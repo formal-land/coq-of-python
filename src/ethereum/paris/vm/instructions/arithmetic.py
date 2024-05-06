@@ -17,6 +17,23 @@ def generate_error(node):
     return message
 
 
+def generate_constant(node, value):
+    if value is None:
+        return "Value.None"
+    elif value is True:
+        return "Value.Bool true"
+    elif value is False:
+        return "Value.Bool false"
+    elif isinstance(value, int):
+        return f"Value.Integer {str(value)}"
+    elif isinstance(value, float):
+        return f"Value.Float {str(value)}"
+    elif isinstance(value, str):
+        return "Value.String \"" + value.replace("\"", "\"\"\"") + "\""
+    else:
+        return generate_error(node)
+
+
 def generate_mod(node):
     if isinstance(node, ast.Module):
         return "\n\n".join(generate_stmt(stmt) for stmt in node.body)
@@ -32,49 +49,63 @@ def generate_mod(node):
 
 def generate_stmt(node):
     if isinstance(node, ast.FunctionDef):
-        params = " ".join(generate_arg(arg) for arg in node.args.args)
+        params = "; ".join(generate_arg(arg) for arg in node.args.args)
         body = "\n".join(generate_stmt(stmt) for stmt in node.body)
-        return f"Definition {node.name} {params} : Evm :=\n{body}."
+
+        return f"Definition {node.name} (args : list A.t) : M :=\n" + \
+            "  match args with\n" + \
+            f"  | [{params}] => ltac:(M.monadic (\n" + \
+            body + "))\n" \
+            "  | _ => M.impossible\n" + \
+            "  end."
     elif isinstance(node, ast.AsyncFunctionDef):
         return generate_error(node)
     elif isinstance(node, ast.ClassDef):
         return generate_error(node)
     elif isinstance(node, ast.Return):
-        return "  Return " + generate_expr(node.value) + "."
+        return "    let _ := M.return (|" + generate_expr(node.value) + "|) in"
     elif isinstance(node, ast.Delete):
         return generate_error(node)
     elif isinstance(node, ast.Assign):
-        return "  let " + generate_expr(node.targets[0]) + " := " + \
+        if len(node.targets) >= 2:
+            return generate_error(node)
+
+        target = node.targets[0]
+
+        if isinstance(target, ast.Name):
+            return "    let " + target.id + " := " + generate_expr(node.value) + " in"
+
+        return "    let _ := " + generate_expr(node.targets[0]) + " := " + \
             generate_expr(node.value) + " in"
     # elif isinstance(node, ast.TypeAlias):
     #     return generate_error(node)
     elif isinstance(node, ast.AugAssign):
-        return "  let " + generate_expr(node.target) + " := " + \
+        return "    let " + generate_expr(node.target) + " := " + \
             generate_operator(node.op) + " " + \
             generate_expr(node.value) + " in"
     elif isinstance(node, ast.AnnAssign):
         return generate_error(node)
     elif isinstance(node, ast.For):
-        return "  For " + generate_expr(node.target) + " in " + \
+        return "    For " + generate_expr(node.target) + " in " + \
             generate_expr(node.iter) + " do\n" + \
             "\n".join(generate_stmt(stmt) for stmt in node.body) + \
-            "\nEndFor."
+            "\n    EndFor."
     elif isinstance(node, ast.AsyncFor):
         return generate_error(node)
     elif isinstance(node, ast.While):
-        return "  While " + generate_expr(node.test) + " do\n" + \
+        return "    While " + generate_expr(node.test) + " do\n" + \
             "\n".join(generate_stmt(stmt) for stmt in node.body) + \
-            "\nEndWhile."
+            "\n    EndWhile."
     elif isinstance(node, ast.If):
-        return "  If " + generate_expr(node.test) + " then\n" + \
+        return "    If " + generate_expr(node.test) + " then\n" + \
             "\n".join(generate_stmt(stmt) for stmt in node.body) + \
-            "\nElse\n" + "\n".join(generate_stmt(stmt) for stmt in node.orelse) + \
-            "\nEndIf."
+            "\n    Else\n" + "\n".join(generate_stmt(stmt) for stmt in node.orelse) + \
+            "\n    EndIf."
     elif isinstance(node, ast.With):
-        return "  With " + generate_expr(node.items[0].context_expr) + " as " + \
+        return "    With " + generate_expr(node.items[0].context_expr) + " as " + \
             generate_expr(node.items[0].optional_vars) + " do\n" + \
             "\n".join(generate_stmt(stmt) for stmt in node.body) + \
-            "\nEndWith."
+            "\n    EndWith."
     elif isinstance(node, ast.AsyncWith):
         return generate_error(node)
     elif isinstance(node, ast.Match):
@@ -82,30 +113,30 @@ def generate_stmt(node):
     elif isinstance(node, ast.Raise):
         return generate_error(node)
     elif isinstance(node, ast.Try):
-        return "  Try\n" + "\n".join(generate_stmt(stmt) for stmt in node.body) + \
-            "\nExcept\n" + "\n".join(generate_stmt(stmt) for stmt in node.handlers) + \
-            "\nEndTry."
+        return "    Try\n" + "\n".join(generate_stmt(stmt) for stmt in node.body) + \
+            "\n    Except\n" + "\n".join(generate_stmt(stmt) for stmt in node.handlers) + \
+            "\n    EndTry."
     # elif isinstance(node, ast.TryStar):
     #     return generate_error(node)
     elif isinstance(node, ast.Assert):
-        return "  Assert " + generate_expr(node.test) + "."
+        return "    Assert " + generate_expr(node.test) + "."
     elif isinstance(node, ast.Import):
-        return "Import " + ", ".join(alias.name for alias in node.names) + "."
+        return "Require " + ", ".join(alias.name for alias in node.names) + "."
     elif isinstance(node, ast.ImportFrom):
-        return "Import " + (node.module if node.module is not None else "?") + \
+        return "Require " + (node.module if node.module is not None else "?") + \
             ".[" + ", ".join(alias.name for alias in node.names) + "]."
     elif isinstance(node, ast.Global):
         return generate_error(node)
     elif isinstance(node, ast.Nonlocal):
         return generate_error(node)
     elif isinstance(node, ast.Expr):
-        return "  Let _ := " + generate_expr(node.value) + " in"
+        return "    let _ := " + generate_expr(node.value) + " in"
     elif isinstance(node, ast.Pass):
-        return "  Pass."
+        return "    Pass."
     elif isinstance(node, ast.Break):
-        return "  Break."
+        return "    Break."
     elif isinstance(node, ast.Continue):
-        return "  Continue."
+        return "    Continue."
     else:
         return generate_error(node)
 
@@ -153,7 +184,7 @@ def generate_expr(node):
     elif isinstance(node, ast.JoinedStr):
         return f"{''.join(generate_expr(value) for value in node.values)}"
     elif isinstance(node, ast.Constant):
-        return str(node.value)
+        return generate_constant(node, node.value)
     elif isinstance(node, ast.Attribute):
         return f"{generate_expr(node.value)}.{node.attr}"
     elif isinstance(node, ast.Subscript):
@@ -251,7 +282,7 @@ def generate_cmpop(node):
 
 
 def generate_arg(node):
-    return "(" + node.arg + " : " + node.annotation.id + ")"
+    return node.arg
 
 
 file_name = "../execution-specs/src/ethereum/paris/vm/instructions/arithmetic.py"
