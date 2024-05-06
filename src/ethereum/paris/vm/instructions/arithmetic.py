@@ -17,6 +17,10 @@ def generate_error(node):
     return message
 
 
+def generate_indent(indent):
+    return "  " * indent
+
+
 def generate_constant(node, value):
     if value is None:
         return "Value.None"
@@ -36,7 +40,7 @@ def generate_constant(node, value):
 
 def generate_mod(node):
     if isinstance(node, ast.Module):
-        return "\n\n".join(generate_stmt(stmt) for stmt in node.body)
+        return "\n\n".join(generate_stmt(0, stmt) for stmt in node.body)
     elif isinstance(node, ast.Interactive):
         return generate_error(node)
     elif isinstance(node, ast.Interactive):
@@ -47,12 +51,12 @@ def generate_mod(node):
         return generate_error(node)
 
 
-def generate_stmt(node):
+def generate_stmt(indent, node):
     if isinstance(node, ast.FunctionDef):
         params = "; ".join(generate_arg(arg) for arg in node.args.args)
-        body = "\n".join(generate_stmt(stmt) for stmt in node.body)
+        body = "\n".join(generate_stmt(indent + 1, stmt) for stmt in node.body)
 
-        return f"Definition {node.name} (args : list A.t) : M :=\n" + \
+        return f"Definition {node.name} (args : list Value.t) : M :=\n" + \
             "  match args with\n" + \
             f"  | [{params}] => ltac:(M.monadic (\n" + \
             body + "))\n" \
@@ -63,7 +67,7 @@ def generate_stmt(node):
     elif isinstance(node, ast.ClassDef):
         return generate_error(node)
     elif isinstance(node, ast.Return):
-        return "    let _ := M.return (|" + generate_expr(node.value) + "|) in"
+        return generate_indent(indent) + "let _ := M.return (| " + generate_expr(node.value) + " |) in"
     elif isinstance(node, ast.Delete):
         return generate_error(node)
     elif isinstance(node, ast.Assign):
@@ -73,39 +77,50 @@ def generate_stmt(node):
         target = node.targets[0]
 
         if isinstance(target, ast.Name):
-            return "    let " + target.id + " := " + generate_expr(node.value) + " in"
+            return generate_indent(indent) + "let " + target.id + " := " + \
+                generate_expr(node.value) + " in"
 
-        return "    let _ := " + generate_expr(node.targets[0]) + " := " + \
-            generate_expr(node.value) + " in"
+        return generate_indent(indent) + "let _ := M.assign (|\n" + \
+            generate_indent(indent + 1) + generate_expr(target) + ",\n" + \
+            generate_indent(indent + 1) + generate_expr(node.value) + "\n" +\
+            generate_indent(indent) + "|) in"
     # elif isinstance(node, ast.TypeAlias):
     #     return generate_error(node)
     elif isinstance(node, ast.AugAssign):
-        return "    let " + generate_expr(node.target) + " := " + \
-            generate_operator(node.op) + " " + \
-            generate_expr(node.value) + " in"
+        if isinstance(node.target, ast.Name):
+            return generate_indent(indent) + "let " + node.target.id + " := " + \
+                generate_operator(node.op) + "\n" + \
+                generate_indent(indent + 1) + generate_expr(node.value) + "\n" + \
+                generate_indent(indent + 1) + generate_expr(node.value) + " in"
+
+        return generate_indent(indent) + "let _ := M.assign_op (|\n" + \
+            generate_indent(indent + 1) + generate_operator(node.op) + ",\n" + \
+            generate_indent(indent + 1) + generate_expr(node.target) + ",\n" + \
+            generate_indent(indent + 1) + generate_expr(node.value) + "\n" +\
+            generate_indent(indent) + "|) in"
     elif isinstance(node, ast.AnnAssign):
         return generate_error(node)
     elif isinstance(node, ast.For):
-        return "    For " + generate_expr(node.target) + " in " + \
+        return generate_indent(indent) + "For " + generate_expr(node.target) + " in " + \
             generate_expr(node.iter) + " do\n" + \
-            "\n".join(generate_stmt(stmt) for stmt in node.body) + \
-            "\n    EndFor."
+            "\n".join(generate_stmt(indent + 1, stmt) for stmt in node.body) + "\n" + \
+            generate_indent(indent) + "EndFor."
     elif isinstance(node, ast.AsyncFor):
         return generate_error(node)
     elif isinstance(node, ast.While):
-        return "    While " + generate_expr(node.test) + " do\n" + \
-            "\n".join(generate_stmt(stmt) for stmt in node.body) + \
-            "\n    EndWhile."
+        return generate_indent(indent) + "While " + generate_expr(node.test) + " do\n" + \
+            "\n".join(generate_stmt(indent + 1, stmt) for stmt in node.body) + "\n" + \
+            generate_indent(indent) + "EndWhile."
     elif isinstance(node, ast.If):
-        return "    If " + generate_expr(node.test) + " then\n" + \
-            "\n".join(generate_stmt(stmt) for stmt in node.body) + \
-            "\n    Else\n" + "\n".join(generate_stmt(stmt) for stmt in node.orelse) + \
-            "\n    EndIf."
+        return generate_indent(indent) + "let _ :=\n" + \
+            generate_indent(indent + 1) + "if M.is_true " + \
+            generate_expr(node.test) + " then\n" + \
+            "\n".join(generate_stmt(indent + 2, stmt) for stmt in node.body) + "\n" + \
+            generate_indent(indent + 1) + "else\n" + \
+            "\n".join(generate_stmt(indent + 2, stmt)
+                      for stmt in node.orelse) + " in"
     elif isinstance(node, ast.With):
-        return "    With " + generate_expr(node.items[0].context_expr) + " as " + \
-            generate_expr(node.items[0].optional_vars) + " do\n" + \
-            "\n".join(generate_stmt(stmt) for stmt in node.body) + \
-            "\n    EndWith."
+        generate_error(node)
     elif isinstance(node, ast.AsyncWith):
         return generate_error(node)
     elif isinstance(node, ast.Match):
@@ -113,13 +128,12 @@ def generate_stmt(node):
     elif isinstance(node, ast.Raise):
         return generate_error(node)
     elif isinstance(node, ast.Try):
-        return "    Try\n" + "\n".join(generate_stmt(stmt) for stmt in node.body) + \
-            "\n    Except\n" + "\n".join(generate_stmt(stmt) for stmt in node.handlers) + \
-            "\n    EndTry."
+        generate_error(node)
     # elif isinstance(node, ast.TryStar):
     #     return generate_error(node)
     elif isinstance(node, ast.Assert):
-        return "    Assert " + generate_expr(node.test) + "."
+        return generate_indent(indent) + "let _ := M.assert (| " + \
+            generate_expr(node.test) + " |) in"
     elif isinstance(node, ast.Import):
         return "Require " + ", ".join(alias.name for alias in node.names) + "."
     elif isinstance(node, ast.ImportFrom):
@@ -130,13 +144,13 @@ def generate_stmt(node):
     elif isinstance(node, ast.Nonlocal):
         return generate_error(node)
     elif isinstance(node, ast.Expr):
-        return "    let _ := " + generate_expr(node.value) + " in"
+        return generate_indent(indent) + "let _ := " + generate_expr(node.value) + " in"
     elif isinstance(node, ast.Pass):
-        return "    Pass."
+        return generate_indent(indent) + "let _ := M.pass (| |) in"
     elif isinstance(node, ast.Break):
-        return "    Break."
+        return generate_indent(indent) + "let _ := M.break (| |) in"
     elif isinstance(node, ast.Continue):
-        return "    Continue."
+        return generate_indent(indent) + "let _ := M.continue (| |) in"
     else:
         return generate_error(node)
 
@@ -146,17 +160,18 @@ def generate_expr(node):
         return "(" + generate_boolop(node.op) + \
             " ".join(generate_expr(value) for value in node.values) + ")"
     elif isinstance(node, ast.NamedExpr):
-        return "(" + generate_expr(node.target) + " := " + \
-            generate_expr(node.value) + ")"
+        return generate_error(node)
     elif isinstance(node, ast.BinOp):
-        return "(" + generate_operator(node.op) + \
+        return "(" + generate_operator(node.op) + " " + \
             generate_expr(node.left) + " " + generate_expr(node.right) + ")"
     elif isinstance(node, ast.UnaryOp):
         return "(" + generate_unaryop(node.op) + generate_expr(node.operand) + ")"
     elif isinstance(node, ast.Lambda):
-        return f"fun {generate_expr(node.args)} => {generate_expr(node.body)}"
+        return f"(fun {generate_expr(node.args)} => {generate_expr(node.body)})"
     elif isinstance(node, ast.IfExp):
-        return f"If {generate_expr(node.test)} then {generate_expr(node.body)} else {generate_expr(node.orelse)}"
+        return "(if M.is_true " + generate_expr(node.test) + " then " + \
+            generate_expr(node.body) + " else " + \
+            generate_expr(node.orelse) + ")"
     elif isinstance(node, ast.Dict):
         return "{" + ", ".join(generate_expr(key) + ": " + generate_expr(value) for key, value in zip(node.keys, node.values)) + "}"
     elif isinstance(node, ast.Set):
@@ -170,21 +185,25 @@ def generate_expr(node):
     elif isinstance(node, ast.GeneratorExp):
         return f"({generate_expr(node.elt)} for {generate_expr(node.generators)})"
     elif isinstance(node, ast.Await):
-        return f"Await {generate_expr(node.value)}"
+        return f"(M.await (| {generate_expr(node.value)} |))"
     elif isinstance(node, ast.Yield):
-        return f"Yield {generate_expr(node.value)}"
+        return f"(M.yield (| {generate_expr(node.value)} |))"
     elif isinstance(node, ast.YieldFrom):
-        return f"YieldFrom {generate_expr(node.value)}"
+        return f"(M.yield_from (| {generate_expr(node.value)} |))"
     elif isinstance(node, ast.Compare):
-        return f"{generate_expr(node.left)} {generate_cmpop(node.ops[0])} {generate_expr(node.comparators[0])}"
+        if len(node.ops) >= 2 or len(node.comparators) >= 2:
+            return generate_error(node)
+
+        return f"({generate_cmpop(node.ops[0])} (| {generate_expr(node.left)}, {generate_expr(node.comparators[0])} |))"
     elif isinstance(node, ast.Call):
-        return f"{generate_expr(node.func)}({', '.join(generate_expr(arg) for arg in node.args)})"
+        return "(M.call (| " + generate_expr(node.func) + ", [" + \
+            '; '.join(generate_expr(arg) for arg in node.args) + "] |))"
     elif isinstance(node, ast.FormattedValue):
-        return f"{generate_expr(node.value)}"
+        return generate_error(node)
     elif isinstance(node, ast.JoinedStr):
-        return f"{''.join(generate_expr(value) for value in node.values)}"
+        return generate_error(node)
     elif isinstance(node, ast.Constant):
-        return generate_constant(node, node.value)
+        return "(" + generate_constant(node, node.value) + ")"
     elif isinstance(node, ast.Attribute):
         return f"{generate_expr(node.value)}.{node.attr}"
     elif isinstance(node, ast.Subscript):
@@ -205,78 +224,78 @@ def generate_expr(node):
 
 def generate_boolop(node):
     if isinstance(node, ast.And):
-        return "And"
+        return "BoolOp.And"
     elif isinstance(node, ast.Or):
-        return "Or"
+        return "BoolOp.Or"
     else:
         return generate_error(node)
 
 
 def generate_operator(node):
     if isinstance(node, ast.Add):
-        return "+"
+        return "BinOp.Add"
     elif isinstance(node, ast.Sub):
-        return "-"
+        return "BinOp.Sub"
     elif isinstance(node, ast.Mult):
-        return "*"
+        return "BinOp.Mult"
     elif isinstance(node, ast.MatMult):
-        return "@"
+        return "BinOp.MatMult"
     elif isinstance(node, ast.Div):
-        return "/"
+        return "BinOp.Div"
     elif isinstance(node, ast.Mod):
-        return "%"
+        return "BinOp.Mod"
     elif isinstance(node, ast.Pow):
-        return "**"
+        return "BinOp.Pow"
     elif isinstance(node, ast.LShift):
-        return "<<"
+        return "BinOp.LShift"
     elif isinstance(node, ast.RShift):
-        return ">>"
+        return "BinOp.RShift"
     elif isinstance(node, ast.BitOr):
-        return "|"
+        return "BinOp.BitOr"
     elif isinstance(node, ast.BitXor):
-        return "^"
+        return "BinOp.BitXor"
     elif isinstance(node, ast.BitAnd):
-        return "&"
+        return "BinOp.BitAnd"
     elif isinstance(node, ast.FloorDiv):
-        return "//"
+        return "BinOp.FloorDiv"
     else:
         return generate_error(node)
 
 
 def generate_unaryop(node):
     if isinstance(node, ast.Invert):
-        return "~"
+        return "UnOp.Invert"
     elif isinstance(node, ast.Not):
-        return "!"
+        return "UnOp.Not"
     elif isinstance(node, ast.UAdd):
-        return "+"
+        return "UnOp.Add"
     elif isinstance(node, ast.USub):
-        return "-"
+        return "UnOp.Sub"
     else:
         return generate_error(node)
 
 
 def generate_cmpop(node):
     if isinstance(node, ast.Eq):
-        return "=="
+        return "Compare.Eq"
     elif isinstance(node, ast.NotEq):
-        return "!="
+        return "Compare.NotEq"
     elif isinstance(node, ast.Lt):
-        return "<"
+        return "Compare.Lt"
     elif isinstance(node, ast.LtE):
-        return "<="
+        return "Compare.LtE"
     elif isinstance(node, ast.Gt):
-        return ">"
+        return "Compare.Gt"
     elif isinstance(node, ast.GtE):
-        return ">="
+        return "Compare.GtE"
     elif isinstance(node, ast.Is):
-        return "Is"
+        return "Compare.Is"
     elif isinstance(node, ast.IsNot):
-        return "IsNot"
+        return "Compare.IsNot"
     elif isinstance(node, ast.In):
-        return "In"
+        return "Compare.In"
     elif isinstance(node, ast.NotIn):
-        return "NotIn"
+        return "Compare.NotIn"
     else:
         return generate_error(node)
 
