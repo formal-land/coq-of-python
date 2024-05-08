@@ -1,3 +1,12 @@
+# Coq rules
+.CoqMakefile.d
+CoqMakefile.conf
+*.vo
+*.vok
+*.vos
+*.glob
+.*.aux
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
