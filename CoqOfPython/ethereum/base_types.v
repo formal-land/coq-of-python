@@ -43,9 +43,12 @@ Module import_typing.
 End import_typing.
 Import import_typing.
 
-(* At top_level_stmt: unsupported node type: ClassDef *)
+Inductive SlottedFreezable :=.
 
-let U255_CEIL_VALUE := (BinOp.Pow (Value.Integer 2) (Value.Integer 255)) in
+Axiom Inherit_SlottedFreezable_Protocol : Inherit Protocol SlottedFreezable.
+
+Definition U255_CEIL_VALUE : Value.t := M.run ltac:(M.monadic (
+  BinOp.pow (| (Value.Integer 2), (Value.Integer 255) |))).
 
 Definition expr_50 : Value.t :=
   (Value.String "
@@ -55,7 +58,8 @@ arithmetic operations, like [`sdiv`].
 [`sdiv`]: ref:ethereum.frontier.vm.instructions.arithmetic.sdiv
 ").
 
-let U256_CEIL_VALUE := (BinOp.Pow (Value.Integer 2) (Value.Integer 256)) in
+Definition U256_CEIL_VALUE : Value.t := M.run ltac:(M.monadic (
+  BinOp.pow (| (Value.Integer 2), (Value.Integer 256) |))).
 
 Definition expr_58 : Value.t :=
   (Value.String "
@@ -66,54 +70,76 @@ Smallest value that requires 257 bits to represent. Used when converting a
 [`U256.to_signed`]: ref:ethereum.base_types.U256.to_signed
 ").
 
-(* At top_level_stmt: unsupported node type: ClassDef *)
+Inductive Uint :=.
 
-let T := (M.call (| TypeVar, [(Value.String "T")] |)) in
+Axiom Inherit_Uint_int : Inherit int Uint.
 
-(* At top_level_stmt: unsupported node type: ClassDef *)
+Definition T : Value.t := M.run ltac:(M.monadic (
+  (M.call (| TypeVar, [(Value.String "T")] |)))).
 
-(* At top_level_stmt: unsupported node type: ClassDef *)
+Inductive FixedUint :=.
 
-let _ := M.assign (|
-U256.MAX_VALUE,
-(M.call (| int.__new__, [U256; (BinOp.Sub (BinOp.Pow (Value.Integer 2) (Value.Integer 256)) (Value.Integer 1))] |))
-|) in
+Axiom Inherit_FixedUint_int : Inherit int FixedUint.
 
-(* At top_level_stmt: unsupported node type: ClassDef *)
+Inductive U256 :=.
 
-let _ := M.assign (|
-U32.MAX_VALUE,
-(M.call (| int.__new__, [U32; (BinOp.Sub (BinOp.Pow (Value.Integer 2) (Value.Integer 32)) (Value.Integer 1))] |))
-|) in
+Axiom Inherit_U256_FixedUint : Inherit FixedUint U256.
 
-(* At top_level_stmt: unsupported node type: ClassDef *)
+(* At top_level_stmt: unsupported node type: Assign *)
 
-let _ := M.assign (|
-U64.MAX_VALUE,
-(M.call (| int.__new__, [U64; (BinOp.Sub (BinOp.Pow (Value.Integer 2) (Value.Integer 64)) (Value.Integer 1))] |))
-|) in
+Inductive U32 :=.
 
-let B := (M.call (| TypeVar, [(Value.String "B")] |)) in
+Axiom Inherit_U32_FixedUint : Inherit FixedUint U32.
 
-(* At top_level_stmt: unsupported node type: ClassDef *)
+(* At top_level_stmt: unsupported node type: Assign *)
 
-(* At top_level_stmt: unsupported node type: ClassDef *)
+Inductive U64 :=.
 
-(* At top_level_stmt: unsupported node type: ClassDef *)
+Axiom Inherit_U64_FixedUint : Inherit FixedUint U64.
 
-(* At top_level_stmt: unsupported node type: ClassDef *)
+(* At top_level_stmt: unsupported node type: Assign *)
 
-(* At top_level_stmt: unsupported node type: ClassDef *)
+Definition B : Value.t := M.run ltac:(M.monadic (
+  (M.call (| TypeVar, [(Value.String "B")] |)))).
 
-(* At top_level_stmt: unsupported node type: ClassDef *)
+Inductive FixedBytes :=.
 
-(* At top_level_stmt: unsupported node type: ClassDef *)
+Axiom Inherit_FixedBytes_bytes : Inherit bytes FixedBytes.
 
-(* At top_level_stmt: unsupported node type: ClassDef *)
+Inductive Bytes0 :=.
 
-(* At top_level_stmt: unsupported node type: ClassDef *)
+Axiom Inherit_Bytes0_FixedBytes : Inherit FixedBytes Bytes0.
 
-let Bytes := bytes in
+Inductive Bytes4 :=.
+
+Axiom Inherit_Bytes4_FixedBytes : Inherit FixedBytes Bytes4.
+
+Inductive Bytes8 :=.
+
+Axiom Inherit_Bytes8_FixedBytes : Inherit FixedBytes Bytes8.
+
+Inductive Bytes20 :=.
+
+Axiom Inherit_Bytes20_FixedBytes : Inherit FixedBytes Bytes20.
+
+Inductive Bytes32 :=.
+
+Axiom Inherit_Bytes32_FixedBytes : Inherit FixedBytes Bytes32.
+
+Inductive Bytes48 :=.
+
+Axiom Inherit_Bytes48_FixedBytes : Inherit FixedBytes Bytes48.
+
+Inductive Bytes64 :=.
+
+Axiom Inherit_Bytes64_FixedBytes : Inherit FixedBytes Bytes64.
+
+Inductive Bytes256 :=.
+
+Axiom Inherit_Bytes256_FixedBytes : Inherit FixedBytes Bytes256.
+
+Definition Bytes : Value.t := M.run ltac:(M.monadic (
+  bytes)).
 
 Definition expr_925 : Value.t :=
   (Value.String "
@@ -162,7 +188,7 @@ Definition slotted_freezable (args : list Value.t) : M :=
     ") in
   let _ := M.assign (|
     cls.__slots__,
-    (BinOp.Add ((Value.String "_frozen")) (M.call (| tuple, [cls.__annotations__] |)))
+    BinOp.add (| ((Value.String "_frozen")), (M.call (| tuple, [cls.__annotations__] |)) |)
   |) in
   let _ := M.assign (|
     cls.__init__,
@@ -180,7 +206,8 @@ Definition slotted_freezable (args : list Value.t) : M :=
   | _ => M.impossible
   end.
 
-let S := (M.call (| TypeVar, [(Value.String "S")] |)) in
+Definition S : Value.t := M.run ltac:(M.monadic (
+  (M.call (| TypeVar, [(Value.String "S")] |)))).
 
 Definition modify (args : list Value.t) : M :=
   match args with

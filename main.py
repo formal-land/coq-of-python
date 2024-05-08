@@ -26,7 +26,9 @@ def generate_name(name):
         "Definition",
         "End",
         "Import",
+        "in",
         "Ltac",
+        "mod",
         "Module",
         "Require",
         "Set",
@@ -83,7 +85,17 @@ def generate_top_level_stmt(node):
     elif isinstance(node, ast.AsyncFunctionDef):
         return generate_error("top_level_stmt", node)
     elif isinstance(node, ast.ClassDef):
-        return generate_error("top_level_stmt", node)
+        text = f"Inductive {generate_name(node.name)} :=.\n\n"
+
+        for base in node.bases:
+            if isinstance(base, ast.Name):
+                text += \
+                    f"Axiom Inherit_{generate_name(node.name)}_{generate_name(base.id)}" + \
+                    f" : Inherit {generate_name(base.id)} {generate_name(node.name)}."
+            else:
+                text += generate_error("base", base)
+
+        return text
     elif isinstance(node, ast.Assign):
         if len(node.targets) >= 2:
             return generate_error("top_level_stmt", node)
@@ -91,13 +103,10 @@ def generate_top_level_stmt(node):
         target = node.targets[0]
 
         if isinstance(target, ast.Name):
-            return "let " + target.id + " := " + \
-                generate_expr(node.value) + " in"
+            return "Definition " + target.id + " : Value.t := M.run ltac:(M.monadic (\n" + \
+                generate_indent(1) + generate_expr(node.value) + "))."
 
-        return "let _ := M.assign (|\n" + \
-            generate_expr(target) + ",\n" + \
-            generate_expr(node.value) + "\n" +\
-            "|) in"
+        return generate_error("top_level_stmt", node)
     elif isinstance(node, ast.Import):
         return "Require " + ", ".join(alias.name for alias in node.names) + "."
     elif isinstance(node, ast.ImportFrom):
@@ -231,8 +240,8 @@ def generate_expr(node):
     elif isinstance(node, ast.NamedExpr):
         return generate_error("stmt", node)
     elif isinstance(node, ast.BinOp):
-        return "(" + generate_operator(node.op) + " " + \
-            generate_expr(node.left) + " " + generate_expr(node.right) + ")"
+        return generate_operator(node.op) + " (| " + \
+            generate_expr(node.left) + ", " + generate_expr(node.right) + " |)"
     elif isinstance(node, ast.UnaryOp):
         return "(" + generate_unaryop(node.op) + generate_expr(node.operand) + ")"
     elif isinstance(node, ast.Lambda):
@@ -293,78 +302,78 @@ def generate_expr(node):
 
 def generate_boolop(node):
     if isinstance(node, ast.And):
-        return "BoolOp.And"
+        return "BoolOp.and"
     elif isinstance(node, ast.Or):
-        return "BoolOp.Or"
+        return "BoolOp.or"
     else:
         return generate_error("boolop", node)
 
 
 def generate_operator(node):
     if isinstance(node, ast.Add):
-        return "BinOp.Add"
+        return "BinOp.add"
     elif isinstance(node, ast.Sub):
-        return "BinOp.Sub"
+        return "BinOp.sub"
     elif isinstance(node, ast.Mult):
-        return "BinOp.Mult"
+        return "BinOp.mult"
     elif isinstance(node, ast.MatMult):
-        return "BinOp.MatMult"
+        return "BinOp.mat_mult"
     elif isinstance(node, ast.Div):
-        return "BinOp.Div"
+        return "BinOp.div"
     elif isinstance(node, ast.Mod):
-        return "BinOp.Mod"
+        return "BinOp.mod_"
     elif isinstance(node, ast.Pow):
-        return "BinOp.Pow"
+        return "BinOp.pow"
     elif isinstance(node, ast.LShift):
-        return "BinOp.LShift"
+        return "BinOp.l_shift"
     elif isinstance(node, ast.RShift):
-        return "BinOp.RShift"
+        return "BinOp.r_shift"
     elif isinstance(node, ast.BitOr):
-        return "BinOp.BitOr"
+        return "BinOp.bit_or"
     elif isinstance(node, ast.BitXor):
-        return "BinOp.BitXor"
+        return "BinOp.bit_xor"
     elif isinstance(node, ast.BitAnd):
-        return "BinOp.BitAnd"
+        return "BinOp.bit_and"
     elif isinstance(node, ast.FloorDiv):
-        return "BinOp.FloorDiv"
+        return "BinOp.floor_div"
     else:
         return generate_error("operator", node)
 
 
 def generate_unaryop(node):
     if isinstance(node, ast.Invert):
-        return "UnOp.Invert"
+        return "UnOp.invert"
     elif isinstance(node, ast.Not):
-        return "UnOp.Not"
+        return "UnOp.not"
     elif isinstance(node, ast.UAdd):
-        return "UnOp.Add"
+        return "UnOp.add"
     elif isinstance(node, ast.USub):
-        return "UnOp.Sub"
+        return "UnOp.sub"
     else:
         return generate_error("unaryop", node)
 
 
 def generate_cmpop(node):
     if isinstance(node, ast.Eq):
-        return "Compare.Eq"
+        return "Compare.eq"
     elif isinstance(node, ast.NotEq):
-        return "Compare.NotEq"
+        return "Compare.not_eq"
     elif isinstance(node, ast.Lt):
-        return "Compare.Lt"
+        return "Compare.lt"
     elif isinstance(node, ast.LtE):
-        return "Compare.LtE"
+        return "Compare.lt_e"
     elif isinstance(node, ast.Gt):
-        return "Compare.Gt"
+        return "Compare.gt"
     elif isinstance(node, ast.GtE):
-        return "Compare.GtE"
+        return "Compare.gt_e"
     elif isinstance(node, ast.Is):
-        return "Compare.Is"
+        return "Compare.is"
     elif isinstance(node, ast.IsNot):
-        return "Compare.IsNot"
+        return "Compare.is_not"
     elif isinstance(node, ast.In):
-        return "Compare.In"
+        return "Compare.in"
     elif isinstance(node, ast.NotIn):
-        return "Compare.NotIn"
+        return "Compare.not_in"
     else:
         return generate_error("cmpop", node)
 
@@ -379,8 +388,6 @@ output_file_name = "CoqOfPython/ethereum/" + sys.argv[1].replace(".py", ".v")
 file_content = open(input_file_name).read()
 parsed_tree = ast.parse(file_content)
 
-# print(ast.dump(parsed_tree, indent=4))
-
 # Generate Coq code from the AST
 coq_code = f"""Require Import CoqOfPython.CoqOfPython.
 
@@ -390,3 +397,5 @@ coq_code = f"""Require Import CoqOfPython.CoqOfPython.
 # Output the generated Coq code
 with open(output_file_name, "w") as output_file:
     output_file.write(coq_code)
+
+print(ast.dump(parsed_tree, indent=4))

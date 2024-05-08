@@ -1,11 +1,11 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Parameter Any : Value.t.
-Parameter Callable : Value.t.
-Parameter ClassVar : Value.t.
-Parameter Optional : Value.t.
-Parameter Protocol : Value.t.
-Parameter Tuple : Value.t.
-Parameter Type_ : Value.t.
-Parameter TypeVar : Value.t.
+Inductive Any : Set :=.
+Inductive Callable : Set :=.
+Inductive ClassVar : Set :=.
+Inductive Optional : Set :=.
+Inductive Protocol : Set :=.
+Inductive Tuple : Set :=.
+Inductive Type_ : Set :=.
+Inductive TypeVar : Set :=.
 Parameter runtime_checkable : Value.t.
