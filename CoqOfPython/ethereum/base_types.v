@@ -1,5 +1,7 @@
 Require Import CoqOfPython.CoqOfPython.
 
+Inductive globals : Set :=.
+
 Definition expr_1 : Value.t :=
   (Value.String "
 Integer and array types which are used by—but not unique to—Ethereum.
@@ -22,30 +24,38 @@ sequences containing an exact number of bytes.
 [`Bytes64`]: ref:ethereum.base_types.Bytes64
 ").
 
-Module import_dataclasses.
-  Require Import dataclasses.
-  Definition is_dataclass := is_dataclass.
-  Definition replace := replace.
-End import_dataclasses.
-Import import_dataclasses.
+Require dataclasses.
+Axiom dataclasses_is_dataclass :
+  IsGlobalAlias globals dataclasses.globals "is_dataclass".
+Axiom dataclasses_replace :
+  IsGlobalAlias globals dataclasses.globals "replace".
 
-Module import_typing.
-  Require Import typing.
-  Definition Any := Any.
-  Definition Callable := Callable.
-  Definition ClassVar := ClassVar.
-  Definition Optional := Optional.
-  Definition Protocol := Protocol.
-  Definition Tuple := Tuple.
-  Definition Type_ := Type_.
-  Definition TypeVar := TypeVar.
-  Definition runtime_checkable := runtime_checkable.
-End import_typing.
-Import import_typing.
+Require typing.
+Axiom typing_Any :
+  IsGlobalAlias globals typing.globals "Any".
+Axiom typing_Callable :
+  IsGlobalAlias globals typing.globals "Callable".
+Axiom typing_ClassVar :
+  IsGlobalAlias globals typing.globals "ClassVar".
+Axiom typing_Optional :
+  IsGlobalAlias globals typing.globals "Optional".
+Axiom typing_Protocol :
+  IsGlobalAlias globals typing.globals "Protocol".
+Axiom typing_Tuple :
+  IsGlobalAlias globals typing.globals "Tuple".
+Axiom typing_Type_ :
+  IsGlobalAlias globals typing.globals "Type_".
+Axiom typing_TypeVar :
+  IsGlobalAlias globals typing.globals "TypeVar".
+Axiom typing_runtime_checkable :
+  IsGlobalAlias globals typing.globals "runtime_checkable".
 
-Inductive SlottedFreezable :=.
-
-Axiom Inherit_SlottedFreezable_Protocol : Inherit Protocol SlottedFreezable.
+Definition SlottedFreezable : Value.t :=
+  Value.OfTy builtins.globals "type" (Value.Klass
+    [(globals, "Protocol")]
+    []
+    []
+  ).
 
 Definition U255_CEIL_VALUE : Value.t := M.run ltac:(M.monadic (
   BinOp.pow (| (Value.Integer 2), (Value.Integer 255) |))).
@@ -70,73 +80,115 @@ Smallest value that requires 257 bits to represent. Used when converting a
 [`U256.to_signed`]: ref:ethereum.base_types.U256.to_signed
 ").
 
-Inductive Uint :=.
-
-Axiom Inherit_Uint_int : Inherit int Uint.
+Definition Uint : Value.t :=
+  Value.OfTy builtins.globals "type" (Value.Klass
+    [(globals, "int")]
+    ["from_be_bytes"; "from_le_bytes"]
+    []
+  ).
 
 Definition T : Value.t := M.run ltac:(M.monadic (
   (M.call (| TypeVar, [(Value.String "T")] |)))).
 
-Inductive FixedUint :=.
+Definition FixedUint : Value.t :=
+  Value.OfTy builtins.globals "type" (Value.Klass
+    [(globals, "int")]
+    []
+    []
+  ).
 
-Axiom Inherit_FixedUint_int : Inherit int FixedUint.
-
-Inductive U256 :=.
-
-Axiom Inherit_U256_FixedUint : Inherit FixedUint U256.
+Definition U256 : Value.t :=
+  Value.OfTy builtins.globals "type" (Value.Klass
+    [(globals, "FixedUint")]
+    ["from_be_bytes"; "from_signed"]
+    []
+  ).
 
 (* At top_level_stmt: unsupported node type: Assign *)
 
-Inductive U32 :=.
-
-Axiom Inherit_U32_FixedUint : Inherit FixedUint U32.
+Definition U32 : Value.t :=
+  Value.OfTy builtins.globals "type" (Value.Klass
+    [(globals, "FixedUint")]
+    ["from_le_bytes"]
+    []
+  ).
 
 (* At top_level_stmt: unsupported node type: Assign *)
 
-Inductive U64 :=.
-
-Axiom Inherit_U64_FixedUint : Inherit FixedUint U64.
+Definition U64 : Value.t :=
+  Value.OfTy builtins.globals "type" (Value.Klass
+    [(globals, "FixedUint")]
+    ["from_le_bytes"; "from_be_bytes"]
+    []
+  ).
 
 (* At top_level_stmt: unsupported node type: Assign *)
 
 Definition B : Value.t := M.run ltac:(M.monadic (
   (M.call (| TypeVar, [(Value.String "B")] |)))).
 
-Inductive FixedBytes :=.
+Definition FixedBytes : Value.t :=
+  Value.OfTy builtins.globals "type" (Value.Klass
+    [(globals, "bytes")]
+    []
+    []
+  ).
 
-Axiom Inherit_FixedBytes_bytes : Inherit bytes FixedBytes.
+Definition Bytes0 : Value.t :=
+  Value.OfTy builtins.globals "type" (Value.Klass
+    [(globals, "FixedBytes")]
+    []
+    []
+  ).
 
-Inductive Bytes0 :=.
+Definition Bytes4 : Value.t :=
+  Value.OfTy builtins.globals "type" (Value.Klass
+    [(globals, "FixedBytes")]
+    []
+    []
+  ).
 
-Axiom Inherit_Bytes0_FixedBytes : Inherit FixedBytes Bytes0.
+Definition Bytes8 : Value.t :=
+  Value.OfTy builtins.globals "type" (Value.Klass
+    [(globals, "FixedBytes")]
+    []
+    []
+  ).
 
-Inductive Bytes4 :=.
+Definition Bytes20 : Value.t :=
+  Value.OfTy builtins.globals "type" (Value.Klass
+    [(globals, "FixedBytes")]
+    []
+    []
+  ).
 
-Axiom Inherit_Bytes4_FixedBytes : Inherit FixedBytes Bytes4.
+Definition Bytes32 : Value.t :=
+  Value.OfTy builtins.globals "type" (Value.Klass
+    [(globals, "FixedBytes")]
+    []
+    []
+  ).
 
-Inductive Bytes8 :=.
+Definition Bytes48 : Value.t :=
+  Value.OfTy builtins.globals "type" (Value.Klass
+    [(globals, "FixedBytes")]
+    []
+    []
+  ).
 
-Axiom Inherit_Bytes8_FixedBytes : Inherit FixedBytes Bytes8.
+Definition Bytes64 : Value.t :=
+  Value.OfTy builtins.globals "type" (Value.Klass
+    [(globals, "FixedBytes")]
+    []
+    []
+  ).
 
-Inductive Bytes20 :=.
-
-Axiom Inherit_Bytes20_FixedBytes : Inherit FixedBytes Bytes20.
-
-Inductive Bytes32 :=.
-
-Axiom Inherit_Bytes32_FixedBytes : Inherit FixedBytes Bytes32.
-
-Inductive Bytes48 :=.
-
-Axiom Inherit_Bytes48_FixedBytes : Inherit FixedBytes Bytes48.
-
-Inductive Bytes64 :=.
-
-Axiom Inherit_Bytes64_FixedBytes : Inherit FixedBytes Bytes64.
-
-Inductive Bytes256 :=.
-
-Axiom Inherit_Bytes256_FixedBytes : Inherit FixedBytes Bytes256.
+Definition Bytes256 : Value.t :=
+  Value.OfTy builtins.globals "type" (Value.Klass
+    [(globals, "FixedBytes")]
+    []
+    []
+  ).
 
 Definition Bytes : Value.t := M.run ltac:(M.monadic (
   bytes)).

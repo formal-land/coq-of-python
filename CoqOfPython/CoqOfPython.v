@@ -15,15 +15,39 @@ Global Open Scope type_scope.
 
 Export List.ListNotations.
 
+Inductive sigS {A : Type} (P : A -> Set) : Set :=
+| existS : forall (x : A), P x -> sigS P.
+Arguments existS {_ _}.
+
+Reserved Notation "{ x @ P }" (at level 0, x at level 99).
+Reserved Notation "{ x : A @ P }" (at level 0, x at level 99).
+Reserved Notation "{ ' pat : A @ P }"
+  (at level 0, pat strict pattern, format "{ ' pat : A @ P }").
+
+Notation "{ x @ P }" := (sigS (fun x => P)) : type_scope.
+Notation "{ x : A @ P }" := (sigS (A := A) (fun x => P)) : type_scope.
+Notation "{ ' pat : A @ P }" := (sigS (A := A) (fun pat => P)) : type_scope.
+
 Module Value.
   Inductive t : Set :=
+  | OfTy (globals : Set) (klass : string) (value : t)
   | None
   | Bool (b : bool)
   | Integer (z : Z)
-  | String (s : string).
+  | String (s : string)
+  | Tuple (items : list t)
+  (** Lists and tuples are very similar. The disctinction between the two is conventional. We use
+      a list when the number of elements is not statically known. *)
+  | List (items : list t)
+  | Closure (f : { '(t, M) : Set * Set @ list t -> M })
+  | Klass (bases : list (Set * string)) (class_methods : list t) (methods : list t).
 End Value.
 
 Parameter M : Set.
+
+Parameter IsInGlobals : Set -> Value.t -> string -> Prop.
+
+Parameter IsGlobalAlias : Set -> Set -> string -> Prop.
 
 Module M.
   Parameter pure : Value.t -> M.
@@ -31,6 +55,9 @@ Module M.
   Parameter let_ : M -> (Value.t -> M) -> M.
 
   Parameter call : Value.t -> list Value.t -> M.
+
+  Definition closure (f : list Value.t -> M) : Value.t :=
+    Value.Closure (existS (Value.t, M) f).
 
   Parameter run : M -> Value.t.
 
@@ -158,5 +185,19 @@ Module Compare.
 End Compare.
 
 (** ** Builtins *)
+Module builtins.
+  Inductive globals : Set :=.
 
-Inductive int : Set :=.
+  Definition type : Value.t :=
+    Value.OfTy globals "type" (Value.Klass [] [] []).
+
+  Inductive int : Set :=.
+End builtins.
+
+(** ** Code example *)
+
+Inductive globals : Set :=.
+
+Parameter foo : list Value.t -> M.
+
+Axiom foo_in_global_names : IsInGlobals globals (M.closure foo) "foo".

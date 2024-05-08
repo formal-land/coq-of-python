@@ -1,5 +1,7 @@
 Require Import CoqOfPython.CoqOfPython.
 
+Inductive globals : Set :=.
+
 Inductive Any : Set :=.
 Inductive Callable : Set :=.
 Inductive ClassVar : Set :=.

@@ -85,15 +85,42 @@ def generate_top_level_stmt(node):
     elif isinstance(node, ast.AsyncFunctionDef):
         return generate_error("top_level_stmt", node)
     elif isinstance(node, ast.ClassDef):
-        text = f"Inductive {generate_name(node.name)} :=.\n\n"
+        text = f"Definition {generate_name(node.name)} : Value.t :=\n"
+        text += generate_indent(1) + \
+            "Value.OfTy builtins.globals \"type\" (Value.Klass\n"
 
+        # Bases
+        text += generate_indent(2) + "["
+        not_first = False
         for base in node.bases:
+            if not_first:
+                text += "; "
             if isinstance(base, ast.Name):
-                text += \
-                    f"Axiom Inherit_{generate_name(node.name)}_{generate_name(base.id)}" + \
-                    f" : Inherit {generate_name(base.id)} {generate_name(node.name)}."
+                text += f"(globals, \"{generate_name(base.id)}\")"
             else:
                 text += generate_error("base", base)
+            not_first = True
+        text += "]\n"
+
+        # Class methods
+        text += generate_indent(2) + "["
+        not_first = False
+        for stmt in node.body:
+            if isinstance(stmt, ast.FunctionDef):
+                if len(stmt.decorator_list) == 1:
+                    decorator = stmt.decorator_list[0]
+                    if isinstance(decorator, ast.Name) and decorator.id == "classmethod":
+                        if not_first:
+                            text += "; "
+                        text += f"\"{stmt.name}\""
+                        not_first = True
+        text += "]\n"
+
+        # Methods
+        text += generate_indent(2) + "["
+        text += "]\n"
+
+        text += generate_indent(1) + ")."
 
         return text
     elif isinstance(node, ast.Assign):
@@ -108,20 +135,19 @@ def generate_top_level_stmt(node):
 
         return generate_error("top_level_stmt", node)
     elif isinstance(node, ast.Import):
-        return "Require " + ", ".join(alias.name for alias in node.names) + "."
+        return generate_error("top_level_stmt", node)
     elif isinstance(node, ast.ImportFrom):
         module = node.module if node.module is not None else "__init__"
-        wrapping_module = f"import_{module.replace('.', '_')}"
+        snake_module = module.replace(".", "_")
 
-        return f"Module {wrapping_module}.\n" + \
-            generate_indent(1) + "Require Import " + module + ".\n" + \
+        return f"Require {module}.\n" + \
             "\n".join(
+                f"Axiom {snake_module}_{generate_name(alias.name)} :\n" +
                 generate_indent(1) +
-                f"Definition {generate_name(alias.name)} := {generate_name(alias.name)}."
+                f"IsGlobalAlias globals {module}.globals " +
+                f"\"{generate_name(alias.name)}\"."
                 for alias in node.names
-            ) + "\n" + \
-            f"End {wrapping_module}.\n" + \
-            f"Import {wrapping_module}."
+            )
     elif isinstance(node, ast.Global):
         return generate_error("top_level_stmt", node)
     elif isinstance(node, ast.Nonlocal):
@@ -391,6 +417,8 @@ parsed_tree = ast.parse(file_content)
 # Generate Coq code from the AST
 coq_code = f"""Require Import CoqOfPython.CoqOfPython.
 
+Inductive globals : Set :=.
+
 {generate_mod(parsed_tree)}
 """
 
@@ -398,4 +426,4 @@ coq_code = f"""Require Import CoqOfPython.CoqOfPython.
 with open(output_file_name, "w") as output_file:
     output_file.write(coq_code)
 
-print(ast.dump(parsed_tree, indent=4))
+# print(ast.dump(parsed_tree, indent=4))

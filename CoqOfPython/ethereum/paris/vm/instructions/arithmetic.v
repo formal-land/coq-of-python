@@ -15,44 +15,29 @@ Introduction
 Implementations of the EVM Arithmetic instructions.
 ").
 
-Module import_ethereum_base_types.
-  Require Import ethereum.base_types.
-  Definition U255_CEIL_VALUE := U255_CEIL_VALUE.
-  Definition U256 := U256.
-  Definition U256_CEIL_VALUE := U256_CEIL_VALUE.
-  Definition Uint := Uint.
-End import_ethereum_base_types.
-Import import_ethereum_base_types.
+Require ethereum.base_types.
+Definition U255_CEIL_VALUE := U255_CEIL_VALUE.
+Definition U256 := U256.
+Definition U256_CEIL_VALUE := U256_CEIL_VALUE.
+Definition Uint := Uint.
 
-Module import_ethereum_utils_numeric.
-  Require Import ethereum.utils.numeric.
-  Definition get_sign := get_sign.
-End import_ethereum_utils_numeric.
-Import import_ethereum_utils_numeric.
+Require ethereum.utils.numeric.
+Definition get_sign := get_sign.
 
-Module import___init__.
-  Require Import __init__.
-  Definition Evm := Evm.
-End import___init__.
-Import import___init__.
+Require __init__.
+Definition Evm := Evm.
 
-Module import_gas.
-  Require Import gas.
-  Definition GAS_EXPONENTIATION := GAS_EXPONENTIATION.
-  Definition GAS_EXPONENTIATION_PER_BYTE := GAS_EXPONENTIATION_PER_BYTE.
-  Definition GAS_LOW := GAS_LOW.
-  Definition GAS_MID := GAS_MID.
-  Definition GAS_VERY_LOW := GAS_VERY_LOW.
-  Definition charge_gas := charge_gas.
-End import_gas.
-Import import_gas.
+Require gas.
+Definition GAS_EXPONENTIATION := GAS_EXPONENTIATION.
+Definition GAS_EXPONENTIATION_PER_BYTE := GAS_EXPONENTIATION_PER_BYTE.
+Definition GAS_LOW := GAS_LOW.
+Definition GAS_MID := GAS_MID.
+Definition GAS_VERY_LOW := GAS_VERY_LOW.
+Definition charge_gas := charge_gas.
 
-Module import_stack.
-  Require Import stack.
-  Definition pop := pop.
-  Definition push := push.
-End import_stack.
-Import import_stack.
+Require stack.
+Definition pop := pop.
+Definition push := push.
 
 Definition add (args : list Value.t) : M :=
   match args with
@@ -73,7 +58,7 @@ Definition add (args : list Value.t) : M :=
   let result := (M.call (| x.wrapping_add, [y] |)) in
   let _ := (M.call (| push, [evm.stack; result] |)) in
   let _ := M.assign_op (|
-    BinOp.Add,
+    BinOp.add,
     evm.pc,
     (Value.Integer 1)
   |) in))
@@ -99,7 +84,7 @@ Definition sub (args : list Value.t) : M :=
   let result := (M.call (| x.wrapping_sub, [y] |)) in
   let _ := (M.call (| push, [evm.stack; result] |)) in
   let _ := M.assign_op (|
-    BinOp.Add,
+    BinOp.add,
     evm.pc,
     (Value.Integer 1)
   |) in))
@@ -125,7 +110,7 @@ Definition mul (args : list Value.t) : M :=
   let result := (M.call (| x.wrapping_mul, [y] |)) in
   let _ := (M.call (| push, [evm.stack; result] |)) in
   let _ := M.assign_op (|
-    BinOp.Add,
+    BinOp.add,
     evm.pc,
     (Value.Integer 1)
   |) in))
@@ -149,13 +134,13 @@ Definition div (args : list Value.t) : M :=
   let divisor := (M.call (| pop, [evm.stack] |)) in
   let _ := (M.call (| charge_gas, [evm; GAS_LOW] |)) in
   let _ :=
-    if M.is_true (Compare.Eq (| divisor, (Value.Integer 0) |)) then
+    if M.is_true (Compare.eq (| divisor, (Value.Integer 0) |)) then
       let quotient := (M.call (| U256, [(Value.Integer 0)] |)) in
     else
-      let quotient := (BinOp.FloorDiv dividend divisor) in in
+      let quotient := BinOp.floor_div (| dividend, divisor |) in in
   let _ := (M.call (| push, [evm.stack; quotient] |)) in
   let _ := M.assign_op (|
-    BinOp.Add,
+    BinOp.add,
     evm.pc,
     (Value.Integer 1)
   |) in))
@@ -179,18 +164,18 @@ Definition sdiv (args : list Value.t) : M :=
   let divisor := (M.call (| (M.call (| pop, [evm.stack] |)).to_signed, [] |)) in
   let _ := (M.call (| charge_gas, [evm; GAS_LOW] |)) in
   let _ :=
-    if M.is_true (Compare.Eq (| divisor, (Value.Integer 0) |)) then
+    if M.is_true (Compare.eq (| divisor, (Value.Integer 0) |)) then
       let quotient := (Value.Integer 0) in
     else
       let _ :=
-        if M.is_true (BoolOp.And(Compare.Eq (| dividend, (UnOp.SubU255_CEIL_VALUE) |)) (Compare.Eq (| divisor, (UnOp.Sub(Value.Integer 1)) |))) then
-          let quotient := (UnOp.SubU255_CEIL_VALUE) in
+        if M.is_true (BoolOp.and(Compare.eq (| dividend, (UnOp.subU255_CEIL_VALUE) |)) (Compare.eq (| divisor, (UnOp.sub(Value.Integer 1)) |))) then
+          let quotient := (UnOp.subU255_CEIL_VALUE) in
         else
-          let sign := (M.call (| get_sign, [(BinOp.Mult dividend divisor)] |)) in
-          let quotient := (BinOp.Mult sign (BinOp.FloorDiv (M.call (| abs, [dividend] |)) (M.call (| abs, [divisor] |)))) in in in
+          let sign := (M.call (| get_sign, [BinOp.mult (| dividend, divisor |)] |)) in
+          let quotient := BinOp.mult (| sign, BinOp.floor_div (| (M.call (| abs, [dividend] |)), (M.call (| abs, [divisor] |)) |) |) in in in
   let _ := (M.call (| push, [evm.stack; (M.call (| U256.from_signed, [quotient] |))] |)) in
   let _ := M.assign_op (|
-    BinOp.Add,
+    BinOp.add,
     evm.pc,
     (Value.Integer 1)
   |) in))
@@ -214,13 +199,13 @@ Definition mod (args : list Value.t) : M :=
   let y := (M.call (| pop, [evm.stack] |)) in
   let _ := (M.call (| charge_gas, [evm; GAS_LOW] |)) in
   let _ :=
-    if M.is_true (Compare.Eq (| y, (Value.Integer 0) |)) then
+    if M.is_true (Compare.eq (| y, (Value.Integer 0) |)) then
       let remainder := (M.call (| U256, [(Value.Integer 0)] |)) in
     else
-      let remainder := (BinOp.Mod x y) in in
+      let remainder := BinOp.mod_ (| x, y |) in in
   let _ := (M.call (| push, [evm.stack; remainder] |)) in
   let _ := M.assign_op (|
-    BinOp.Add,
+    BinOp.add,
     evm.pc,
     (Value.Integer 1)
   |) in))
@@ -244,13 +229,13 @@ Definition smod (args : list Value.t) : M :=
   let y := (M.call (| (M.call (| pop, [evm.stack] |)).to_signed, [] |)) in
   let _ := (M.call (| charge_gas, [evm; GAS_LOW] |)) in
   let _ :=
-    if M.is_true (Compare.Eq (| y, (Value.Integer 0) |)) then
+    if M.is_true (Compare.eq (| y, (Value.Integer 0) |)) then
       let remainder := (Value.Integer 0) in
     else
-      let remainder := (BinOp.Mult (M.call (| get_sign, [x] |)) (BinOp.Mod (M.call (| abs, [x] |)) (M.call (| abs, [y] |)))) in in
+      let remainder := BinOp.mult (| (M.call (| get_sign, [x] |)), BinOp.mod_ (| (M.call (| abs, [x] |)), (M.call (| abs, [y] |)) |) |) in in
   let _ := (M.call (| push, [evm.stack; (M.call (| U256.from_signed, [remainder] |))] |)) in
   let _ := M.assign_op (|
-    BinOp.Add,
+    BinOp.add,
     evm.pc,
     (Value.Integer 1)
   |) in))
@@ -275,13 +260,13 @@ Definition addmod (args : list Value.t) : M :=
   let z := (M.call (| Uint, [(M.call (| pop, [evm.stack] |))] |)) in
   let _ := (M.call (| charge_gas, [evm; GAS_MID] |)) in
   let _ :=
-    if M.is_true (Compare.Eq (| z, (Value.Integer 0) |)) then
+    if M.is_true (Compare.eq (| z, (Value.Integer 0) |)) then
       let result := (M.call (| U256, [(Value.Integer 0)] |)) in
     else
-      let result := (M.call (| U256, [(BinOp.Mod (BinOp.Add x y) z)] |)) in in
+      let result := (M.call (| U256, [BinOp.mod_ (| BinOp.add (| x, y |), z |)] |)) in in
   let _ := (M.call (| push, [evm.stack; result] |)) in
   let _ := M.assign_op (|
-    BinOp.Add,
+    BinOp.add,
     evm.pc,
     (Value.Integer 1)
   |) in))
@@ -306,13 +291,13 @@ Definition mulmod (args : list Value.t) : M :=
   let z := (M.call (| Uint, [(M.call (| pop, [evm.stack] |))] |)) in
   let _ := (M.call (| charge_gas, [evm; GAS_MID] |)) in
   let _ :=
-    if M.is_true (Compare.Eq (| z, (Value.Integer 0) |)) then
+    if M.is_true (Compare.eq (| z, (Value.Integer 0) |)) then
       let result := (M.call (| U256, [(Value.Integer 0)] |)) in
     else
-      let result := (M.call (| U256, [(BinOp.Mod (BinOp.Mult x y) z)] |)) in in
+      let result := (M.call (| U256, [BinOp.mod_ (| BinOp.mult (| x, y |), z |)] |)) in in
   let _ := (M.call (| push, [evm.stack; result] |)) in
   let _ := M.assign_op (|
-    BinOp.Add,
+    BinOp.add,
     evm.pc,
     (Value.Integer 1)
   |) in))
@@ -335,12 +320,12 @@ Definition exp (args : list Value.t) : M :=
   let base := (M.call (| Uint, [(M.call (| pop, [evm.stack] |))] |)) in
   let exponent := (M.call (| Uint, [(M.call (| pop, [evm.stack] |))] |)) in
   let exponent_bits := (M.call (| exponent.bit_length, [] |)) in
-  let exponent_bytes := (BinOp.FloorDiv (BinOp.Add exponent_bits (Value.Integer 7)) (Value.Integer 8)) in
-  let _ := (M.call (| charge_gas, [evm; (BinOp.Add GAS_EXPONENTIATION (BinOp.Mult GAS_EXPONENTIATION_PER_BYTE exponent_bytes))] |)) in
+  let exponent_bytes := BinOp.floor_div (| BinOp.add (| exponent_bits, (Value.Integer 7) |), (Value.Integer 8) |) in
+  let _ := (M.call (| charge_gas, [evm; BinOp.add (| GAS_EXPONENTIATION, BinOp.mult (| GAS_EXPONENTIATION_PER_BYTE, exponent_bytes |) |)] |)) in
   let result := (M.call (| U256, [(M.call (| pow, [base; exponent; U256_CEIL_VALUE] |))] |)) in
   let _ := (M.call (| push, [evm.stack; result] |)) in
   let _ := M.assign_op (|
-    BinOp.Add,
+    BinOp.add,
     evm.pc,
     (Value.Integer 1)
   |) in))
@@ -364,21 +349,21 @@ Definition signextend (args : list Value.t) : M :=
   let value := (M.call (| pop, [evm.stack] |)) in
   let _ := (M.call (| charge_gas, [evm; GAS_LOW] |)) in
   let _ :=
-    if M.is_true (Compare.Gt (| byte_num, (Value.Integer 31) |)) then
+    if M.is_true (Compare.gt (| byte_num, (Value.Integer 31) |)) then
       let result := value in
     else
       let value_bytes := (M.call (| bytes, [(M.call (| value.to_be_bytes32, [] |))] |)) in
-      let value_bytes := value_bytes[(BinOp.Sub (Value.Integer 31) (M.call (| int, [byte_num] |))):(* At stmt: unsupported node type: NoneType *)] in
-      let sign_bit := (BinOp.RShift value_bytes[(Value.Integer 0)] (Value.Integer 7)) in
+      let value_bytes := value_bytes[BinOp.sub (| (Value.Integer 31), (M.call (| int, [byte_num] |)) |):(* At stmt: unsupported node type: NoneType *)] in
+      let sign_bit := BinOp.r_shift (| value_bytes[(Value.Integer 0)], (Value.Integer 7) |) in
       let _ :=
-        if M.is_true (Compare.Eq (| sign_bit, (Value.Integer 0) |)) then
+        if M.is_true (Compare.eq (| sign_bit, (Value.Integer 0) |)) then
           let result := (M.call (| U256.from_be_bytes, [value_bytes] |)) in
         else
-          let num_bytes_prepend := (BinOp.Sub (Value.Integer 32) (BinOp.Add byte_num (Value.Integer 1))) in
-          let result := (M.call (| U256.from_be_bytes, [(BinOp.Add (M.call (| bytearray, [(BinOp.Mult [(Value.Integer 255)] num_bytes_prepend)] |)) value_bytes)] |)) in in in
+          let num_bytes_prepend := BinOp.sub (| (Value.Integer 32), BinOp.add (| byte_num, (Value.Integer 1) |) |) in
+          let result := (M.call (| U256.from_be_bytes, [BinOp.add (| (M.call (| bytearray, [BinOp.mult (| [(Value.Integer 255)], num_bytes_prepend |)] |)), value_bytes |)] |)) in in in
   let _ := (M.call (| push, [evm.stack; result] |)) in
   let _ := M.assign_op (|
-    BinOp.Add,
+    BinOp.add,
     evm.pc,
     (Value.Integer 1)
   |) in))
