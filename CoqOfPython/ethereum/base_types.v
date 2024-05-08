@@ -3,7 +3,7 @@ Require Import CoqOfPython.CoqOfPython.
 Inductive globals : Set :=.
 
 Definition expr_1 : Value.t :=
-  (Value.String "
+  (Constant.str "
 Integer and array types which are used by—but not unique to—Ethereum.
 
 [`Uint`] represents non-negative integers of arbitrary size, while subclasses
@@ -51,17 +51,16 @@ Axiom typing_runtime_checkable :
   IsGlobalAlias globals typing.globals "runtime_checkable".
 
 Definition SlottedFreezable : Value.t :=
-  Value.OfTy builtins.globals "type" (Value.Klass
+  make_klass
     [(globals, "Protocol")]
     []
-    []
-  ).
+    [].
 
 Definition U255_CEIL_VALUE : Value.t := M.run ltac:(M.monadic (
-  BinOp.pow (| (Value.Integer 2), (Value.Integer 255) |))).
+  BinOp.pow (| (Constant.int 2), (Constant.int 255) |))).
 
 Definition expr_50 : Value.t :=
-  (Value.String "
+  (Constant.str "
 Smallest value that requires 256 bits to represent. Mostly used in signed
 arithmetic operations, like [`sdiv`].
 
@@ -69,10 +68,10 @@ arithmetic operations, like [`sdiv`].
 ").
 
 Definition U256_CEIL_VALUE : Value.t := M.run ltac:(M.monadic (
-  BinOp.pow (| (Value.Integer 2), (Value.Integer 256) |))).
+  BinOp.pow (| (Constant.int 2), (Constant.int 256) |))).
 
 Definition expr_58 : Value.t :=
-  (Value.String "
+  (Constant.str "
 Smallest value that requires 257 bits to represent. Used when converting a
 [`U256`] in two's complement format to a regular `int` in [`U256.to_signed`].
 
@@ -81,120 +80,106 @@ Smallest value that requires 257 bits to represent. Used when converting a
 ").
 
 Definition Uint : Value.t :=
-  Value.OfTy builtins.globals "type" (Value.Klass
+  make_klass
     [(globals, "int")]
     ["from_be_bytes"; "from_le_bytes"]
-    []
-  ).
+    [].
 
 Definition T : Value.t := M.run ltac:(M.monadic (
-  (M.call (| TypeVar, [(Value.String "T")] |)))).
+  (M.call (| TypeVar, [(Constant.str "T")] |)))).
 
 Definition FixedUint : Value.t :=
-  Value.OfTy builtins.globals "type" (Value.Klass
+  make_klass
     [(globals, "int")]
     []
-    []
-  ).
+    [].
 
 Definition U256 : Value.t :=
-  Value.OfTy builtins.globals "type" (Value.Klass
+  make_klass
     [(globals, "FixedUint")]
     ["from_be_bytes"; "from_signed"]
-    []
-  ).
+    [].
 
 (* At top_level_stmt: unsupported node type: Assign *)
 
 Definition U32 : Value.t :=
-  Value.OfTy builtins.globals "type" (Value.Klass
+  make_klass
     [(globals, "FixedUint")]
     ["from_le_bytes"]
-    []
-  ).
+    [].
 
 (* At top_level_stmt: unsupported node type: Assign *)
 
 Definition U64 : Value.t :=
-  Value.OfTy builtins.globals "type" (Value.Klass
+  make_klass
     [(globals, "FixedUint")]
     ["from_le_bytes"; "from_be_bytes"]
-    []
-  ).
+    [].
 
 (* At top_level_stmt: unsupported node type: Assign *)
 
 Definition B : Value.t := M.run ltac:(M.monadic (
-  (M.call (| TypeVar, [(Value.String "B")] |)))).
+  (M.call (| TypeVar, [(Constant.str "B")] |)))).
 
 Definition FixedBytes : Value.t :=
-  Value.OfTy builtins.globals "type" (Value.Klass
+  make_klass
     [(globals, "bytes")]
     []
-    []
-  ).
+    [].
 
 Definition Bytes0 : Value.t :=
-  Value.OfTy builtins.globals "type" (Value.Klass
+  make_klass
     [(globals, "FixedBytes")]
     []
-    []
-  ).
+    [].
 
 Definition Bytes4 : Value.t :=
-  Value.OfTy builtins.globals "type" (Value.Klass
+  make_klass
     [(globals, "FixedBytes")]
     []
-    []
-  ).
+    [].
 
 Definition Bytes8 : Value.t :=
-  Value.OfTy builtins.globals "type" (Value.Klass
+  make_klass
     [(globals, "FixedBytes")]
     []
-    []
-  ).
+    [].
 
 Definition Bytes20 : Value.t :=
-  Value.OfTy builtins.globals "type" (Value.Klass
+  make_klass
     [(globals, "FixedBytes")]
     []
-    []
-  ).
+    [].
 
 Definition Bytes32 : Value.t :=
-  Value.OfTy builtins.globals "type" (Value.Klass
+  make_klass
     [(globals, "FixedBytes")]
     []
-    []
-  ).
+    [].
 
 Definition Bytes48 : Value.t :=
-  Value.OfTy builtins.globals "type" (Value.Klass
+  make_klass
     [(globals, "FixedBytes")]
     []
-    []
-  ).
+    [].
 
 Definition Bytes64 : Value.t :=
-  Value.OfTy builtins.globals "type" (Value.Klass
+  make_klass
     [(globals, "FixedBytes")]
     []
-    []
-  ).
+    [].
 
 Definition Bytes256 : Value.t :=
-  Value.OfTy builtins.globals "type" (Value.Klass
+  make_klass
     [(globals, "FixedBytes")]
     []
-    []
-  ).
+    [].
 
 Definition Bytes : Value.t := M.run ltac:(M.monadic (
   bytes)).
 
 Definition expr_925 : Value.t :=
-  (Value.String "
+  (Constant.str "
 Sequence of bytes (octets) of arbitrary length.
 ").
 
@@ -202,7 +187,7 @@ Definition _setattr_function (args : list Value.t) : M :=
   match args with
   | [self; attr; value] => ltac:(M.monadic (
   let _ :=
-    if M.is_true (M.call (| getattr, [self; (Value.String "_frozen"); (Value.None)] |)) then
+    if M.is_true (M.call (| getattr, [self; (Constant.str "_frozen"); (Value.None)] |)) then
 (* At stmt: unsupported node type: Raise *)
     else
       let _ := (M.call (| object.__setattr__, [self; attr; value] |)) in in))
@@ -231,7 +216,7 @@ Definition _make_init_function (args : list Value.t) : M :=
 Definition slotted_freezable (args : list Value.t) : M :=
   match args with
   | [cls] => ltac:(M.monadic (
-  let _ := (Value.String "
+  let _ := (Constant.str "
     Monkey patches a dataclass so it can be frozen by setting `_frozen` to
     `True` and uses `__slots__` for efficiency.
 
@@ -240,7 +225,7 @@ Definition slotted_freezable (args : list Value.t) : M :=
     ") in
   let _ := M.assign (|
     cls.__slots__,
-    BinOp.add (| ((Value.String "_frozen")), (M.call (| tuple, [cls.__annotations__] |)) |)
+    BinOp.add (| ((Constant.str "_frozen")), (M.call (| tuple, [cls.__annotations__] |)) |)
   |) in
   let _ := M.assign (|
     cls.__init__,
@@ -259,12 +244,12 @@ Definition slotted_freezable (args : list Value.t) : M :=
   end.
 
 Definition S : Value.t := M.run ltac:(M.monadic (
-  (M.call (| TypeVar, [(Value.String "S")] |)))).
+  (M.call (| TypeVar, [(Constant.str "S")] |)))).
 
 Definition modify (args : list Value.t) : M :=
   match args with
   | [obj; f] => ltac:(M.monadic (
-  let _ := (Value.String "
+  let _ := (Constant.str "
     Create a copy of `obj` (which must be [`@slotted_freezable`]), and modify
     it by applying `f`. The returned copy will be frozen.
 
@@ -276,7 +261,7 @@ Definition modify (args : list Value.t) : M :=
   let _ := (M.call (| f, [new_obj] |)) in
   let _ := M.assign (|
     new_obj._frozen,
-    (Value.Bool true)
+    (Constant.bool true)
   |) in
   let _ := M.return (| new_obj |) in))
   | _ => M.impossible

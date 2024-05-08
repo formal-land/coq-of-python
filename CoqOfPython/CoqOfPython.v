@@ -15,39 +15,66 @@ Global Open Scope type_scope.
 
 Export List.ListNotations.
 
-Inductive sigS {A : Type} (P : A -> Set) : Set :=
-| existS : forall (x : A), P x -> sigS P.
-Arguments existS {_ _}.
-
-Reserved Notation "{ x @ P }" (at level 0, x at level 99).
-Reserved Notation "{ x : A @ P }" (at level 0, x at level 99).
-Reserved Notation "{ ' pat : A @ P }"
-  (at level 0, pat strict pattern, format "{ ' pat : A @ P }").
-
-Notation "{ x @ P }" := (sigS (fun x => P)) : type_scope.
-Notation "{ x : A @ P }" := (sigS (A := A) (fun x => P)) : type_scope.
-Notation "{ ' pat : A @ P }" := (sigS (A := A) (fun pat => P)) : type_scope.
-
-Module Value.
-  Inductive t : Set :=
-  | OfTy (globals : Set) (klass : string) (value : t)
-  | None
+Module Data.
+  (** This type is not accessible directly in Python, as only object are. We use this type
+      internally to represent integers, closures, ... that can be made accessible in a special
+      field of objects. *)
+  Inductive t (Value : Set) : Set :=
   | Bool (b : bool)
   | Integer (z : Z)
   | String (s : string)
-  | Tuple (items : list t)
-  (** Lists and tuples are very similar. The disctinction between the two is conventional. We use
+  | Tuple (items : list Value)
+  (** Lists and tuples are very similar. The distinction between the two is conventional. We use
       a list when the number of elements is not statically known. *)
-  | List (items : list t)
-  | Closure (f : { '(t, M) : Set * Set @ list t -> M })
-  | Klass (bases : list (Set * string)) (class_methods : list t) (methods : list t).
+  | List (items : list Value)
+  | Closure {Value M : Set} (f : list Value -> M)
+  | Klass (bases : list (Set * string)) (class_methods : list Value) (methods : list Value).
+  Arguments Bool {_}.
+  Arguments Integer {_}.
+  Arguments String {_}.
+  Arguments Tuple {_}.
+  Arguments List {_}.
+  Arguments Closure {_ _ _}.
+  Arguments Klass {_}.
+End Data.
+
+Module Object.
+  Record t {Value : Set} : Set := {
+    internal : option (Data.t Value);
+    fields : list (string * Value);
+  }.
+  Arguments t : clear implicits.
+  Arguments Build_t {_}.
+
+  (** When an object is just a wrapper around the [Data.t] type. *)
+  Definition wrapper {Value : Set} (data : Data.t Value) : t Value :=
+    {|
+      internal := Some data;
+      fields := [];
+    |}.
+End Object.
+
+Module Pointer.
+  Inductive t (Value : Set) : Set :=
+  | Imm (data : Object.t Value)
+  | Mutable {Address A : Set} (address : Address) (to_data : A -> Object.t Value).
+  Arguments Imm {_}.
+  Arguments Mutable {_ _ _}.
+End Pointer.
+
+Module Value.
+  Inductive t : Set :=
+  | Make (globals : Set) (klass : string) (value : Pointer.t t).
 End Value.
 
 Parameter M : Set.
 
 Parameter IsInGlobals : Set -> Value.t -> string -> Prop.
 
-Parameter IsGlobalAlias : Set -> Set -> string -> Prop.
+Definition IsGlobalAlias (globals required_globals : Set) (name : string) : Prop :=
+  forall (value : Value.t),
+    IsInGlobals required_globals value name ->
+    IsInGlobals globals value name.
 
 Module M.
   Parameter pure : Value.t -> M.
@@ -55,9 +82,6 @@ Module M.
   Parameter let_ : M -> (Value.t -> M) -> M.
 
   Parameter call : Value.t -> list Value.t -> M.
-
-  Definition closure (f : list Value.t -> M) : Value.t :=
-    Value.Closure (existS (Value.t, M) f).
 
   Parameter run : M -> Value.t.
 
@@ -189,15 +213,40 @@ Module builtins.
   Inductive globals : Set :=.
 
   Definition type : Value.t :=
-    Value.OfTy globals "type" (Value.Klass [] [] []).
+    Value.Make globals "type" (Pointer.Imm (Object.wrapper (Data.Klass [] [] []))).
+  Axiom type_in_globals : IsInGlobals globals type "type".
 
-  Inductive int : Set :=.
+  Definition int : Value.t :=
+    Value.Make globals "type" (Pointer.Imm (Object.wrapper (Data.Klass [] [] []))).
+  Axiom int_in_globals : IsInGlobals globals int "int".
+
+  Definition str : Value.t :=
+    Value.Make globals "type" (Pointer.Imm (Object.wrapper (Data.Klass [] [] []))).
+  Axiom str_in_globals : IsInGlobals globals str "str".
 End builtins.
 
-(** ** Code example *)
+Module Constant.
+  Definition None_ : Value.t :=
+    Value.Make builtins.globals "NoneType" (Pointer.Imm {|
+      Object.internal := None;
+      Object.fields := [];
+    |}).
 
-Inductive globals : Set :=.
+  Definition bool (b : bool) : Value.t :=
+    Value.Make builtins.globals "bool" (Pointer.Imm (Object.wrapper (Data.Bool b))).
 
-Parameter foo : list Value.t -> M.
+  Definition int (z : Z) : Value.t :=
+    Value.Make builtins.globals "int" (Pointer.Imm (Object.wrapper (Data.Integer z))).
 
-Axiom foo_in_global_names : IsInGlobals globals (M.closure foo) "foo".
+  Definition str (s : string) : Value.t :=
+    Value.Make builtins.globals "str" (Pointer.Imm (Object.wrapper (Data.String s))).
+End Constant.
+
+Definition make_klass
+    (bases : list (Set * string))
+    (class_methods : list Value.t)
+    (methods : list Value.t) :
+    Value.t :=
+  Value.Make builtins.globals "type" (Pointer.Imm (Object.wrapper (
+    Data.Klass bases class_methods methods
+  ))).

@@ -45,15 +45,15 @@ def generate_constant(node, value):
     if value is None:
         return "Value.None"
     elif value is True:
-        return "Value.Bool true"
+        return "Constant.bool true"
     elif value is False:
-        return "Value.Bool false"
+        return "Constant.bool false"
     elif isinstance(value, int):
-        return f"Value.Integer {str(value)}"
+        return f"Constant.int {str(value)}"
     elif isinstance(value, float):
         return f"Value.Float {str(value)}"
     elif isinstance(value, str):
-        return "Value.String \"" + value.replace("\"", "\"\"\"") + "\""
+        return "Constant.str \"" + value.replace("\"", "\"\"\"") + "\""
     else:
         return generate_error("constant", node)
 
@@ -87,7 +87,7 @@ def generate_top_level_stmt(node):
     elif isinstance(node, ast.ClassDef):
         text = f"Definition {generate_name(node.name)} : Value.t :=\n"
         text += generate_indent(1) + \
-            "Value.OfTy builtins.globals \"type\" (Value.Klass\n"
+            "make_klass\n"
 
         # Bases
         text += generate_indent(2) + "["
@@ -118,9 +118,7 @@ def generate_top_level_stmt(node):
 
         # Methods
         text += generate_indent(2) + "["
-        text += "]\n"
-
-        text += generate_indent(1) + ")."
+        text += "]."
 
         return text
     elif isinstance(node, ast.Assign):
