@@ -1,4 +1,6 @@
 import os
+import subprocess
+import sys
 
 folder_to_convert = "../execution-specs/src/ethereum"
 
@@ -11,4 +13,14 @@ for root, dirs, files in os.walk(folder_to_convert):
             # print("Converting file: " + full_path)
             short_path = full_path[(len(folder_to_convert) + 1):]
             print("Converting file: " + short_path)
-            os.system("python main.py " + short_path)
+
+            try:
+                command = "python main.py " + short_path
+                print(command)
+                subprocess.run(command, shell=True, check=True)
+            except subprocess.CalledProcessError as e:
+                print(f"Error occurred: {e}")
+                # sys.exit(1)
+            except KeyboardInterrupt:
+                print("Ctrl-C pressed, interrupting the script.")
+                sys.exit(1)

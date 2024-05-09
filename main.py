@@ -1,4 +1,5 @@
 import ast
+import os
 import sys
 
 
@@ -599,6 +600,11 @@ Inductive globals : Set :=.
 
 {generate_mod(parsed_tree)}
 """
+
+# Ensure that the directory exists
+output_directory = os.path.dirname(output_file_name)
+if not os.path.exists(output_directory):
+    os.makedirs(output_directory)
 
 # Output the generated Coq code
 with open(output_file_name, "w") as output_file:
