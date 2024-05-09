@@ -32,8 +32,8 @@ Module Data.
   | Closure {Value M : Set} (f : Value -> Value -> M)
   | Klass {Value M : Set}
     (bases : list (Set * string))
-    (class_methods : list (string * (list Value -> M)))
-    (methods : list (string * (list Value -> M))).
+    (class_methods : list (string * (Value -> Value -> M)))
+    (methods : list (string * (Value -> Value -> M))).
   Arguments Bool {_}.
   Arguments Integer {_}.
   Arguments String {_}.
@@ -97,11 +97,15 @@ Module M.
 
   Parameter get_name : Set -> string -> M.
 
-  Parameter set_locals : list (string * Value.t) -> M.
+  Parameter set_locals : Value.t -> Value.t -> list string -> M.
+
+  Parameter assign : Value.t -> Value.t -> M.
 
   Parameter return_ : Value.t -> M.
 
   Parameter raise : Value.t -> M.
+
+  Parameter assert : Value.t -> M.
 
   Parameter impossible : M.
 
@@ -238,8 +242,8 @@ Module builtins.
 
   Definition make_klass
     (bases : list (Set * string))
-    (class_methods : list (string * (list Value.t -> M)))
-    (methods : list (string * (list Value.t -> M))) :
+    (class_methods : list (string * (Value.t -> Value.t -> M)))
+    (methods : list (string * (Value.t -> Value.t -> M))) :
     Value.t :=
   Value.Make builtins.globals "type" (Pointer.Imm (Object.wrapper (
     Data.Klass bases class_methods methods
@@ -280,6 +284,8 @@ Definition make_tuple (items : list Value.t) : Value.t :=
 
 Definition make_list (items : list Value.t) : Value.t :=
   Value.Make builtins.globals "list" (Pointer.Imm (Object.wrapper (Data.List items))).
+
+Parameter make_list_concat : list Value.t -> M.
 
 Definition make_set (items : list Value.t) : Value.t :=
   Value.Make builtins.globals "set" (Pointer.Imm (Object.wrapper (Data.Set_ items))).

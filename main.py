@@ -76,15 +76,8 @@ def generate_mod(node):
 
 def generate_top_level_stmt(node):
     if isinstance(node, ast.FunctionDef):
-        params = "; ".join(generate_arg(arg) for arg in node.args.args)
-        body = "\n".join(generate_stmt(1, stmt) for stmt in node.body)
-
-        return f"Definition {node.name} (args : list Value.t) : M :=\n" + \
-            "  match args with\n" + \
-            f"  | [{params}] => ltac:(M.monadic (\n" + \
-            body + "))\n" \
-            "  | _ => M.impossible\n" + \
-            "  end."
+        return f"Definition {node.name} : Value.t -> Value.t -> M :=\n" + \
+            generate_indent(1) + generate_function_def_body(1, node) + "."
     elif isinstance(node, ast.AsyncFunctionDef):
         return generate_error("top_level_stmt", node)
     elif isinstance(node, ast.ClassDef):
@@ -116,6 +109,7 @@ def generate_top_level_stmt(node):
                         text += ";\n"
                     text += generate_indent(3) + "(\n"
                     text += generate_indent(4) + f"\"{stmt.name}\"," + "\n"
+                    text += generate_indent(4)
                     text += generate_function_def_body(4, stmt) + "\n"
                     text += generate_indent(3) + ")"
                     not_first = True
@@ -131,6 +125,7 @@ def generate_top_level_stmt(node):
                     text += ";\n"
                 text += generate_indent(3) + "(\n"
                 text += generate_indent(4) + f"\"{stmt.name}\"," + "\n"
+                text += generate_indent(4)
                 text += generate_function_def_body(4, stmt) + "\n"
                 text += generate_indent(3) + ")"
                 not_first = True
@@ -177,19 +172,13 @@ def generate_top_level_stmt(node):
 
 
 def generate_function_def_body(indent, node):
-    params = "; ".join(generate_arg(arg) for arg in node.args.args)
-    body = generate_stmts(indent + 2, node.body)
+    params = "; ".join(f"\"{arg.arg}\"" for arg in node.args.args)
+    body = generate_stmts(indent + 1, node.body)
 
-    return generate_indent(indent) + "fun (args : list Value.t) =>\n" + \
-        generate_indent(indent + 1) + "match args with\n" + \
-        generate_indent(indent + 1) + f"| [{params}] => ltac:(M.monadic (\n" + \
-        generate_indent(indent + 2) + "let _ := M.set_locals (| [" + \
-        "; ".join(
-            f"(\"{arg.arg}\", {generate_arg(arg)})" for arg in node.args.args
-    ) + "] |) in\n" + \
-        body + "))\n" + \
-        generate_indent(indent + 1) + "| _ => M.impossible\n" + \
-        generate_indent(indent + 1) + "end"
+    return "fun (args kwargs : Value.t) => ltac:(M.monadic (\n" + \
+        generate_indent(indent + 1) + \
+        f"let _ := M.set_locals (| args, kwargs, [ {params} ] |) in\n" + \
+        body + "))"
 
 
 def generate_if_then_else(indent, condition, success, error):
@@ -242,8 +231,10 @@ def generate_stmt(indent, node):
                 generate_expr(indent + 1, False, node.value) + " in"
 
         return generate_indent(indent) + "let _ := M.assign (|\n" + \
-            generate_indent(indent + 1) + generate_expr(1, False, target) + ",\n" + \
-            generate_indent(indent + 1) + generate_expr(1, False, node.value) + "\n" + \
+            generate_indent(indent + 1) + \
+            generate_expr(indent + 1, False, target) + ",\n" + \
+            generate_indent(indent + 1) + \
+            generate_expr(indent + 1, False, node.value) + "\n" + \
             generate_indent(indent) + "|) in"
     # elif isinstance(node, ast.TypeAlias):
     #     return generate_error("stmt", node)
@@ -380,13 +371,13 @@ def generate_list(indent, is_with_paren, nodes):
 
     return paren(
         is_with_paren,
-        "make_list_concat [\n" +
+        "make_list_concat (| [\n" +
         ';\n'.join(
             generate_indent(indent + 1) +
             generate_single_list_or_node(indent + 1, False, list_to_concat)
             for list_to_concat in lists_to_concat
         ) + "\n" +
-        generate_indent(indent) + "]"
+        generate_indent(indent) + "] |)"
     )
 
 
@@ -398,9 +389,12 @@ def generate_expr(indent, is_with_paren, node):
     elif isinstance(node, ast.BinOp):
         return paren(
             is_with_paren,
-            generate_operator(node.op) + " (| " +
-            generate_expr(indent, False, node.left) + ", " +
-            generate_expr(indent, False, node.right) + " |)"
+            generate_operator(node.op) + " (|\n" +
+            generate_indent(indent + 1) +
+            generate_expr(indent + 1, False, node.left) + ",\n" +
+            generate_indent(indent + 1) +
+            generate_expr(indent + 1, False, node.right) + "\n" +
+            generate_indent(indent) + "|)"
         )
     elif isinstance(node, ast.UnaryOp):
         return paren(
@@ -459,13 +453,10 @@ def generate_expr(indent, is_with_paren, node):
             is_with_paren,
             "M.call (|\n" +
             generate_indent(indent + 1) + generate_expr(indent + 1, False, node.func) +
-            ", [" +
-            ("\n" if len(node.args) >= 1 else "") +
-            ';\n'.join(
-                generate_indent(indent + 1) +
-                generate_expr(indent + 1, False, arg)
-                for arg in node.args
-            ) + "]\n" +
+            ",\n" +
+            generate_indent(indent + 1) +
+            generate_list(indent + 1, False, node.args) + ",\n" +
+            generate_indent(indent + 1) + "make_dict []\n" +
             generate_indent(indent) + "|)"
         )
     elif isinstance(node, ast.FormattedValue):
