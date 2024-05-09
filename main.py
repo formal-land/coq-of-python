@@ -317,22 +317,82 @@ def paren(is_with_paren, text):
     return "(" + text + ")" if is_with_paren else text
 
 
-def generate_expr(indent, is_with_paren, node):
-    if isinstance(node, ast.BoolOp):
-        if len(node.values) != 2:
-            return generate_error("expr", node)
+def generate_bool_op(indent, is_with_paren, op, nodes):
+    if len(nodes) == 0:
+        return generate_error("expr", nodes)
+    elif len(nodes) == 1:
+        return generate_expr(indent + 1, False, nodes[0])
 
+    return paren(
+        is_with_paren,
+        generate_boolop(op) + " (|\n" +
+        generate_indent(indent + 1) +
+        generate_expr(indent + 1, False, nodes[0]) + ",\n" +
+        generate_indent(indent + 1) + "ltac:(M.monadic (\n" +
+        generate_indent(indent + 2) +
+        generate_bool_op(indent + 2, False, op, nodes[1:]) + "\n" +
+        generate_indent(indent + 1) + "))\n" +
+        generate_indent(indent) + "|)"
+    )
+
+
+def generate_single_list_or_node(indent, is_with_paren, nodes):
+    if isinstance(nodes, list):
         return paren(
             is_with_paren,
-            generate_boolop(node.op) + " (|\n" +
-            generate_indent(indent + 1) +
-            generate_expr(indent + 1, False, node.values[0]) + ",\n" +
-            generate_indent(indent + 1) + "ltac:(M.monadic (\n" +
-            generate_indent(indent + 2) +
-            generate_expr(indent + 2, False, node.values[1]) + "\n" +
-            generate_indent(indent + 1) + "))\n" +
-            generate_indent(indent) + "|)"
+            "make_list [\n" +
+            ';\n'.join(
+                generate_indent(indent + 1) +
+                generate_expr(indent + 1, False, node)
+                for node in nodes
+            ) + "\n" +
+            generate_indent(indent) + "]"
         )
+
+    # In this case the [nodes] expression represents a list, but is not syntactically as
+    # a list.
+    return generate_expr(indent, is_with_paren, nodes)
+
+
+def generate_list(indent, is_with_paren, nodes):
+    lists_to_concat = []
+    current_list = []
+
+    for node in nodes:
+        if isinstance(node, ast.Starred):
+            if len(current_list) > 0:
+                lists_to_concat.append(current_list)
+            lists_to_concat.append(node.value)
+            current_list = []
+        else:
+            current_list.append(node)
+
+    if len(current_list) > 0:
+        lists_to_concat.append(current_list)
+
+    if len(lists_to_concat) == 0:
+        return paren(
+            is_with_paren,
+            "make_list []"
+        )
+    elif len(lists_to_concat) == 1:
+        return generate_single_list_or_node(indent, is_with_paren, lists_to_concat[0])
+
+    return paren(
+        is_with_paren,
+        "make_list_concat [\n" +
+        ';\n'.join(
+            generate_indent(indent + 1) +
+            generate_single_list_or_node(indent + 1, False, list_to_concat)
+            for list_to_concat in lists_to_concat
+        ) + "\n" +
+        generate_indent(indent) + "]"
+    )
+
+
+def generate_expr(indent, is_with_paren, node):
+    if isinstance(node, ast.BoolOp):
+        return generate_bool_op(indent, is_with_paren, node.op, node.values)
     elif isinstance(node, ast.NamedExpr):
         return generate_error("expr", node)
     elif isinstance(node, ast.BinOp):
@@ -428,17 +488,15 @@ def generate_expr(indent, is_with_paren, node):
             f"M.get_subscript (| {generate_expr(indent, False, node.value)}, {generate_expr(indent, False, node.slice)} |)"
         )
     elif isinstance(node, ast.Starred):
-        return paren(
-            is_with_paren,
-            f"*{generate_expr(indent, False, node.value)}"
-        )
+        # We should handle this kind of expression as part of the enclosing expression
+        return generate_error("expr", node)
     elif isinstance(node, ast.Name):
         return paren(
             is_with_paren,
             f"M.get_name (| globals, \"{node.id}\" |)"
         )
     elif isinstance(node, ast.List):
-        return f"[{', '.join(generate_expr(indent, False, elt) for elt in node.elts)}]"
+        return generate_list(indent, is_with_paren, node.elts)
     elif isinstance(node, ast.Tuple):
         return paren(
             is_with_paren,

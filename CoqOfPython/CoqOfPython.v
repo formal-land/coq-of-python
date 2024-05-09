@@ -27,7 +27,9 @@ Module Data.
   (** Lists and tuples are very similar. The distinction between the two is conventional. We use
       a list when the number of elements is not statically known. *)
   | List (items : list Value)
-  | Closure {Value M : Set} (f : list Value -> M)
+  | Set_ (items : list Value)
+  | Dict (dict : list (string * Value))
+  | Closure {Value M : Set} (f : Value -> Value -> M)
   | Klass {Value M : Set}
     (bases : list (Set * string))
     (class_methods : list (string * (list Value -> M)))
@@ -37,6 +39,8 @@ Module Data.
   Arguments String {_}.
   Arguments Tuple {_}.
   Arguments List {_}.
+  Arguments Set_ {_}.
+  Arguments Dict {_}.
   Arguments Closure {_ _ _}.
   Arguments Klass {_ _ _}.
 End Data.
@@ -84,7 +88,7 @@ Module M.
 
   Parameter let_ : M -> (Value.t -> M) -> M.
 
-  Parameter call : Value.t -> list Value.t -> M.
+  Parameter call : Value.t -> Value.t -> Value.t -> M.
 
   Parameter get_field : Value.t -> string -> M.
 
@@ -273,3 +277,14 @@ End Constant.
 
 Definition make_tuple (items : list Value.t) : Value.t :=
   Value.Make builtins.globals "tuple" (Pointer.Imm (Object.wrapper (Data.Tuple items))).
+
+Definition make_list (items : list Value.t) : Value.t :=
+  Value.Make builtins.globals "list" (Pointer.Imm (Object.wrapper (Data.List items))).
+
+Definition make_set (items : list Value.t) : Value.t :=
+  Value.Make builtins.globals "set" (Pointer.Imm (Object.wrapper (Data.Set_ items))).
+
+Parameter order_dict : list (string * Value.t) -> list (string * Value.t).
+
+Definition make_dict (dict : list (string * Value.t)) : Value.t :=
+  Value.Make builtins.globals "dict" (Pointer.Imm (Object.wrapper (Data.Dict (order_dict dict)))).

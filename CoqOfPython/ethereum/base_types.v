@@ -1516,7 +1516,17 @@ Definition FixedUint : Value.t :=
             let _ :=
               (* if *)
               M.if_then_else (|
-                (* At expr: unsupported node type: BoolOp *),
+                BoolOp.or (|
+                  Compare.lt (| M.get_name (| globals, "right" |), Constant.int 0 |),
+                  ltac:(M.monadic (
+                    BoolOp.or (|
+                      Compare.gt (| M.get_name (| globals, "right" |), M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |) |),
+                      ltac:(M.monadic (
+                        Compare.lt (| M.get_name (| globals, "self" |), M.get_name (| globals, "right" |) |)
+                      ))
+                    |)
+                  ))
+                |),
               (* then *)
               ltac:(M.monadic (
                 let _ := M.raise (| M.call (|
@@ -1636,7 +1646,17 @@ Definition FixedUint : Value.t :=
             let _ :=
               (* if *)
               M.if_then_else (|
-                (* At expr: unsupported node type: BoolOp *),
+                BoolOp.or (|
+                  Compare.lt (| M.get_name (| globals, "left" |), Constant.int 0 |),
+                  ltac:(M.monadic (
+                    BoolOp.or (|
+                      Compare.gt (| M.get_name (| globals, "left" |), M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |) |),
+                      ltac:(M.monadic (
+                        Compare.gt (| M.get_name (| globals, "self" |), M.get_name (| globals, "left" |) |)
+                      ))
+                    |)
+                  ))
+                |),
               (* then *)
               ltac:(M.monadic (
                 let _ := M.raise (| M.call (|
@@ -2317,7 +2337,17 @@ Definition FixedUint : Value.t :=
             let _ :=
               (* if *)
               M.if_then_else (|
-                (* At expr: unsupported node type: BoolOp *),
+                BoolOp.or (|
+                  Compare.lt (| M.get_name (| globals, "right" |), Constant.int 0 |),
+                  ltac:(M.monadic (
+                    BoolOp.or (|
+                      Compare.gt (| M.get_name (| globals, "right" |), M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |) |),
+                      ltac:(M.monadic (
+                        Compare.gt (| M.get_name (| globals, "result" |), M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |) |)
+                      ))
+                    |)
+                  ))
+                |),
               (* then *)
               ltac:(M.monadic (
                 let _ := M.raise (| M.call (|
@@ -3335,6 +3365,21 @@ Definition FixedBytes : Value.t :=
             let _ := Constant.str "
         Create a new instance, ensuring the result has the correct length.
         " in
+            let x :=
+              make_list_concat [
+                make_list [
+                  Constant.int 1;
+                  Constant.int 2
+                ];
+                make_list [
+                  Constant.str "x";
+                  Constant.str "y";
+                  Constant.str "z"
+                ];
+                make_list [
+                  Constant.int 3
+                ]
+              ] in
             let result :=
               M.call (|
                 M.get_field (| M.call (|
@@ -3343,7 +3388,7 @@ Definition FixedBytes : Value.t :=
                   M.get_name (| globals, "cls" |)]
                 |), "__new__" |), [
                 M.get_name (| globals, "cls" |);
-                *M.get_name (| globals, "args" |)]
+                (* At expr: unsupported node type: Starred *)]
               |) in
             let _ :=
               (* if *)
@@ -3456,7 +3501,7 @@ Definition Bytes : Value.t := M.run ltac:(M.monadic (
   M.get_name (| globals, "bytes" |)
 )).
 
-Definition expr_925 : Value.t :=
+Definition expr_926 : Value.t :=
   Constant.str "
 Sequence of bytes (octets) of arbitrary length.
 ".
