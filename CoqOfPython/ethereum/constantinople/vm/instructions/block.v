@@ -69,24 +69,6 @@ Definition block_hash : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        BoolOp.or (|
-          Compare.lt_e (| M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "number" |), M.get_name (| globals, "block_number" |) |),
-          ltac:(M.monadic (
-            Compare.gt (| M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "number" |), BinOp.add (|
-                M.get_name (| globals, "block_number" |),
-                Constant.int 256
-              |) |)
-          ))
-        |),
-      (* then *)
-      ltac:(M.monadic (
-        let hash :=
-          (* At constant: unsupported node type: Constant *) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let hash :=
           M.get_subscript (| M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "block_hashes" |), UnOp.sub (| BinOp.sub (|
             M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "number" |),

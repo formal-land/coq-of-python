@@ -285,22 +285,6 @@ Definition get_byte : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.gt_e (| M.get_name (| globals, "byte_index" |), Constant.int 32 |),
-      (* then *)
-      ltac:(M.monadic (
-        let result :=
-          M.call (|
-            M.get_name (| globals, "U256" |),
-            make_list [
-              Constant.int 0
-            ],
-            make_dict []
-          |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let extra_bytes_to_right :=
           BinOp.sub (|
             Constant.int 31,

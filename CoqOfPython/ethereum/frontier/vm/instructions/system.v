@@ -155,7 +155,7 @@ Definition create : Value.t -> Value.t -> M :=
       BinOp.add,
       M.get_field (| M.get_name (| globals, "evm" |), "memory" |),
       BinOp.mult (|
-    (* At constant: unsupported node type: Constant *),
+    Constant.bytes "00",
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
@@ -187,96 +187,7 @@ Definition create : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        BoolOp.or (|
-          Compare.lt (| M.get_field (| M.get_name (| globals, "sender" |), "balance" |), M.get_name (| globals, "endowment" |) |),
-          ltac:(M.monadic (
-            BoolOp.or (|
-              Compare.eq (| M.get_field (| M.get_name (| globals, "sender" |), "nonce" |), M.call (|
-                M.get_name (| globals, "Uint" |),
-                make_list [
-                  BinOp.sub (|
-                    BinOp.pow (|
-                      Constant.int 2,
-                      Constant.int 64
-                    |),
-                    Constant.int 1
-                  |)
-                ],
-                make_dict []
-              |) |),
-              ltac:(M.monadic (
-                Compare.gt (| BinOp.add (|
-                    M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "depth" |),
-                    Constant.int 1
-                  |), M.get_name (| globals, "STACK_DEPTH_LIMIT" |) |)
-              ))
-            |)
-          ))
-        |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.call (|
-    M.get_name (| globals, "push" |),
-    make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.call (|
-        M.get_name (| globals, "U256" |),
-        make_list [
-          Constant.int 0
-        ],
-        make_dict []
-      |)
-    ],
-    make_dict []
-  |) in
-        let _ := M.assign_op (|
-          BinOp.add,
-          M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |),
-          M.get_name (| globals, "create_message_gas" |)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ :=
-          (* if *)
-          M.if_then_else (|
-            M.call (|
-              M.get_name (| globals, "account_has_code_or_nonce" |),
-              make_list [
-                M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "state" |);
-                M.get_name (| globals, "contract_address" |)
-              ],
-              make_dict []
-            |),
-          (* then *)
-          ltac:(M.monadic (
-            let _ := M.call (|
-    M.get_name (| globals, "increment_nonce" |),
-    make_list [
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "state" |);
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "current_target" |)
-    ],
-    make_dict []
-  |) in
-            let _ := M.call (|
-    M.get_name (| globals, "push" |),
-    make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.call (|
-        M.get_name (| globals, "U256" |),
-        make_list [
-          Constant.int 0
-        ],
-        make_dict []
-      |)
-    ],
-    make_dict []
-  |) in
-            M.pure Constant.None_
-          (* else *)
-          )), ltac:(M.monadic (
             let call_data :=
               M.call (|
                 M.get_name (| globals, "memory_read_bytes" |),
@@ -311,36 +222,6 @@ Definition create : Value.t -> Value.t -> M :=
                 make_dict []
               |) in
             let _ :=
-              (* if *)
-              M.if_then_else (|
-                M.get_field (| M.get_name (| globals, "child_evm" |), "error" |),
-              (* then *)
-              ltac:(M.monadic (
-                let _ := M.call (|
-    M.get_name (| globals, "incorporate_child_on_error" |),
-    make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "child_evm" |)
-    ],
-    make_dict []
-  |) in
-                let _ := M.call (|
-    M.get_name (| globals, "push" |),
-    make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.call (|
-        M.get_name (| globals, "U256" |),
-        make_list [
-          Constant.int 0
-        ],
-        make_dict []
-      |)
-    ],
-    make_dict []
-  |) in
-                M.pure Constant.None_
-              (* else *)
-              )), ltac:(M.monadic (
                 let _ := M.call (|
     M.get_name (| globals, "incorporate_child_on_success" |),
     make_list [
@@ -429,7 +310,7 @@ Definition return_ : Value.t -> Value.t -> M :=
       BinOp.add,
       M.get_field (| M.get_name (| globals, "evm" |), "memory" |),
       BinOp.mult (|
-    (* At constant: unsupported node type: Constant *),
+    Constant.bytes "00",
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
@@ -460,39 +341,6 @@ Definition generic_call : Value.t -> Value.t -> M :=
     " in
 (* At stmt: unsupported node type: ImportFrom *)
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.gt (| BinOp.add (|
-          M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "depth" |),
-          Constant.int 1
-        |), M.get_name (| globals, "STACK_DEPTH_LIMIT" |) |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.assign_op (|
-          BinOp.add,
-          M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |),
-          M.get_name (| globals, "gas" |)
-        |) in
-        let _ := M.call (|
-    M.get_name (| globals, "push" |),
-    make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.call (|
-        M.get_name (| globals, "U256" |),
-        make_list [
-          Constant.int 0
-        ],
-        make_dict []
-      |)
-    ],
-    make_dict []
-  |) in
-        let _ := M.return_ (|
-          (* At expr: unsupported node type: NoneType *)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let call_data :=
@@ -530,36 +378,6 @@ Definition generic_call : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        M.get_field (| M.get_name (| globals, "child_evm" |), "error" |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.call (|
-    M.get_name (| globals, "incorporate_child_on_error" |),
-    make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "child_evm" |)
-    ],
-    make_dict []
-  |) in
-        let _ := M.call (|
-    M.get_name (| globals, "push" |),
-    make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.call (|
-        M.get_name (| globals, "U256" |),
-        make_list [
-          Constant.int 0
-        ],
-        make_dict []
-      |)
-    ],
-    make_dict []
-  |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ := M.call (|
     M.get_name (| globals, "incorporate_child_on_success" |),
     make_list [
@@ -610,7 +428,7 @@ Definition generic_call : Value.t -> Value.t -> M :=
     make_list [
       M.get_field (| M.get_name (| globals, "evm" |), "memory" |);
       M.get_name (| globals, "memory_output_start_position" |);
-      M.get_subscript (| M.get_field (| M.get_name (| globals, "child_evm" |), "output" |), (* At expr: unsupported node type: NoneType *):M.get_name (| globals, "actual_output_size" |) |)
+      M.get_subscript (| M.get_field (| M.get_name (| globals, "child_evm" |), "output" |), Constant.None_:M.get_name (| globals, "actual_output_size" |) |)
     ],
     make_dict []
   |) in
@@ -733,7 +551,7 @@ Definition call : Value.t -> Value.t -> M :=
       BinOp.add,
       M.get_field (| M.get_name (| globals, "evm" |), "memory" |),
       BinOp.mult (|
-    (* At constant: unsupported node type: Constant *),
+    Constant.bytes "00",
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
@@ -747,33 +565,6 @@ Definition call : Value.t -> Value.t -> M :=
         make_dict []
       |), "balance" |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.lt (| M.get_name (| globals, "sender_balance" |), M.get_name (| globals, "value" |) |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.call (|
-    M.get_name (| globals, "push" |),
-    make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.call (|
-        M.get_name (| globals, "U256" |),
-        make_list [
-          Constant.int 0
-        ],
-        make_dict []
-      |)
-    ],
-    make_dict []
-  |) in
-        let _ := M.assign_op (|
-          BinOp.add,
-          M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |),
-          M.get_field (| M.get_name (| globals, "message_call_gas" |), "stipend" |)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ := M.call (|
     M.get_name (| globals, "generic_call" |),
     make_list [
@@ -918,7 +709,7 @@ Definition callcode : Value.t -> Value.t -> M :=
       BinOp.add,
       M.get_field (| M.get_name (| globals, "evm" |), "memory" |),
       BinOp.mult (|
-    (* At constant: unsupported node type: Constant *),
+    Constant.bytes "00",
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
@@ -932,33 +723,6 @@ Definition callcode : Value.t -> Value.t -> M :=
         make_dict []
       |), "balance" |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.lt (| M.get_name (| globals, "sender_balance" |), M.get_name (| globals, "value" |) |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.call (|
-    M.get_name (| globals, "push" |),
-    make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.call (|
-        M.get_name (| globals, "U256" |),
-        make_list [
-          Constant.int 0
-        ],
-        make_dict []
-      |)
-    ],
-    make_dict []
-  |) in
-        let _ := M.assign_op (|
-          BinOp.add,
-          M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |),
-          M.get_field (| M.get_name (| globals, "message_call_gas" |), "stipend" |)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ := M.call (|
     M.get_name (| globals, "generic_call" |),
     make_list [
@@ -1017,7 +781,10 @@ Definition selfdestruct : Value.t -> Value.t -> M :=
       M.get_field (| M.get_name (| globals, "evm" |), "accounts_to_delete" |) in
     let parent_evm :=
       M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "parent_evm" |) in
-    While Compare.is_not (| M.get_name (| globals, "parent_evm" |), Constant.None_ |) do
+    While Compare.is_not (|
+    M.get_name (| globals, "parent_evm" |),
+    Constant.None_
+  |) do
       let _ := M.call (|
     M.get_field (| M.get_name (| globals, "refunded_accounts" |), "update" |),
     make_list [
@@ -1029,19 +796,6 @@ Definition selfdestruct : Value.t -> Value.t -> M :=
         M.get_field (| M.get_field (| M.get_name (| globals, "parent_evm" |), "message" |), "parent_evm" |) in
     EndWhile.
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.not_in (| M.get_name (| globals, "originator" |), M.get_name (| globals, "refunded_accounts" |) |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.assign_op (|
-          BinOp.add,
-          M.get_field (| M.get_name (| globals, "evm" |), "refund_counter" |),
-          M.get_name (| globals, "REFUND_SELF_DESTRUCT" |)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|

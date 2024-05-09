@@ -46,29 +46,10 @@ Definition ForkCriteria : Value.t :=
         Equality for fork criteria.
         " in
           let _ :=
-            (* if *)
-            M.if_then_else (|
-              M.call (|
-                M.get_name (| globals, "isinstance" |),
-                make_list [
-                  M.get_name (| globals, "other" |);
-                  M.get_name (| globals, "ForkCriteria" |)
-                ],
-                make_dict []
-              |),
-            (* then *)
-            ltac:(M.monadic (
-              let _ := M.return_ (|
-                Compare.eq (| M.get_field (| M.get_name (| globals, "self" |), "_internal" |), M.get_field (| M.get_name (| globals, "other" |), "_internal" |) |)
-              |) in
-              M.pure Constant.None_
-            (* else *)
-            )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
           let _ := M.return_ (|
             M.get_name (| globals, "NotImplemented" |)
-          |) in
           M.pure Constant.None_))
       );
       (
@@ -80,29 +61,10 @@ Definition ForkCriteria : Value.t :=
         forks and scheduled forks are before unscheduled forks.
         " in
           let _ :=
-            (* if *)
-            M.if_then_else (|
-              M.call (|
-                M.get_name (| globals, "isinstance" |),
-                make_list [
-                  M.get_name (| globals, "other" |);
-                  M.get_name (| globals, "ForkCriteria" |)
-                ],
-                make_dict []
-              |),
-            (* then *)
-            ltac:(M.monadic (
-              let _ := M.return_ (|
-                Compare.lt (| M.get_field (| M.get_name (| globals, "self" |), "_internal" |), M.get_field (| M.get_name (| globals, "other" |), "_internal" |) |)
-              |) in
-              M.pure Constant.None_
-            (* else *)
-            )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
           let _ := M.return_ (|
             M.get_name (| globals, "NotImplemented" |)
-          |) in
           M.pure Constant.None_))
       );
       (
@@ -120,7 +82,6 @@ Definition ForkCriteria : Value.t :=
               ],
               make_dict []
             |)
-          |) in
           M.pure Constant.None_))
       )
     ].
@@ -154,8 +115,10 @@ Definition ByBlockNumber : Value.t :=
         Check whether the block number has been reached.
         " in
           let _ := M.return_ (|
-            Compare.gt_e (| M.get_name (| globals, "block_number" |), M.get_field (| M.get_name (| globals, "self" |), "block_number" |) |)
-          |) in
+            Compare.gt_e (|
+              M.get_name (| globals, "block_number" |),
+              M.get_field (| M.get_name (| globals, "self" |), "block_number" |)
+            |)
           M.pure Constant.None_))
       );
       (
@@ -167,7 +130,6 @@ Definition ByBlockNumber : Value.t :=
         " in
           let _ := M.return_ (|
             (* At expr: unsupported node type: JoinedStr *)
-          |) in
           M.pure Constant.None_))
       )
     ].
@@ -201,8 +163,10 @@ Definition ByTimestamp : Value.t :=
         Check whether the timestamp has been reached.
         " in
           let _ := M.return_ (|
-            Compare.gt_e (| M.get_name (| globals, "timestamp" |), M.get_field (| M.get_name (| globals, "self" |), "timestamp" |) |)
-          |) in
+            Compare.gt_e (|
+              M.get_name (| globals, "timestamp" |),
+              M.get_field (| M.get_name (| globals, "self" |), "timestamp" |)
+            |)
           M.pure Constant.None_))
       );
       (
@@ -214,7 +178,6 @@ Definition ByTimestamp : Value.t :=
         " in
           let _ := M.return_ (|
             (* At expr: unsupported node type: JoinedStr *)
-          |) in
           M.pure Constant.None_))
       )
     ].
@@ -245,7 +208,6 @@ Definition Unscheduled : Value.t :=
         " in
           let _ := M.return_ (|
             Constant.bool false
-          |) in
           M.pure Constant.None_))
       );
       (
@@ -257,7 +219,6 @@ Definition Unscheduled : Value.t :=
         " in
           let _ := M.return_ (|
             Constant.str "Unscheduled()"
-          |) in
           M.pure Constant.None_))
       )
     ].

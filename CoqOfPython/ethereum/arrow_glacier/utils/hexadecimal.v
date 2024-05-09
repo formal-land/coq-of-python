@@ -66,7 +66,6 @@ Definition hex_to_root : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition hex_to_bloom : Value.t -> Value.t -> M :=
@@ -105,7 +104,6 @@ Definition hex_to_bloom : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition hex_to_address : Value.t -> Value.t -> M :=
@@ -151,5 +149,4 @@ Definition hex_to_address : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).

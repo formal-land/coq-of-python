@@ -72,10 +72,7 @@ Definition add_to_bloom : Value.t -> Value.t -> M :=
           M.call (|
             M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
             make_list [
-              M.get_subscript (| M.get_name (| globals, "hash" |), M.get_name (| globals, "idx" |):BinOp.add (|
-                M.get_name (| globals, "idx" |),
-                Constant.int 2
-              |) |)
+              M.get_subscript (| M.get_name (| globals, "hash" |), M.get_name (| globals, "idx" |) |)
             ],
             make_dict []
           |),
@@ -160,5 +157,4 @@ Definition logs_bloom : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).

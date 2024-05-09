@@ -124,115 +124,16 @@ Definition encode_transaction : Value.t -> Value.t -> M :=
     Encode a transaction. Needed because non-legacy transactions aren't RLP.
     " in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        M.call (|
-          M.get_name (| globals, "isinstance" |),
-          make_list [
-            M.get_name (| globals, "tx" |);
-            M.get_name (| globals, "LegacyTransaction" |)
-          ],
-          make_dict []
-        |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.return_ (|
-          M.get_name (| globals, "tx" |)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ :=
-          (* if *)
-          M.if_then_else (|
-            M.call (|
-              M.get_name (| globals, "isinstance" |),
-              make_list [
-                M.get_name (| globals, "tx" |);
-                M.get_name (| globals, "AccessListTransaction" |)
-              ],
-              make_dict []
-            |),
-          (* then *)
-          ltac:(M.monadic (
-            let _ := M.return_ (|
-              BinOp.add (|
-                (* At constant: unsupported node type: Constant *),
-                M.call (|
-                  M.get_field (| M.get_name (| globals, "rlp" |), "encode" |),
-                  make_list [
-                    M.get_name (| globals, "tx" |)
-                  ],
-                  make_dict []
-                |)
-              |)
-            |) in
-            M.pure Constant.None_
-          (* else *)
-          )), ltac:(M.monadic (
             let _ :=
-              (* if *)
-              M.if_then_else (|
-                M.call (|
-                  M.get_name (| globals, "isinstance" |),
-                  make_list [
-                    M.get_name (| globals, "tx" |);
-                    M.get_name (| globals, "FeeMarketTransaction" |)
-                  ],
-                  make_dict []
-                |),
-              (* then *)
-              ltac:(M.monadic (
-                let _ := M.return_ (|
-                  BinOp.add (|
-                    (* At constant: unsupported node type: Constant *),
-                    M.call (|
-                      M.get_field (| M.get_name (| globals, "rlp" |), "encode" |),
-                      make_list [
-                        M.get_name (| globals, "tx" |)
-                      ],
-                      make_dict []
-                    |)
-                  |)
-                |) in
-                M.pure Constant.None_
-              (* else *)
-              )), ltac:(M.monadic (
                 let _ :=
-                  (* if *)
-                  M.if_then_else (|
-                    M.call (|
-                      M.get_name (| globals, "isinstance" |),
-                      make_list [
-                        M.get_name (| globals, "tx" |);
-                        M.get_name (| globals, "BlobTransaction" |)
-                      ],
-                      make_dict []
-                    |),
-                  (* then *)
-                  ltac:(M.monadic (
-                    let _ := M.return_ (|
-                      BinOp.add (|
-                        (* At constant: unsupported node type: Constant *),
-                        M.call (|
-                          M.get_field (| M.get_name (| globals, "rlp" |), "encode" |),
-                          make_list [
-                            M.get_name (| globals, "tx" |)
-                          ],
-                          make_dict []
-                        |)
-                      |)
-                    |) in
-                    M.pure Constant.None_
-                  (* else *)
-                  )), ltac:(M.monadic (
-                    let _ := M.raise (| M.call (|
+                    let _ := M.raise (| Some(M.call (|
                       M.get_name (| globals, "Exception" |),
                       make_list [
                         (* At expr: unsupported node type: JoinedStr *)
                       ],
                       make_dict []
-                    |) |) in
+                    |))
                     M.pure Constant.None_
                   )) |) in
                 M.pure Constant.None_
@@ -250,88 +151,8 @@ Definition decode_transaction : Value.t -> Value.t -> M :=
     Decode a transaction. Needed because non-legacy transactions aren't RLP.
     " in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        M.call (|
-          M.get_name (| globals, "isinstance" |),
-          make_list [
-            M.get_name (| globals, "tx" |);
-            M.get_name (| globals, "Bytes" |)
-          ],
-          make_dict []
-        |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ :=
-          (* if *)
-          M.if_then_else (|
-            Compare.eq (| M.get_subscript (| M.get_name (| globals, "tx" |), Constant.int 0 |), Constant.int 1 |),
-          (* then *)
-          ltac:(M.monadic (
-            let _ := M.return_ (|
-              M.call (|
-                M.get_field (| M.get_name (| globals, "rlp" |), "decode_to" |),
-                make_list [
-                  M.get_name (| globals, "AccessListTransaction" |);
-                  M.get_subscript (| M.get_name (| globals, "tx" |), Constant.int 1:(* At expr: unsupported node type: NoneType *) |)
-                ],
-                make_dict []
-              |)
-            |) in
-            M.pure Constant.None_
-          (* else *)
-          )), ltac:(M.monadic (
-            let _ :=
-              (* if *)
-              M.if_then_else (|
-                Compare.eq (| M.get_subscript (| M.get_name (| globals, "tx" |), Constant.int 0 |), Constant.int 2 |),
-              (* then *)
-              ltac:(M.monadic (
-                let _ := M.return_ (|
-                  M.call (|
-                    M.get_field (| M.get_name (| globals, "rlp" |), "decode_to" |),
-                    make_list [
-                      M.get_name (| globals, "FeeMarketTransaction" |);
-                      M.get_subscript (| M.get_name (| globals, "tx" |), Constant.int 1:(* At expr: unsupported node type: NoneType *) |)
-                    ],
-                    make_dict []
-                  |)
-                |) in
-                M.pure Constant.None_
-              (* else *)
-              )), ltac:(M.monadic (
-                let _ :=
-                  (* if *)
-                  M.if_then_else (|
-                    Compare.eq (| M.get_subscript (| M.get_name (| globals, "tx" |), Constant.int 0 |), Constant.int 3 |),
-                  (* then *)
-                  ltac:(M.monadic (
-                    let _ := M.return_ (|
-                      M.call (|
-                        M.get_field (| M.get_name (| globals, "rlp" |), "decode_to" |),
-                        make_list [
-                          M.get_name (| globals, "BlobTransaction" |);
-                          M.get_subscript (| M.get_name (| globals, "tx" |), Constant.int 1:(* At expr: unsupported node type: NoneType *) |)
-                        ],
-                        make_dict []
-                      |)
-                    |) in
-                    M.pure Constant.None_
-                  (* else *)
-                  )), ltac:(M.monadic (
-                    let _ := M.raise (| M.get_name (| globals, "InvalidBlock" |) |) in
-                    M.pure Constant.None_
-                  )) |) in
-                M.pure Constant.None_
-              )) |) in
-            M.pure Constant.None_
-          )) |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ := M.return_ (|
           M.get_name (| globals, "tx" |)
-        |) in
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).

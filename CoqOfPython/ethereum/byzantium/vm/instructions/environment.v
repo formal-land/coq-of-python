@@ -502,7 +502,7 @@ Definition calldatacopy : Value.t -> Value.t -> M :=
       BinOp.add,
       M.get_field (| M.get_name (| globals, "evm" |), "memory" |),
       BinOp.mult (|
-    (* At constant: unsupported node type: Constant *),
+    Constant.bytes "00",
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
@@ -670,7 +670,7 @@ Definition codecopy : Value.t -> Value.t -> M :=
       BinOp.add,
       M.get_field (| M.get_name (| globals, "evm" |), "memory" |),
       BinOp.mult (|
-    (* At constant: unsupported node type: Constant *),
+    Constant.bytes "00",
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
@@ -913,7 +913,7 @@ Definition extcodecopy : Value.t -> Value.t -> M :=
       BinOp.add,
       M.get_field (| M.get_name (| globals, "evm" |), "memory" |),
       BinOp.mult (|
-    (* At constant: unsupported node type: Constant *),
+    Constant.bytes "00",
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
@@ -1084,28 +1084,31 @@ Definition returndatacopy : Value.t -> Value.t -> M :=
     let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
-      Compare.lt_e (| BinOp.add (|
-        M.call (|
-          M.get_name (| globals, "Uint" |),
-          make_list [
-            M.get_name (| globals, "return_data_start_position" |)
-          ],
-          make_dict []
+      Compare.lt_e (|
+        BinOp.add (|
+          M.call (|
+            M.get_name (| globals, "Uint" |),
+            make_list [
+              M.get_name (| globals, "return_data_start_position" |)
+            ],
+            make_dict []
+          |),
+          M.call (|
+            M.get_name (| globals, "Uint" |),
+            make_list [
+              M.get_name (| globals, "size" |)
+            ],
+            make_dict []
+          |)
         |),
         M.call (|
-          M.get_name (| globals, "Uint" |),
+          M.get_name (| globals, "len" |),
           make_list [
-            M.get_name (| globals, "size" |)
+            M.get_field (| M.get_name (| globals, "evm" |), "return_data" |)
           ],
           make_dict []
         |)
-      |), M.call (|
-        M.get_name (| globals, "len" |),
-        make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "return_data" |)
-        ],
-        make_dict []
-      |) |);
+      |);
       M.get_name (| globals, "OutOfBoundsRead" |)
     ],
     make_dict []
@@ -1114,15 +1117,12 @@ Definition returndatacopy : Value.t -> Value.t -> M :=
       BinOp.add,
       M.get_field (| M.get_name (| globals, "evm" |), "memory" |),
       BinOp.mult (|
-    (* At constant: unsupported node type: Constant *),
+    Constant.bytes "00",
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
     let value :=
-      M.get_subscript (| M.get_field (| M.get_name (| globals, "evm" |), "return_data" |), M.get_name (| globals, "return_data_start_position" |):BinOp.add (|
-        M.get_name (| globals, "return_data_start_position" |),
-        M.get_name (| globals, "size" |)
-      |) |) in
+      M.get_subscript (| M.get_field (| M.get_name (| globals, "evm" |), "return_data" |), M.get_name (| globals, "return_data_start_position" |) |) in
     let _ := M.call (|
     M.get_name (| globals, "memory_write" |),
     make_list [

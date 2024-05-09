@@ -273,22 +273,6 @@ Definition div : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.eq (| M.get_name (| globals, "divisor" |), Constant.int 0 |),
-      (* then *)
-      ltac:(M.monadic (
-        let quotient :=
-          M.call (|
-            M.get_name (| globals, "U256" |),
-            make_list [
-              Constant.int 0
-            ],
-            make_dict []
-          |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let quotient :=
           BinOp.floor_div (|
             M.get_name (| globals, "dividend" |),
@@ -357,32 +341,7 @@ Definition sdiv : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.eq (| M.get_name (| globals, "divisor" |), Constant.int 0 |),
-      (* then *)
-      ltac:(M.monadic (
-        let quotient :=
-          Constant.int 0 in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ :=
-          (* if *)
-          M.if_then_else (|
-            BoolOp.and (|
-              Compare.eq (| M.get_name (| globals, "dividend" |), UnOp.sub (| M.get_name (| globals, "U255_CEIL_VALUE" |) |) |),
-              ltac:(M.monadic (
-                Compare.eq (| M.get_name (| globals, "divisor" |), UnOp.sub (| Constant.int 1 |) |)
-              ))
-            |),
-          (* then *)
-          ltac:(M.monadic (
-            let quotient :=
-              UnOp.sub (| M.get_name (| globals, "U255_CEIL_VALUE" |) |) in
-            M.pure Constant.None_
-          (* else *)
-          )), ltac:(M.monadic (
             let sign :=
               M.call (|
                 M.get_name (| globals, "get_sign" |),
@@ -477,22 +436,6 @@ Definition mod : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.eq (| M.get_name (| globals, "y" |), Constant.int 0 |),
-      (* then *)
-      ltac:(M.monadic (
-        let remainder :=
-          M.call (|
-            M.get_name (| globals, "U256" |),
-            make_list [
-              Constant.int 0
-            ],
-            make_dict []
-          |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let remainder :=
           BinOp.mod_ (|
             M.get_name (| globals, "x" |),
@@ -561,16 +504,6 @@ Definition smod : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.eq (| M.get_name (| globals, "y" |), Constant.int 0 |),
-      (* then *)
-      ltac:(M.monadic (
-        let remainder :=
-          Constant.int 0 in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let remainder :=
           BinOp.mult (|
             M.call (|
@@ -684,22 +617,6 @@ Definition addmod : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.eq (| M.get_name (| globals, "z" |), Constant.int 0 |),
-      (* then *)
-      ltac:(M.monadic (
-        let result :=
-          M.call (|
-            M.get_name (| globals, "U256" |),
-            make_list [
-              Constant.int 0
-            ],
-            make_dict []
-          |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let result :=
           M.call (|
             M.get_name (| globals, "U256" |),
@@ -795,22 +712,6 @@ Definition mulmod : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.eq (| M.get_name (| globals, "z" |), Constant.int 0 |),
-      (* then *)
-      ltac:(M.monadic (
-        let result :=
-          M.call (|
-            M.get_name (| globals, "U256" |),
-            make_list [
-              Constant.int 0
-            ],
-            make_dict []
-          |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let result :=
           M.call (|
             M.get_name (| globals, "U256" |),
@@ -980,16 +881,6 @@ Definition signextend : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.gt (| M.get_name (| globals, "byte_num" |), Constant.int 31 |),
-      (* then *)
-      ltac:(M.monadic (
-        let result :=
-          M.get_name (| globals, "value" |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let value_bytes :=
           M.call (|
             M.get_name (| globals, "bytes" |),
@@ -1012,29 +903,13 @@ Definition signextend : Value.t -> Value.t -> M :=
               ],
               make_dict []
             |)
-          |):(* At expr: unsupported node type: NoneType *) |) in
+          |) |) in
         let sign_bit :=
           BinOp.r_shift (|
             M.get_subscript (| M.get_name (| globals, "value_bytes" |), Constant.int 0 |),
             Constant.int 7
           |) in
         let _ :=
-          (* if *)
-          M.if_then_else (|
-            Compare.eq (| M.get_name (| globals, "sign_bit" |), Constant.int 0 |),
-          (* then *)
-          ltac:(M.monadic (
-            let result :=
-              M.call (|
-                M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
-                make_list [
-                  M.get_name (| globals, "value_bytes" |)
-                ],
-                make_dict []
-              |) in
-            M.pure Constant.None_
-          (* else *)
-          )), ltac:(M.monadic (
             let num_bytes_prepend :=
               BinOp.sub (|
                 Constant.int 32,

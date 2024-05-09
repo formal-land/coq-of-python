@@ -78,7 +78,10 @@ Definition less_than : Value.t -> Value.t -> M :=
       M.call (|
         M.get_name (| globals, "U256" |),
         make_list [
-          Compare.lt (| M.get_name (| globals, "left" |), M.get_name (| globals, "right" |) |)
+          Compare.lt (|
+            M.get_name (| globals, "left" |),
+            M.get_name (| globals, "right" |)
+          |)
         ],
         make_dict []
       |) in
@@ -145,7 +148,10 @@ Definition signed_less_than : Value.t -> Value.t -> M :=
       M.call (|
         M.get_name (| globals, "U256" |),
         make_list [
-          Compare.lt (| M.get_name (| globals, "left" |), M.get_name (| globals, "right" |) |)
+          Compare.lt (|
+            M.get_name (| globals, "left" |),
+            M.get_name (| globals, "right" |)
+          |)
         ],
         make_dict []
       |) in
@@ -205,7 +211,10 @@ Definition greater_than : Value.t -> Value.t -> M :=
       M.call (|
         M.get_name (| globals, "U256" |),
         make_list [
-          Compare.gt (| M.get_name (| globals, "left" |), M.get_name (| globals, "right" |) |)
+          Compare.gt (|
+            M.get_name (| globals, "left" |),
+            M.get_name (| globals, "right" |)
+          |)
         ],
         make_dict []
       |) in
@@ -272,7 +281,10 @@ Definition signed_greater_than : Value.t -> Value.t -> M :=
       M.call (|
         M.get_name (| globals, "U256" |),
         make_list [
-          Compare.gt (| M.get_name (| globals, "left" |), M.get_name (| globals, "right" |) |)
+          Compare.gt (|
+            M.get_name (| globals, "left" |),
+            M.get_name (| globals, "right" |)
+          |)
         ],
         make_dict []
       |) in
@@ -332,7 +344,10 @@ Definition equal : Value.t -> Value.t -> M :=
       M.call (|
         M.get_name (| globals, "U256" |),
         make_list [
-          Compare.eq (| M.get_name (| globals, "left" |), M.get_name (| globals, "right" |) |)
+          Compare.eq (|
+            M.get_name (| globals, "left" |),
+            M.get_name (| globals, "right" |)
+          |)
         ],
         make_dict []
       |) in
@@ -384,7 +399,10 @@ Definition is_zero : Value.t -> Value.t -> M :=
       M.call (|
         M.get_name (| globals, "U256" |),
         make_list [
-          Compare.eq (| M.get_name (| globals, "x" |), Constant.int 0 |)
+          Compare.eq (|
+            M.get_name (| globals, "x" |),
+            Constant.int 0
+          |)
         ],
         make_dict []
       |) in

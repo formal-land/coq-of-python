@@ -55,13 +55,16 @@ Definition blake2f : Value.t -> Value.t -> M :=
     let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
-      Compare.eq (| M.call (|
-        M.get_name (| globals, "len" |),
-        make_list [
-          M.get_name (| globals, "data" |)
-        ],
-        make_dict []
-      |), Constant.int 213 |);
+      Compare.eq (|
+        M.call (|
+          M.get_name (| globals, "len" |),
+          make_list [
+            M.get_name (| globals, "data" |)
+          ],
+          make_dict []
+        |),
+        Constant.int 213
+      |);
       M.get_name (| globals, "InvalidParameter" |)
     ],
     make_dict []
@@ -96,10 +99,13 @@ Definition blake2f : Value.t -> Value.t -> M :=
     let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
-      Compare.in (| M.get_name (| globals, "f" |), make_list [
-        Constant.int 0;
-        Constant.int 1
-      ] |);
+      Compare.in (|
+        M.get_name (| globals, "f" |),
+        make_list [
+          Constant.int 0;
+          Constant.int 1
+        ]
+      |);
       M.get_name (| globals, "InvalidParameter" |)
     ],
     make_dict []

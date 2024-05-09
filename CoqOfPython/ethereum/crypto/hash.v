@@ -77,7 +77,6 @@ Definition keccak256 : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition keccak512 : Value.t -> Value.t -> M :=
@@ -120,5 +119,4 @@ Definition keccak512 : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).

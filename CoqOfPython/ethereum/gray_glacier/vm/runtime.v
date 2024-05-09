@@ -67,50 +67,19 @@ Definition get_valid_jump_destinations : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |) in
-    While Compare.lt (| M.get_name (| globals, "pc" |), M.call (|
-    M.get_name (| globals, "len" |),
-    make_list [
-      M.get_name (| globals, "code" |)
-    ],
-    make_dict []
-  |) |) do
+    While Compare.lt (|
+    M.get_name (| globals, "pc" |),
+    M.call (|
+      M.get_name (| globals, "len" |),
+      make_list [
+        M.get_name (| globals, "code" |)
+      ],
+      make_dict []
+    |)
+  |) do
 (* At stmt: unsupported node type: Try *)
       let _ :=
-        (* if *)
-        M.if_then_else (|
-          Compare.eq (| M.get_name (| globals, "current_opcode" |), M.get_field (| M.get_name (| globals, "Ops" |), "JUMPDEST" |) |),
-        (* then *)
-        ltac:(M.monadic (
-          let _ := M.call (|
-    M.get_field (| M.get_name (| globals, "valid_jump_destinations" |), "add" |),
-    make_list [
-      M.get_name (| globals, "pc" |)
-    ],
-    make_dict []
-  |) in
-          M.pure Constant.None_
-        (* else *)
-        )), ltac:(M.monadic (
           let _ :=
-            (* if *)
-            M.if_then_else (|
-              (* At expr: unsupported node type: Compare *),
-            (* then *)
-            ltac:(M.monadic (
-              let push_data_size :=
-                BinOp.add (|
-                  BinOp.sub (|
-                    M.get_field (| M.get_name (| globals, "current_opcode" |), "value" |),
-                    M.get_field (| M.get_field (| M.get_name (| globals, "Ops" |), "PUSH1" |), "value" |)
-                  |),
-                  Constant.int 1
-                |) in
-              let pc := BinOp.add
-                M.get_name (| globals, "push_data_size" |)
-                M.get_name (| globals, "push_data_size" |) in
-              M.pure Constant.None_
-            (* else *)
-            )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
           M.pure Constant.None_
@@ -121,5 +90,4 @@ Definition get_valid_jump_destinations : Value.t -> Value.t -> M :=
     EndWhile.
     let _ := M.return_ (|
       M.get_name (| globals, "valid_jump_destinations" |)
-    |) in
     M.pure Constant.None_)).

@@ -47,32 +47,9 @@ Definition get_sign : Value.t -> Value.t -> M :=
         The return value is based on math signum function.
     " in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.lt (| M.get_name (| globals, "value" |), Constant.int 0 |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.return_ (|
-          UnOp.sub (| Constant.int 1 |)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ :=
-          (* if *)
-          M.if_then_else (|
-            Compare.eq (| M.get_name (| globals, "value" |), Constant.int 0 |),
-          (* then *)
-          ltac:(M.monadic (
-            let _ := M.return_ (|
-              Constant.int 0
-            |) in
-            M.pure Constant.None_
-          (* else *)
-          )), ltac:(M.monadic (
             let _ := M.return_ (|
               Constant.int 1
-            |) in
             M.pure Constant.None_
           )) |) in
         M.pure Constant.None_
@@ -111,23 +88,6 @@ Definition ceil32 : Value.t -> Value.t -> M :=
         M.get_name (| globals, "ceiling" |)
       |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.eq (| M.get_name (| globals, "remainder" |), M.call (|
-          M.get_name (| globals, "Uint" |),
-          make_list [
-            Constant.int 0
-          ],
-          make_dict []
-        |) |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.return_ (|
-          M.get_name (| globals, "value" |)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ := M.return_ (|
           BinOp.sub (|
             BinOp.add (|
@@ -136,7 +96,6 @@ Definition ceil32 : Value.t -> Value.t -> M :=
             |),
             M.get_name (| globals, "remainder" |)
           |)
-        |) in
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -158,17 +117,6 @@ Definition is_prime : Value.t -> Value.t -> M :=
         Boolean indicating if `number` is prime or not.
     " in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.lt_e (| M.get_name (| globals, "number" |), Constant.int 1 |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.return_ (|
-          Constant.bool false
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     For M.get_name (| globals, "x" |) in M.call (|
@@ -192,26 +140,11 @@ Definition is_prime : Value.t -> Value.t -> M :=
     make_dict []
   |) do
       let _ :=
-        (* if *)
-        M.if_then_else (|
-          Compare.eq (| BinOp.mod_ (|
-            M.get_name (| globals, "number" |),
-            M.get_name (| globals, "x" |)
-          |), Constant.int 0 |),
-        (* then *)
-        ltac:(M.monadic (
-          let _ := M.return_ (|
-            Constant.bool false
-          |) in
-          M.pure Constant.None_
-        (* else *)
-        )), ltac:(M.monadic (
           M.pure Constant.None_
         )) |) in
     EndFor.
     let _ := M.return_ (|
       Constant.bool true
-    |) in
     M.pure Constant.None_)).
 
 Definition le_bytes_to_uint32_sequence : Value.t -> Value.t -> M :=
@@ -257,10 +190,7 @@ Definition le_bytes_to_uint32_sequence : Value.t -> Value.t -> M :=
       M.call (|
         M.get_field (| M.get_name (| globals, "U32" |), "from_le_bytes" |),
         make_list [
-          M.get_subscript (| M.get_name (| globals, "data" |), M.get_name (| globals, "i" |):BinOp.add (|
-            M.get_name (| globals, "i" |),
-            Constant.int 4
-          |) |)
+          M.get_subscript (| M.get_name (| globals, "data" |), M.get_name (| globals, "i" |) |)
         ],
         make_dict []
       |)
@@ -276,7 +206,6 @@ Definition le_bytes_to_uint32_sequence : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition le_uint32_sequence_to_bytes : Value.t -> Value.t -> M :=
@@ -307,7 +236,7 @@ Definition le_uint32_sequence_to_bytes : Value.t -> Value.t -> M :=
         The byte stream obtained from the little endian U32 stream.
     " in
     let result_bytes :=
-      (* At constant: unsupported node type: Constant *) in
+      Constant.bytes "" in
     For M.get_name (| globals, "item" |) in M.get_name (| globals, "sequence" |) do
       let result_bytes := BinOp.add
         M.call (|
@@ -323,7 +252,6 @@ Definition le_uint32_sequence_to_bytes : Value.t -> Value.t -> M :=
     EndFor.
     let _ := M.return_ (|
       M.get_name (| globals, "result_bytes" |)
-    |) in
     M.pure Constant.None_)).
 
 Definition le_uint32_sequence_to_uint : Value.t -> Value.t -> M :=
@@ -361,7 +289,6 @@ Definition le_uint32_sequence_to_uint : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition taylor_exponential : Value.t -> Value.t -> M :=
@@ -395,7 +322,10 @@ Definition taylor_exponential : Value.t -> Value.t -> M :=
         M.get_name (| globals, "factor" |),
         M.get_name (| globals, "denominator" |)
       |) in
-    While Compare.gt (| M.get_name (| globals, "numerator_accumulated" |), Constant.int 0 |) do
+    While Compare.gt (|
+    M.get_name (| globals, "numerator_accumulated" |),
+    Constant.int 0
+  |) do
       let output := BinOp.add
         M.get_name (| globals, "numerator_accumulated" |)
         M.get_name (| globals, "numerator_accumulated" |) in
@@ -419,5 +349,4 @@ Definition taylor_exponential : Value.t -> Value.t -> M :=
         M.get_name (| globals, "output" |),
         M.get_name (| globals, "denominator" |)
       |)
-    |) in
     M.pure Constant.None_)).

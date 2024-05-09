@@ -126,13 +126,7 @@ Definition begin_transaction : Value.t -> Value.t -> M :=
           M.get_field (| M.get_name (| globals, "state" |), "_main_trie" |)
         ],
         make_dict []
-      |); {M.get_name (| globals, "k" |): M.call (|
-        M.get_name (| globals, "copy_trie" |),
-        make_list [
-          M.get_name (| globals, "t" |)
-        ],
-        make_dict []
-      |) for (* At expr: unsupported node type: list *)} ]
+      |); (* At expr: unsupported node type: DictComp *) ]
     ],
     make_dict []
   |) in
@@ -155,19 +149,6 @@ Definition commit_transaction : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        UnOp.not (| M.get_field (| M.get_name (| globals, "state" |), "_snapshots" |) |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.call (|
-    M.get_field (| M.get_field (| M.get_name (| globals, "state" |), "_created_accounts" |), "clear" |),
-    make_list [],
-    make_dict []
-  |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -193,19 +174,6 @@ Definition rollback_transaction : Value.t -> Value.t -> M :=
       |)
     |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        UnOp.not (| M.get_field (| M.get_name (| globals, "state" |), "_snapshots" |) |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.call (|
-    M.get_field (| M.get_field (| M.get_name (| globals, "state" |), "_created_accounts" |), "clear" |),
-    make_list [],
-    make_dict []
-  |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -242,27 +210,8 @@ Definition get_account : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        M.call (|
-          M.get_name (| globals, "isinstance" |),
-          make_list [
-            M.get_name (| globals, "account" |);
-            M.get_name (| globals, "Account" |)
-          ],
-          make_dict []
-        |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.return_ (|
-          M.get_name (| globals, "account" |)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ := M.return_ (|
           M.get_name (| globals, "EMPTY_ACCOUNT" |)
-        |) in
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -297,7 +246,6 @@ Definition get_account_optional : Value.t -> Value.t -> M :=
       |) in
     let _ := M.return_ (|
       M.get_name (| globals, "account" |)
-    |) in
     M.pure Constant.None_)).
 
 Definition set_account : Value.t -> Value.t -> M :=
@@ -377,15 +325,6 @@ Definition destroy_storage : Value.t -> Value.t -> M :=
         Address of account whose storage is to be deleted.
     " in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.in (| M.get_name (| globals, "address" |), M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |) |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.delete (| M.get_subscript (| M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |), M.get_name (| globals, "address" |) |) |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -448,23 +387,6 @@ Definition get_storage : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.is (| M.get_name (| globals, "trie" |), Constant.None_ |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.return_ (|
-          M.call (|
-            M.get_name (| globals, "U256" |),
-            make_list [
-              Constant.int 0
-            ],
-            make_dict []
-          |)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let value :=
@@ -486,7 +408,6 @@ Definition get_storage : Value.t -> Value.t -> M :=
   |) |) in
     let _ := M.return_ (|
       M.get_name (| globals, "value" |)
-    |) in
     M.pure Constant.None_)).
 
 Definition set_storage : Value.t -> Value.t -> M :=
@@ -507,14 +428,17 @@ Definition set_storage : Value.t -> Value.t -> M :=
     value : `U256`
         Value to set at the key.
     " in
-    let _ := M.assert (| Compare.is_not (| M.call (|
-    M.get_name (| globals, "trie_get" |),
-    make_list [
-      M.get_field (| M.get_name (| globals, "state" |), "_main_trie" |);
-      M.get_name (| globals, "address" |)
-    ],
-    make_dict []
-  |), Constant.None_ |) |) in
+    let _ := M.assert (| Compare.is_not (|
+    M.call (|
+      M.get_name (| globals, "trie_get" |),
+      make_list [
+        M.get_field (| M.get_name (| globals, "state" |), "_main_trie" |);
+        M.get_name (| globals, "address" |)
+      ],
+      make_dict []
+    |),
+    Constant.None_
+  |) |) in
     let trie :=
       M.call (|
         M.get_field (| M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |), "get" |),
@@ -524,24 +448,6 @@ Definition set_storage : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.is (| M.get_name (| globals, "trie" |), Constant.None_ |),
-      (* then *)
-      ltac:(M.monadic (
-        let trie :=
-          M.call (|
-            M.get_name (| globals, "Trie" |),
-            make_list [],
-            make_dict []
-          |) in
-        let _ := M.assign (|
-          M.get_subscript (| M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |), M.get_name (| globals, "address" |) |),
-          M.get_name (| globals, "trie" |)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
@@ -554,15 +460,6 @@ Definition set_storage : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.eq (| M.get_field (| M.get_name (| globals, "trie" |), "_data" |), {} |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.delete (| M.get_subscript (| M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |), M.get_name (| globals, "address" |) |) |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -587,26 +484,8 @@ Definition storage_root : Value.t -> Value.t -> M :=
     " in
     let _ := M.assert (| UnOp.not (| M.get_field (| M.get_name (| globals, "state" |), "_snapshots" |) |) |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.in (| M.get_name (| globals, "address" |), M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |) |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.return_ (|
-          M.call (|
-            M.get_name (| globals, "root" |),
-            make_list [
-              M.get_subscript (| M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |), M.get_name (| globals, "address" |) |)
-            ],
-            make_dict []
-          |)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ := M.return_ (|
           M.get_name (| globals, "EMPTY_TRIE_ROOT" |)
-        |) in
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -637,7 +516,6 @@ Definition state_root : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition account_exists : Value.t -> Value.t -> M :=
@@ -659,15 +537,17 @@ Definition account_exists : Value.t -> Value.t -> M :=
         True if account exists in the state trie, False otherwise
     " in
     let _ := M.return_ (|
-      Compare.is_not (| M.call (|
-        M.get_name (| globals, "get_account_optional" |),
-        make_list [
-          M.get_name (| globals, "state" |);
-          M.get_name (| globals, "address" |)
-        ],
-        make_dict []
-      |), Constant.None_ |)
-    |) in
+      Compare.is_not (|
+        M.call (|
+          M.get_name (| globals, "get_account_optional" |),
+          make_list [
+            M.get_name (| globals, "state" |);
+            M.get_name (| globals, "address" |)
+          ],
+          make_dict []
+        |),
+        Constant.None_
+      |)
     M.pure Constant.None_)).
 
 Definition account_has_code_or_nonce : Value.t -> Value.t -> M :=
@@ -700,18 +580,23 @@ Definition account_has_code_or_nonce : Value.t -> Value.t -> M :=
       |) in
     let _ := M.return_ (|
       BoolOp.or (|
-        Compare.not_eq (| M.get_field (| M.get_name (| globals, "account" |), "nonce" |), M.call (|
-          M.get_name (| globals, "Uint" |),
-          make_list [
-            Constant.int 0
-          ],
-          make_dict []
-        |) |),
+        Compare.not_eq (|
+          M.get_field (| M.get_name (| globals, "account" |), "nonce" |),
+          M.call (|
+            M.get_name (| globals, "Uint" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |)
+        |),
         ltac:(M.monadic (
-          Compare.not_eq (| M.get_field (| M.get_name (| globals, "account" |), "code" |), (* At constant: unsupported node type: Constant *) |)
+          Compare.not_eq (|
+            M.get_field (| M.get_name (| globals, "account" |), "code" |),
+            Constant.bytes ""
+          |)
         ))
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition is_account_empty : Value.t -> Value.t -> M :=
@@ -744,23 +629,31 @@ Definition is_account_empty : Value.t -> Value.t -> M :=
       |) in
     let _ := M.return_ (|
       BoolOp.and (|
-        Compare.eq (| M.get_field (| M.get_name (| globals, "account" |), "nonce" |), M.call (|
-          M.get_name (| globals, "Uint" |),
-          make_list [
-            Constant.int 0
-          ],
-          make_dict []
-        |) |),
+        Compare.eq (|
+          M.get_field (| M.get_name (| globals, "account" |), "nonce" |),
+          M.call (|
+            M.get_name (| globals, "Uint" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |)
+        |),
         ltac:(M.monadic (
           BoolOp.and (|
-            Compare.eq (| M.get_field (| M.get_name (| globals, "account" |), "code" |), (* At constant: unsupported node type: Constant *) |),
+            Compare.eq (|
+              M.get_field (| M.get_name (| globals, "account" |), "code" |),
+              Constant.bytes ""
+            |),
             ltac:(M.monadic (
-              Compare.eq (| M.get_field (| M.get_name (| globals, "account" |), "balance" |), Constant.int 0 |)
+              Compare.eq (|
+                M.get_field (| M.get_name (| globals, "account" |), "balance" |),
+                Constant.int 0
+              |)
             ))
           |)
         ))
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition account_exists_and_is_empty : Value.t -> Value.t -> M :=
@@ -794,28 +687,39 @@ Definition account_exists_and_is_empty : Value.t -> Value.t -> M :=
       |) in
     let _ := M.return_ (|
       BoolOp.and (|
-        Compare.is_not (| M.get_name (| globals, "account" |), Constant.None_ |),
+        Compare.is_not (|
+          M.get_name (| globals, "account" |),
+          Constant.None_
+        |),
         ltac:(M.monadic (
           BoolOp.and (|
-            Compare.eq (| M.get_field (| M.get_name (| globals, "account" |), "nonce" |), M.call (|
-              M.get_name (| globals, "Uint" |),
-              make_list [
-                Constant.int 0
-              ],
-              make_dict []
-            |) |),
+            Compare.eq (|
+              M.get_field (| M.get_name (| globals, "account" |), "nonce" |),
+              M.call (|
+                M.get_name (| globals, "Uint" |),
+                make_list [
+                  Constant.int 0
+                ],
+                make_dict []
+              |)
+            |),
             ltac:(M.monadic (
               BoolOp.and (|
-                Compare.eq (| M.get_field (| M.get_name (| globals, "account" |), "code" |), (* At constant: unsupported node type: Constant *) |),
+                Compare.eq (|
+                  M.get_field (| M.get_name (| globals, "account" |), "code" |),
+                  Constant.bytes ""
+                |),
                 ltac:(M.monadic (
-                  Compare.eq (| M.get_field (| M.get_name (| globals, "account" |), "balance" |), Constant.int 0 |)
+                  Compare.eq (|
+                    M.get_field (| M.get_name (| globals, "account" |), "balance" |),
+                    Constant.int 0
+                  |)
                 ))
               |)
             ))
           |)
         ))
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition is_account_alive : Value.t -> Value.t -> M :=
@@ -846,36 +750,33 @@ Definition is_account_alive : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.is (| M.get_name (| globals, "account" |), Constant.None_ |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.return_ (|
-          Constant.bool false
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ := M.return_ (|
           UnOp.not (| BoolOp.and (|
-            Compare.eq (| M.get_field (| M.get_name (| globals, "account" |), "nonce" |), M.call (|
-              M.get_name (| globals, "Uint" |),
-              make_list [
-                Constant.int 0
-              ],
-              make_dict []
-            |) |),
+            Compare.eq (|
+              M.get_field (| M.get_name (| globals, "account" |), "nonce" |),
+              M.call (|
+                M.get_name (| globals, "Uint" |),
+                make_list [
+                  Constant.int 0
+                ],
+                make_dict []
+              |)
+            |),
             ltac:(M.monadic (
               BoolOp.and (|
-                Compare.eq (| M.get_field (| M.get_name (| globals, "account" |), "code" |), (* At constant: unsupported node type: Constant *) |),
+                Compare.eq (|
+                  M.get_field (| M.get_name (| globals, "account" |), "code" |),
+                  Constant.bytes ""
+                |),
                 ltac:(M.monadic (
-                  Compare.eq (| M.get_field (| M.get_name (| globals, "account" |), "balance" |), Constant.int 0 |)
+                  Compare.eq (|
+                    M.get_field (| M.get_name (| globals, "account" |), "balance" |),
+                    Constant.int 0
+                  |)
                 ))
               |)
             ))
           |) |)
-        |) in
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -983,30 +884,6 @@ Definition touch_account : Value.t -> Value.t -> M :=
         The address of the account that need to initialised.
     " in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        UnOp.not (| M.call (|
-          M.get_name (| globals, "account_exists" |),
-          make_list [
-            M.get_name (| globals, "state" |);
-            M.get_name (| globals, "address" |)
-          ],
-          make_dict []
-        |) |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.call (|
-    M.get_name (| globals, "set_account" |),
-    make_list [
-      M.get_name (| globals, "state" |);
-      M.get_name (| globals, "address" |);
-      M.get_name (| globals, "EMPTY_ACCOUNT" |)
-    ],
-    make_dict []
-  |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -1084,23 +961,6 @@ Definition get_storage_original : Value.t -> Value.t -> M :=
         Key of the storage slot.
     " in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.in (| M.get_name (| globals, "address" |), M.get_field (| M.get_name (| globals, "state" |), "_created_accounts" |) |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.return_ (|
-          M.call (|
-            M.get_name (| globals, "U256" |),
-            make_list [
-              Constant.int 0
-            ],
-            make_dict []
-          |)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.assign (|
@@ -1116,22 +976,6 @@ Definition get_storage_original : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.is (| M.get_name (| globals, "original_account_trie" |), Constant.None_ |),
-      (* then *)
-      ltac:(M.monadic (
-        let original_value :=
-          M.call (|
-            M.get_name (| globals, "U256" |),
-            make_list [
-              Constant.int 0
-            ],
-            make_dict []
-          |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let original_value :=
           M.call (|
             M.get_name (| globals, "trie_get" |),
@@ -1153,5 +997,4 @@ Definition get_storage_original : Value.t -> Value.t -> M :=
   |) |) in
     let _ := M.return_ (|
       M.get_name (| globals, "original_value" |)
-    |) in
     M.pure Constant.None_)).

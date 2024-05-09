@@ -109,15 +109,6 @@ Definition jump : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.not_in (| M.get_name (| globals, "jump_dest" |), M.get_field (| M.get_name (| globals, "evm" |), "valid_jump_destinations" |) |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.raise (| M.get_name (| globals, "InvalidJumpDestError" |) |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.assign (|
@@ -177,29 +168,7 @@ Definition jumpi : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.eq (| M.get_name (| globals, "conditional_value" |), Constant.int 0 |),
-      (* then *)
-      ltac:(M.monadic (
-        let destination :=
-          BinOp.add (|
-            M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
-            Constant.int 1
-          |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ :=
-          (* if *)
-          M.if_then_else (|
-            Compare.not_in (| M.get_name (| globals, "jump_dest" |), M.get_field (| M.get_name (| globals, "evm" |), "valid_jump_destinations" |) |),
-          (* then *)
-          ltac:(M.monadic (
-            let _ := M.raise (| M.get_name (| globals, "InvalidJumpDestError" |) |) in
-            M.pure Constant.None_
-          (* else *)
-          )), ltac:(M.monadic (
             let destination :=
               M.get_name (| globals, "jump_dest" |) in
             M.pure Constant.None_

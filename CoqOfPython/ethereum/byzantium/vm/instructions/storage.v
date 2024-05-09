@@ -154,44 +154,11 @@ Definition sstore : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        BoolOp.and (|
-          Compare.not_eq (| M.get_name (| globals, "new_value" |), Constant.int 0 |),
-          ltac:(M.monadic (
-            Compare.eq (| M.get_name (| globals, "current_value" |), Constant.int 0 |)
-          ))
-        |),
-      (* then *)
-      ltac:(M.monadic (
-        let gas_cost :=
-          M.get_name (| globals, "GAS_STORAGE_SET" |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let gas_cost :=
           M.get_name (| globals, "GAS_STORAGE_UPDATE" |) in
         M.pure Constant.None_
       )) |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        BoolOp.and (|
-          Compare.eq (| M.get_name (| globals, "new_value" |), Constant.int 0 |),
-          ltac:(M.monadic (
-            Compare.not_eq (| M.get_name (| globals, "current_value" |), Constant.int 0 |)
-          ))
-        |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.assign_op (|
-          BinOp.add,
-          M.get_field (| M.get_name (| globals, "evm" |), "refund_counter" |),
-          M.get_name (| globals, "GAS_STORAGE_CLEAR_REFUND" |)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|

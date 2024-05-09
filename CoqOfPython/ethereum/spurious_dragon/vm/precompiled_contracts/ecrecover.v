@@ -188,60 +188,12 @@ Definition ecrecover : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        BoolOp.and (|
-          Compare.not_eq (| M.get_name (| globals, "v" |), Constant.int 27 |),
-          ltac:(M.monadic (
-            Compare.not_eq (| M.get_name (| globals, "v" |), Constant.int 28 |)
-          ))
-        |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.return_ (|
-          (* At expr: unsupported node type: NoneType *)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        BoolOp.or (|
-          Compare.gt_e (| Constant.int 0, M.get_name (| globals, "r" |) |),
-          ltac:(M.monadic (
-            Compare.gt_e (| M.get_name (| globals, "r" |), M.get_name (| globals, "SECP256K1N" |) |)
-          ))
-        |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.return_ (|
-          (* At expr: unsupported node type: NoneType *)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        BoolOp.or (|
-          Compare.gt_e (| Constant.int 0, M.get_name (| globals, "s" |) |),
-          ltac:(M.monadic (
-            Compare.gt_e (| M.get_name (| globals, "s" |), M.get_name (| globals, "SECP256K1N" |) |)
-          ))
-        |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.return_ (|
-          (* At expr: unsupported node type: NoneType *)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
 (* At stmt: unsupported node type: Try *)
@@ -252,7 +204,7 @@ Definition ecrecover : Value.t -> Value.t -> M :=
           M.get_name (| globals, "public_key" |)
         ],
         make_dict []
-      |), Constant.int 12:Constant.int 32 |) in
+      |), Constant.int 12 |) in
     let padded_address :=
       M.call (|
         M.get_name (| globals, "left_pad_zero_bytes" |),

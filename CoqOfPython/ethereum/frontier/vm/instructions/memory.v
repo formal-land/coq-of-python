@@ -121,7 +121,7 @@ Definition mstore : Value.t -> Value.t -> M :=
       BinOp.add,
       M.get_field (| M.get_name (| globals, "evm" |), "memory" |),
       BinOp.mult (|
-    (* At constant: unsupported node type: Constant *),
+    Constant.bytes "00",
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
@@ -203,7 +203,7 @@ Definition mstore8 : Value.t -> Value.t -> M :=
       BinOp.add,
       M.get_field (| M.get_name (| globals, "evm" |), "memory" |),
       BinOp.mult (|
-    (* At constant: unsupported node type: Constant *),
+    Constant.bytes "00",
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
@@ -288,7 +288,7 @@ Definition mload : Value.t -> Value.t -> M :=
       BinOp.add,
       M.get_field (| M.get_name (| globals, "evm" |), "memory" |),
       BinOp.mult (|
-    (* At constant: unsupported node type: Constant *),
+    Constant.bytes "00",
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in

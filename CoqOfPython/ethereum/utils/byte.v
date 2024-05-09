@@ -44,11 +44,10 @@ Definition left_pad_zero_bytes : Value.t -> Value.t -> M :=
         M.get_field (| M.get_name (| globals, "value" |), "rjust" |),
         make_list [
           M.get_name (| globals, "size" |);
-          (* At constant: unsupported node type: Constant *)
+          Constant.bytes "00"
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition right_pad_zero_bytes : Value.t -> Value.t -> M :=
@@ -74,9 +73,8 @@ Definition right_pad_zero_bytes : Value.t -> Value.t -> M :=
         M.get_field (| M.get_name (| globals, "value" |), "ljust" |),
         make_list [
           M.get_name (| globals, "size" |);
-          (* At constant: unsupported node type: Constant *)
+          Constant.bytes "00"
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).

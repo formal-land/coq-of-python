@@ -58,7 +58,7 @@ Definition BLS_MODULUS : Value.t := M.run ltac:(M.monadic (
 )).
 
 Definition VERSIONED_HASH_VERSION_KZG : Value.t := M.run ltac:(M.monadic (
-  (* At constant: unsupported node type: Constant *)
+  Constant.bytes "01"
 )).
 
 Definition point_evaluation : Value.t -> Value.t -> M :=
@@ -79,33 +79,36 @@ Definition point_evaluation : Value.t -> Value.t -> M :=
     let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
-      Compare.eq (| M.call (|
-        M.get_name (| globals, "len" |),
-        make_list [
-          M.get_name (| globals, "data" |)
-        ],
-        make_dict []
-      |), Constant.int 192 |);
+      Compare.eq (|
+        M.call (|
+          M.get_name (| globals, "len" |),
+          make_list [
+            M.get_name (| globals, "data" |)
+          ],
+          make_dict []
+        |),
+        Constant.int 192
+      |);
       M.get_name (| globals, "KZGProofError" |)
     ],
     make_dict []
   |) in
     let versioned_hash :=
-      M.get_subscript (| M.get_name (| globals, "data" |), (* At expr: unsupported node type: NoneType *):Constant.int 32 |) in
+      M.get_subscript (| M.get_name (| globals, "data" |), Constant.None_:Constant.int 32 |) in
     let z :=
-      M.get_subscript (| M.get_name (| globals, "data" |), Constant.int 32:Constant.int 64 |) in
+      M.get_subscript (| M.get_name (| globals, "data" |), Constant.int 32 |) in
     let y :=
-      M.get_subscript (| M.get_name (| globals, "data" |), Constant.int 64:Constant.int 96 |) in
+      M.get_subscript (| M.get_name (| globals, "data" |), Constant.int 64 |) in
     let commitment :=
       M.call (|
         M.get_name (| globals, "KZGCommitment" |),
         make_list [
-          M.get_subscript (| M.get_name (| globals, "data" |), Constant.int 96:Constant.int 144 |)
+          M.get_subscript (| M.get_name (| globals, "data" |), Constant.int 96 |)
         ],
         make_dict []
       |) in
     let proof :=
-      M.get_subscript (| M.get_name (| globals, "data" |), Constant.int 144:Constant.int 192 |) in
+      M.get_subscript (| M.get_name (| globals, "data" |), Constant.int 144 |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -117,13 +120,16 @@ Definition point_evaluation : Value.t -> Value.t -> M :=
     let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
-      Compare.eq (| M.call (|
-        M.get_name (| globals, "kzg_commitment_to_versioned_hash" |),
-        make_list [
-          M.get_name (| globals, "commitment" |)
-        ],
-        make_dict []
-      |), M.get_name (| globals, "versioned_hash" |) |);
+      Compare.eq (|
+        M.call (|
+          M.get_name (| globals, "kzg_commitment_to_versioned_hash" |),
+          make_list [
+            M.get_name (| globals, "commitment" |)
+          ],
+          make_dict []
+        |),
+        M.get_name (| globals, "versioned_hash" |)
+      |);
       M.get_name (| globals, "KZGProofError" |)
     ],
     make_dict []

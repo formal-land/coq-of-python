@@ -181,36 +181,6 @@ Definition modexp : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.lt (| M.get_name (| globals, "exp_length" |), Constant.int 32 |),
-      (* then *)
-      ltac:(M.monadic (
-        let adjusted_exp_length :=
-          M.call (|
-            M.get_name (| globals, "Uint" |),
-            make_list [
-              M.call (|
-                M.get_name (| globals, "max" |),
-                make_list [
-                  Constant.int 0;
-                  BinOp.sub (|
-                    M.call (|
-                      M.get_field (| M.get_name (| globals, "exp_head" |), "bit_length" |),
-                      make_list [],
-                      make_dict []
-                    |),
-                    Constant.int 1
-                  |)
-                ],
-                make_dict []
-              |)
-            ],
-            make_dict []
-          |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let adjusted_exp_length :=
           M.call (|
             M.get_name (| globals, "Uint" |),
@@ -297,30 +267,6 @@ Definition modexp : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        BoolOp.and (|
-          Compare.eq (| M.get_name (| globals, "base_length" |), Constant.int 0 |),
-          ltac:(M.monadic (
-            Compare.eq (| M.get_name (| globals, "modulus_length" |), Constant.int 0 |)
-          ))
-        |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.assign (|
-          M.get_field (| M.get_name (| globals, "evm" |), "output" |),
-          M.call (|
-            M.get_name (| globals, "Bytes" |),
-            make_list [],
-            make_dict []
-          |)
-        |) in
-        let _ := M.return_ (|
-          (* At expr: unsupported node type: NoneType *)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let base :=
@@ -383,27 +329,6 @@ Definition modexp : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.eq (| M.get_name (| globals, "modulus" |), Constant.int 0 |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.assign (|
-          M.get_field (| M.get_name (| globals, "evm" |), "output" |),
-          BinOp.mult (|
-            M.call (|
-              M.get_name (| globals, "Bytes" |),
-              make_list [
-                (* At constant: unsupported node type: Constant *)
-              ],
-              make_dict []
-            |),
-            M.get_name (| globals, "modulus_length" |)
-          |)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ := M.assign (|
           M.get_field (| M.get_name (| globals, "evm" |), "output" |),
           M.call (|
@@ -440,47 +365,7 @@ Definition get_mult_complexity : Value.t -> Value.t -> M :=
     Estimate the complexity of performing Karatsuba multiplication.
     " in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.lt_e (| M.get_name (| globals, "x" |), Constant.int 64 |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.return_ (|
-          BinOp.pow (|
-            M.get_name (| globals, "x" |),
-            Constant.int 2
-          |)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ :=
-          (* if *)
-          M.if_then_else (|
-            Compare.lt_e (| M.get_name (| globals, "x" |), Constant.int 1024 |),
-          (* then *)
-          ltac:(M.monadic (
-            let _ := M.return_ (|
-              BinOp.sub (|
-                BinOp.add (|
-                  BinOp.floor_div (|
-                    BinOp.pow (|
-                      M.get_name (| globals, "x" |),
-                      Constant.int 2
-                    |),
-                    Constant.int 4
-                  |),
-                  BinOp.mult (|
-                    Constant.int 96,
-                    M.get_name (| globals, "x" |)
-                  |)
-                |),
-                Constant.int 3072
-              |)
-            |) in
-            M.pure Constant.None_
-          (* else *)
-          )), ltac:(M.monadic (
             let _ := M.return_ (|
               BinOp.sub (|
                 BinOp.add (|
@@ -498,7 +383,6 @@ Definition get_mult_complexity : Value.t -> Value.t -> M :=
                 |),
                 Constant.int 199680
               |)
-            |) in
             M.pure Constant.None_
           )) |) in
         M.pure Constant.None_

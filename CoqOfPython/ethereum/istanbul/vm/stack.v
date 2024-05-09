@@ -49,21 +49,6 @@ Definition pop : Value.t -> Value.t -> M :=
 
     " in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.eq (| M.call (|
-          M.get_name (| globals, "len" |),
-          make_list [
-            M.get_name (| globals, "stack" |)
-          ],
-          make_dict []
-        |), Constant.int 0 |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.raise (| M.get_name (| globals, "StackUnderflowError" |) |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.return_ (|
@@ -72,7 +57,6 @@ Definition pop : Value.t -> Value.t -> M :=
         make_list [],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition push : Value.t -> Value.t -> M :=
@@ -91,21 +75,6 @@ Definition push : Value.t -> Value.t -> M :=
 
     " in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.eq (| M.call (|
-          M.get_name (| globals, "len" |),
-          make_list [
-            M.get_name (| globals, "stack" |)
-          ],
-          make_dict []
-        |), Constant.int 1024 |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.raise (| M.get_name (| globals, "StackOverflowError" |) |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.return_ (|
@@ -116,5 +85,4 @@ Definition push : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).

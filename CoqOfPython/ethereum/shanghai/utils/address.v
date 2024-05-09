@@ -70,11 +70,10 @@ Definition to_address : Value.t -> Value.t -> M :=
             M.get_field (| M.get_name (| globals, "data" |), "to_be_bytes32" |),
             make_list [],
             make_dict []
-          |), UnOp.sub (| Constant.int 20 |):(* At expr: unsupported node type: NoneType *) |)
+          |), UnOp.sub (| Constant.int 20 |) |)
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition compute_contract_address : Value.t -> Value.t -> M :=
@@ -114,7 +113,7 @@ Definition compute_contract_address : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let canonical_address :=
-      M.get_subscript (| M.get_name (| globals, "computed_address" |), UnOp.sub (| Constant.int 20 |):(* At expr: unsupported node type: NoneType *) |) in
+      M.get_subscript (| M.get_name (| globals, "computed_address" |), UnOp.sub (| Constant.int 20 |) |) in
     let padded_address :=
       M.call (|
         M.get_name (| globals, "left_pad_zero_bytes" |),
@@ -132,7 +131,6 @@ Definition compute_contract_address : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition compute_create2_contract_address : Value.t -> Value.t -> M :=
@@ -160,7 +158,7 @@ Definition compute_create2_contract_address : Value.t -> Value.t -> M :=
       BinOp.add (|
         BinOp.add (|
           BinOp.add (|
-            (* At constant: unsupported node type: Constant *),
+            Constant.bytes "ff",
             M.get_name (| globals, "address" |)
           |),
           M.get_name (| globals, "salt" |)
@@ -182,7 +180,7 @@ Definition compute_create2_contract_address : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let canonical_address :=
-      M.get_subscript (| M.get_name (| globals, "computed_address" |), UnOp.sub (| Constant.int 20 |):(* At expr: unsupported node type: NoneType *) |) in
+      M.get_subscript (| M.get_name (| globals, "computed_address" |), UnOp.sub (| Constant.int 20 |) |) in
     let padded_address :=
       M.call (|
         M.get_name (| globals, "left_pad_zero_bytes" |),
@@ -200,5 +198,4 @@ Definition compute_create2_contract_address : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).

@@ -98,5 +98,4 @@ Definition encode_account : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).

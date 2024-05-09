@@ -287,22 +287,6 @@ Definition get_byte : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.gt_e (| M.get_name (| globals, "byte_index" |), Constant.int 32 |),
-      (* then *)
-      ltac:(M.monadic (
-        let result :=
-          M.call (|
-            M.get_name (| globals, "U256" |),
-            make_list [
-              Constant.int 0
-            ],
-            make_dict []
-          |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let extra_bytes_to_right :=
           BinOp.sub (|
             Constant.int 31,
@@ -382,28 +366,6 @@ Definition bitwise_shl : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.lt (| M.get_name (| globals, "shift" |), Constant.int 256 |),
-      (* then *)
-      ltac:(M.monadic (
-        let result :=
-          M.call (|
-            M.get_name (| globals, "U256" |),
-            make_list [
-              BinOp.mod_ (|
-                BinOp.l_shift (|
-                  M.get_name (| globals, "value" |),
-                  M.get_name (| globals, "shift" |)
-                |),
-                M.get_name (| globals, "U256_CEIL_VALUE" |)
-              |)
-            ],
-            make_dict []
-          |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let result :=
           M.call (|
             M.get_name (| globals, "U256" |),
@@ -465,19 +427,6 @@ Definition bitwise_shr : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.lt (| M.get_name (| globals, "shift" |), Constant.int 256 |),
-      (* then *)
-      ltac:(M.monadic (
-        let result :=
-          BinOp.r_shift (|
-            M.get_name (| globals, "value" |),
-            M.get_name (| globals, "shift" |)
-          |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let result :=
           M.call (|
             M.get_name (| globals, "U256" |),
@@ -543,42 +492,7 @@ Definition bitwise_sar : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.lt (| M.get_name (| globals, "shift" |), Constant.int 256 |),
-      (* then *)
-      ltac:(M.monadic (
-        let result :=
-          M.call (|
-            M.get_field (| M.get_name (| globals, "U256" |), "from_signed" |),
-            make_list [
-              BinOp.r_shift (|
-                M.get_name (| globals, "signed_value" |),
-                M.get_name (| globals, "shift" |)
-              |)
-            ],
-            make_dict []
-          |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ :=
-          (* if *)
-          M.if_then_else (|
-            Compare.gt_e (| M.get_name (| globals, "signed_value" |), Constant.int 0 |),
-          (* then *)
-          ltac:(M.monadic (
-            let result :=
-              M.call (|
-                M.get_name (| globals, "U256" |),
-                make_list [
-                  Constant.int 0
-                ],
-                make_dict []
-              |) in
-            M.pure Constant.None_
-          (* else *)
-          )), ltac:(M.monadic (
             let result :=
               M.get_field (| M.get_name (| globals, "U256" |), "MAX_VALUE" |) in
             M.pure Constant.None_

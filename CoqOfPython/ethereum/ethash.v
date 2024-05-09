@@ -216,7 +216,6 @@ Definition epoch : Value.t -> Value.t -> M :=
         M.get_name (| globals, "block_number" |),
         M.get_name (| globals, "EPOCH_SIZE" |)
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition cache_size : Value.t -> Value.t -> M :=
@@ -278,7 +277,6 @@ Definition cache_size : Value.t -> Value.t -> M :=
     EndWhile.
     let _ := M.return_ (|
       M.get_name (| globals, "size" |)
-    |) in
     M.pure Constant.None_)).
 
 Definition dataset_size : Value.t -> Value.t -> M :=
@@ -342,7 +340,6 @@ Definition dataset_size : Value.t -> Value.t -> M :=
     EndWhile.
     let _ := M.return_ (|
       M.get_name (| globals, "size" |)
-    |) in
     M.pure Constant.None_)).
 
 Definition generate_seed : Value.t -> Value.t -> M :=
@@ -364,10 +361,13 @@ Definition generate_seed : Value.t -> Value.t -> M :=
       |) in
     let seed :=
       BinOp.mult (|
-        (* At constant: unsupported node type: Constant *),
+        Constant.bytes "00",
         Constant.int 32
       |) in
-    While Compare.not_eq (| M.get_name (| globals, "epoch_number" |), Constant.int 0 |) do
+    While Compare.not_eq (|
+    M.get_name (| globals, "epoch_number" |),
+    Constant.int 0
+  |) do
       let seed :=
         M.call (|
           M.get_name (| globals, "keccak256" |),
@@ -388,7 +388,6 @@ Definition generate_seed : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition generate_cache : Value.t -> Value.t -> M :=
@@ -500,7 +499,7 @@ Definition generate_cache : Value.t -> Value.t -> M :=
             M.call (|
               M.get_field (| M.get_name (| globals, "U32" |), "from_le_bytes" |),
               make_list [
-                M.get_subscript (| M.get_subscript (| M.get_name (| globals, "cache" |), M.get_name (| globals, "index" |) |), Constant.int 0:Constant.int 4 |)
+                M.get_subscript (| M.get_subscript (| M.get_name (| globals, "cache" |), M.get_name (| globals, "index" |) |), Constant.int 0 |)
               ],
               make_dict []
             |),
@@ -510,10 +509,7 @@ Definition generate_cache : Value.t -> Value.t -> M :=
           M.call (|
             M.get_name (| globals, "bytes" |),
             make_list [
-              [BinOp.bit_xor (|
-                M.get_name (| globals, "a" |),
-                M.get_name (| globals, "b" |)
-              |) for (* At expr: unsupported node type: list *)]
+              (* At expr: unsupported node type: ListComp *)
             ],
             make_dict []
           |) in
@@ -533,17 +529,10 @@ Definition generate_cache : Value.t -> Value.t -> M :=
       M.call (|
         M.get_name (| globals, "tuple" |),
         make_list [
-          (M.call (|
-            M.get_name (| globals, "le_bytes_to_uint32_sequence" |),
-            make_list [
-              M.get_name (| globals, "cache_item" |)
-            ],
-            make_dict []
-          |) for (* At expr: unsupported node type: list *))
+          (* At expr: unsupported node type: GeneratorExp *)
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition fnv : Value.t -> Value.t -> M :=
@@ -595,7 +584,6 @@ Definition fnv : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition fnv_hash : Value.t -> Value.t -> M :=
@@ -613,18 +601,10 @@ Definition fnv_hash : Value.t -> Value.t -> M :=
       M.call (|
         M.get_name (| globals, "tuple" |),
         make_list [
-          (M.call (|
-            M.get_name (| globals, "fnv" |),
-            make_list [
-              M.get_subscript (| M.get_name (| globals, "mix_integers" |), M.get_name (| globals, "i" |) |);
-              M.get_subscript (| M.get_name (| globals, "data" |), M.get_name (| globals, "i" |) |)
-            ],
-            make_dict []
-          |) for (* At expr: unsupported node type: list *))
+          (* At expr: unsupported node type: GeneratorExp *)
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition generate_dataset_item : Value.t -> Value.t -> M :=
@@ -743,7 +723,6 @@ Definition generate_dataset_item : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition generate_dataset : Value.t -> Value.t -> M :=
@@ -761,24 +740,10 @@ Definition generate_dataset : Value.t -> Value.t -> M :=
       M.call (|
         M.get_name (| globals, "tuple" |),
         make_list [
-          (M.call (|
-            M.get_name (| globals, "generate_dataset_item" |),
-            make_list [
-              M.get_name (| globals, "cache" |);
-              M.call (|
-                M.get_name (| globals, "Uint" |),
-                make_list [
-                  M.get_name (| globals, "index" |)
-                ],
-                make_dict []
-              |)
-            ],
-            make_dict []
-          |) for (* At expr: unsupported node type: list *))
+          (* At expr: unsupported node type: GeneratorExp *)
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition hashimoto : Value.t -> Value.t -> M :=
@@ -834,7 +799,7 @@ Definition hashimoto : Value.t -> Value.t -> M :=
       M.call (|
         M.get_field (| M.get_name (| globals, "U32" |), "from_le_bytes" |),
         make_list [
-          M.get_subscript (| M.get_name (| globals, "seed_hash" |), (* At expr: unsupported node type: NoneType *):Constant.int 4 |)
+          M.get_subscript (| M.get_name (| globals, "seed_hash" |), Constant.None_:Constant.int 4 |)
         ],
         make_dict []
       |) in
@@ -1025,7 +990,6 @@ Definition hashimoto : Value.t -> Value.t -> M :=
       |) in
     let _ := M.return_ (|
       make_tuple [ M.get_name (| globals, "mix_digest" |); M.get_name (| globals, "result" |) ]
-    |) in
     M.pure Constant.None_)).
 
 Definition hashimoto_light : Value.t -> Value.t -> M :=
@@ -1065,5 +1029,4 @@ Definition hashimoto_light : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).

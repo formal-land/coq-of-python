@@ -104,22 +104,6 @@ Definition push_n : Value.t -> Value.t -> M :=
     " in
     let _ := M.pass (| |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.eq (| M.get_name (| globals, "num_bytes" |), Constant.int 0 |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
-    make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_BASE" |)
-    ],
-    make_dict []
-  |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -207,13 +191,16 @@ Definition dup_n : Value.t -> Value.t -> M :=
     let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
-      Compare.lt (| M.get_name (| globals, "item_number" |), M.call (|
-        M.get_name (| globals, "len" |),
-        make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
-        ],
-        make_dict []
-      |) |);
+      Compare.lt (|
+        M.get_name (| globals, "item_number" |),
+        M.call (|
+          M.get_name (| globals, "len" |),
+          make_list [
+            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          ],
+          make_dict []
+        |)
+      |);
       M.get_name (| globals, "StackUnderflowError" |)
     ],
     make_dict []
@@ -279,13 +266,16 @@ Definition swap_n : Value.t -> Value.t -> M :=
     let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
-      Compare.lt (| M.get_name (| globals, "item_number" |), M.call (|
-        M.get_name (| globals, "len" |),
-        make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
-        ],
-        make_dict []
-      |) |);
+      Compare.lt (|
+        M.get_name (| globals, "item_number" |),
+        M.call (|
+          M.get_name (| globals, "len" |),
+          make_list [
+            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          ],
+          make_dict []
+        |)
+      |);
       M.get_name (| globals, "StackUnderflowError" |)
     ],
     make_dict []

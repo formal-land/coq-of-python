@@ -1,5 +1,6 @@
 # Coq rules
 .CoqMakefile.d
+CoqMakefile
 CoqMakefile.conf
 *.vo
 *.vok

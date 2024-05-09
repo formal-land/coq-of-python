@@ -113,7 +113,7 @@ Definition secp256k1_recover : Value.t -> Value.t -> M :=
           ],
           make_dict []
         |)
-      |):Constant.int 32 |),
+      |) |),
       M.get_name (| globals, "r_bytes" |)
     |) in
     let _ := M.assign (|
@@ -126,7 +126,7 @@ Definition secp256k1_recover : Value.t -> Value.t -> M :=
           ],
           make_dict []
         |)
-      |):Constant.int 64 |),
+      |) |),
       M.get_name (| globals, "s_bytes" |)
     |) in
     let _ := M.assign (|
@@ -153,10 +153,9 @@ Definition secp256k1_recover : Value.t -> Value.t -> M :=
         M.get_field (| M.get_name (| globals, "public_key" |), "format" |),
         make_list [],
         make_dict []
-      |), Constant.int 1:(* At expr: unsupported node type: NoneType *) |) in
+      |), Constant.int 1 |) in
     let _ := M.return_ (|
       M.get_name (| globals, "public_key" |)
-    |) in
     M.pure Constant.None_)).
 
 Definition EllipticCurve : Value.t :=
@@ -192,7 +191,6 @@ Definition EllipticCurve : Value.t :=
               ],
               make_dict []
             |)
-          |) in
           M.pure Constant.None_))
       )
     ]
@@ -223,7 +221,6 @@ Definition EllipticCurve : Value.t :=
           |) in
           let _ := M.return_ (|
             M.get_name (| globals, "res" |)
-          |) in
           M.pure Constant.None_))
       );
       (
@@ -235,61 +232,6 @@ Definition EllipticCurve : Value.t :=
         `__new__()` directly.
         " in
           let _ :=
-            (* if *)
-            M.if_then_else (|
-              BoolOp.and (|
-                BoolOp.or (|
-                  Compare.not_eq (| M.get_name (| globals, "x" |), M.call (|
-                    M.get_field (| M.get_field (| M.get_name (| globals, "self" |), "FIELD" |), "zero" |),
-                    make_list [],
-                    make_dict []
-                  |) |),
-                  ltac:(M.monadic (
-                    Compare.not_eq (| M.get_name (| globals, "y" |), M.call (|
-                        M.get_field (| M.get_field (| M.get_name (| globals, "self" |), "FIELD" |), "zero" |),
-                        make_list [],
-                        make_dict []
-                      |) |)
-                  ))
-                |),
-                ltac:(M.monadic (
-                  Compare.not_eq (| BinOp.sub (|
-                      BinOp.sub (|
-                        BinOp.sub (|
-                          BinOp.pow (|
-                            M.get_name (| globals, "y" |),
-                            Constant.int 2
-                          |),
-                          BinOp.pow (|
-                            M.get_name (| globals, "x" |),
-                            Constant.int 3
-                          |)
-                        |),
-                        BinOp.mult (|
-                          M.get_field (| M.get_name (| globals, "self" |), "A" |),
-                          M.get_name (| globals, "x" |)
-                        |)
-                      |),
-                      M.get_field (| M.get_name (| globals, "self" |), "B" |)
-                    |), M.call (|
-                      M.get_field (| M.get_field (| M.get_name (| globals, "self" |), "FIELD" |), "zero" |),
-                      make_list [],
-                      make_dict []
-                    |) |)
-                ))
-              |),
-            (* then *)
-            ltac:(M.monadic (
-              let _ := M.raise (| M.call (|
-                M.get_name (| globals, "ValueError" |),
-                make_list [
-                  Constant.str "Point not on curve"
-                ],
-                make_dict []
-              |) |) in
-              M.pure Constant.None_
-            (* else *)
-            )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
           M.pure Constant.None_))
@@ -302,40 +244,21 @@ Definition EllipticCurve : Value.t :=
         Test two points for equality.
         " in
           let _ :=
-            (* if *)
-            M.if_then_else (|
-              UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
-                make_list [
-                  M.get_name (| globals, "other" |);
-                  M.call (|
-                    M.get_name (| globals, "type" |),
-                    make_list [
-                      M.get_name (| globals, "self" |)
-                    ],
-                    make_dict []
-                  |)
-                ],
-                make_dict []
-              |) |),
-            (* then *)
-            ltac:(M.monadic (
-              let _ := M.return_ (|
-                Constant.bool false
-              |) in
-              M.pure Constant.None_
-            (* else *)
-            )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
           let _ := M.return_ (|
             BoolOp.and (|
-              Compare.eq (| M.get_field (| M.get_name (| globals, "self" |), "x" |), M.get_field (| M.get_name (| globals, "other" |), "x" |) |),
+              Compare.eq (|
+                M.get_field (| M.get_name (| globals, "self" |), "x" |),
+                M.get_field (| M.get_name (| globals, "other" |), "x" |)
+              |),
               ltac:(M.monadic (
-                Compare.eq (| M.get_field (| M.get_name (| globals, "self" |), "y" |), M.get_field (| M.get_name (| globals, "other" |), "y" |) |)
+                Compare.eq (|
+                  M.get_field (| M.get_name (| globals, "self" |), "y" |),
+                  M.get_field (| M.get_name (| globals, "other" |), "y" |)
+                |)
               ))
             |)
-          |) in
           M.pure Constant.None_))
       );
       (
@@ -353,7 +276,6 @@ Definition EllipticCurve : Value.t :=
               ],
               make_dict []
             |)
-          |) in
           M.pure Constant.None_))
       );
       (
@@ -368,22 +290,6 @@ Definition EllipticCurve : Value.t :=
             make_tuple [ M.get_field (| M.get_name (| globals, "self" |), "x" |); M.get_field (| M.get_name (| globals, "self" |), "y" |); M.get_field (| M.get_name (| globals, "self" |), "FIELD" |) ]
           |) in
           let _ :=
-            (* if *)
-            M.if_then_else (|
-              BoolOp.and (|
-                Compare.eq (| M.get_name (| globals, "x" |), Constant.int 0 |),
-                ltac:(M.monadic (
-                  Compare.eq (| M.get_name (| globals, "y" |), Constant.int 0 |)
-                ))
-              |),
-            (* then *)
-            ltac:(M.monadic (
-              let _ := M.return_ (|
-                M.get_name (| globals, "self" |)
-              |) in
-              M.pure Constant.None_
-            (* else *)
-            )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
           let lam :=
@@ -453,7 +359,6 @@ Definition EllipticCurve : Value.t :=
               ],
               make_dict []
             |)
-          |) in
           M.pure Constant.None_))
       );
       (
@@ -474,77 +379,12 @@ Definition EllipticCurve : Value.t :=
             make_tuple [ M.get_field (| M.get_name (| globals, "self" |), "x" |); M.get_field (| M.get_name (| globals, "self" |), "y" |); M.get_field (| M.get_name (| globals, "other" |), "x" |); M.get_field (| M.get_name (| globals, "other" |), "y" |) ]
           |) in
           let _ :=
-            (* if *)
-            M.if_then_else (|
-              BoolOp.and (|
-                Compare.eq (| M.get_name (| globals, "self_x" |), M.get_name (| globals, "ZERO" |) |),
-                ltac:(M.monadic (
-                  Compare.eq (| M.get_name (| globals, "self_y" |), M.get_name (| globals, "ZERO" |) |)
-                ))
-              |),
-            (* then *)
-            ltac:(M.monadic (
-              let _ := M.return_ (|
-                M.get_name (| globals, "other" |)
-              |) in
-              M.pure Constant.None_
-            (* else *)
-            )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
           let _ :=
-            (* if *)
-            M.if_then_else (|
-              BoolOp.and (|
-                Compare.eq (| M.get_name (| globals, "other_x" |), M.get_name (| globals, "ZERO" |) |),
-                ltac:(M.monadic (
-                  Compare.eq (| M.get_name (| globals, "other_y" |), M.get_name (| globals, "ZERO" |) |)
-                ))
-              |),
-            (* then *)
-            ltac:(M.monadic (
-              let _ := M.return_ (|
-                M.get_name (| globals, "self" |)
-              |) in
-              M.pure Constant.None_
-            (* else *)
-            )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
           let _ :=
-            (* if *)
-            M.if_then_else (|
-              Compare.eq (| M.get_name (| globals, "self_x" |), M.get_name (| globals, "other_x" |) |),
-            (* then *)
-            ltac:(M.monadic (
-              let _ :=
-                (* if *)
-                M.if_then_else (|
-                  Compare.eq (| M.get_name (| globals, "self_y" |), M.get_name (| globals, "other_y" |) |),
-                (* then *)
-                ltac:(M.monadic (
-                  let _ := M.return_ (|
-                    M.call (|
-                      M.get_field (| M.get_name (| globals, "self" |), "double" |),
-                      make_list [],
-                      make_dict []
-                    |)
-                  |) in
-                  M.pure Constant.None_
-                (* else *)
-                )), ltac:(M.monadic (
-                  let _ := M.return_ (|
-                    M.call (|
-                      M.get_field (| M.get_name (| globals, "self" |), "point_at_infinity" |),
-                      make_list [],
-                      make_dict []
-                    |)
-                  |) in
-                  M.pure Constant.None_
-                )) |) in
-              M.pure Constant.None_
-            (* else *)
-            )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
           let lam :=
@@ -596,7 +436,6 @@ Definition EllipticCurve : Value.t :=
               ],
               make_dict []
             |)
-          |) in
           M.pure Constant.None_))
       );
       (
@@ -632,24 +471,11 @@ Definition EllipticCurve : Value.t :=
             |) in
           let s :=
             M.get_name (| globals, "self" |) in
-          While Compare.not_eq (| M.get_name (| globals, "n" |), Constant.int 0 |) do
+          While Compare.not_eq (|
+    M.get_name (| globals, "n" |),
+    Constant.int 0
+  |) do
             let _ :=
-              (* if *)
-              M.if_then_else (|
-                Compare.eq (| BinOp.mod_ (|
-                  M.get_name (| globals, "n" |),
-                  Constant.int 2
-                |), Constant.int 1 |),
-              (* then *)
-              ltac:(M.monadic (
-                let res :=
-                  BinOp.add (|
-                    M.get_name (| globals, "res" |),
-                    M.get_name (| globals, "s" |)
-                  |) in
-                M.pure Constant.None_
-              (* else *)
-              )), ltac:(M.monadic (
                 M.pure Constant.None_
               )) |) in
             let s :=
@@ -663,7 +489,6 @@ Definition EllipticCurve : Value.t :=
           EndWhile.
           let _ := M.return_ (|
             M.get_name (| globals, "res" |)
-          |) in
           M.pure Constant.None_))
       )
     ].

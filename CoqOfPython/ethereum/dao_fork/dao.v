@@ -33,13 +33,7 @@ Axiom utils_hexadecimal_hex_to_address :
   IsGlobalAlias globals utils.hexadecimal.globals "hex_to_address".
 
 Definition DAO_ACCOUNTS : Value.t := M.run ltac:(M.monadic (
-  [M.call (|
-    M.get_name (| globals, "hex_to_address" |),
-    make_list [
-      M.get_name (| globals, "address" |)
-    ],
-    make_dict []
-  |) for (* At expr: unsupported node type: list *)]
+  (* At expr: unsupported node type: ListComp *)
 )).
 
 Definition DAO_RECOVERY : Value.t := M.run ltac:(M.monadic (

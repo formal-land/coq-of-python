@@ -143,28 +143,6 @@ Definition incorporate_child_on_success : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        M.call (|
-          M.get_name (| globals, "account_exists_and_is_empty" |),
-          make_list [
-            M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "state" |);
-            M.get_field (| M.get_field (| M.get_name (| globals, "child_evm" |), "message" |), "current_target" |)
-          ],
-          make_dict []
-        |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.call (|
-    M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "touched_accounts" |), "add" |),
-    make_list [
-      M.get_field (| M.get_field (| M.get_name (| globals, "child_evm" |), "message" |), "current_target" |)
-    ],
-    make_dict []
-  |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -183,57 +161,9 @@ Definition incorporate_child_on_error : Value.t -> Value.t -> M :=
         The child evm to incorporate.
     " in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.in (| M.get_name (| globals, "RIPEMD160_ADDRESS" |), M.get_field (| M.get_name (| globals, "child_evm" |), "touched_accounts" |) |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.call (|
-    M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "touched_accounts" |), "add" |),
-    make_list [
-      M.get_name (| globals, "RIPEMD160_ADDRESS" |)
-    ],
-    make_dict []
-  |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.eq (| M.get_field (| M.get_field (| M.get_name (| globals, "child_evm" |), "message" |), "current_target" |), M.get_name (| globals, "RIPEMD160_ADDRESS" |) |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ :=
-          (* if *)
-          M.if_then_else (|
-            M.call (|
-              M.get_name (| globals, "account_exists_and_is_empty" |),
-              make_list [
-                M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "state" |);
-                M.get_field (| M.get_field (| M.get_name (| globals, "child_evm" |), "message" |), "current_target" |)
-              ],
-              make_dict []
-            |),
-          (* then *)
-          ltac:(M.monadic (
-            let _ := M.call (|
-    M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "touched_accounts" |), "add" |),
-    make_list [
-      M.get_name (| globals, "RIPEMD160_ADDRESS" |)
-    ],
-    make_dict []
-  |) in
-            M.pure Constant.None_
-          (* else *)
-          )), ltac:(M.monadic (
-            M.pure Constant.None_
-          )) |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.assign_op (|

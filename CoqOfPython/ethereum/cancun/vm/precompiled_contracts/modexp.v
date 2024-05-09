@@ -192,30 +192,6 @@ Definition modexp : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        BoolOp.and (|
-          Compare.eq (| M.get_name (| globals, "base_length" |), Constant.int 0 |),
-          ltac:(M.monadic (
-            Compare.eq (| M.get_name (| globals, "modulus_length" |), Constant.int 0 |)
-          ))
-        |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.assign (|
-          M.get_field (| M.get_name (| globals, "evm" |), "output" |),
-          M.call (|
-            M.get_name (| globals, "Bytes" |),
-            make_list [],
-            make_dict []
-          |)
-        |) in
-        let _ := M.return_ (|
-          (* At expr: unsupported node type: NoneType *)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let base :=
@@ -278,27 +254,6 @@ Definition modexp : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.eq (| M.get_name (| globals, "modulus" |), Constant.int 0 |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ := M.assign (|
-          M.get_field (| M.get_name (| globals, "evm" |), "output" |),
-          BinOp.mult (|
-            M.call (|
-              M.get_name (| globals, "Bytes" |),
-              make_list [
-                (* At constant: unsupported node type: Constant *)
-              ],
-              make_dict []
-            |),
-            M.get_name (| globals, "modulus_length" |)
-          |)
-        |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ := M.assign (|
           M.get_field (| M.get_name (| globals, "evm" |), "output" |),
           M.call (|
@@ -383,7 +338,6 @@ Definition complexity : Value.t -> Value.t -> M :=
         M.get_name (| globals, "words" |),
         Constant.int 2
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition iterations : Value.t -> Value.t -> M :=
@@ -410,64 +364,7 @@ Definition iterations : Value.t -> Value.t -> M :=
         Number of iterations.
     " in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        BoolOp.and (|
-          Compare.lt_e (| M.get_name (| globals, "exponent_length" |), Constant.int 32 |),
-          ltac:(M.monadic (
-            Compare.eq (| M.get_name (| globals, "exponent_head" |), Constant.int 0 |)
-          ))
-        |),
-      (* then *)
-      ltac:(M.monadic (
-        let count :=
-          M.call (|
-            M.get_name (| globals, "Uint" |),
-            make_list [
-              Constant.int 0
-            ],
-            make_dict []
-          |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let _ :=
-          (* if *)
-          M.if_then_else (|
-            Compare.lt_e (| M.get_name (| globals, "exponent_length" |), Constant.int 32 |),
-          (* then *)
-          ltac:(M.monadic (
-            let bit_length :=
-              M.call (|
-                M.get_name (| globals, "Uint" |),
-                make_list [
-                  M.call (|
-                    M.get_field (| M.get_name (| globals, "exponent_head" |), "bit_length" |),
-                    make_list [],
-                    make_dict []
-                  |)
-                ],
-                make_dict []
-              |) in
-            let _ :=
-              (* if *)
-              M.if_then_else (|
-                Compare.gt (| M.get_name (| globals, "bit_length" |), Constant.int 0 |),
-              (* then *)
-              ltac:(M.monadic (
-                let bit_length := BinOp.sub
-                  Constant.int 1
-                  Constant.int 1 in
-                M.pure Constant.None_
-              (* else *)
-              )), ltac:(M.monadic (
-                M.pure Constant.None_
-              )) |) in
-            let count :=
-              M.get_name (| globals, "bit_length" |) in
-            M.pure Constant.None_
-          (* else *)
-          )), ltac:(M.monadic (
             let length_part :=
               BinOp.mult (|
                 Constant.int 8,
@@ -495,17 +392,6 @@ Definition iterations : Value.t -> Value.t -> M :=
                 make_dict []
               |) in
             let _ :=
-              (* if *)
-              M.if_then_else (|
-                Compare.gt (| M.get_name (| globals, "bits_part" |), Constant.int 0 |),
-              (* then *)
-              ltac:(M.monadic (
-                let bits_part := BinOp.sub
-                  Constant.int 1
-                  Constant.int 1 in
-                M.pure Constant.None_
-              (* else *)
-              )), ltac:(M.monadic (
                 M.pure Constant.None_
               )) |) in
             let count :=
@@ -532,7 +418,6 @@ Definition iterations : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).
 
 Definition gas_cost : Value.t -> Value.t -> M :=
@@ -604,5 +489,4 @@ Definition gas_cost : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).

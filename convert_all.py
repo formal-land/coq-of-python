@@ -10,8 +10,8 @@ for root, dirs, files in os.walk(folder_to_convert):
         if file.endswith(".py"):
             # convert the file
             full_path = root + "/" + file
-            # print("Converting file: " + full_path)
             short_path = full_path[(len(folder_to_convert) + 1):]
+            print("")
             print("Converting file: " + short_path)
 
             try:
@@ -20,7 +20,7 @@ for root, dirs, files in os.walk(folder_to_convert):
                 subprocess.run(command, shell=True, check=True)
             except subprocess.CalledProcessError as e:
                 print(f"Error occurred: {e}")
-                # sys.exit(1)
+                sys.exit(1)
             except KeyboardInterrupt:
                 print("Ctrl-C pressed, interrupting the script.")
                 sys.exit(1)

@@ -152,7 +152,10 @@ Definition sstore : Value.t -> Value.t -> M :=
     let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
-      Compare.gt (| M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |), M.get_name (| globals, "GAS_CALL_STIPEND" |) |);
+      Compare.gt (|
+        M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |),
+        M.get_name (| globals, "GAS_CALL_STIPEND" |)
+      |);
       M.get_name (| globals, "OutOfGasError" |)
     ],
     make_dict []
@@ -178,156 +181,11 @@ Definition sstore : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        BoolOp.and (|
-          Compare.eq (| M.get_name (| globals, "original_value" |), M.get_name (| globals, "current_value" |) |),
-          ltac:(M.monadic (
-            Compare.not_eq (| M.get_name (| globals, "current_value" |), M.get_name (| globals, "new_value" |) |)
-          ))
-        |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ :=
-          (* if *)
-          M.if_then_else (|
-            Compare.eq (| M.get_name (| globals, "original_value" |), Constant.int 0 |),
-          (* then *)
-          ltac:(M.monadic (
-            let gas_cost :=
-              M.get_name (| globals, "GAS_STORAGE_SET" |) in
-            M.pure Constant.None_
-          (* else *)
-          )), ltac:(M.monadic (
-            let gas_cost :=
-              M.get_name (| globals, "GAS_STORAGE_UPDATE" |) in
-            M.pure Constant.None_
-          )) |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         let gas_cost :=
           M.get_name (| globals, "GAS_SLOAD" |) in
         M.pure Constant.None_
       )) |) in
     let _ :=
-      (* if *)
-      M.if_then_else (|
-        Compare.not_eq (| M.get_name (| globals, "current_value" |), M.get_name (| globals, "new_value" |) |),
-      (* then *)
-      ltac:(M.monadic (
-        let _ :=
-          (* if *)
-          M.if_then_else (|
-            BoolOp.and (|
-              Compare.not_eq (| M.get_name (| globals, "original_value" |), Constant.int 0 |),
-              ltac:(M.monadic (
-                BoolOp.and (|
-                  Compare.not_eq (| M.get_name (| globals, "current_value" |), Constant.int 0 |),
-                  ltac:(M.monadic (
-                    Compare.eq (| M.get_name (| globals, "new_value" |), Constant.int 0 |)
-                  ))
-                |)
-              ))
-            |),
-          (* then *)
-          ltac:(M.monadic (
-            let _ := M.assign_op (|
-              BinOp.add,
-              M.get_field (| M.get_name (| globals, "evm" |), "refund_counter" |),
-              M.call (|
-    M.get_name (| globals, "int" |),
-    make_list [
-      M.get_name (| globals, "GAS_STORAGE_CLEAR_REFUND" |)
-    ],
-    make_dict []
-  |)
-            |) in
-            M.pure Constant.None_
-          (* else *)
-          )), ltac:(M.monadic (
-            M.pure Constant.None_
-          )) |) in
-        let _ :=
-          (* if *)
-          M.if_then_else (|
-            BoolOp.and (|
-              Compare.not_eq (| M.get_name (| globals, "original_value" |), Constant.int 0 |),
-              ltac:(M.monadic (
-                Compare.eq (| M.get_name (| globals, "current_value" |), Constant.int 0 |)
-              ))
-            |),
-          (* then *)
-          ltac:(M.monadic (
-            let _ := M.assign_op (|
-              BinOp.sub,
-              M.get_field (| M.get_name (| globals, "evm" |), "refund_counter" |),
-              M.call (|
-    M.get_name (| globals, "int" |),
-    make_list [
-      M.get_name (| globals, "GAS_STORAGE_CLEAR_REFUND" |)
-    ],
-    make_dict []
-  |)
-            |) in
-            M.pure Constant.None_
-          (* else *)
-          )), ltac:(M.monadic (
-            M.pure Constant.None_
-          )) |) in
-        let _ :=
-          (* if *)
-          M.if_then_else (|
-            Compare.eq (| M.get_name (| globals, "original_value" |), M.get_name (| globals, "new_value" |) |),
-          (* then *)
-          ltac:(M.monadic (
-            let _ :=
-              (* if *)
-              M.if_then_else (|
-                Compare.eq (| M.get_name (| globals, "original_value" |), Constant.int 0 |),
-              (* then *)
-              ltac:(M.monadic (
-                let _ := M.assign_op (|
-                  BinOp.add,
-                  M.get_field (| M.get_name (| globals, "evm" |), "refund_counter" |),
-                  M.call (|
-    M.get_name (| globals, "int" |),
-    make_list [
-      BinOp.sub (|
-        M.get_name (| globals, "GAS_STORAGE_SET" |),
-        M.get_name (| globals, "GAS_SLOAD" |)
-      |)
-    ],
-    make_dict []
-  |)
-                |) in
-                M.pure Constant.None_
-              (* else *)
-              )), ltac:(M.monadic (
-                let _ := M.assign_op (|
-                  BinOp.add,
-                  M.get_field (| M.get_name (| globals, "evm" |), "refund_counter" |),
-                  M.call (|
-    M.get_name (| globals, "int" |),
-    make_list [
-      BinOp.sub (|
-        M.get_name (| globals, "GAS_STORAGE_UPDATE" |),
-        M.get_name (| globals, "GAS_SLOAD" |)
-      |)
-    ],
-    make_dict []
-  |)
-                |) in
-                M.pure Constant.None_
-              )) |) in
-            M.pure Constant.None_
-          (* else *)
-          )), ltac:(M.monadic (
-            M.pure Constant.None_
-          )) |) in
-        M.pure Constant.None_
-      (* else *)
-      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|

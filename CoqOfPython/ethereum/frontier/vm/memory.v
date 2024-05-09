@@ -45,22 +45,7 @@ Definition memory_write : Value.t -> Value.t -> M :=
         Data to write to memory.
     " in
     let _ := M.assign (|
-      M.get_subscript (| M.get_name (| globals, "memory" |), M.get_name (| globals, "start_position" |):BinOp.add (|
-        M.call (|
-          M.get_name (| globals, "Uint" |),
-          make_list [
-            M.get_name (| globals, "start_position" |)
-          ],
-          make_dict []
-        |),
-        M.call (|
-          M.get_name (| globals, "len" |),
-          make_list [
-            M.get_name (| globals, "value" |)
-          ],
-          make_dict []
-        |)
-      |) |),
+      M.get_subscript (| M.get_name (| globals, "memory" |), M.get_name (| globals, "start_position" |) |),
       M.get_name (| globals, "value" |)
     |) in
     M.pure Constant.None_)).
@@ -86,23 +71,7 @@ Definition memory_read_bytes : Value.t -> Value.t -> M :=
         Data read from memory.
     " in
     let _ := M.return_ (|
-      M.get_subscript (| M.get_name (| globals, "memory" |), M.get_name (| globals, "start_position" |):BinOp.add (|
-        M.call (|
-          M.get_name (| globals, "Uint" |),
-          make_list [
-            M.get_name (| globals, "start_position" |)
-          ],
-          make_dict []
-        |),
-        M.call (|
-          M.get_name (| globals, "Uint" |),
-          make_list [
-            M.get_name (| globals, "size" |)
-          ],
-          make_dict []
-        |)
-      |) |)
-    |) in
+      M.get_subscript (| M.get_name (| globals, "memory" |), M.get_name (| globals, "start_position" |) |)
     M.pure Constant.None_)).
 
 Definition buffer_read : Value.t -> Value.t -> M :=
@@ -129,25 +98,9 @@ Definition buffer_read : Value.t -> Value.t -> M :=
       M.call (|
         M.get_name (| globals, "right_pad_zero_bytes" |),
         make_list [
-          M.get_subscript (| M.get_name (| globals, "buffer" |), M.get_name (| globals, "start_position" |):BinOp.add (|
-            M.call (|
-              M.get_name (| globals, "Uint" |),
-              make_list [
-                M.get_name (| globals, "start_position" |)
-              ],
-              make_dict []
-            |),
-            M.call (|
-              M.get_name (| globals, "Uint" |),
-              make_list [
-                M.get_name (| globals, "size" |)
-              ],
-              make_dict []
-            |)
-          |) |);
+          M.get_subscript (| M.get_name (| globals, "buffer" |), M.get_name (| globals, "start_position" |) |);
           M.get_name (| globals, "size" |)
         ],
         make_dict []
       |)
-    |) in
     M.pure Constant.None_)).

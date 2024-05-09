@@ -188,13 +188,16 @@ Definition dup_n : Value.t -> Value.t -> M :=
     let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
-      Compare.lt (| M.get_name (| globals, "item_number" |), M.call (|
-        M.get_name (| globals, "len" |),
-        make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
-        ],
-        make_dict []
-      |) |);
+      Compare.lt (|
+        M.get_name (| globals, "item_number" |),
+        M.call (|
+          M.get_name (| globals, "len" |),
+          make_list [
+            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          ],
+          make_dict []
+        |)
+      |);
       M.get_name (| globals, "StackUnderflowError" |)
     ],
     make_dict []
@@ -260,13 +263,16 @@ Definition swap_n : Value.t -> Value.t -> M :=
     let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
-      Compare.lt (| M.get_name (| globals, "item_number" |), M.call (|
-        M.get_name (| globals, "len" |),
-        make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
-        ],
-        make_dict []
-      |) |);
+      Compare.lt (|
+        M.get_name (| globals, "item_number" |),
+        M.call (|
+          M.get_name (| globals, "len" |),
+          make_list [
+            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          ],
+          make_dict []
+        |)
+      |);
       M.get_name (| globals, "StackUnderflowError" |)
     ],
     make_dict []
