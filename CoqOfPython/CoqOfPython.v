@@ -27,16 +27,20 @@ Module Data.
   (** Lists and tuples are very similar. The distinction between the two is conventional. We use
       a list when the number of elements is not statically known. *)
   | List (items : list Value)
-  | Closure {Value M : Set} (f : list Value -> M)
+  | Set_ (items : list Value)
+  | Dict (dict : list (string * Value))
+  | Closure {Value M : Set} (f : Value -> Value -> M)
   | Klass {Value M : Set}
     (bases : list (Set * string))
-    (class_methods : list (string * (list Value -> nat -> M)))
-    (methods : list Value).
+    (class_methods : list (string * (Value -> Value -> M)))
+    (methods : list (string * (Value -> Value -> M))).
   Arguments Bool {_}.
   Arguments Integer {_}.
   Arguments String {_}.
   Arguments Tuple {_}.
   Arguments List {_}.
+  Arguments Set_ {_}.
+  Arguments Dict {_}.
   Arguments Closure {_ _ _}.
   Arguments Klass {_ _ _}.
 End Data.
@@ -84,17 +88,28 @@ Module M.
 
   Parameter let_ : M -> (Value.t -> M) -> M.
 
-  Parameter call : Value.t -> list Value.t -> M.
+  Parameter call : Value.t -> Value.t -> Value.t -> M.
 
   Parameter get_field : Value.t -> string -> M.
 
-  Parameter get_name : Set -> nat -> string -> M.
+  (** For the `x[i]` syntax. *)
+  Parameter get_subscript : Value.t -> Value.t -> M.
 
-  Parameter set_locals : nat -> list (string * Value.t) -> M.
+  Parameter get_name : Set -> string -> M.
+
+  Parameter set_locals : Value.t -> Value.t -> list string -> M.
+
+  Parameter assign : Value.t -> Value.t -> M.
 
   Parameter return_ : Value.t -> M.
 
+  Parameter raise : Value.t -> M.
+
+  Parameter assert : Value.t -> M.
+
   Parameter impossible : M.
+
+  Parameter if_then_else : Value.t -> M -> M -> M.
 
   Parameter run : M -> Value.t.
 
@@ -227,8 +242,8 @@ Module builtins.
 
   Definition make_klass
     (bases : list (Set * string))
-    (class_methods : list (string * (list Value.t -> nat -> M)))
-    (methods : list Value.t) :
+    (class_methods : list (string * (Value.t -> Value.t -> M)))
+    (methods : list (string * (Value.t -> Value.t -> M))) :
     Value.t :=
   Value.Make builtins.globals "type" (Pointer.Imm (Object.wrapper (
     Data.Klass bases class_methods methods
@@ -263,3 +278,19 @@ Module Constant.
   Definition str (s : string) : Value.t :=
     Value.Make builtins.globals "str" (Pointer.Imm (Object.wrapper (Data.String s))).
 End Constant.
+
+Definition make_tuple (items : list Value.t) : Value.t :=
+  Value.Make builtins.globals "tuple" (Pointer.Imm (Object.wrapper (Data.Tuple items))).
+
+Definition make_list (items : list Value.t) : Value.t :=
+  Value.Make builtins.globals "list" (Pointer.Imm (Object.wrapper (Data.List items))).
+
+Parameter make_list_concat : list Value.t -> M.
+
+Definition make_set (items : list Value.t) : Value.t :=
+  Value.Make builtins.globals "set" (Pointer.Imm (Object.wrapper (Data.Set_ items))).
+
+Parameter order_dict : list (string * Value.t) -> list (string * Value.t).
+
+Definition make_dict (dict : list (string * Value.t)) : Value.t :=
+  Value.Make builtins.globals "dict" (Pointer.Imm (Object.wrapper (Data.Dict (order_dict dict)))).
