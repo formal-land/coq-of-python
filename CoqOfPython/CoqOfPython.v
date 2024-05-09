@@ -30,8 +30,8 @@ Module Data.
   | Closure {Value M : Set} (f : list Value -> M)
   | Klass {Value M : Set}
     (bases : list (Set * string))
-    (class_methods : list (string * (list Value -> nat -> M)))
-    (methods : list Value).
+    (class_methods : list (string * (list Value -> M)))
+    (methods : list (string * (list Value -> M))).
   Arguments Bool {_}.
   Arguments Integer {_}.
   Arguments String {_}.
@@ -88,13 +88,20 @@ Module M.
 
   Parameter get_field : Value.t -> string -> M.
 
-  Parameter get_name : Set -> nat -> string -> M.
+  (** For the `x[i]` syntax. *)
+  Parameter get_subscript : Value.t -> Value.t -> M.
 
-  Parameter set_locals : nat -> list (string * Value.t) -> M.
+  Parameter get_name : Set -> string -> M.
+
+  Parameter set_locals : list (string * Value.t) -> M.
 
   Parameter return_ : Value.t -> M.
 
+  Parameter raise : Value.t -> M.
+
   Parameter impossible : M.
+
+  Parameter if_then_else : Value.t -> M -> M -> M.
 
   Parameter run : M -> Value.t.
 
@@ -227,8 +234,8 @@ Module builtins.
 
   Definition make_klass
     (bases : list (Set * string))
-    (class_methods : list (string * (list Value.t -> nat -> M)))
-    (methods : list Value.t) :
+    (class_methods : list (string * (list Value.t -> M)))
+    (methods : list (string * (list Value.t -> M))) :
     Value.t :=
   Value.Make builtins.globals "type" (Pointer.Imm (Object.wrapper (
     Data.Klass bases class_methods methods
@@ -263,3 +270,6 @@ Module Constant.
   Definition str (s : string) : Value.t :=
     Value.Make builtins.globals "str" (Pointer.Imm (Object.wrapper (Data.String s))).
 End Constant.
+
+Definition make_tuple (items : list Value.t) : Value.t :=
+  Value.Make builtins.globals "tuple" (Pointer.Imm (Object.wrapper (Data.Tuple items))).
