@@ -28,14 +28,17 @@ Module Data.
       a list when the number of elements is not statically known. *)
   | List (items : list Value)
   | Closure {Value M : Set} (f : list Value -> M)
-  | Klass (bases : list (Set * string)) (class_methods : list Value) (methods : list Value).
+  | Klass {Value M : Set}
+    (bases : list (Set * string))
+    (class_methods : list (string * (list Value -> nat -> M)))
+    (methods : list Value).
   Arguments Bool {_}.
   Arguments Integer {_}.
   Arguments String {_}.
   Arguments Tuple {_}.
   Arguments List {_}.
   Arguments Closure {_ _ _}.
-  Arguments Klass {_}.
+  Arguments Klass {_ _ _}.
 End Data.
 
 Module Object.
@@ -82,6 +85,16 @@ Module M.
   Parameter let_ : M -> (Value.t -> M) -> M.
 
   Parameter call : Value.t -> list Value.t -> M.
+
+  Parameter get_field : Value.t -> string -> M.
+
+  Parameter get_name : Set -> nat -> string -> M.
+
+  Parameter set_locals : nat -> list (string * Value.t) -> M.
+
+  Parameter return_ : Value.t -> M.
+
+  Parameter impossible : M.
 
   Parameter run : M -> Value.t.
 
@@ -212,16 +225,25 @@ End Compare.
 Module builtins.
   Inductive globals : Set :=.
 
+  Definition make_klass
+    (bases : list (Set * string))
+    (class_methods : list (string * (list Value.t -> nat -> M)))
+    (methods : list Value.t) :
+    Value.t :=
+  Value.Make builtins.globals "type" (Pointer.Imm (Object.wrapper (
+    Data.Klass bases class_methods methods
+  ))).
+
   Definition type : Value.t :=
-    Value.Make globals "type" (Pointer.Imm (Object.wrapper (Data.Klass [] [] []))).
+    make_klass [] [] [].
   Axiom type_in_globals : IsInGlobals globals type "type".
 
   Definition int : Value.t :=
-    Value.Make globals "type" (Pointer.Imm (Object.wrapper (Data.Klass [] [] []))).
+    make_klass [] [] [].
   Axiom int_in_globals : IsInGlobals globals int "int".
 
   Definition str : Value.t :=
-    Value.Make globals "type" (Pointer.Imm (Object.wrapper (Data.Klass [] [] []))).
+    make_klass [] [] [].
   Axiom str_in_globals : IsInGlobals globals str "str".
 End builtins.
 
@@ -241,12 +263,3 @@ Module Constant.
   Definition str (s : string) : Value.t :=
     Value.Make builtins.globals "str" (Pointer.Imm (Object.wrapper (Data.String s))).
 End Constant.
-
-Definition make_klass
-    (bases : list (Set * string))
-    (class_methods : list Value.t)
-    (methods : list Value.t) :
-    Value.t :=
-  Value.Make builtins.globals "type" (Pointer.Imm (Object.wrapper (
-    Data.Klass bases class_methods methods
-  ))).
