@@ -15,7 +15,7 @@ for root, dirs, files in os.walk(folder_to_convert):
             print("Converting file: " + short_path)
 
             try:
-                command = "python main.py " + short_path
+                command = "python main.py " + folder_to_convert + " " + short_path
                 print(command)
                 subprocess.run(command, shell=True, check=True)
             except subprocess.CalledProcessError as e:

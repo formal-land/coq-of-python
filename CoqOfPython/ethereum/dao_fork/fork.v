@@ -65,99 +65,99 @@ Require ethereum.utils.ensure.
 Axiom ethereum_utils_ensure_ensure :
   IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
 
-Require __init__.
-Axiom __init___rlp :
-  IsGlobalAlias globals __init__.globals "rlp".
+Require ethereum.__init__.
+Axiom ethereum___init___rlp :
+  IsGlobalAlias globals ethereum.__init__.globals "rlp".
 
-Require base_types.
-Axiom base_types_U64 :
-  IsGlobalAlias globals base_types.globals "U64".
-Axiom base_types_U256 :
-  IsGlobalAlias globals base_types.globals "U256".
-Axiom base_types_U256_CEIL_VALUE :
-  IsGlobalAlias globals base_types.globals "U256_CEIL_VALUE".
-Axiom base_types_Bytes :
-  IsGlobalAlias globals base_types.globals "Bytes".
-Axiom base_types_Bytes32 :
-  IsGlobalAlias globals base_types.globals "Bytes32".
-Axiom base_types_Uint :
-  IsGlobalAlias globals base_types.globals "Uint".
+Require ethereum.base_types.
+Axiom ethereum_base_types_U64 :
+  IsGlobalAlias globals ethereum.base_types.globals "U64".
+Axiom ethereum_base_types_U256 :
+  IsGlobalAlias globals ethereum.base_types.globals "U256".
+Axiom ethereum_base_types_U256_CEIL_VALUE :
+  IsGlobalAlias globals ethereum.base_types.globals "U256_CEIL_VALUE".
+Axiom ethereum_base_types_Bytes :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
+Axiom ethereum_base_types_Bytes32 :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes32".
+Axiom ethereum_base_types_Uint :
+  IsGlobalAlias globals ethereum.base_types.globals "Uint".
 
-Require __init__.
-Axiom __init___FORK_CRITERIA :
-  IsGlobalAlias globals __init__.globals "FORK_CRITERIA".
-Axiom __init___vm :
-  IsGlobalAlias globals __init__.globals "vm".
+Require ethereum.dao_fork.__init__.
+Axiom ethereum_dao_fork___init___FORK_CRITERIA :
+  IsGlobalAlias globals ethereum.dao_fork.__init__.globals "FORK_CRITERIA".
+Axiom ethereum_dao_fork___init___vm :
+  IsGlobalAlias globals ethereum.dao_fork.__init__.globals "vm".
 
-Require blocks.
-Axiom blocks_Block :
-  IsGlobalAlias globals blocks.globals "Block".
-Axiom blocks_Header :
-  IsGlobalAlias globals blocks.globals "Header".
-Axiom blocks_Log :
-  IsGlobalAlias globals blocks.globals "Log".
-Axiom blocks_Receipt :
-  IsGlobalAlias globals blocks.globals "Receipt".
+Require ethereum.dao_fork.blocks.
+Axiom ethereum_dao_fork_blocks_Block :
+  IsGlobalAlias globals ethereum.dao_fork.blocks.globals "Block".
+Axiom ethereum_dao_fork_blocks_Header :
+  IsGlobalAlias globals ethereum.dao_fork.blocks.globals "Header".
+Axiom ethereum_dao_fork_blocks_Log :
+  IsGlobalAlias globals ethereum.dao_fork.blocks.globals "Log".
+Axiom ethereum_dao_fork_blocks_Receipt :
+  IsGlobalAlias globals ethereum.dao_fork.blocks.globals "Receipt".
 
-Require bloom.
-Axiom bloom_logs_bloom :
-  IsGlobalAlias globals bloom.globals "logs_bloom".
+Require ethereum.dao_fork.bloom.
+Axiom ethereum_dao_fork_bloom_logs_bloom :
+  IsGlobalAlias globals ethereum.dao_fork.bloom.globals "logs_bloom".
 
-Require dao.
-Axiom dao_apply_dao :
-  IsGlobalAlias globals dao.globals "apply_dao".
+Require ethereum.dao_fork.dao.
+Axiom ethereum_dao_fork_dao_apply_dao :
+  IsGlobalAlias globals ethereum.dao_fork.dao.globals "apply_dao".
 
-Require fork_types.
-Axiom fork_types_Address :
-  IsGlobalAlias globals fork_types.globals "Address".
-Axiom fork_types_Bloom :
-  IsGlobalAlias globals fork_types.globals "Bloom".
-Axiom fork_types_Root :
-  IsGlobalAlias globals fork_types.globals "Root".
+Require ethereum.dao_fork.fork_types.
+Axiom ethereum_dao_fork_fork_types_Address :
+  IsGlobalAlias globals ethereum.dao_fork.fork_types.globals "Address".
+Axiom ethereum_dao_fork_fork_types_Bloom :
+  IsGlobalAlias globals ethereum.dao_fork.fork_types.globals "Bloom".
+Axiom ethereum_dao_fork_fork_types_Root :
+  IsGlobalAlias globals ethereum.dao_fork.fork_types.globals "Root".
 
-Require state.
-Axiom state_State :
-  IsGlobalAlias globals state.globals "State".
-Axiom state_create_ether :
-  IsGlobalAlias globals state.globals "create_ether".
-Axiom state_destroy_account :
-  IsGlobalAlias globals state.globals "destroy_account".
-Axiom state_get_account :
-  IsGlobalAlias globals state.globals "get_account".
-Axiom state_increment_nonce :
-  IsGlobalAlias globals state.globals "increment_nonce".
-Axiom state_set_account_balance :
-  IsGlobalAlias globals state.globals "set_account_balance".
-Axiom state_state_root :
-  IsGlobalAlias globals state.globals "state_root".
+Require ethereum.dao_fork.state.
+Axiom ethereum_dao_fork_state_State :
+  IsGlobalAlias globals ethereum.dao_fork.state.globals "State".
+Axiom ethereum_dao_fork_state_create_ether :
+  IsGlobalAlias globals ethereum.dao_fork.state.globals "create_ether".
+Axiom ethereum_dao_fork_state_destroy_account :
+  IsGlobalAlias globals ethereum.dao_fork.state.globals "destroy_account".
+Axiom ethereum_dao_fork_state_get_account :
+  IsGlobalAlias globals ethereum.dao_fork.state.globals "get_account".
+Axiom ethereum_dao_fork_state_increment_nonce :
+  IsGlobalAlias globals ethereum.dao_fork.state.globals "increment_nonce".
+Axiom ethereum_dao_fork_state_set_account_balance :
+  IsGlobalAlias globals ethereum.dao_fork.state.globals "set_account_balance".
+Axiom ethereum_dao_fork_state_state_root :
+  IsGlobalAlias globals ethereum.dao_fork.state.globals "state_root".
 
-Require transactions.
-Axiom transactions_TX_BASE_COST :
-  IsGlobalAlias globals transactions.globals "TX_BASE_COST".
-Axiom transactions_TX_CREATE_COST :
-  IsGlobalAlias globals transactions.globals "TX_CREATE_COST".
-Axiom transactions_TX_DATA_COST_PER_NON_ZERO :
-  IsGlobalAlias globals transactions.globals "TX_DATA_COST_PER_NON_ZERO".
-Axiom transactions_TX_DATA_COST_PER_ZERO :
-  IsGlobalAlias globals transactions.globals "TX_DATA_COST_PER_ZERO".
-Axiom transactions_Transaction :
-  IsGlobalAlias globals transactions.globals "Transaction".
+Require ethereum.dao_fork.transactions.
+Axiom ethereum_dao_fork_transactions_TX_BASE_COST :
+  IsGlobalAlias globals ethereum.dao_fork.transactions.globals "TX_BASE_COST".
+Axiom ethereum_dao_fork_transactions_TX_CREATE_COST :
+  IsGlobalAlias globals ethereum.dao_fork.transactions.globals "TX_CREATE_COST".
+Axiom ethereum_dao_fork_transactions_TX_DATA_COST_PER_NON_ZERO :
+  IsGlobalAlias globals ethereum.dao_fork.transactions.globals "TX_DATA_COST_PER_NON_ZERO".
+Axiom ethereum_dao_fork_transactions_TX_DATA_COST_PER_ZERO :
+  IsGlobalAlias globals ethereum.dao_fork.transactions.globals "TX_DATA_COST_PER_ZERO".
+Axiom ethereum_dao_fork_transactions_Transaction :
+  IsGlobalAlias globals ethereum.dao_fork.transactions.globals "Transaction".
 
-Require trie.
-Axiom trie_Trie :
-  IsGlobalAlias globals trie.globals "Trie".
-Axiom trie_root :
-  IsGlobalAlias globals trie.globals "root".
-Axiom trie_trie_set :
-  IsGlobalAlias globals trie.globals "trie_set".
+Require ethereum.dao_fork.trie.
+Axiom ethereum_dao_fork_trie_Trie :
+  IsGlobalAlias globals ethereum.dao_fork.trie.globals "Trie".
+Axiom ethereum_dao_fork_trie_root :
+  IsGlobalAlias globals ethereum.dao_fork.trie.globals "root".
+Axiom ethereum_dao_fork_trie_trie_set :
+  IsGlobalAlias globals ethereum.dao_fork.trie.globals "trie_set".
 
-Require utils.message.
-Axiom utils_message_prepare_message :
-  IsGlobalAlias globals utils.message.globals "prepare_message".
+Require ethereum.dao_fork.utils.message.
+Axiom ethereum_dao_fork_utils_message_prepare_message :
+  IsGlobalAlias globals ethereum.dao_fork.utils.message.globals "prepare_message".
 
-Require vm.interpreter.
-Axiom vm_interpreter_process_message_call :
-  IsGlobalAlias globals vm.interpreter.globals "process_message_call".
+Require ethereum.dao_fork.vm.interpreter.
+Axiom ethereum_dao_fork_vm_interpreter_process_message_call :
+  IsGlobalAlias globals ethereum.dao_fork.vm.interpreter.globals "process_message_call".
 
 Definition BLOCK_REWARD : Value.t := M.run ltac:(M.monadic (
   M.call (|
@@ -244,6 +244,7 @@ Definition apply_fork : Value.t -> Value.t -> M :=
   |) in
     let _ := M.return_ (|
       M.get_name (| globals, "old" |)
+    |) in
     M.pure Constant.None_)).
 
 Definition get_last_256_block_hashes : Value.t -> Value.t -> M :=
@@ -269,8 +270,28 @@ Definition get_last_256_block_hashes : Value.t -> Value.t -> M :=
         Hashes of the recent 256 blocks in order of increasing block number.
     " in
     let recent_blocks :=
-      M.get_subscript (| M.get_field (| M.get_name (| globals, "chain" |), "blocks" |), UnOp.sub (| Constant.int 255 |) |) in
+      M.get_subscript (| M.get_field (| M.get_name (| globals, "chain" |), "blocks" |), M.slice (| UnOp.sub (| Constant.int 255 |), Constant.None_ |) |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.call (|
+            M.get_name (| globals, "len" |),
+            make_list [
+              M.get_name (| globals, "recent_blocks" |)
+            ],
+            make_dict []
+          |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.return_ (|
+          make_list []
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let recent_block_hashes :=
@@ -309,6 +330,7 @@ Definition get_last_256_block_hashes : Value.t -> Value.t -> M :=
   |) in
     let _ := M.return_ (|
       M.get_name (| globals, "recent_block_hashes" |)
+    |) in
     M.pure Constant.None_)).
 
 Definition state_transition : Value.t -> Value.t -> M :=
@@ -439,6 +461,27 @@ Definition state_transition : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.gt (|
+          M.call (|
+            M.get_name (| globals, "len" |),
+            make_list [
+              M.get_field (| M.get_name (| globals, "chain" |), "blocks" |)
+            ],
+            make_dict []
+          |),
+          Constant.int 255
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign (|
+          M.get_field (| M.get_name (| globals, "chain" |), "blocks" |),
+          M.get_subscript (| M.get_field (| M.get_name (| globals, "chain" |), "blocks" |), M.slice (| UnOp.sub (| Constant.int 255 |), Constant.None_ |) |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -568,6 +611,39 @@ Definition validate_header : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        BoolOp.and (|
+          Compare.gt_e (|
+            M.get_field (| M.get_name (| globals, "header" |), "number" |),
+            M.get_field (| M.get_name (| globals, "FORK_CRITERIA" |), "block_number" |)
+          |),
+          ltac:(M.monadic (
+            Compare.lt (|
+              M.get_field (| M.get_name (| globals, "header" |), "number" |),
+              BinOp.add (|
+                M.get_field (| M.get_name (| globals, "FORK_CRITERIA" |), "block_number" |),
+                Constant.int 10
+              |)
+            |)
+          ))
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_name (| globals, "ensure" |),
+    make_list [
+      Compare.eq (|
+        M.get_field (| M.get_name (| globals, "header" |), "extra_data" |),
+        Constant.bytes "64616f2d686172642d666f726b"
+      |);
+      M.get_name (| globals, "InvalidBlock" |)
+    ],
+    make_dict []
+  |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
@@ -628,6 +704,7 @@ Definition generate_header_hash_for_pow : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition validate_proof_of_work : Value.t -> Value.t -> M :=
@@ -759,6 +836,7 @@ Definition check_transaction : Value.t -> Value.t -> M :=
       |) in
     let _ := M.return_ (|
       M.get_name (| globals, "sender_address" |)
+    |) in
     M.pure Constant.None_)).
 
 Definition make_receipt : Value.t -> Value.t -> M :=
@@ -792,6 +870,7 @@ Definition make_receipt : Value.t -> Value.t -> M :=
       |) in
     let _ := M.return_ (|
       M.get_name (| globals, "receipt" |)
+    |) in
     M.pure Constant.None_)).
 
 Definition ApplyBodyOutput : Value.t :=
@@ -1005,6 +1084,7 @@ Definition apply_body : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition validate_ommers : Value.t -> Value.t -> M :=
@@ -1057,6 +1137,26 @@ Definition validate_ommers : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.call (|
+            M.get_name (| globals, "len" |),
+            make_list [
+              M.get_name (| globals, "ommers" |)
+            ],
+            make_dict []
+          |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.return_ (|
+          Constant.None_
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     For M.get_name (| globals, "ommer" |) in M.get_name (| globals, "ommers" |) do
@@ -1114,7 +1214,7 @@ Definition validate_ommers : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let ommers_hashes :=
-      (* At expr: unsupported node type: ListComp *) in
+      Constant.str "(* At expr: unsupported node type: ListComp *)" in
     let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
@@ -1145,19 +1245,19 @@ Definition validate_ommers : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let recent_canonical_blocks :=
-      M.get_subscript (| M.get_field (| M.get_name (| globals, "chain" |), "blocks" |), UnOp.sub (| BinOp.add (|
+      M.get_subscript (| M.get_field (| M.get_name (| globals, "chain" |), "blocks" |), M.slice (| UnOp.sub (| BinOp.add (|
         M.get_name (| globals, "MAX_OMMER_DEPTH" |),
         Constant.int 1
-      |) |) |) in
+      |) |), Constant.None_ |) |) in
     let recent_canonical_block_hashes :=
-      (* At expr: unsupported node type: SetComp *) in
+      Constant.str "(* At expr: unsupported node type: SetComp *)" in
 (* At stmt: unsupported node type: AnnAssign *)
     For M.get_name (| globals, "block" |) in M.get_name (| globals, "recent_canonical_blocks" |) do
       let recent_ommers_hashes :=
         M.call (|
           M.get_field (| M.get_name (| globals, "recent_ommers_hashes" |), "union" |),
           make_list [
-            (* At expr: unsupported node type: SetComp *)
+            Constant.str "(* At expr: unsupported node type: SetComp *)"
           ],
           make_dict []
         |) in
@@ -1591,6 +1691,7 @@ Definition process_transaction : Value.t -> Value.t -> M :=
     EndFor.
     let _ := M.return_ (|
       make_tuple [ M.get_name (| globals, "total_gas_used" |); M.get_field (| M.get_name (| globals, "output" |), "logs" |) ]
+    |) in
     M.pure Constant.None_)).
 
 Definition validate_transaction : Value.t -> Value.t -> M :=
@@ -1645,6 +1746,7 @@ Definition validate_transaction : Value.t -> Value.t -> M :=
           |)
         ))
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition calculate_intrinsic_cost : Value.t -> Value.t -> M :=
@@ -1676,6 +1778,20 @@ Definition calculate_intrinsic_cost : Value.t -> Value.t -> M :=
       Constant.int 0 in
     For M.get_name (| globals, "byte" |) in M.get_field (| M.get_name (| globals, "tx" |), "data" |) do
       let _ :=
+        (* if *)
+        M.if_then_else (|
+          Compare.eq (|
+            M.get_name (| globals, "byte" |),
+            Constant.int 0
+          |),
+        (* then *)
+        ltac:(M.monadic (
+          let data_cost := BinOp.add
+            M.get_name (| globals, "TX_DATA_COST_PER_ZERO" |)
+            M.get_name (| globals, "TX_DATA_COST_PER_ZERO" |) in
+          M.pure Constant.None_
+        (* else *)
+        )), ltac:(M.monadic (
           let data_cost := BinOp.add
             M.get_name (| globals, "TX_DATA_COST_PER_NON_ZERO" |)
             M.get_name (| globals, "TX_DATA_COST_PER_NON_ZERO" |) in
@@ -1683,6 +1799,25 @@ Definition calculate_intrinsic_cost : Value.t -> Value.t -> M :=
         )) |) in
     EndFor.
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_field (| M.get_name (| globals, "tx" |), "to" |),
+          M.call (|
+            M.get_name (| globals, "Bytes0" |),
+            make_list [
+              Constant.bytes ""
+            ],
+            make_dict []
+          |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let create_cost :=
+          M.get_name (| globals, "TX_CREATE_COST" |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let create_cost :=
           Constant.int 0 in
         M.pure Constant.None_
@@ -1701,6 +1836,7 @@ Definition calculate_intrinsic_cost : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition recover_sender : Value.t -> Value.t -> M :=
@@ -1819,10 +1955,11 @@ Definition recover_sender : Value.t -> Value.t -> M :=
               M.get_name (| globals, "public_key" |)
             ],
             make_dict []
-          |), Constant.int 12 |)
+          |), M.slice (| Constant.int 12, Constant.int 32 |) |)
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition signing_hash : Value.t -> Value.t -> M :=
@@ -1859,6 +1996,7 @@ Definition signing_hash : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition compute_header_hash : Value.t -> Value.t -> M :=
@@ -1909,6 +2047,7 @@ Definition compute_header_hash : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition check_gas_limit : Value.t -> Value.t -> M :=
@@ -1947,16 +2086,65 @@ Definition check_gas_limit : Value.t -> Value.t -> M :=
         M.get_name (| globals, "GAS_LIMIT_ADJUSTMENT_FACTOR" |)
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.gt_e (|
+          M.get_name (| globals, "gas_limit" |),
+          BinOp.add (|
+            M.get_name (| globals, "parent_gas_limit" |),
+            M.get_name (| globals, "max_adjustment_delta" |)
+          |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.return_ (|
+          Constant.bool false
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.lt_e (|
+          M.get_name (| globals, "gas_limit" |),
+          BinOp.sub (|
+            M.get_name (| globals, "parent_gas_limit" |),
+            M.get_name (| globals, "max_adjustment_delta" |)
+          |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.return_ (|
+          Constant.bool false
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.lt (|
+          M.get_name (| globals, "gas_limit" |),
+          M.get_name (| globals, "GAS_LIMIT_MINIMUM" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.return_ (|
+          Constant.bool false
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.return_ (|
       Constant.bool true
+    |) in
     M.pure Constant.None_)).
 
 Definition calculate_block_difficulty : Value.t -> Value.t -> M :=
@@ -2060,6 +2248,26 @@ Definition calculate_block_difficulty : Value.t -> Value.t -> M :=
         Constant.int 2
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.gt_e (|
+          M.get_name (| globals, "num_bomb_periods" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let difficulty := BinOp.add
+          BinOp.pow (|
+    Constant.int 2,
+    M.get_name (| globals, "num_bomb_periods" |)
+  |)
+          BinOp.pow (|
+    Constant.int 2,
+    M.get_name (| globals, "num_bomb_periods" |)
+  |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.return_ (|
@@ -2077,4 +2285,5 @@ Definition calculate_block_difficulty : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).

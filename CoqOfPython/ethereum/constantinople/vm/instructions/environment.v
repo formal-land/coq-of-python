@@ -35,57 +35,57 @@ Require ethereum.utils.numeric.
 Axiom ethereum_utils_numeric_ceil32 :
   IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
 
-Require fork_types.
-Axiom fork_types_EMPTY_ACCOUNT :
-  IsGlobalAlias globals fork_types.globals "EMPTY_ACCOUNT".
+Require ethereum.constantinople.fork_types.
+Axiom ethereum_constantinople_fork_types_EMPTY_ACCOUNT :
+  IsGlobalAlias globals ethereum.constantinople.fork_types.globals "EMPTY_ACCOUNT".
 
-Require state.
-Axiom state_get_account :
-  IsGlobalAlias globals state.globals "get_account".
+Require ethereum.constantinople.state.
+Axiom ethereum_constantinople_state_get_account :
+  IsGlobalAlias globals ethereum.constantinople.state.globals "get_account".
 
-Require utils.address.
-Axiom utils_address_to_address :
-  IsGlobalAlias globals utils.address.globals "to_address".
+Require ethereum.constantinople.utils.address.
+Axiom ethereum_constantinople_utils_address_to_address :
+  IsGlobalAlias globals ethereum.constantinople.utils.address.globals "to_address".
 
-Require vm.memory.
-Axiom vm_memory_buffer_read :
-  IsGlobalAlias globals vm.memory.globals "buffer_read".
-Axiom vm_memory_memory_write :
-  IsGlobalAlias globals vm.memory.globals "memory_write".
+Require ethereum.constantinople.vm.memory.
+Axiom ethereum_constantinople_vm_memory_buffer_read :
+  IsGlobalAlias globals ethereum.constantinople.vm.memory.globals "buffer_read".
+Axiom ethereum_constantinople_vm_memory_memory_write :
+  IsGlobalAlias globals ethereum.constantinople.vm.memory.globals "memory_write".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.constantinople.vm.__init__.
+Axiom ethereum_constantinople_vm___init___Evm :
+  IsGlobalAlias globals ethereum.constantinople.vm.__init__.globals "Evm".
 
-Require exceptions.
-Axiom exceptions_OutOfBoundsRead :
-  IsGlobalAlias globals exceptions.globals "OutOfBoundsRead".
+Require ethereum.constantinople.vm.exceptions.
+Axiom ethereum_constantinople_vm_exceptions_OutOfBoundsRead :
+  IsGlobalAlias globals ethereum.constantinople.vm.exceptions.globals "OutOfBoundsRead".
 
-Require gas.
-Axiom gas_GAS_BALANCE :
-  IsGlobalAlias globals gas.globals "GAS_BALANCE".
-Axiom gas_GAS_BASE :
-  IsGlobalAlias globals gas.globals "GAS_BASE".
-Axiom gas_GAS_CODE_HASH :
-  IsGlobalAlias globals gas.globals "GAS_CODE_HASH".
-Axiom gas_GAS_COPY :
-  IsGlobalAlias globals gas.globals "GAS_COPY".
-Axiom gas_GAS_EXTERNAL :
-  IsGlobalAlias globals gas.globals "GAS_EXTERNAL".
-Axiom gas_GAS_RETURN_DATA_COPY :
-  IsGlobalAlias globals gas.globals "GAS_RETURN_DATA_COPY".
-Axiom gas_GAS_VERY_LOW :
-  IsGlobalAlias globals gas.globals "GAS_VERY_LOW".
-Axiom gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals gas.globals "calculate_gas_extend_memory".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
+Require ethereum.constantinople.vm.gas.
+Axiom ethereum_constantinople_vm_gas_GAS_BALANCE :
+  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_BALANCE".
+Axiom ethereum_constantinople_vm_gas_GAS_BASE :
+  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_BASE".
+Axiom ethereum_constantinople_vm_gas_GAS_CODE_HASH :
+  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_CODE_HASH".
+Axiom ethereum_constantinople_vm_gas_GAS_COPY :
+  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_COPY".
+Axiom ethereum_constantinople_vm_gas_GAS_EXTERNAL :
+  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_EXTERNAL".
+Axiom ethereum_constantinople_vm_gas_GAS_RETURN_DATA_COPY :
+  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_RETURN_DATA_COPY".
+Axiom ethereum_constantinople_vm_gas_GAS_VERY_LOW :
+  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_VERY_LOW".
+Axiom ethereum_constantinople_vm_gas_calculate_gas_extend_memory :
+  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "calculate_gas_extend_memory".
+Axiom ethereum_constantinople_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "charge_gas".
 
-Require stack.
-Axiom stack_pop :
-  IsGlobalAlias globals stack.globals "pop".
-Axiom stack_push :
-  IsGlobalAlias globals stack.globals "push".
+Require ethereum.constantinople.vm.stack.
+Axiom ethereum_constantinople_vm_stack_pop :
+  IsGlobalAlias globals ethereum.constantinople.vm.stack.globals "pop".
+Axiom ethereum_constantinople_vm_stack_push :
+  IsGlobalAlias globals ethereum.constantinople.vm.stack.globals "push".
 
 Definition address : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -1132,7 +1132,10 @@ Definition returndatacopy : Value.t -> Value.t -> M :=
   |)
     |) in
     let value :=
-      M.get_subscript (| M.get_field (| M.get_name (| globals, "evm" |), "return_data" |), M.get_name (| globals, "return_data_start_position" |) |) in
+      M.get_subscript (| M.get_field (| M.get_name (| globals, "evm" |), "return_data" |), M.slice (| M.get_name (| globals, "return_data_start_position" |), BinOp.add (|
+        M.get_name (| globals, "return_data_start_position" |),
+        M.get_name (| globals, "size" |)
+      |) |) |) in
     let _ := M.call (|
     M.get_name (| globals, "memory_write" |),
     make_list [
@@ -1191,6 +1194,25 @@ Definition extcodehash : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "account" |),
+          M.get_name (| globals, "EMPTY_ACCOUNT" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let codehash :=
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let codehash :=
           M.call (|
             M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),

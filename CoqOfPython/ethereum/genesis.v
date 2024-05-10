@@ -34,9 +34,9 @@ Axiom typing_Dict :
 Axiom typing_cast :
   IsGlobalAlias globals typing.globals "cast".
 
-Require ethereum.
-Axiom ethereum_rlp :
-  IsGlobalAlias globals ethereum.globals "rlp".
+Require ethereum.__init__.
+Axiom ethereum___init___rlp :
+  IsGlobalAlias globals ethereum.__init__.globals "rlp".
 
 Require ethereum.base_types.
 Axiom ethereum_base_types_U64 :
@@ -109,7 +109,7 @@ Definition get_genesis_configuration : Value.t -> Value.t -> M :=
               M.get_field (| M.get_name (| globals, "pkgutil" |), "get_data" |),
               make_list [
                 Constant.str "ethereum";
-                (* At expr: unsupported node type: JoinedStr *)
+                Constant.str "(* At expr: unsupported node type: JoinedStr *)"
               ],
               make_dict []
             |)
@@ -133,6 +133,7 @@ Definition get_genesis_configuration : Value.t -> Value.t -> M :=
         make_list [],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition hex_or_base_10_str_to_u256 : Value.t -> Value.t -> M :=
@@ -143,6 +144,29 @@ Definition hex_or_base_10_str_to_u256 : Value.t -> Value.t -> M :=
     numbers or 0x prefixed hex. This function supports both.
     " in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.call (|
+          M.get_field (| M.get_name (| globals, "balance" |), "startswith" |),
+          make_list [
+            Constant.str "0x"
+          ],
+          make_dict []
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.return_ (|
+          M.call (|
+            M.get_name (| globals, "hex_to_u256" |),
+            make_list [
+              M.get_name (| globals, "balance" |)
+            ],
+            make_dict []
+          |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.return_ (|
           M.call (|
             M.get_name (| globals, "U256" |),
@@ -157,6 +181,7 @@ Definition hex_or_base_10_str_to_u256 : Value.t -> Value.t -> M :=
             ],
             make_dict []
           |)
+        |) in
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -320,8 +345,113 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
       EndFor.
     EndFor.
     let fields :=
-      {Constant.str "parent_hash", Constant.str "ommers_hash", Constant.str "coinbase", Constant.str "state_root", Constant.str "transactions_root", Constant.str "receipt_root", Constant.str "bloom", Constant.str "difficulty", Constant.str "number", Constant.str "gas_limit", Constant.str "gas_used", Constant.str "timestamp", Constant.str "extra_data", Constant.str "nonce"} in
+      {Constant.str "parent_hash": M.call (|
+        M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "fork_types" |), "Hash32" |),
+        make_list [
+          BinOp.mult (|
+            Constant.bytes "00",
+            Constant.int 32
+          |)
+        ],
+        make_dict []
+      |), Constant.str "ommers_hash": M.call (|
+        M.get_field (| M.get_name (| globals, "rlp" |), "rlp_hash" |),
+        make_list [
+          make_tuple [  ]
+        ],
+        make_dict []
+      |), Constant.str "coinbase": M.call (|
+        M.get_name (| globals, "Address" |),
+        make_list [
+          BinOp.mult (|
+            Constant.bytes "00",
+            Constant.int 20
+          |)
+        ],
+        make_dict []
+      |), Constant.str "state_root": M.call (|
+        M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "state" |), "state_root" |),
+        make_list [
+          M.get_field (| M.get_name (| globals, "chain" |), "state" |)
+        ],
+        make_dict []
+      |), Constant.str "transactions_root": M.call (|
+        M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "trie" |), "root" |),
+        make_list [
+          M.call (|
+            M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "trie" |), "Trie" |),
+            make_list [
+              Constant.bool false;
+              Constant.None_
+            ],
+            make_dict []
+          |)
+        ],
+        make_dict []
+      |), Constant.str "receipt_root": M.call (|
+        M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "trie" |), "root" |),
+        make_list [
+          M.call (|
+            M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "trie" |), "Trie" |),
+            make_list [
+              Constant.bool false;
+              Constant.None_
+            ],
+            make_dict []
+          |)
+        ],
+        make_dict []
+      |), Constant.str "bloom": M.call (|
+        M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "fork_types" |), "Bloom" |),
+        make_list [
+          BinOp.mult (|
+            Constant.bytes "00",
+            Constant.int 256
+          |)
+        ],
+        make_dict []
+      |), Constant.str "difficulty": M.get_field (| M.get_name (| globals, "genesis" |), "difficulty" |), Constant.str "number": M.call (|
+        M.get_name (| globals, "Uint" |),
+        make_list [
+          Constant.int 0
+        ],
+        make_dict []
+      |), Constant.str "gas_limit": M.get_field (| M.get_name (| globals, "genesis" |), "gas_limit" |), Constant.str "gas_used": M.call (|
+        M.get_name (| globals, "Uint" |),
+        make_list [
+          Constant.int 0
+        ],
+        make_dict []
+      |), Constant.str "timestamp": M.get_field (| M.get_name (| globals, "genesis" |), "timestamp" |), Constant.str "extra_data": M.get_field (| M.get_name (| globals, "genesis" |), "extra_data" |), Constant.str "nonce": M.get_field (| M.get_name (| globals, "genesis" |), "nonce" |)} in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.call (|
+          M.get_name (| globals, "hasattr" |),
+          make_list [
+            M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "blocks" |), "Header" |);
+            Constant.str "mix_digest"
+          ],
+          make_dict []
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign (|
+          M.get_subscript (| M.get_name (| globals, "fields" |), Constant.str "mix_digest" |),
+          M.call (|
+            M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "fork_types" |), "Hash32" |),
+            make_list [
+              BinOp.mult (|
+                Constant.bytes "00",
+                Constant.int 32
+              |)
+            ],
+            make_dict []
+          |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.assign (|
           M.get_subscript (| M.get_name (| globals, "fields" |), Constant.str "prev_randao" |),
           M.call (|
@@ -338,6 +468,34 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.call (|
+          M.get_name (| globals, "hasattr" |),
+          make_list [
+            M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "blocks" |), "Header" |);
+            Constant.str "base_fee_per_gas"
+          ],
+          make_dict []
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign (|
+          M.get_subscript (| M.get_name (| globals, "fields" |), Constant.str "base_fee_per_gas" |),
+          M.call (|
+            M.get_name (| globals, "Uint" |),
+            make_list [
+              BinOp.pow (|
+                Constant.int 10,
+                Constant.int 9
+              |)
+            ],
+            make_dict []
+          |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let genesis_header :=

@@ -29,27 +29,27 @@ Require ethereum.utils.ensure.
 Axiom ethereum_utils_ensure_ensure :
   IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
-Axiom __init___stack :
-  IsGlobalAlias globals __init__.globals "stack".
+Require ethereum.dao_fork.vm.__init__.
+Axiom ethereum_dao_fork_vm___init___Evm :
+  IsGlobalAlias globals ethereum.dao_fork.vm.__init__.globals "Evm".
+Axiom ethereum_dao_fork_vm___init___stack :
+  IsGlobalAlias globals ethereum.dao_fork.vm.__init__.globals "stack".
 
-Require exceptions.
-Axiom exceptions_StackUnderflowError :
-  IsGlobalAlias globals exceptions.globals "StackUnderflowError".
+Require ethereum.dao_fork.vm.exceptions.
+Axiom ethereum_dao_fork_vm_exceptions_StackUnderflowError :
+  IsGlobalAlias globals ethereum.dao_fork.vm.exceptions.globals "StackUnderflowError".
 
-Require gas.
-Axiom gas_GAS_BASE :
-  IsGlobalAlias globals gas.globals "GAS_BASE".
-Axiom gas_GAS_VERY_LOW :
-  IsGlobalAlias globals gas.globals "GAS_VERY_LOW".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
+Require ethereum.dao_fork.vm.gas.
+Axiom ethereum_dao_fork_vm_gas_GAS_BASE :
+  IsGlobalAlias globals ethereum.dao_fork.vm.gas.globals "GAS_BASE".
+Axiom ethereum_dao_fork_vm_gas_GAS_VERY_LOW :
+  IsGlobalAlias globals ethereum.dao_fork.vm.gas.globals "GAS_VERY_LOW".
+Axiom ethereum_dao_fork_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.dao_fork.vm.gas.globals "charge_gas".
 
-Require memory.
-Axiom memory_buffer_read :
-  IsGlobalAlias globals memory.globals "buffer_read".
+Require ethereum.dao_fork.vm.memory.
+Axiom ethereum_dao_fork_vm_memory_buffer_read :
+  IsGlobalAlias globals ethereum.dao_fork.vm.memory.globals "buffer_read".
 
 Definition pop : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

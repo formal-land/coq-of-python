@@ -61,77 +61,77 @@ Require ethereum.utils.ensure.
 Axiom ethereum_utils_ensure_ensure :
   IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
 
-Require blocks.
-Axiom blocks_Log :
-  IsGlobalAlias globals blocks.globals "Log".
+Require ethereum.spurious_dragon.blocks.
+Axiom ethereum_spurious_dragon_blocks_Log :
+  IsGlobalAlias globals ethereum.spurious_dragon.blocks.globals "Log".
 
-Require fork_types.
-Axiom fork_types_Address :
-  IsGlobalAlias globals fork_types.globals "Address".
+Require ethereum.spurious_dragon.fork_types.
+Axiom ethereum_spurious_dragon_fork_types_Address :
+  IsGlobalAlias globals ethereum.spurious_dragon.fork_types.globals "Address".
 
-Require state.
-Axiom state_account_exists_and_is_empty :
-  IsGlobalAlias globals state.globals "account_exists_and_is_empty".
-Axiom state_account_has_code_or_nonce :
-  IsGlobalAlias globals state.globals "account_has_code_or_nonce".
-Axiom state_begin_transaction :
-  IsGlobalAlias globals state.globals "begin_transaction".
-Axiom state_commit_transaction :
-  IsGlobalAlias globals state.globals "commit_transaction".
-Axiom state_destroy_storage :
-  IsGlobalAlias globals state.globals "destroy_storage".
-Axiom state_increment_nonce :
-  IsGlobalAlias globals state.globals "increment_nonce".
-Axiom state_move_ether :
-  IsGlobalAlias globals state.globals "move_ether".
-Axiom state_rollback_transaction :
-  IsGlobalAlias globals state.globals "rollback_transaction".
-Axiom state_set_code :
-  IsGlobalAlias globals state.globals "set_code".
-Axiom state_touch_account :
-  IsGlobalAlias globals state.globals "touch_account".
+Require ethereum.spurious_dragon.state.
+Axiom ethereum_spurious_dragon_state_account_exists_and_is_empty :
+  IsGlobalAlias globals ethereum.spurious_dragon.state.globals "account_exists_and_is_empty".
+Axiom ethereum_spurious_dragon_state_account_has_code_or_nonce :
+  IsGlobalAlias globals ethereum.spurious_dragon.state.globals "account_has_code_or_nonce".
+Axiom ethereum_spurious_dragon_state_begin_transaction :
+  IsGlobalAlias globals ethereum.spurious_dragon.state.globals "begin_transaction".
+Axiom ethereum_spurious_dragon_state_commit_transaction :
+  IsGlobalAlias globals ethereum.spurious_dragon.state.globals "commit_transaction".
+Axiom ethereum_spurious_dragon_state_destroy_storage :
+  IsGlobalAlias globals ethereum.spurious_dragon.state.globals "destroy_storage".
+Axiom ethereum_spurious_dragon_state_increment_nonce :
+  IsGlobalAlias globals ethereum.spurious_dragon.state.globals "increment_nonce".
+Axiom ethereum_spurious_dragon_state_move_ether :
+  IsGlobalAlias globals ethereum.spurious_dragon.state.globals "move_ether".
+Axiom ethereum_spurious_dragon_state_rollback_transaction :
+  IsGlobalAlias globals ethereum.spurious_dragon.state.globals "rollback_transaction".
+Axiom ethereum_spurious_dragon_state_set_code :
+  IsGlobalAlias globals ethereum.spurious_dragon.state.globals "set_code".
+Axiom ethereum_spurious_dragon_state_touch_account :
+  IsGlobalAlias globals ethereum.spurious_dragon.state.globals "touch_account".
 
-Require vm.
-Axiom vm_Message :
-  IsGlobalAlias globals vm.globals "Message".
+Require ethereum.spurious_dragon.vm.__init__.
+Axiom ethereum_spurious_dragon_vm___init___Message :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.__init__.globals "Message".
 
-Require vm.gas.
-Axiom vm_gas_GAS_CODE_DEPOSIT :
-  IsGlobalAlias globals vm.gas.globals "GAS_CODE_DEPOSIT".
-Axiom vm_gas_charge_gas :
-  IsGlobalAlias globals vm.gas.globals "charge_gas".
+Require ethereum.spurious_dragon.vm.gas.
+Axiom ethereum_spurious_dragon_vm_gas_GAS_CODE_DEPOSIT :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.gas.globals "GAS_CODE_DEPOSIT".
+Axiom ethereum_spurious_dragon_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.gas.globals "charge_gas".
 
-Require vm.precompiled_contracts.mapping.
-Axiom vm_precompiled_contracts_mapping_PRE_COMPILED_CONTRACTS :
-  IsGlobalAlias globals vm.precompiled_contracts.mapping.globals "PRE_COMPILED_CONTRACTS".
+Require ethereum.spurious_dragon.vm.precompiled_contracts.mapping.
+Axiom ethereum_spurious_dragon_vm_precompiled_contracts_mapping_PRE_COMPILED_CONTRACTS :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.precompiled_contracts.mapping.globals "PRE_COMPILED_CONTRACTS".
 
-Require __init__.
-Axiom __init___Environment :
-  IsGlobalAlias globals __init__.globals "Environment".
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.spurious_dragon.vm.__init__.
+Axiom ethereum_spurious_dragon_vm___init___Environment :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.__init__.globals "Environment".
+Axiom ethereum_spurious_dragon_vm___init___Evm :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.__init__.globals "Evm".
 
-Require exceptions.
-Axiom exceptions_AddressCollision :
-  IsGlobalAlias globals exceptions.globals "AddressCollision".
-Axiom exceptions_ExceptionalHalt :
-  IsGlobalAlias globals exceptions.globals "ExceptionalHalt".
-Axiom exceptions_InvalidOpcode :
-  IsGlobalAlias globals exceptions.globals "InvalidOpcode".
-Axiom exceptions_OutOfGasError :
-  IsGlobalAlias globals exceptions.globals "OutOfGasError".
-Axiom exceptions_StackDepthLimitError :
-  IsGlobalAlias globals exceptions.globals "StackDepthLimitError".
+Require ethereum.spurious_dragon.vm.exceptions.
+Axiom ethereum_spurious_dragon_vm_exceptions_AddressCollision :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.exceptions.globals "AddressCollision".
+Axiom ethereum_spurious_dragon_vm_exceptions_ExceptionalHalt :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.exceptions.globals "ExceptionalHalt".
+Axiom ethereum_spurious_dragon_vm_exceptions_InvalidOpcode :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.exceptions.globals "InvalidOpcode".
+Axiom ethereum_spurious_dragon_vm_exceptions_OutOfGasError :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.exceptions.globals "OutOfGasError".
+Axiom ethereum_spurious_dragon_vm_exceptions_StackDepthLimitError :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.exceptions.globals "StackDepthLimitError".
 
-Require instructions.
-Axiom instructions_Ops :
-  IsGlobalAlias globals instructions.globals "Ops".
-Axiom instructions_op_implementation :
-  IsGlobalAlias globals instructions.globals "op_implementation".
+Require ethereum.spurious_dragon.vm.instructions.__init__.
+Axiom ethereum_spurious_dragon_vm_instructions___init___Ops :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.instructions.__init__.globals "Ops".
+Axiom ethereum_spurious_dragon_vm_instructions___init___op_implementation :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.instructions.__init__.globals "op_implementation".
 
-Require runtime.
-Axiom runtime_get_valid_jump_destinations :
-  IsGlobalAlias globals runtime.globals "get_valid_jump_destinations".
+Require ethereum.spurious_dragon.vm.runtime.
+Axiom ethereum_spurious_dragon_vm_runtime_get_valid_jump_destinations :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.runtime.globals "get_valid_jump_destinations".
 
 Definition STACK_DEPTH_LIMIT : Value.t := M.run ltac:(M.monadic (
   M.call (|
@@ -178,6 +178,94 @@ Definition process_message_call : Value.t -> Value.t -> M :=
         Output of the message call
     " in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_field (| M.get_name (| globals, "message" |), "target" |),
+          M.call (|
+            M.get_name (| globals, "Bytes0" |),
+            make_list [
+              Constant.bytes ""
+            ],
+            make_dict []
+          |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let is_collision :=
+          M.call (|
+            M.get_name (| globals, "account_has_code_or_nonce" |),
+            make_list [
+              M.get_field (| M.get_name (| globals, "env" |), "state" |);
+              M.get_field (| M.get_name (| globals, "message" |), "current_target" |)
+            ],
+            make_dict []
+          |) in
+        let _ :=
+          (* if *)
+          M.if_then_else (|
+            M.get_name (| globals, "is_collision" |),
+          (* then *)
+          ltac:(M.monadic (
+            let _ := M.return_ (|
+              M.call (|
+                M.get_name (| globals, "MessageCallOutput" |),
+                make_list [
+                  M.call (|
+                    M.get_name (| globals, "Uint" |),
+                    make_list [
+                      Constant.int 0
+                    ],
+                    make_dict []
+                  |);
+                  M.call (|
+                    M.get_name (| globals, "U256" |),
+                    make_list [
+                      Constant.int 0
+                    ],
+                    make_dict []
+                  |);
+                  M.call (|
+                    M.get_name (| globals, "tuple" |),
+                    make_list [],
+                    make_dict []
+                  |);
+                  M.call (|
+                    M.get_name (| globals, "set" |),
+                    make_list [],
+                    make_dict []
+                  |);
+                  M.call (|
+                    M.get_name (| globals, "set" |),
+                    make_list [],
+                    make_dict []
+                  |);
+                  M.call (|
+                    M.get_name (| globals, "AddressCollision" |),
+                    make_list [],
+                    make_dict []
+                  |)
+                ],
+                make_dict []
+              |)
+            |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
+            let evm :=
+              M.call (|
+                M.get_name (| globals, "process_create_message" |),
+                make_list [
+                  M.get_name (| globals, "message" |);
+                  M.get_name (| globals, "env" |)
+                ],
+                make_dict []
+              |) in
+            M.pure Constant.None_
+          )) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let evm :=
           M.call (|
             M.get_name (| globals, "process_message" |),
@@ -188,11 +276,74 @@ Definition process_message_call : Value.t -> Value.t -> M :=
             make_dict []
           |) in
         let _ :=
+          (* if *)
+          M.if_then_else (|
+            M.call (|
+              M.get_name (| globals, "account_exists_and_is_empty" |),
+              make_list [
+                M.get_field (| M.get_name (| globals, "env" |), "state" |);
+                M.call (|
+                  M.get_name (| globals, "Address" |),
+                  make_list [
+                    M.get_field (| M.get_name (| globals, "message" |), "target" |)
+                  ],
+                  make_dict []
+                |)
+              ],
+              make_dict []
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let _ := M.call (|
+    M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "touched_accounts" |), "add" |),
+    make_list [
+      M.call (|
+        M.get_name (| globals, "Address" |),
+        make_list [
+          M.get_field (| M.get_name (| globals, "message" |), "target" |)
+        ],
+        make_dict []
+      |)
+    ],
+    make_dict []
+  |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
             M.pure Constant.None_
           )) |) in
         M.pure Constant.None_
       )) |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.get_field (| M.get_name (| globals, "evm" |), "error" |),
+      (* then *)
+      ltac:(M.monadic (
+(* At stmt: unsupported node type: AnnAssign *)
+        let accounts_to_delete :=
+          M.call (|
+            M.get_name (| globals, "set" |),
+            make_list [],
+            make_dict []
+          |) in
+        let touched_accounts :=
+          M.call (|
+            M.get_name (| globals, "set" |),
+            make_list [],
+            make_dict []
+          |) in
+        let refund_counter :=
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let logs :=
           M.get_field (| M.get_name (| globals, "evm" |), "logs" |) in
         let accounts_to_delete :=
@@ -230,6 +381,7 @@ Definition process_message_call : Value.t -> Value.t -> M :=
         make_list [],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition process_create_message : Value.t -> Value.t -> M :=
@@ -283,6 +435,28 @@ Definition process_create_message : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        UnOp.not (| M.get_field (| M.get_name (| globals, "evm" |), "error" |) |),
+      (* then *)
+      ltac:(M.monadic (
+        let contract_code :=
+          M.get_field (| M.get_name (| globals, "evm" |), "output" |) in
+        let contract_code_gas :=
+          BinOp.mult (|
+            M.call (|
+              M.get_name (| globals, "len" |),
+              make_list [
+                M.get_name (| globals, "contract_code" |)
+              ],
+              make_dict []
+            |),
+            M.get_name (| globals, "GAS_CODE_DEPOSIT" |)
+          |) in
+(* At stmt: unsupported node type: Try *)
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.call (|
     M.get_name (| globals, "rollback_transaction" |),
     make_list [
@@ -294,6 +468,7 @@ Definition process_create_message : Value.t -> Value.t -> M :=
       )) |) in
     let _ := M.return_ (|
       M.get_name (| globals, "evm" |)
+    |) in
     M.pure Constant.None_)).
 
 Definition process_message : Value.t -> Value.t -> M :=
@@ -315,6 +490,24 @@ Definition process_message : Value.t -> Value.t -> M :=
         Items containing execution specific objects
     " in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.gt (|
+          M.get_field (| M.get_name (| globals, "message" |), "depth" |),
+          M.get_name (| globals, "STACK_DEPTH_LIMIT" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some(M.call (|
+          M.get_name (| globals, "StackDepthLimitError" |),
+          make_list [
+            Constant.str "Stack depth limit reached"
+          ],
+          make_dict []
+        |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
@@ -333,6 +526,32 @@ Definition process_message : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        BoolOp.and (|
+          M.get_field (| M.get_name (| globals, "message" |), "should_transfer_value" |),
+          ltac:(M.monadic (
+            Compare.not_eq (|
+              M.get_field (| M.get_name (| globals, "message" |), "value" |),
+              Constant.int 0
+            |)
+          ))
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_name (| globals, "move_ether" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "env" |), "state" |);
+      M.get_field (| M.get_name (| globals, "message" |), "caller" |);
+      M.get_field (| M.get_name (| globals, "message" |), "current_target" |);
+      M.get_field (| M.get_name (| globals, "message" |), "value" |)
+    ],
+    make_dict []
+  |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let evm :=
@@ -345,6 +564,21 @@ Definition process_message : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.get_field (| M.get_name (| globals, "evm" |), "error" |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_name (| globals, "rollback_transaction" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "env" |), "state" |)
+    ],
+    make_dict []
+  |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.call (|
     M.get_name (| globals, "commit_transaction" |),
     make_list [
@@ -356,6 +590,7 @@ Definition process_message : Value.t -> Value.t -> M :=
       )) |) in
     let _ := M.return_ (|
       M.get_name (| globals, "evm" |)
+    |) in
     M.pure Constant.None_)).
 
 Definition execute_code : Value.t -> Value.t -> M :=
@@ -395,4 +630,5 @@ Definition execute_code : Value.t -> Value.t -> M :=
 (* At stmt: unsupported node type: Try *)
     let _ := M.return_ (|
       M.get_name (| globals, "evm" |)
+    |) in
     M.pure Constant.None_)).

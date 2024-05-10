@@ -23,21 +23,21 @@ Axiom ethereum_base_types_U256 :
 Axiom ethereum_base_types_U256_CEIL_VALUE :
   IsGlobalAlias globals ethereum.base_types.globals "U256_CEIL_VALUE".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.muir_glacier.vm.__init__.
+Axiom ethereum_muir_glacier_vm___init___Evm :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.__init__.globals "Evm".
 
-Require gas.
-Axiom gas_GAS_VERY_LOW :
-  IsGlobalAlias globals gas.globals "GAS_VERY_LOW".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
+Require ethereum.muir_glacier.vm.gas.
+Axiom ethereum_muir_glacier_vm_gas_GAS_VERY_LOW :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "GAS_VERY_LOW".
+Axiom ethereum_muir_glacier_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "charge_gas".
 
-Require stack.
-Axiom stack_pop :
-  IsGlobalAlias globals stack.globals "pop".
-Axiom stack_push :
-  IsGlobalAlias globals stack.globals "push".
+Require ethereum.muir_glacier.vm.stack.
+Axiom ethereum_muir_glacier_vm_stack_pop :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.stack.globals "pop".
+Axiom ethereum_muir_glacier_vm_stack_push :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.stack.globals "push".
 
 Definition bitwise_and : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -287,6 +287,25 @@ Definition get_byte : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.gt_e (|
+          M.get_name (| globals, "byte_index" |),
+          Constant.int 32
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let result :=
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let extra_bytes_to_right :=
           BinOp.sub (|
             Constant.int 31,
@@ -366,6 +385,31 @@ Definition bitwise_shl : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.lt (|
+          M.get_name (| globals, "shift" |),
+          Constant.int 256
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let result :=
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              BinOp.mod_ (|
+                BinOp.l_shift (|
+                  M.get_name (| globals, "value" |),
+                  M.get_name (| globals, "shift" |)
+                |),
+                M.get_name (| globals, "U256_CEIL_VALUE" |)
+              |)
+            ],
+            make_dict []
+          |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let result :=
           M.call (|
             M.get_name (| globals, "U256" |),
@@ -427,6 +471,22 @@ Definition bitwise_shr : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.lt (|
+          M.get_name (| globals, "shift" |),
+          Constant.int 256
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let result :=
+          BinOp.r_shift (|
+            M.get_name (| globals, "value" |),
+            M.get_name (| globals, "shift" |)
+          |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let result :=
           M.call (|
             M.get_name (| globals, "U256" |),
@@ -492,7 +552,48 @@ Definition bitwise_sar : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.lt (|
+          M.get_name (| globals, "shift" |),
+          Constant.int 256
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let result :=
+          M.call (|
+            M.get_field (| M.get_name (| globals, "U256" |), "from_signed" |),
+            make_list [
+              BinOp.r_shift (|
+                M.get_name (| globals, "signed_value" |),
+                M.get_name (| globals, "shift" |)
+              |)
+            ],
+            make_dict []
+          |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ :=
+          (* if *)
+          M.if_then_else (|
+            Compare.gt_e (|
+              M.get_name (| globals, "signed_value" |),
+              Constant.int 0
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let result :=
+              M.call (|
+                M.get_name (| globals, "U256" |),
+                make_list [
+                  Constant.int 0
+                ],
+                make_dict []
+              |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
             let result :=
               M.get_field (| M.get_name (| globals, "U256" |), "MAX_VALUE" |) in
             M.pure Constant.None_

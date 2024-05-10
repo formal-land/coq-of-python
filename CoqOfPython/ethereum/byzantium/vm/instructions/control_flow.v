@@ -23,31 +23,31 @@ Axiom ethereum_base_types_U256 :
 Axiom ethereum_base_types_Uint :
   IsGlobalAlias globals ethereum.base_types.globals "Uint".
 
-Require vm.gas.
-Axiom vm_gas_GAS_BASE :
-  IsGlobalAlias globals vm.gas.globals "GAS_BASE".
-Axiom vm_gas_GAS_HIGH :
-  IsGlobalAlias globals vm.gas.globals "GAS_HIGH".
-Axiom vm_gas_GAS_JUMPDEST :
-  IsGlobalAlias globals vm.gas.globals "GAS_JUMPDEST".
-Axiom vm_gas_GAS_MID :
-  IsGlobalAlias globals vm.gas.globals "GAS_MID".
-Axiom vm_gas_charge_gas :
-  IsGlobalAlias globals vm.gas.globals "charge_gas".
+Require ethereum.byzantium.vm.gas.
+Axiom ethereum_byzantium_vm_gas_GAS_BASE :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_BASE".
+Axiom ethereum_byzantium_vm_gas_GAS_HIGH :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_HIGH".
+Axiom ethereum_byzantium_vm_gas_GAS_JUMPDEST :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_JUMPDEST".
+Axiom ethereum_byzantium_vm_gas_GAS_MID :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_MID".
+Axiom ethereum_byzantium_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "charge_gas".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.byzantium.vm.__init__.
+Axiom ethereum_byzantium_vm___init___Evm :
+  IsGlobalAlias globals ethereum.byzantium.vm.__init__.globals "Evm".
 
-Require exceptions.
-Axiom exceptions_InvalidJumpDestError :
-  IsGlobalAlias globals exceptions.globals "InvalidJumpDestError".
+Require ethereum.byzantium.vm.exceptions.
+Axiom ethereum_byzantium_vm_exceptions_InvalidJumpDestError :
+  IsGlobalAlias globals ethereum.byzantium.vm.exceptions.globals "InvalidJumpDestError".
 
-Require stack.
-Axiom stack_pop :
-  IsGlobalAlias globals stack.globals "pop".
-Axiom stack_push :
-  IsGlobalAlias globals stack.globals "push".
+Require ethereum.byzantium.vm.stack.
+Axiom ethereum_byzantium_vm_stack_pop :
+  IsGlobalAlias globals ethereum.byzantium.vm.stack.globals "pop".
+Axiom ethereum_byzantium_vm_stack_push :
+  IsGlobalAlias globals ethereum.byzantium.vm.stack.globals "push".
 
 Definition stop : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -109,6 +109,18 @@ Definition jump : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.not_in (|
+          M.get_name (| globals, "jump_dest" |),
+          M.get_field (| M.get_name (| globals, "evm" |), "valid_jump_destinations" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some(M.get_name (| globals, "InvalidJumpDestError" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.assign (|
@@ -168,7 +180,35 @@ Definition jumpi : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "conditional_value" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let destination :=
+          BinOp.add (|
+            M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+            Constant.int 1
+          |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ :=
+          (* if *)
+          M.if_then_else (|
+            Compare.not_in (|
+              M.get_name (| globals, "jump_dest" |),
+              M.get_field (| M.get_name (| globals, "evm" |), "valid_jump_destinations" |)
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let _ := M.raise (| Some(M.get_name (| globals, "InvalidJumpDestError" |)) |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
             let destination :=
               M.get_name (| globals, "jump_dest" |) in
             M.pure Constant.None_

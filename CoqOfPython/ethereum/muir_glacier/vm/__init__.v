@@ -50,23 +50,23 @@ Require ethereum.crypto.hash.
 Axiom ethereum_crypto_hash_Hash32 :
   IsGlobalAlias globals ethereum.crypto.hash.globals "Hash32".
 
-Require blocks.
-Axiom blocks_Log :
-  IsGlobalAlias globals blocks.globals "Log".
+Require ethereum.muir_glacier.blocks.
+Axiom ethereum_muir_glacier_blocks_Log :
+  IsGlobalAlias globals ethereum.muir_glacier.blocks.globals "Log".
 
-Require fork_types.
-Axiom fork_types_Address :
-  IsGlobalAlias globals fork_types.globals "Address".
+Require ethereum.muir_glacier.fork_types.
+Axiom ethereum_muir_glacier_fork_types_Address :
+  IsGlobalAlias globals ethereum.muir_glacier.fork_types.globals "Address".
 
-Require state.
-Axiom state_State :
-  IsGlobalAlias globals state.globals "State".
-Axiom state_account_exists_and_is_empty :
-  IsGlobalAlias globals state.globals "account_exists_and_is_empty".
+Require ethereum.muir_glacier.state.
+Axiom ethereum_muir_glacier_state_State :
+  IsGlobalAlias globals ethereum.muir_glacier.state.globals "State".
+Axiom ethereum_muir_glacier_state_account_exists_and_is_empty :
+  IsGlobalAlias globals ethereum.muir_glacier.state.globals "account_exists_and_is_empty".
 
-Require precompiled_contracts.
-Axiom precompiled_contracts_RIPEMD160_ADDRESS :
-  IsGlobalAlias globals precompiled_contracts.globals "RIPEMD160_ADDRESS".
+Require ethereum.muir_glacier.vm.precompiled_contracts.__init__.
+Axiom ethereum_muir_glacier_vm_precompiled_contracts___init___RIPEMD160_ADDRESS :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.precompiled_contracts.__init__.globals "RIPEMD160_ADDRESS".
 
 Definition __all__ : Value.t := M.run ltac:(M.monadic (
   make_tuple [ Constant.str "Environment"; Constant.str "Evm"; Constant.str "Message" ]
@@ -145,6 +145,28 @@ Definition incorporate_child_on_success : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.call (|
+          M.get_name (| globals, "account_exists_and_is_empty" |),
+          make_list [
+            M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "state" |);
+            M.get_field (| M.get_field (| M.get_name (| globals, "child_evm" |), "message" |), "current_target" |)
+          ],
+          make_dict []
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "touched_accounts" |), "add" |),
+    make_list [
+      M.get_field (| M.get_field (| M.get_name (| globals, "child_evm" |), "message" |), "current_target" |)
+    ],
+    make_dict []
+  |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -163,9 +185,63 @@ Definition incorporate_child_on_error : Value.t -> Value.t -> M :=
         The child evm to incorporate.
     " in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.in (|
+          M.get_name (| globals, "RIPEMD160_ADDRESS" |),
+          M.get_field (| M.get_name (| globals, "child_evm" |), "touched_accounts" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "touched_accounts" |), "add" |),
+    make_list [
+      M.get_name (| globals, "RIPEMD160_ADDRESS" |)
+    ],
+    make_dict []
+  |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_field (| M.get_field (| M.get_name (| globals, "child_evm" |), "message" |), "current_target" |),
+          M.get_name (| globals, "RIPEMD160_ADDRESS" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ :=
+          (* if *)
+          M.if_then_else (|
+            M.call (|
+              M.get_name (| globals, "account_exists_and_is_empty" |),
+              make_list [
+                M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "state" |);
+                M.get_field (| M.get_field (| M.get_name (| globals, "child_evm" |), "message" |), "current_target" |)
+              ],
+              make_dict []
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let _ := M.call (|
+    M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "touched_accounts" |), "add" |),
+    make_list [
+      M.get_name (| globals, "RIPEMD160_ADDRESS" |)
+    ],
+    make_dict []
+  |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
+            M.pure Constant.None_
+          )) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.assign_op (|

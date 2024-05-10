@@ -25,17 +25,17 @@ Axiom ethereum_base_types_Bytes :
 Axiom ethereum_base_types_Uint :
   IsGlobalAlias globals ethereum.base_types.globals "Uint".
 
-Require vm.
-Axiom vm_Evm :
-  IsGlobalAlias globals vm.globals "Evm".
+Require ethereum.byzantium.vm.__init__.
+Axiom ethereum_byzantium_vm___init___Evm :
+  IsGlobalAlias globals ethereum.byzantium.vm.__init__.globals "Evm".
 
-Require vm.gas.
-Axiom vm_gas_charge_gas :
-  IsGlobalAlias globals vm.gas.globals "charge_gas".
+Require ethereum.byzantium.vm.gas.
+Axiom ethereum_byzantium_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "charge_gas".
 
-Require memory.
-Axiom memory_buffer_read :
-  IsGlobalAlias globals memory.globals "buffer_read".
+Require ethereum.byzantium.vm.memory.
+Axiom ethereum_byzantium_vm_memory_buffer_read :
+  IsGlobalAlias globals ethereum.byzantium.vm.memory.globals "buffer_read".
 
 Definition GQUADDIVISOR : Value.t := M.run ltac:(M.monadic (
   M.call (|
@@ -181,6 +181,39 @@ Definition modexp : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.lt (|
+          M.get_name (| globals, "exp_length" |),
+          Constant.int 32
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let adjusted_exp_length :=
+          M.call (|
+            M.get_name (| globals, "Uint" |),
+            make_list [
+              M.call (|
+                M.get_name (| globals, "max" |),
+                make_list [
+                  Constant.int 0;
+                  BinOp.sub (|
+                    M.call (|
+                      M.get_field (| M.get_name (| globals, "exp_head" |), "bit_length" |),
+                      make_list [],
+                      make_dict []
+                    |),
+                    Constant.int 1
+                  |)
+                ],
+                make_dict []
+              |)
+            ],
+            make_dict []
+          |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let adjusted_exp_length :=
           M.call (|
             M.get_name (| globals, "Uint" |),
@@ -267,6 +300,36 @@ Definition modexp : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        BoolOp.and (|
+          Compare.eq (|
+            M.get_name (| globals, "base_length" |),
+            Constant.int 0
+          |),
+          ltac:(M.monadic (
+            Compare.eq (|
+              M.get_name (| globals, "modulus_length" |),
+              Constant.int 0
+            |)
+          ))
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign (|
+          M.get_field (| M.get_name (| globals, "evm" |), "output" |),
+          M.call (|
+            M.get_name (| globals, "Bytes" |),
+            make_list [],
+            make_dict []
+          |)
+        |) in
+        let _ := M.return_ (|
+          Constant.None_
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let base :=
@@ -329,6 +392,30 @@ Definition modexp : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "modulus" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign (|
+          M.get_field (| M.get_name (| globals, "evm" |), "output" |),
+          BinOp.mult (|
+            M.call (|
+              M.get_name (| globals, "Bytes" |),
+              make_list [
+                Constant.bytes "00"
+              ],
+              make_dict []
+            |),
+            M.get_name (| globals, "modulus_length" |)
+          |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.assign (|
           M.get_field (| M.get_name (| globals, "evm" |), "output" |),
           M.call (|
@@ -365,7 +452,53 @@ Definition get_mult_complexity : Value.t -> Value.t -> M :=
     Estimate the complexity of performing Karatsuba multiplication.
     " in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.lt_e (|
+          M.get_name (| globals, "x" |),
+          Constant.int 64
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.return_ (|
+          BinOp.pow (|
+            M.get_name (| globals, "x" |),
+            Constant.int 2
+          |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ :=
+          (* if *)
+          M.if_then_else (|
+            Compare.lt_e (|
+              M.get_name (| globals, "x" |),
+              Constant.int 1024
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let _ := M.return_ (|
+              BinOp.sub (|
+                BinOp.add (|
+                  BinOp.floor_div (|
+                    BinOp.pow (|
+                      M.get_name (| globals, "x" |),
+                      Constant.int 2
+                    |),
+                    Constant.int 4
+                  |),
+                  BinOp.mult (|
+                    Constant.int 96,
+                    M.get_name (| globals, "x" |)
+                  |)
+                |),
+                Constant.int 3072
+              |)
+            |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
             let _ := M.return_ (|
               BinOp.sub (|
                 BinOp.add (|
@@ -383,6 +516,7 @@ Definition get_mult_complexity : Value.t -> Value.t -> M :=
                 |),
                 Constant.int 199680
               |)
+            |) in
             M.pure Constant.None_
           )) |) in
         M.pure Constant.None_

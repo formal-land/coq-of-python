@@ -40,27 +40,27 @@ Axiom ethereum_base_types_Bytes32 :
 Axiom ethereum_base_types_Uint :
   IsGlobalAlias globals ethereum.base_types.globals "Uint".
 
-Require fork_types.
-Axiom fork_types_Address :
-  IsGlobalAlias globals fork_types.globals "Address".
+Require ethereum.london.fork_types.
+Axiom ethereum_london_fork_types_Address :
+  IsGlobalAlias globals ethereum.london.fork_types.globals "Address".
 
-Require state.
-Axiom state_get_account :
-  IsGlobalAlias globals state.globals "get_account".
+Require ethereum.london.state.
+Axiom ethereum_london_state_get_account :
+  IsGlobalAlias globals ethereum.london.state.globals "get_account".
 
-Require vm.
-Axiom vm_Environment :
-  IsGlobalAlias globals vm.globals "Environment".
-Axiom vm_Message :
-  IsGlobalAlias globals vm.globals "Message".
+Require ethereum.london.vm.__init__.
+Axiom ethereum_london_vm___init___Environment :
+  IsGlobalAlias globals ethereum.london.vm.__init__.globals "Environment".
+Axiom ethereum_london_vm___init___Message :
+  IsGlobalAlias globals ethereum.london.vm.__init__.globals "Message".
 
-Require vm.precompiled_contracts.mapping.
-Axiom vm_precompiled_contracts_mapping_PRE_COMPILED_CONTRACTS :
-  IsGlobalAlias globals vm.precompiled_contracts.mapping.globals "PRE_COMPILED_CONTRACTS".
+Require ethereum.london.vm.precompiled_contracts.mapping.
+Axiom ethereum_london_vm_precompiled_contracts_mapping_PRE_COMPILED_CONTRACTS :
+  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.mapping.globals "PRE_COMPILED_CONTRACTS".
 
-Require address.
-Axiom address_compute_contract_address :
-  IsGlobalAlias globals address.globals "compute_contract_address".
+Require ethereum.london.utils.address.
+Axiom ethereum_london_utils_address_compute_contract_address :
+  IsGlobalAlias globals ethereum.london.utils.address.globals "compute_contract_address".
 
 Definition prepare_message : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -103,14 +103,108 @@ Definition prepare_message : Value.t -> Value.t -> M :=
         Items containing contract creation or message call specific data.
     " in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.call (|
+          M.get_name (| globals, "isinstance" |),
+          make_list [
+            M.get_name (| globals, "target" |);
+            M.get_name (| globals, "Bytes0" |)
+          ],
+          make_dict []
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let current_target :=
+          M.call (|
+            M.get_name (| globals, "compute_contract_address" |),
+            make_list [
+              M.get_name (| globals, "caller" |);
+              BinOp.sub (|
+                M.get_field (| M.call (|
+                  M.get_name (| globals, "get_account" |),
+                  make_list [
+                    M.get_field (| M.get_name (| globals, "env" |), "state" |);
+                    M.get_name (| globals, "caller" |)
+                  ],
+                  make_dict []
+                |), "nonce" |),
+                M.call (|
+                  M.get_name (| globals, "U256" |),
+                  make_list [
+                    Constant.int 1
+                  ],
+                  make_dict []
+                |)
+              |)
+            ],
+            make_dict []
+          |) in
+        let msg_data :=
+          M.call (|
+            M.get_name (| globals, "Bytes" |),
+            make_list [
+              Constant.bytes ""
+            ],
+            make_dict []
+          |) in
+        let code :=
+          M.get_name (| globals, "data" |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ :=
+          (* if *)
+          M.if_then_else (|
+            M.call (|
+              M.get_name (| globals, "isinstance" |),
+              make_list [
+                M.get_name (| globals, "target" |);
+                M.get_name (| globals, "Address" |)
+              ],
+              make_dict []
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let current_target :=
+              M.get_name (| globals, "target" |) in
+            let msg_data :=
+              M.get_name (| globals, "data" |) in
+            let code :=
+              M.get_field (| M.call (|
+                M.get_name (| globals, "get_account" |),
+                make_list [
+                  M.get_field (| M.get_name (| globals, "env" |), "state" |);
+                  M.get_name (| globals, "target" |)
+                ],
+                make_dict []
+              |), "code" |) in
+            let _ :=
+              (* if *)
+              M.if_then_else (|
+                Compare.is (|
+                  M.get_name (| globals, "code_address" |),
+                  Constant.None_
+                |),
+              (* then *)
+              ltac:(M.monadic (
+                let code_address :=
+                  M.get_name (| globals, "target" |) in
+                M.pure Constant.None_
+              (* else *)
+              )), ltac:(M.monadic (
+                M.pure Constant.None_
+              )) |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
             let _ := M.raise (| Some(M.call (|
               M.get_name (| globals, "AssertionError" |),
               make_list [
                 Constant.str "Target must be address or empty bytes"
               ],
               make_dict []
-            |))
+            |)) |) in
             M.pure Constant.None_
           )) |) in
         M.pure Constant.None_
@@ -159,4 +253,5 @@ Definition prepare_message : Value.t -> Value.t -> M :=
         make_list [],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).

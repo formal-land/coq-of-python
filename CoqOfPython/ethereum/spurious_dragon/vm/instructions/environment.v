@@ -27,45 +27,45 @@ Require ethereum.utils.numeric.
 Axiom ethereum_utils_numeric_ceil32 :
   IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
 
-Require state.
-Axiom state_get_account :
-  IsGlobalAlias globals state.globals "get_account".
+Require ethereum.spurious_dragon.state.
+Axiom ethereum_spurious_dragon_state_get_account :
+  IsGlobalAlias globals ethereum.spurious_dragon.state.globals "get_account".
 
-Require utils.address.
-Axiom utils_address_to_address :
-  IsGlobalAlias globals utils.address.globals "to_address".
+Require ethereum.spurious_dragon.utils.address.
+Axiom ethereum_spurious_dragon_utils_address_to_address :
+  IsGlobalAlias globals ethereum.spurious_dragon.utils.address.globals "to_address".
 
-Require vm.memory.
-Axiom vm_memory_buffer_read :
-  IsGlobalAlias globals vm.memory.globals "buffer_read".
-Axiom vm_memory_memory_write :
-  IsGlobalAlias globals vm.memory.globals "memory_write".
+Require ethereum.spurious_dragon.vm.memory.
+Axiom ethereum_spurious_dragon_vm_memory_buffer_read :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.memory.globals "buffer_read".
+Axiom ethereum_spurious_dragon_vm_memory_memory_write :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.memory.globals "memory_write".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.spurious_dragon.vm.__init__.
+Axiom ethereum_spurious_dragon_vm___init___Evm :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.__init__.globals "Evm".
 
-Require gas.
-Axiom gas_GAS_BALANCE :
-  IsGlobalAlias globals gas.globals "GAS_BALANCE".
-Axiom gas_GAS_BASE :
-  IsGlobalAlias globals gas.globals "GAS_BASE".
-Axiom gas_GAS_COPY :
-  IsGlobalAlias globals gas.globals "GAS_COPY".
-Axiom gas_GAS_EXTERNAL :
-  IsGlobalAlias globals gas.globals "GAS_EXTERNAL".
-Axiom gas_GAS_VERY_LOW :
-  IsGlobalAlias globals gas.globals "GAS_VERY_LOW".
-Axiom gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals gas.globals "calculate_gas_extend_memory".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
+Require ethereum.spurious_dragon.vm.gas.
+Axiom ethereum_spurious_dragon_vm_gas_GAS_BALANCE :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.gas.globals "GAS_BALANCE".
+Axiom ethereum_spurious_dragon_vm_gas_GAS_BASE :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.gas.globals "GAS_BASE".
+Axiom ethereum_spurious_dragon_vm_gas_GAS_COPY :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.gas.globals "GAS_COPY".
+Axiom ethereum_spurious_dragon_vm_gas_GAS_EXTERNAL :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.gas.globals "GAS_EXTERNAL".
+Axiom ethereum_spurious_dragon_vm_gas_GAS_VERY_LOW :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.gas.globals "GAS_VERY_LOW".
+Axiom ethereum_spurious_dragon_vm_gas_calculate_gas_extend_memory :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.gas.globals "calculate_gas_extend_memory".
+Axiom ethereum_spurious_dragon_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.gas.globals "charge_gas".
 
-Require stack.
-Axiom stack_pop :
-  IsGlobalAlias globals stack.globals "pop".
-Axiom stack_push :
-  IsGlobalAlias globals stack.globals "push".
+Require ethereum.spurious_dragon.vm.stack.
+Axiom ethereum_spurious_dragon_vm_stack_pop :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.stack.globals "pop".
+Axiom ethereum_spurious_dragon_vm_stack_push :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.stack.globals "push".
 
 Definition address : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

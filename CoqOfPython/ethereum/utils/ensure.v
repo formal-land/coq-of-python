@@ -40,7 +40,18 @@ Definition ensure : Value.t -> Value.t -> M :=
         Constructor for the exception to raise.
     " in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.get_name (| globals, "value" |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.return_ (|
+          Constant.None_
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
-    let _ := M.raise (| Some(M.get_name (| globals, "exception" |))
+    let _ := M.raise (| Some(M.get_name (| globals, "exception" |)) |) in
     M.pure Constant.None_)).

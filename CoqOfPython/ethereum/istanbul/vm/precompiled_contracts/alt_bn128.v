@@ -45,21 +45,21 @@ Require ethereum.utils.ensure.
 Axiom ethereum_utils_ensure_ensure :
   IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
 
-Require vm.
-Axiom vm_Evm :
-  IsGlobalAlias globals vm.globals "Evm".
+Require ethereum.istanbul.vm.__init__.
+Axiom ethereum_istanbul_vm___init___Evm :
+  IsGlobalAlias globals ethereum.istanbul.vm.__init__.globals "Evm".
 
-Require vm.gas.
-Axiom vm_gas_charge_gas :
-  IsGlobalAlias globals vm.gas.globals "charge_gas".
+Require ethereum.istanbul.vm.gas.
+Axiom ethereum_istanbul_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.istanbul.vm.gas.globals "charge_gas".
 
-Require vm.memory.
-Axiom vm_memory_buffer_read :
-  IsGlobalAlias globals vm.memory.globals "buffer_read".
+Require ethereum.istanbul.vm.memory.
+Axiom ethereum_istanbul_vm_memory_buffer_read :
+  IsGlobalAlias globals ethereum.istanbul.vm.memory.globals "buffer_read".
 
-Require exceptions.
-Axiom exceptions_OutOfGasError :
-  IsGlobalAlias globals exceptions.globals "OutOfGasError".
+Require ethereum.istanbul.vm.exceptions.
+Axiom ethereum_istanbul_vm_exceptions_OutOfGasError :
+  IsGlobalAlias globals ethereum.istanbul.vm.exceptions.globals "OutOfGasError".
 
 Definition alt_bn128_add : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -210,6 +210,18 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
       |) in
     For M.get_name (| globals, "i" |) in make_tuple [ M.get_name (| globals, "x0_value" |); M.get_name (| globals, "y0_value" |); M.get_name (| globals, "x1_value" |); M.get_name (| globals, "y1_value" |) ] do
       let _ :=
+        (* if *)
+        M.if_then_else (|
+          Compare.gt_e (|
+            M.get_name (| globals, "i" |),
+            M.get_name (| globals, "ALT_BN128_PRIME" |)
+          |),
+        (* then *)
+        ltac:(M.monadic (
+          let _ := M.raise (| Some(M.get_name (| globals, "OutOfGasError" |)) |) in
+          M.pure Constant.None_
+        (* else *)
+        )), ltac:(M.monadic (
           M.pure Constant.None_
         )) |) in
     EndFor.
@@ -353,6 +365,18 @@ Definition alt_bn128_mul : Value.t -> Value.t -> M :=
       |) in
     For M.get_name (| globals, "i" |) in make_tuple [ M.get_name (| globals, "x0_value" |); M.get_name (| globals, "y0_value" |) ] do
       let _ :=
+        (* if *)
+        M.if_then_else (|
+          Compare.gt_e (|
+            M.get_name (| globals, "i" |),
+            M.get_name (| globals, "ALT_BN128_PRIME" |)
+          |),
+        (* then *)
+        ltac:(M.monadic (
+          let _ := M.raise (| Some(M.get_name (| globals, "OutOfGasError" |)) |) in
+          M.pure Constant.None_
+        (* else *)
+        )), ltac:(M.monadic (
           M.pure Constant.None_
         )) |) in
     EndFor.
@@ -425,6 +449,27 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.not_eq (|
+          BinOp.mod_ (|
+            M.call (|
+              M.get_name (| globals, "len" |),
+              make_list [
+                M.get_name (| globals, "data" |)
+              ],
+              make_dict []
+            |),
+            Constant.int 192
+          |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some(M.get_name (| globals, "OutOfGasError" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let result :=
@@ -464,7 +509,7 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
           M.call (|
             M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
             make_list [
-              M.get_subscript (| M.get_name (| globals, "data" |), BinOp.add (|
+              M.get_subscript (| M.get_name (| globals, "data" |), M.slice (| BinOp.add (|
                 BinOp.mult (|
                   M.get_name (| globals, "i" |),
                   Constant.int 192
@@ -473,11 +518,35 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
                   Constant.int 32,
                   M.get_name (| globals, "j" |)
                 |)
-              |) |)
+              |), BinOp.add (|
+                BinOp.mult (|
+                  M.get_name (| globals, "i" |),
+                  Constant.int 192
+                |),
+                BinOp.mult (|
+                  Constant.int 32,
+                  BinOp.add (|
+                    M.get_name (| globals, "j" |),
+                    Constant.int 1
+                  |)
+                |)
+              |) |) |)
             ],
             make_dict []
           |) in
         let _ :=
+          (* if *)
+          M.if_then_else (|
+            Compare.gt_e (|
+              M.get_name (| globals, "value" |),
+              M.get_name (| globals, "ALT_BN128_PRIME" |)
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let _ := M.raise (| Some(M.get_name (| globals, "OutOfGasError" |)) |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
             M.pure Constant.None_
           )) |) in
         let _ := M.call (|
@@ -538,10 +607,80 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
     make_dict []
   |) in
       let _ :=
+        (* if *)
+        M.if_then_else (|
+          BoolOp.and (|
+            Compare.not_eq (|
+              M.get_name (| globals, "p" |),
+              M.call (|
+                M.get_field (| M.get_name (| globals, "BNP" |), "point_at_infinity" |),
+                make_list [],
+                make_dict []
+              |)
+            |),
+            ltac:(M.monadic (
+              Compare.not_eq (|
+                M.get_name (| globals, "q" |),
+                M.call (|
+                  M.get_field (| M.get_name (| globals, "BNP2" |), "point_at_infinity" |),
+                  make_list [],
+                  make_dict []
+                |)
+              |)
+            ))
+          |),
+        (* then *)
+        ltac:(M.monadic (
+          let result :=
+            BinOp.mult (|
+              M.get_name (| globals, "result" |),
+              M.call (|
+                M.get_name (| globals, "pairing" |),
+                make_list [
+                  M.get_name (| globals, "q" |);
+                  M.get_name (| globals, "p" |)
+                ],
+                make_dict []
+              |)
+            |) in
+          M.pure Constant.None_
+        (* else *)
+        )), ltac:(M.monadic (
           M.pure Constant.None_
         )) |) in
     EndFor.
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "result" |),
+          M.call (|
+            M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
+            make_list [
+              Constant.int 1
+            ],
+            make_dict []
+          |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign (|
+          M.get_field (| M.get_name (| globals, "evm" |), "output" |),
+          M.call (|
+            M.get_field (| M.call (|
+              M.get_name (| globals, "U256" |),
+              make_list [
+                Constant.int 1
+              ],
+              make_dict []
+            |), "to_be_bytes32" |),
+            make_list [],
+            make_dict []
+          |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.assign (|
           M.get_field (| M.get_name (| globals, "evm" |), "output" |),
           M.call (|

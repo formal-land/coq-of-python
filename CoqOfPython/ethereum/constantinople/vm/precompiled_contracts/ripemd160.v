@@ -31,17 +31,17 @@ Require ethereum.utils.numeric.
 Axiom ethereum_utils_numeric_ceil32 :
   IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
 
-Require vm.
-Axiom vm_Evm :
-  IsGlobalAlias globals vm.globals "Evm".
+Require ethereum.constantinople.vm.__init__.
+Axiom ethereum_constantinople_vm___init___Evm :
+  IsGlobalAlias globals ethereum.constantinople.vm.__init__.globals "Evm".
 
-Require vm.gas.
-Axiom vm_gas_GAS_RIPEMD160 :
-  IsGlobalAlias globals vm.gas.globals "GAS_RIPEMD160".
-Axiom vm_gas_GAS_RIPEMD160_WORD :
-  IsGlobalAlias globals vm.gas.globals "GAS_RIPEMD160_WORD".
-Axiom vm_gas_charge_gas :
-  IsGlobalAlias globals vm.gas.globals "charge_gas".
+Require ethereum.constantinople.vm.gas.
+Axiom ethereum_constantinople_vm_gas_GAS_RIPEMD160 :
+  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_RIPEMD160".
+Axiom ethereum_constantinople_vm_gas_GAS_RIPEMD160_WORD :
+  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_RIPEMD160_WORD".
+Axiom ethereum_constantinople_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "charge_gas".
 
 Definition ripemd160 : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

@@ -48,6 +48,7 @@ Definition left_pad_zero_bytes : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition right_pad_zero_bytes : Value.t -> Value.t -> M :=
@@ -77,4 +78,5 @@ Definition right_pad_zero_bytes : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).

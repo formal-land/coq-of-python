@@ -23,34 +23,34 @@ Axiom typing_Callable :
 Axiom typing_Dict :
   IsGlobalAlias globals typing.globals "Dict".
 
-Require fork_types.
-Axiom fork_types_Address :
-  IsGlobalAlias globals fork_types.globals "Address".
+Require ethereum.frontier.fork_types.
+Axiom ethereum_frontier_fork_types_Address :
+  IsGlobalAlias globals ethereum.frontier.fork_types.globals "Address".
 
-Require __init__.
-Axiom __init___ECRECOVER_ADDRESS :
-  IsGlobalAlias globals __init__.globals "ECRECOVER_ADDRESS".
-Axiom __init___IDENTITY_ADDRESS :
-  IsGlobalAlias globals __init__.globals "IDENTITY_ADDRESS".
-Axiom __init___RIPEMD160_ADDRESS :
-  IsGlobalAlias globals __init__.globals "RIPEMD160_ADDRESS".
-Axiom __init___SHA256_ADDRESS :
-  IsGlobalAlias globals __init__.globals "SHA256_ADDRESS".
+Require ethereum.frontier.vm.precompiled_contracts.__init__.
+Axiom ethereum_frontier_vm_precompiled_contracts___init___ECRECOVER_ADDRESS :
+  IsGlobalAlias globals ethereum.frontier.vm.precompiled_contracts.__init__.globals "ECRECOVER_ADDRESS".
+Axiom ethereum_frontier_vm_precompiled_contracts___init___IDENTITY_ADDRESS :
+  IsGlobalAlias globals ethereum.frontier.vm.precompiled_contracts.__init__.globals "IDENTITY_ADDRESS".
+Axiom ethereum_frontier_vm_precompiled_contracts___init___RIPEMD160_ADDRESS :
+  IsGlobalAlias globals ethereum.frontier.vm.precompiled_contracts.__init__.globals "RIPEMD160_ADDRESS".
+Axiom ethereum_frontier_vm_precompiled_contracts___init___SHA256_ADDRESS :
+  IsGlobalAlias globals ethereum.frontier.vm.precompiled_contracts.__init__.globals "SHA256_ADDRESS".
 
-Require ecrecover.
-Axiom ecrecover_ecrecover :
-  IsGlobalAlias globals ecrecover.globals "ecrecover".
+Require ethereum.frontier.vm.precompiled_contracts.ecrecover.
+Axiom ethereum_frontier_vm_precompiled_contracts_ecrecover_ecrecover :
+  IsGlobalAlias globals ethereum.frontier.vm.precompiled_contracts.ecrecover.globals "ecrecover".
 
-Require identity.
-Axiom identity_identity :
-  IsGlobalAlias globals identity.globals "identity".
+Require ethereum.frontier.vm.precompiled_contracts.identity.
+Axiom ethereum_frontier_vm_precompiled_contracts_identity_identity :
+  IsGlobalAlias globals ethereum.frontier.vm.precompiled_contracts.identity.globals "identity".
 
-Require ripemd160.
-Axiom ripemd160_ripemd160 :
-  IsGlobalAlias globals ripemd160.globals "ripemd160".
+Require ethereum.frontier.vm.precompiled_contracts.ripemd160.
+Axiom ethereum_frontier_vm_precompiled_contracts_ripemd160_ripemd160 :
+  IsGlobalAlias globals ethereum.frontier.vm.precompiled_contracts.ripemd160.globals "ripemd160".
 
-Require sha256.
-Axiom sha256_sha256 :
-  IsGlobalAlias globals sha256.globals "sha256".
+Require ethereum.frontier.vm.precompiled_contracts.sha256.
+Axiom ethereum_frontier_vm_precompiled_contracts_sha256_sha256 :
+  IsGlobalAlias globals ethereum.frontier.vm.precompiled_contracts.sha256.globals "sha256".
 
 (* At top_level_stmt: unsupported node type: AnnAssign *)

@@ -25,17 +25,17 @@ Axiom ethereum_base_types_Bytes :
 Axiom ethereum_base_types_Uint :
   IsGlobalAlias globals ethereum.base_types.globals "Uint".
 
-Require vm.
-Axiom vm_Evm :
-  IsGlobalAlias globals vm.globals "Evm".
+Require ethereum.paris.vm.__init__.
+Axiom ethereum_paris_vm___init___Evm :
+  IsGlobalAlias globals ethereum.paris.vm.__init__.globals "Evm".
 
-Require vm.gas.
-Axiom vm_gas_charge_gas :
-  IsGlobalAlias globals vm.gas.globals "charge_gas".
+Require ethereum.paris.vm.gas.
+Axiom ethereum_paris_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.paris.vm.gas.globals "charge_gas".
 
-Require memory.
-Axiom memory_buffer_read :
-  IsGlobalAlias globals memory.globals "buffer_read".
+Require ethereum.paris.vm.memory.
+Axiom ethereum_paris_vm_memory_buffer_read :
+  IsGlobalAlias globals ethereum.paris.vm.memory.globals "buffer_read".
 
 Definition GQUADDIVISOR : Value.t := M.run ltac:(M.monadic (
   Constant.int 3
@@ -192,6 +192,36 @@ Definition modexp : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        BoolOp.and (|
+          Compare.eq (|
+            M.get_name (| globals, "base_length" |),
+            Constant.int 0
+          |),
+          ltac:(M.monadic (
+            Compare.eq (|
+              M.get_name (| globals, "modulus_length" |),
+              Constant.int 0
+            |)
+          ))
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign (|
+          M.get_field (| M.get_name (| globals, "evm" |), "output" |),
+          M.call (|
+            M.get_name (| globals, "Bytes" |),
+            make_list [],
+            make_dict []
+          |)
+        |) in
+        let _ := M.return_ (|
+          Constant.None_
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let base :=
@@ -254,6 +284,30 @@ Definition modexp : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "modulus" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign (|
+          M.get_field (| M.get_name (| globals, "evm" |), "output" |),
+          BinOp.mult (|
+            M.call (|
+              M.get_name (| globals, "Bytes" |),
+              make_list [
+                Constant.bytes "00"
+              ],
+              make_dict []
+            |),
+            M.get_name (| globals, "modulus_length" |)
+          |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.assign (|
           M.get_field (| M.get_name (| globals, "evm" |), "output" |),
           M.call (|
@@ -338,6 +392,7 @@ Definition complexity : Value.t -> Value.t -> M :=
         M.get_name (| globals, "words" |),
         Constant.int 2
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition iterations : Value.t -> Value.t -> M :=
@@ -364,7 +419,76 @@ Definition iterations : Value.t -> Value.t -> M :=
         Number of iterations.
     " in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        BoolOp.and (|
+          Compare.lt_e (|
+            M.get_name (| globals, "exponent_length" |),
+            Constant.int 32
+          |),
+          ltac:(M.monadic (
+            Compare.eq (|
+              M.get_name (| globals, "exponent_head" |),
+              Constant.int 0
+            |)
+          ))
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let count :=
+          M.call (|
+            M.get_name (| globals, "Uint" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ :=
+          (* if *)
+          M.if_then_else (|
+            Compare.lt_e (|
+              M.get_name (| globals, "exponent_length" |),
+              Constant.int 32
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let bit_length :=
+              M.call (|
+                M.get_name (| globals, "Uint" |),
+                make_list [
+                  M.call (|
+                    M.get_field (| M.get_name (| globals, "exponent_head" |), "bit_length" |),
+                    make_list [],
+                    make_dict []
+                  |)
+                ],
+                make_dict []
+              |) in
+            let _ :=
+              (* if *)
+              M.if_then_else (|
+                Compare.gt (|
+                  M.get_name (| globals, "bit_length" |),
+                  Constant.int 0
+                |),
+              (* then *)
+              ltac:(M.monadic (
+                let bit_length := BinOp.sub
+                  Constant.int 1
+                  Constant.int 1 in
+                M.pure Constant.None_
+              (* else *)
+              )), ltac:(M.monadic (
+                M.pure Constant.None_
+              )) |) in
+            let count :=
+              M.get_name (| globals, "bit_length" |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
             let length_part :=
               BinOp.mult (|
                 Constant.int 8,
@@ -392,6 +516,20 @@ Definition iterations : Value.t -> Value.t -> M :=
                 make_dict []
               |) in
             let _ :=
+              (* if *)
+              M.if_then_else (|
+                Compare.gt (|
+                  M.get_name (| globals, "bits_part" |),
+                  Constant.int 0
+                |),
+              (* then *)
+              ltac:(M.monadic (
+                let bits_part := BinOp.sub
+                  Constant.int 1
+                  Constant.int 1 in
+                M.pure Constant.None_
+              (* else *)
+              )), ltac:(M.monadic (
                 M.pure Constant.None_
               )) |) in
             let count :=
@@ -418,6 +556,7 @@ Definition iterations : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition gas_cost : Value.t -> Value.t -> M :=
@@ -489,4 +628,5 @@ Definition gas_cost : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).

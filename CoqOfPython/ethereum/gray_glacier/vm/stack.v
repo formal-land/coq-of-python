@@ -25,11 +25,11 @@ Require ethereum.base_types.
 Axiom ethereum_base_types_U256 :
   IsGlobalAlias globals ethereum.base_types.globals "U256".
 
-Require exceptions.
-Axiom exceptions_StackOverflowError :
-  IsGlobalAlias globals exceptions.globals "StackOverflowError".
-Axiom exceptions_StackUnderflowError :
-  IsGlobalAlias globals exceptions.globals "StackUnderflowError".
+Require ethereum.gray_glacier.vm.exceptions.
+Axiom ethereum_gray_glacier_vm_exceptions_StackOverflowError :
+  IsGlobalAlias globals ethereum.gray_glacier.vm.exceptions.globals "StackOverflowError".
+Axiom ethereum_gray_glacier_vm_exceptions_StackUnderflowError :
+  IsGlobalAlias globals ethereum.gray_glacier.vm.exceptions.globals "StackUnderflowError".
 
 Definition pop : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -49,6 +49,24 @@ Definition pop : Value.t -> Value.t -> M :=
 
     " in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.call (|
+            M.get_name (| globals, "len" |),
+            make_list [
+              M.get_name (| globals, "stack" |)
+            ],
+            make_dict []
+          |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some(M.get_name (| globals, "StackUnderflowError" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.return_ (|
@@ -57,6 +75,7 @@ Definition pop : Value.t -> Value.t -> M :=
         make_list [],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition push : Value.t -> Value.t -> M :=
@@ -75,6 +94,24 @@ Definition push : Value.t -> Value.t -> M :=
 
     " in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.call (|
+            M.get_name (| globals, "len" |),
+            make_list [
+              M.get_name (| globals, "stack" |)
+            ],
+            make_dict []
+          |),
+          Constant.int 1024
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some(M.get_name (| globals, "StackOverflowError" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.return_ (|
@@ -85,4 +122,5 @@ Definition push : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).

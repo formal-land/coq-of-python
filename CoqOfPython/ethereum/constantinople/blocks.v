@@ -22,35 +22,35 @@ Require typing.
 Axiom typing_Tuple :
   IsGlobalAlias globals typing.globals "Tuple".
 
-Require base_types.
-Axiom base_types_U256 :
-  IsGlobalAlias globals base_types.globals "U256".
-Axiom base_types_Bytes :
-  IsGlobalAlias globals base_types.globals "Bytes".
-Axiom base_types_Bytes8 :
-  IsGlobalAlias globals base_types.globals "Bytes8".
-Axiom base_types_Bytes32 :
-  IsGlobalAlias globals base_types.globals "Bytes32".
-Axiom base_types_Uint :
-  IsGlobalAlias globals base_types.globals "Uint".
-Axiom base_types_slotted_freezable :
-  IsGlobalAlias globals base_types.globals "slotted_freezable".
+Require ethereum.base_types.
+Axiom ethereum_base_types_U256 :
+  IsGlobalAlias globals ethereum.base_types.globals "U256".
+Axiom ethereum_base_types_Bytes :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
+Axiom ethereum_base_types_Bytes8 :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes8".
+Axiom ethereum_base_types_Bytes32 :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes32".
+Axiom ethereum_base_types_Uint :
+  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_slotted_freezable :
+  IsGlobalAlias globals ethereum.base_types.globals "slotted_freezable".
 
-Require crypto.hash.
-Axiom crypto_hash_Hash32 :
-  IsGlobalAlias globals crypto.hash.globals "Hash32".
+Require ethereum.crypto.hash.
+Axiom ethereum_crypto_hash_Hash32 :
+  IsGlobalAlias globals ethereum.crypto.hash.globals "Hash32".
 
-Require fork_types.
-Axiom fork_types_Address :
-  IsGlobalAlias globals fork_types.globals "Address".
-Axiom fork_types_Bloom :
-  IsGlobalAlias globals fork_types.globals "Bloom".
-Axiom fork_types_Root :
-  IsGlobalAlias globals fork_types.globals "Root".
+Require ethereum.constantinople.fork_types.
+Axiom ethereum_constantinople_fork_types_Address :
+  IsGlobalAlias globals ethereum.constantinople.fork_types.globals "Address".
+Axiom ethereum_constantinople_fork_types_Bloom :
+  IsGlobalAlias globals ethereum.constantinople.fork_types.globals "Bloom".
+Axiom ethereum_constantinople_fork_types_Root :
+  IsGlobalAlias globals ethereum.constantinople.fork_types.globals "Root".
 
-Require transactions.
-Axiom transactions_Transaction :
-  IsGlobalAlias globals transactions.globals "Transaction".
+Require ethereum.constantinople.transactions.
+Axiom ethereum_constantinople_transactions_Transaction :
+  IsGlobalAlias globals ethereum.constantinople.transactions.globals "Transaction".
 
 Definition Header : Value.t :=
   builtins.make_klass

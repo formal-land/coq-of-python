@@ -21,29 +21,29 @@ Require dataclasses.
 Axiom dataclasses_dataclass :
   IsGlobalAlias globals dataclasses.globals "dataclass".
 
-Require __init__.
-Axiom __init___rlp :
-  IsGlobalAlias globals __init__.globals "rlp".
+Require ethereum.__init__.
+Axiom ethereum___init___rlp :
+  IsGlobalAlias globals ethereum.__init__.globals "rlp".
 
-Require base_types.
-Axiom base_types_U256 :
-  IsGlobalAlias globals base_types.globals "U256".
-Axiom base_types_Bytes :
-  IsGlobalAlias globals base_types.globals "Bytes".
-Axiom base_types_Bytes20 :
-  IsGlobalAlias globals base_types.globals "Bytes20".
-Axiom base_types_Bytes256 :
-  IsGlobalAlias globals base_types.globals "Bytes256".
-Axiom base_types_Uint :
-  IsGlobalAlias globals base_types.globals "Uint".
-Axiom base_types_slotted_freezable :
-  IsGlobalAlias globals base_types.globals "slotted_freezable".
+Require ethereum.base_types.
+Axiom ethereum_base_types_U256 :
+  IsGlobalAlias globals ethereum.base_types.globals "U256".
+Axiom ethereum_base_types_Bytes :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
+Axiom ethereum_base_types_Bytes20 :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes20".
+Axiom ethereum_base_types_Bytes256 :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes256".
+Axiom ethereum_base_types_Uint :
+  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_slotted_freezable :
+  IsGlobalAlias globals ethereum.base_types.globals "slotted_freezable".
 
-Require crypto.hash.
-Axiom crypto_hash_Hash32 :
-  IsGlobalAlias globals crypto.hash.globals "Hash32".
-Axiom crypto_hash_keccak256 :
-  IsGlobalAlias globals crypto.hash.globals "keccak256".
+Require ethereum.crypto.hash.
+Axiom ethereum_crypto_hash_Hash32 :
+  IsGlobalAlias globals ethereum.crypto.hash.globals "Hash32".
+Axiom ethereum_crypto_hash_keccak256 :
+  IsGlobalAlias globals ethereum.crypto.hash.globals "keccak256".
 
 Definition Address : Value.t := M.run ltac:(M.monadic (
   M.get_name (| globals, "Bytes20" |)
@@ -98,4 +98,5 @@ Definition encode_account : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).

@@ -33,13 +33,13 @@ Require ethereum.crypto.hash.
 Axiom ethereum_crypto_hash_keccak256 :
   IsGlobalAlias globals ethereum.crypto.hash.globals "keccak256".
 
-Require blocks.
-Axiom blocks_Log :
-  IsGlobalAlias globals blocks.globals "Log".
+Require ethereum.cancun.blocks.
+Axiom ethereum_cancun_blocks_Log :
+  IsGlobalAlias globals ethereum.cancun.blocks.globals "Log".
 
-Require fork_types.
-Axiom fork_types_Bloom :
-  IsGlobalAlias globals fork_types.globals "Bloom".
+Require ethereum.cancun.fork_types.
+Axiom ethereum_cancun_fork_types_Bloom :
+  IsGlobalAlias globals ethereum.cancun.fork_types.globals "Bloom".
 
 Definition add_to_bloom : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -72,7 +72,10 @@ Definition add_to_bloom : Value.t -> Value.t -> M :=
           M.call (|
             M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
             make_list [
-              M.get_subscript (| M.get_name (| globals, "hash" |), M.get_name (| globals, "idx" |) |)
+              M.get_subscript (| M.get_name (| globals, "hash" |), M.slice (| M.get_name (| globals, "idx" |), BinOp.add (|
+                M.get_name (| globals, "idx" |),
+                Constant.int 2
+              |) |) |)
             ],
             make_dict []
           |),
@@ -157,4 +160,5 @@ Definition logs_bloom : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).

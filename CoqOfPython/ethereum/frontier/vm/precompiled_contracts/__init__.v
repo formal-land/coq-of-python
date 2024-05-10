@@ -18,9 +18,9 @@ Addresses of precompiled contracts and mappings to their
 implementations.
 ".
 
-Require utils.hexadecimal.
-Axiom utils_hexadecimal_hex_to_address :
-  IsGlobalAlias globals utils.hexadecimal.globals "hex_to_address".
+Require ethereum.frontier.utils.hexadecimal.
+Axiom ethereum_frontier_utils_hexadecimal_hex_to_address :
+  IsGlobalAlias globals ethereum.frontier.utils.hexadecimal.globals "hex_to_address".
 
 Definition __all__ : Value.t := M.run ltac:(M.monadic (
   make_tuple [ Constant.str "ECRECOVER_ADDRESS"; Constant.str "SHA256_ADDRESS"; Constant.str "RIPEMD160_ADDRESS"; Constant.str "IDENTITY_ADDRESS" ]

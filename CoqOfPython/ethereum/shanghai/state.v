@@ -56,33 +56,33 @@ Require ethereum.utils.ensure.
 Axiom ethereum_utils_ensure_ensure :
   IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
 
-Require blocks.
-Axiom blocks_Withdrawal :
-  IsGlobalAlias globals blocks.globals "Withdrawal".
+Require ethereum.shanghai.blocks.
+Axiom ethereum_shanghai_blocks_Withdrawal :
+  IsGlobalAlias globals ethereum.shanghai.blocks.globals "Withdrawal".
 
-Require fork_types.
-Axiom fork_types_EMPTY_ACCOUNT :
-  IsGlobalAlias globals fork_types.globals "EMPTY_ACCOUNT".
-Axiom fork_types_Account :
-  IsGlobalAlias globals fork_types.globals "Account".
-Axiom fork_types_Address :
-  IsGlobalAlias globals fork_types.globals "Address".
-Axiom fork_types_Root :
-  IsGlobalAlias globals fork_types.globals "Root".
+Require ethereum.shanghai.fork_types.
+Axiom ethereum_shanghai_fork_types_EMPTY_ACCOUNT :
+  IsGlobalAlias globals ethereum.shanghai.fork_types.globals "EMPTY_ACCOUNT".
+Axiom ethereum_shanghai_fork_types_Account :
+  IsGlobalAlias globals ethereum.shanghai.fork_types.globals "Account".
+Axiom ethereum_shanghai_fork_types_Address :
+  IsGlobalAlias globals ethereum.shanghai.fork_types.globals "Address".
+Axiom ethereum_shanghai_fork_types_Root :
+  IsGlobalAlias globals ethereum.shanghai.fork_types.globals "Root".
 
-Require trie.
-Axiom trie_EMPTY_TRIE_ROOT :
-  IsGlobalAlias globals trie.globals "EMPTY_TRIE_ROOT".
-Axiom trie_Trie :
-  IsGlobalAlias globals trie.globals "Trie".
-Axiom trie_copy_trie :
-  IsGlobalAlias globals trie.globals "copy_trie".
-Axiom trie_root :
-  IsGlobalAlias globals trie.globals "root".
-Axiom trie_trie_get :
-  IsGlobalAlias globals trie.globals "trie_get".
-Axiom trie_trie_set :
-  IsGlobalAlias globals trie.globals "trie_set".
+Require ethereum.shanghai.trie.
+Axiom ethereum_shanghai_trie_EMPTY_TRIE_ROOT :
+  IsGlobalAlias globals ethereum.shanghai.trie.globals "EMPTY_TRIE_ROOT".
+Axiom ethereum_shanghai_trie_Trie :
+  IsGlobalAlias globals ethereum.shanghai.trie.globals "Trie".
+Axiom ethereum_shanghai_trie_copy_trie :
+  IsGlobalAlias globals ethereum.shanghai.trie.globals "copy_trie".
+Axiom ethereum_shanghai_trie_root :
+  IsGlobalAlias globals ethereum.shanghai.trie.globals "root".
+Axiom ethereum_shanghai_trie_trie_get :
+  IsGlobalAlias globals ethereum.shanghai.trie.globals "trie_get".
+Axiom ethereum_shanghai_trie_trie_set :
+  IsGlobalAlias globals ethereum.shanghai.trie.globals "trie_set".
 
 Definition State : Value.t :=
   builtins.make_klass
@@ -130,7 +130,7 @@ Definition begin_transaction : Value.t -> Value.t -> M :=
           M.get_field (| M.get_name (| globals, "state" |), "_main_trie" |)
         ],
         make_dict []
-      |); (* At expr: unsupported node type: DictComp *) ]
+      |); Constant.str "(* At expr: unsupported node type: DictComp *)" ]
     ],
     make_dict []
   |) in
@@ -153,6 +153,19 @@ Definition commit_transaction : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        UnOp.not (| M.get_field (| M.get_name (| globals, "state" |), "_snapshots" |) |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_field (| M.get_field (| M.get_name (| globals, "state" |), "_created_accounts" |), "clear" |),
+    make_list [],
+    make_dict []
+  |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -178,6 +191,19 @@ Definition rollback_transaction : Value.t -> Value.t -> M :=
       |)
     |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        UnOp.not (| M.get_field (| M.get_name (| globals, "state" |), "_snapshots" |) |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_field (| M.get_field (| M.get_name (| globals, "state" |), "_created_accounts" |), "clear" |),
+    make_list [],
+    make_dict []
+  |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -214,8 +240,27 @@ Definition get_account : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.call (|
+          M.get_name (| globals, "isinstance" |),
+          make_list [
+            M.get_name (| globals, "account" |);
+            M.get_name (| globals, "Account" |)
+          ],
+          make_dict []
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.return_ (|
+          M.get_name (| globals, "account" |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.return_ (|
           M.get_name (| globals, "EMPTY_ACCOUNT" |)
+        |) in
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -250,6 +295,7 @@ Definition get_account_optional : Value.t -> Value.t -> M :=
       |) in
     let _ := M.return_ (|
       M.get_name (| globals, "account" |)
+    |) in
     M.pure Constant.None_)).
 
 Definition set_account : Value.t -> Value.t -> M :=
@@ -329,6 +375,18 @@ Definition destroy_storage : Value.t -> Value.t -> M :=
         Address of account whose storage is to be deleted.
     " in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.in (|
+          M.get_name (| globals, "address" |),
+          M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.delete (| M.get_subscript (| M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |), M.get_name (| globals, "address" |) |) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -391,6 +449,26 @@ Definition get_storage : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.is (|
+          M.get_name (| globals, "trie" |),
+          Constant.None_
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.return_ (|
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let value :=
@@ -412,6 +490,7 @@ Definition get_storage : Value.t -> Value.t -> M :=
   |) |) in
     let _ := M.return_ (|
       M.get_name (| globals, "value" |)
+    |) in
     M.pure Constant.None_)).
 
 Definition set_storage : Value.t -> Value.t -> M :=
@@ -452,6 +531,27 @@ Definition set_storage : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.is (|
+          M.get_name (| globals, "trie" |),
+          Constant.None_
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let trie :=
+          M.call (|
+            M.get_name (| globals, "Trie" |),
+            make_list [],
+            make_dict []
+          |) in
+        let _ := M.assign (|
+          M.get_subscript (| M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |), M.get_name (| globals, "address" |) |),
+          M.get_name (| globals, "trie" |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
@@ -464,6 +564,18 @@ Definition set_storage : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_field (| M.get_name (| globals, "trie" |), "_data" |),
+          {}
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.delete (| M.get_subscript (| M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |), M.get_name (| globals, "address" |) |) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -488,8 +600,29 @@ Definition storage_root : Value.t -> Value.t -> M :=
     " in
     let _ := M.assert (| UnOp.not (| M.get_field (| M.get_name (| globals, "state" |), "_snapshots" |) |) |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.in (|
+          M.get_name (| globals, "address" |),
+          M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.return_ (|
+          M.call (|
+            M.get_name (| globals, "root" |),
+            make_list [
+              M.get_subscript (| M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |), M.get_name (| globals, "address" |) |)
+            ],
+            make_dict []
+          |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.return_ (|
           M.get_name (| globals, "EMPTY_TRIE_ROOT" |)
+        |) in
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -520,6 +653,7 @@ Definition state_root : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition account_exists : Value.t -> Value.t -> M :=
@@ -552,6 +686,7 @@ Definition account_exists : Value.t -> Value.t -> M :=
         |),
         Constant.None_
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition account_has_code_or_nonce : Value.t -> Value.t -> M :=
@@ -601,6 +736,7 @@ Definition account_has_code_or_nonce : Value.t -> Value.t -> M :=
           |)
         ))
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition is_account_empty : Value.t -> Value.t -> M :=
@@ -658,6 +794,7 @@ Definition is_account_empty : Value.t -> Value.t -> M :=
           |)
         ))
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition account_exists_and_is_empty : Value.t -> Value.t -> M :=
@@ -724,6 +861,7 @@ Definition account_exists_and_is_empty : Value.t -> Value.t -> M :=
           |)
         ))
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition is_account_alive : Value.t -> Value.t -> M :=
@@ -754,6 +892,20 @@ Definition is_account_alive : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.is (|
+          M.get_name (| globals, "account" |),
+          Constant.None_
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.return_ (|
+          Constant.bool false
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.return_ (|
           UnOp.not (| BoolOp.and (|
             Compare.eq (|
@@ -781,6 +933,7 @@ Definition is_account_alive : Value.t -> Value.t -> M :=
               |)
             ))
           |) |)
+        |) in
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -906,6 +1059,30 @@ Definition touch_account : Value.t -> Value.t -> M :=
         The address of the account that need to initialised.
     " in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        UnOp.not (| M.call (|
+          M.get_name (| globals, "account_exists" |),
+          make_list [
+            M.get_name (| globals, "state" |);
+            M.get_name (| globals, "address" |)
+          ],
+          make_dict []
+        |) |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_name (| globals, "set_account" |),
+    make_list [
+      M.get_name (| globals, "state" |);
+      M.get_name (| globals, "address" |);
+      M.get_name (| globals, "EMPTY_ACCOUNT" |)
+    ],
+    make_dict []
+  |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
@@ -983,6 +1160,26 @@ Definition get_storage_original : Value.t -> Value.t -> M :=
         Key of the storage slot.
     " in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.in (|
+          M.get_name (| globals, "address" |),
+          M.get_field (| M.get_name (| globals, "state" |), "_created_accounts" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.return_ (|
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.assign (|
@@ -998,6 +1195,25 @@ Definition get_storage_original : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.is (|
+          M.get_name (| globals, "original_account_trie" |),
+          Constant.None_
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let original_value :=
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let original_value :=
           M.call (|
             M.get_name (| globals, "trie_get" |),
@@ -1019,4 +1235,5 @@ Definition get_storage_original : Value.t -> Value.t -> M :=
   |) |) in
     let _ := M.return_ (|
       M.get_name (| globals, "original_value" |)
+    |) in
     M.pure Constant.None_)).

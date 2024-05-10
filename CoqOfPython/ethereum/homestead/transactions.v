@@ -17,21 +17,21 @@ Require typing.
 Axiom typing_Union :
   IsGlobalAlias globals typing.globals "Union".
 
-Require base_types.
-Axiom base_types_U256 :
-  IsGlobalAlias globals base_types.globals "U256".
-Axiom base_types_Bytes :
-  IsGlobalAlias globals base_types.globals "Bytes".
-Axiom base_types_Bytes0 :
-  IsGlobalAlias globals base_types.globals "Bytes0".
-Axiom base_types_Uint :
-  IsGlobalAlias globals base_types.globals "Uint".
-Axiom base_types_slotted_freezable :
-  IsGlobalAlias globals base_types.globals "slotted_freezable".
+Require ethereum.base_types.
+Axiom ethereum_base_types_U256 :
+  IsGlobalAlias globals ethereum.base_types.globals "U256".
+Axiom ethereum_base_types_Bytes :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
+Axiom ethereum_base_types_Bytes0 :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes0".
+Axiom ethereum_base_types_Uint :
+  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_slotted_freezable :
+  IsGlobalAlias globals ethereum.base_types.globals "slotted_freezable".
 
-Require fork_types.
-Axiom fork_types_Address :
-  IsGlobalAlias globals fork_types.globals "Address".
+Require ethereum.homestead.fork_types.
+Axiom ethereum_homestead_fork_types_Address :
+  IsGlobalAlias globals ethereum.homestead.fork_types.globals "Address".
 
 Definition TX_BASE_COST : Value.t := M.run ltac:(M.monadic (
   Constant.int 21000

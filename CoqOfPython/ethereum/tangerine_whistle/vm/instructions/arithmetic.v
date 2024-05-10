@@ -31,29 +31,29 @@ Require ethereum.utils.numeric.
 Axiom ethereum_utils_numeric_get_sign :
   IsGlobalAlias globals ethereum.utils.numeric.globals "get_sign".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.tangerine_whistle.vm.__init__.
+Axiom ethereum_tangerine_whistle_vm___init___Evm :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.__init__.globals "Evm".
 
-Require gas.
-Axiom gas_GAS_EXPONENTIATION :
-  IsGlobalAlias globals gas.globals "GAS_EXPONENTIATION".
-Axiom gas_GAS_EXPONENTIATION_PER_BYTE :
-  IsGlobalAlias globals gas.globals "GAS_EXPONENTIATION_PER_BYTE".
-Axiom gas_GAS_LOW :
-  IsGlobalAlias globals gas.globals "GAS_LOW".
-Axiom gas_GAS_MID :
-  IsGlobalAlias globals gas.globals "GAS_MID".
-Axiom gas_GAS_VERY_LOW :
-  IsGlobalAlias globals gas.globals "GAS_VERY_LOW".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
+Require ethereum.tangerine_whistle.vm.gas.
+Axiom ethereum_tangerine_whistle_vm_gas_GAS_EXPONENTIATION :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_EXPONENTIATION".
+Axiom ethereum_tangerine_whistle_vm_gas_GAS_EXPONENTIATION_PER_BYTE :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_EXPONENTIATION_PER_BYTE".
+Axiom ethereum_tangerine_whistle_vm_gas_GAS_LOW :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_LOW".
+Axiom ethereum_tangerine_whistle_vm_gas_GAS_MID :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_MID".
+Axiom ethereum_tangerine_whistle_vm_gas_GAS_VERY_LOW :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_VERY_LOW".
+Axiom ethereum_tangerine_whistle_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "charge_gas".
 
-Require stack.
-Axiom stack_pop :
-  IsGlobalAlias globals stack.globals "pop".
-Axiom stack_push :
-  IsGlobalAlias globals stack.globals "push".
+Require ethereum.tangerine_whistle.vm.stack.
+Axiom ethereum_tangerine_whistle_vm_stack_pop :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.stack.globals "pop".
+Axiom ethereum_tangerine_whistle_vm_stack_push :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.stack.globals "push".
 
 Definition add : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -273,6 +273,25 @@ Definition div : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "divisor" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let quotient :=
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let quotient :=
           BinOp.floor_div (|
             M.get_name (| globals, "dividend" |),
@@ -341,7 +360,41 @@ Definition sdiv : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "divisor" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let quotient :=
+          Constant.int 0 in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ :=
+          (* if *)
+          M.if_then_else (|
+            BoolOp.and (|
+              Compare.eq (|
+                M.get_name (| globals, "dividend" |),
+                UnOp.sub (| M.get_name (| globals, "U255_CEIL_VALUE" |) |)
+              |),
+              ltac:(M.monadic (
+                Compare.eq (|
+                  M.get_name (| globals, "divisor" |),
+                  UnOp.sub (| Constant.int 1 |)
+                |)
+              ))
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let quotient :=
+              UnOp.sub (| M.get_name (| globals, "U255_CEIL_VALUE" |) |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
             let sign :=
               M.call (|
                 M.get_name (| globals, "get_sign" |),
@@ -436,6 +489,25 @@ Definition mod : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "y" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let remainder :=
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let remainder :=
           BinOp.mod_ (|
             M.get_name (| globals, "x" |),
@@ -504,6 +576,19 @@ Definition smod : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "y" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let remainder :=
+          Constant.int 0 in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let remainder :=
           BinOp.mult (|
             M.call (|
@@ -617,6 +702,25 @@ Definition addmod : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "z" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let result :=
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let result :=
           M.call (|
             M.get_name (| globals, "U256" |),
@@ -712,6 +816,25 @@ Definition mulmod : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "z" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let result :=
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let result :=
           M.call (|
             M.get_name (| globals, "U256" |),
@@ -881,6 +1004,19 @@ Definition signextend : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.gt (|
+          M.get_name (| globals, "byte_num" |),
+          Constant.int 31
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let result :=
+          M.get_name (| globals, "value" |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let value_bytes :=
           M.call (|
             M.get_name (| globals, "bytes" |),
@@ -894,7 +1030,7 @@ Definition signextend : Value.t -> Value.t -> M :=
             make_dict []
           |) in
         let value_bytes :=
-          M.get_subscript (| M.get_name (| globals, "value_bytes" |), BinOp.sub (|
+          M.get_subscript (| M.get_name (| globals, "value_bytes" |), M.slice (| BinOp.sub (|
             Constant.int 31,
             M.call (|
               M.get_name (| globals, "int" |),
@@ -903,13 +1039,32 @@ Definition signextend : Value.t -> Value.t -> M :=
               ],
               make_dict []
             |)
-          |) |) in
+          |), Constant.None_ |) |) in
         let sign_bit :=
           BinOp.r_shift (|
             M.get_subscript (| M.get_name (| globals, "value_bytes" |), Constant.int 0 |),
             Constant.int 7
           |) in
         let _ :=
+          (* if *)
+          M.if_then_else (|
+            Compare.eq (|
+              M.get_name (| globals, "sign_bit" |),
+              Constant.int 0
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let result :=
+              M.call (|
+                M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
+                make_list [
+                  M.get_name (| globals, "value_bytes" |)
+                ],
+                make_dict []
+              |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
             let num_bytes_prepend :=
               BinOp.sub (|
                 Constant.int 32,

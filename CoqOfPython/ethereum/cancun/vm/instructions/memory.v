@@ -29,33 +29,33 @@ Require ethereum.utils.numeric.
 Axiom ethereum_utils_numeric_ceil32 :
   IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.cancun.vm.__init__.
+Axiom ethereum_cancun_vm___init___Evm :
+  IsGlobalAlias globals ethereum.cancun.vm.__init__.globals "Evm".
 
-Require gas.
-Axiom gas_GAS_BASE :
-  IsGlobalAlias globals gas.globals "GAS_BASE".
-Axiom gas_GAS_COPY :
-  IsGlobalAlias globals gas.globals "GAS_COPY".
-Axiom gas_GAS_VERY_LOW :
-  IsGlobalAlias globals gas.globals "GAS_VERY_LOW".
-Axiom gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals gas.globals "calculate_gas_extend_memory".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
+Require ethereum.cancun.vm.gas.
+Axiom ethereum_cancun_vm_gas_GAS_BASE :
+  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_BASE".
+Axiom ethereum_cancun_vm_gas_GAS_COPY :
+  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_COPY".
+Axiom ethereum_cancun_vm_gas_GAS_VERY_LOW :
+  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_VERY_LOW".
+Axiom ethereum_cancun_vm_gas_calculate_gas_extend_memory :
+  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "calculate_gas_extend_memory".
+Axiom ethereum_cancun_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "charge_gas".
 
-Require memory.
-Axiom memory_memory_read_bytes :
-  IsGlobalAlias globals memory.globals "memory_read_bytes".
-Axiom memory_memory_write :
-  IsGlobalAlias globals memory.globals "memory_write".
+Require ethereum.cancun.vm.memory.
+Axiom ethereum_cancun_vm_memory_memory_read_bytes :
+  IsGlobalAlias globals ethereum.cancun.vm.memory.globals "memory_read_bytes".
+Axiom ethereum_cancun_vm_memory_memory_write :
+  IsGlobalAlias globals ethereum.cancun.vm.memory.globals "memory_write".
 
-Require stack.
-Axiom stack_pop :
-  IsGlobalAlias globals stack.globals "pop".
-Axiom stack_push :
-  IsGlobalAlias globals stack.globals "push".
+Require ethereum.cancun.vm.stack.
+Axiom ethereum_cancun_vm_stack_pop :
+  IsGlobalAlias globals ethereum.cancun.vm.stack.globals "pop".
+Axiom ethereum_cancun_vm_stack_push :
+  IsGlobalAlias globals ethereum.cancun.vm.stack.globals "push".
 
 Definition mstore : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

@@ -29,37 +29,37 @@ Require ethereum.utils.ensure.
 Axiom ethereum_utils_ensure_ensure :
   IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
 
-Require blocks.
-Axiom blocks_Log :
-  IsGlobalAlias globals blocks.globals "Log".
+Require ethereum.constantinople.blocks.
+Axiom ethereum_constantinople_blocks_Log :
+  IsGlobalAlias globals ethereum.constantinople.blocks.globals "Log".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.constantinople.vm.__init__.
+Axiom ethereum_constantinople_vm___init___Evm :
+  IsGlobalAlias globals ethereum.constantinople.vm.__init__.globals "Evm".
 
-Require exceptions.
-Axiom exceptions_WriteInStaticContext :
-  IsGlobalAlias globals exceptions.globals "WriteInStaticContext".
+Require ethereum.constantinople.vm.exceptions.
+Axiom ethereum_constantinople_vm_exceptions_WriteInStaticContext :
+  IsGlobalAlias globals ethereum.constantinople.vm.exceptions.globals "WriteInStaticContext".
 
-Require gas.
-Axiom gas_GAS_LOG :
-  IsGlobalAlias globals gas.globals "GAS_LOG".
-Axiom gas_GAS_LOG_DATA :
-  IsGlobalAlias globals gas.globals "GAS_LOG_DATA".
-Axiom gas_GAS_LOG_TOPIC :
-  IsGlobalAlias globals gas.globals "GAS_LOG_TOPIC".
-Axiom gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals gas.globals "calculate_gas_extend_memory".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
+Require ethereum.constantinople.vm.gas.
+Axiom ethereum_constantinople_vm_gas_GAS_LOG :
+  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_LOG".
+Axiom ethereum_constantinople_vm_gas_GAS_LOG_DATA :
+  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_LOG_DATA".
+Axiom ethereum_constantinople_vm_gas_GAS_LOG_TOPIC :
+  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_LOG_TOPIC".
+Axiom ethereum_constantinople_vm_gas_calculate_gas_extend_memory :
+  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "calculate_gas_extend_memory".
+Axiom ethereum_constantinople_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "charge_gas".
 
-Require memory.
-Axiom memory_memory_read_bytes :
-  IsGlobalAlias globals memory.globals "memory_read_bytes".
+Require ethereum.constantinople.vm.memory.
+Axiom ethereum_constantinople_vm_memory_memory_read_bytes :
+  IsGlobalAlias globals ethereum.constantinople.vm.memory.globals "memory_read_bytes".
 
-Require stack.
-Axiom stack_pop :
-  IsGlobalAlias globals stack.globals "pop".
+Require ethereum.constantinople.vm.stack.
+Axiom ethereum_constantinople_vm_stack_pop :
+  IsGlobalAlias globals ethereum.constantinople.vm.stack.globals "pop".
 
 Definition log_n : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

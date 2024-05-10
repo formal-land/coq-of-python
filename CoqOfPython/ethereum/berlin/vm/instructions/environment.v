@@ -35,57 +35,57 @@ Require ethereum.utils.numeric.
 Axiom ethereum_utils_numeric_ceil32 :
   IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
 
-Require fork_types.
-Axiom fork_types_EMPTY_ACCOUNT :
-  IsGlobalAlias globals fork_types.globals "EMPTY_ACCOUNT".
+Require ethereum.berlin.fork_types.
+Axiom ethereum_berlin_fork_types_EMPTY_ACCOUNT :
+  IsGlobalAlias globals ethereum.berlin.fork_types.globals "EMPTY_ACCOUNT".
 
-Require state.
-Axiom state_get_account :
-  IsGlobalAlias globals state.globals "get_account".
+Require ethereum.berlin.state.
+Axiom ethereum_berlin_state_get_account :
+  IsGlobalAlias globals ethereum.berlin.state.globals "get_account".
 
-Require utils.address.
-Axiom utils_address_to_address :
-  IsGlobalAlias globals utils.address.globals "to_address".
+Require ethereum.berlin.utils.address.
+Axiom ethereum_berlin_utils_address_to_address :
+  IsGlobalAlias globals ethereum.berlin.utils.address.globals "to_address".
 
-Require vm.memory.
-Axiom vm_memory_buffer_read :
-  IsGlobalAlias globals vm.memory.globals "buffer_read".
-Axiom vm_memory_memory_write :
-  IsGlobalAlias globals vm.memory.globals "memory_write".
+Require ethereum.berlin.vm.memory.
+Axiom ethereum_berlin_vm_memory_buffer_read :
+  IsGlobalAlias globals ethereum.berlin.vm.memory.globals "buffer_read".
+Axiom ethereum_berlin_vm_memory_memory_write :
+  IsGlobalAlias globals ethereum.berlin.vm.memory.globals "memory_write".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.berlin.vm.__init__.
+Axiom ethereum_berlin_vm___init___Evm :
+  IsGlobalAlias globals ethereum.berlin.vm.__init__.globals "Evm".
 
-Require exceptions.
-Axiom exceptions_OutOfBoundsRead :
-  IsGlobalAlias globals exceptions.globals "OutOfBoundsRead".
+Require ethereum.berlin.vm.exceptions.
+Axiom ethereum_berlin_vm_exceptions_OutOfBoundsRead :
+  IsGlobalAlias globals ethereum.berlin.vm.exceptions.globals "OutOfBoundsRead".
 
-Require gas.
-Axiom gas_GAS_BASE :
-  IsGlobalAlias globals gas.globals "GAS_BASE".
-Axiom gas_GAS_COLD_ACCOUNT_ACCESS :
-  IsGlobalAlias globals gas.globals "GAS_COLD_ACCOUNT_ACCESS".
-Axiom gas_GAS_COPY :
-  IsGlobalAlias globals gas.globals "GAS_COPY".
-Axiom gas_GAS_FAST_STEP :
-  IsGlobalAlias globals gas.globals "GAS_FAST_STEP".
-Axiom gas_GAS_RETURN_DATA_COPY :
-  IsGlobalAlias globals gas.globals "GAS_RETURN_DATA_COPY".
-Axiom gas_GAS_VERY_LOW :
-  IsGlobalAlias globals gas.globals "GAS_VERY_LOW".
-Axiom gas_GAS_WARM_ACCESS :
-  IsGlobalAlias globals gas.globals "GAS_WARM_ACCESS".
-Axiom gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals gas.globals "calculate_gas_extend_memory".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
+Require ethereum.berlin.vm.gas.
+Axiom ethereum_berlin_vm_gas_GAS_BASE :
+  IsGlobalAlias globals ethereum.berlin.vm.gas.globals "GAS_BASE".
+Axiom ethereum_berlin_vm_gas_GAS_COLD_ACCOUNT_ACCESS :
+  IsGlobalAlias globals ethereum.berlin.vm.gas.globals "GAS_COLD_ACCOUNT_ACCESS".
+Axiom ethereum_berlin_vm_gas_GAS_COPY :
+  IsGlobalAlias globals ethereum.berlin.vm.gas.globals "GAS_COPY".
+Axiom ethereum_berlin_vm_gas_GAS_FAST_STEP :
+  IsGlobalAlias globals ethereum.berlin.vm.gas.globals "GAS_FAST_STEP".
+Axiom ethereum_berlin_vm_gas_GAS_RETURN_DATA_COPY :
+  IsGlobalAlias globals ethereum.berlin.vm.gas.globals "GAS_RETURN_DATA_COPY".
+Axiom ethereum_berlin_vm_gas_GAS_VERY_LOW :
+  IsGlobalAlias globals ethereum.berlin.vm.gas.globals "GAS_VERY_LOW".
+Axiom ethereum_berlin_vm_gas_GAS_WARM_ACCESS :
+  IsGlobalAlias globals ethereum.berlin.vm.gas.globals "GAS_WARM_ACCESS".
+Axiom ethereum_berlin_vm_gas_calculate_gas_extend_memory :
+  IsGlobalAlias globals ethereum.berlin.vm.gas.globals "calculate_gas_extend_memory".
+Axiom ethereum_berlin_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.berlin.vm.gas.globals "charge_gas".
 
-Require stack.
-Axiom stack_pop :
-  IsGlobalAlias globals stack.globals "pop".
-Axiom stack_push :
-  IsGlobalAlias globals stack.globals "push".
+Require ethereum.berlin.vm.stack.
+Axiom ethereum_berlin_vm_stack_pop :
+  IsGlobalAlias globals ethereum.berlin.vm.stack.globals "pop".
+Axiom ethereum_berlin_vm_stack_push :
+  IsGlobalAlias globals ethereum.berlin.vm.stack.globals "push".
 
 Definition address : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -156,6 +156,25 @@ Definition balance : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.in (|
+          M.get_name (| globals, "address" |),
+          M.get_field (| M.get_name (| globals, "evm" |), "accessed_addresses" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_name (| globals, "charge_gas" |),
+    make_list [
+      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, "GAS_WARM_ACCESS" |)
+    ],
+    make_dict []
+  |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.call (|
     M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "accessed_addresses" |), "add" |),
     make_list [
@@ -789,6 +808,25 @@ Definition extcodesize : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.in (|
+          M.get_name (| globals, "address" |),
+          M.get_field (| M.get_name (| globals, "evm" |), "accessed_addresses" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_name (| globals, "charge_gas" |),
+    make_list [
+      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, "GAS_WARM_ACCESS" |)
+    ],
+    make_dict []
+  |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.call (|
     M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "accessed_addresses" |), "add" |),
     make_list [
@@ -926,6 +964,31 @@ Definition extcodecopy : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.in (|
+          M.get_name (| globals, "address" |),
+          M.get_field (| M.get_name (| globals, "evm" |), "accessed_addresses" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_name (| globals, "charge_gas" |),
+    make_list [
+      M.get_name (| globals, "evm" |);
+      BinOp.add (|
+        BinOp.add (|
+          M.get_name (| globals, "GAS_WARM_ACCESS" |),
+          M.get_name (| globals, "copy_gas_cost" |)
+        |),
+        M.get_field (| M.get_name (| globals, "extend_memory" |), "cost" |)
+      |)
+    ],
+    make_dict []
+  |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.call (|
     M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "accessed_addresses" |), "add" |),
     make_list [
@@ -1162,7 +1225,10 @@ Definition returndatacopy : Value.t -> Value.t -> M :=
   |)
     |) in
     let value :=
-      M.get_subscript (| M.get_field (| M.get_name (| globals, "evm" |), "return_data" |), M.get_name (| globals, "return_data_start_position" |) |) in
+      M.get_subscript (| M.get_field (| M.get_name (| globals, "evm" |), "return_data" |), M.slice (| M.get_name (| globals, "return_data_start_position" |), BinOp.add (|
+        M.get_name (| globals, "return_data_start_position" |),
+        M.get_name (| globals, "size" |)
+      |) |) |) in
     let _ := M.call (|
     M.get_name (| globals, "memory_write" |),
     make_list [
@@ -1204,6 +1270,25 @@ Definition extcodehash : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.in (|
+          M.get_name (| globals, "address" |),
+          M.get_field (| M.get_name (| globals, "evm" |), "accessed_addresses" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_name (| globals, "charge_gas" |),
+    make_list [
+      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, "GAS_WARM_ACCESS" |)
+    ],
+    make_dict []
+  |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.call (|
     M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "accessed_addresses" |), "add" |),
     make_list [
@@ -1231,6 +1316,25 @@ Definition extcodehash : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "account" |),
+          M.get_name (| globals, "EMPTY_ACCOUNT" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let codehash :=
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let codehash :=
           M.call (|
             M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),

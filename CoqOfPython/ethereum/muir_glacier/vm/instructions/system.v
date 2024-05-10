@@ -33,87 +33,87 @@ Require ethereum.utils.numeric.
 Axiom ethereum_utils_numeric_ceil32 :
   IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
 
-Require fork_types.
-Axiom fork_types_Address :
-  IsGlobalAlias globals fork_types.globals "Address".
+Require ethereum.muir_glacier.fork_types.
+Axiom ethereum_muir_glacier_fork_types_Address :
+  IsGlobalAlias globals ethereum.muir_glacier.fork_types.globals "Address".
 
-Require state.
-Axiom state_account_exists_and_is_empty :
-  IsGlobalAlias globals state.globals "account_exists_and_is_empty".
-Axiom state_account_has_code_or_nonce :
-  IsGlobalAlias globals state.globals "account_has_code_or_nonce".
-Axiom state_get_account :
-  IsGlobalAlias globals state.globals "get_account".
-Axiom state_increment_nonce :
-  IsGlobalAlias globals state.globals "increment_nonce".
-Axiom state_is_account_alive :
-  IsGlobalAlias globals state.globals "is_account_alive".
-Axiom state_set_account_balance :
-  IsGlobalAlias globals state.globals "set_account_balance".
+Require ethereum.muir_glacier.state.
+Axiom ethereum_muir_glacier_state_account_exists_and_is_empty :
+  IsGlobalAlias globals ethereum.muir_glacier.state.globals "account_exists_and_is_empty".
+Axiom ethereum_muir_glacier_state_account_has_code_or_nonce :
+  IsGlobalAlias globals ethereum.muir_glacier.state.globals "account_has_code_or_nonce".
+Axiom ethereum_muir_glacier_state_get_account :
+  IsGlobalAlias globals ethereum.muir_glacier.state.globals "get_account".
+Axiom ethereum_muir_glacier_state_increment_nonce :
+  IsGlobalAlias globals ethereum.muir_glacier.state.globals "increment_nonce".
+Axiom ethereum_muir_glacier_state_is_account_alive :
+  IsGlobalAlias globals ethereum.muir_glacier.state.globals "is_account_alive".
+Axiom ethereum_muir_glacier_state_set_account_balance :
+  IsGlobalAlias globals ethereum.muir_glacier.state.globals "set_account_balance".
 
-Require utils.address.
-Axiom utils_address_compute_contract_address :
-  IsGlobalAlias globals utils.address.globals "compute_contract_address".
-Axiom utils_address_compute_create2_contract_address :
-  IsGlobalAlias globals utils.address.globals "compute_create2_contract_address".
-Axiom utils_address_to_address :
-  IsGlobalAlias globals utils.address.globals "to_address".
+Require ethereum.muir_glacier.utils.address.
+Axiom ethereum_muir_glacier_utils_address_compute_contract_address :
+  IsGlobalAlias globals ethereum.muir_glacier.utils.address.globals "compute_contract_address".
+Axiom ethereum_muir_glacier_utils_address_compute_create2_contract_address :
+  IsGlobalAlias globals ethereum.muir_glacier.utils.address.globals "compute_create2_contract_address".
+Axiom ethereum_muir_glacier_utils_address_to_address :
+  IsGlobalAlias globals ethereum.muir_glacier.utils.address.globals "to_address".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
-Axiom __init___Message :
-  IsGlobalAlias globals __init__.globals "Message".
-Axiom __init___incorporate_child_on_error :
-  IsGlobalAlias globals __init__.globals "incorporate_child_on_error".
-Axiom __init___incorporate_child_on_success :
-  IsGlobalAlias globals __init__.globals "incorporate_child_on_success".
+Require ethereum.muir_glacier.vm.__init__.
+Axiom ethereum_muir_glacier_vm___init___Evm :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.__init__.globals "Evm".
+Axiom ethereum_muir_glacier_vm___init___Message :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.__init__.globals "Message".
+Axiom ethereum_muir_glacier_vm___init___incorporate_child_on_error :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.__init__.globals "incorporate_child_on_error".
+Axiom ethereum_muir_glacier_vm___init___incorporate_child_on_success :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.__init__.globals "incorporate_child_on_success".
 
-Require exceptions.
-Axiom exceptions_Revert :
-  IsGlobalAlias globals exceptions.globals "Revert".
-Axiom exceptions_WriteInStaticContext :
-  IsGlobalAlias globals exceptions.globals "WriteInStaticContext".
+Require ethereum.muir_glacier.vm.exceptions.
+Axiom ethereum_muir_glacier_vm_exceptions_Revert :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.exceptions.globals "Revert".
+Axiom ethereum_muir_glacier_vm_exceptions_WriteInStaticContext :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.exceptions.globals "WriteInStaticContext".
 
-Require gas.
-Axiom gas_GAS_CALL :
-  IsGlobalAlias globals gas.globals "GAS_CALL".
-Axiom gas_GAS_CALL_VALUE :
-  IsGlobalAlias globals gas.globals "GAS_CALL_VALUE".
-Axiom gas_GAS_CREATE :
-  IsGlobalAlias globals gas.globals "GAS_CREATE".
-Axiom gas_GAS_KECCAK256_WORD :
-  IsGlobalAlias globals gas.globals "GAS_KECCAK256_WORD".
-Axiom gas_GAS_NEW_ACCOUNT :
-  IsGlobalAlias globals gas.globals "GAS_NEW_ACCOUNT".
-Axiom gas_GAS_SELF_DESTRUCT :
-  IsGlobalAlias globals gas.globals "GAS_SELF_DESTRUCT".
-Axiom gas_GAS_SELF_DESTRUCT_NEW_ACCOUNT :
-  IsGlobalAlias globals gas.globals "GAS_SELF_DESTRUCT_NEW_ACCOUNT".
-Axiom gas_GAS_ZERO :
-  IsGlobalAlias globals gas.globals "GAS_ZERO".
-Axiom gas_REFUND_SELF_DESTRUCT :
-  IsGlobalAlias globals gas.globals "REFUND_SELF_DESTRUCT".
-Axiom gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals gas.globals "calculate_gas_extend_memory".
-Axiom gas_calculate_message_call_gas :
-  IsGlobalAlias globals gas.globals "calculate_message_call_gas".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
-Axiom gas_max_message_call_gas :
-  IsGlobalAlias globals gas.globals "max_message_call_gas".
+Require ethereum.muir_glacier.vm.gas.
+Axiom ethereum_muir_glacier_vm_gas_GAS_CALL :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "GAS_CALL".
+Axiom ethereum_muir_glacier_vm_gas_GAS_CALL_VALUE :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "GAS_CALL_VALUE".
+Axiom ethereum_muir_glacier_vm_gas_GAS_CREATE :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "GAS_CREATE".
+Axiom ethereum_muir_glacier_vm_gas_GAS_KECCAK256_WORD :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "GAS_KECCAK256_WORD".
+Axiom ethereum_muir_glacier_vm_gas_GAS_NEW_ACCOUNT :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "GAS_NEW_ACCOUNT".
+Axiom ethereum_muir_glacier_vm_gas_GAS_SELF_DESTRUCT :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "GAS_SELF_DESTRUCT".
+Axiom ethereum_muir_glacier_vm_gas_GAS_SELF_DESTRUCT_NEW_ACCOUNT :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "GAS_SELF_DESTRUCT_NEW_ACCOUNT".
+Axiom ethereum_muir_glacier_vm_gas_GAS_ZERO :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "GAS_ZERO".
+Axiom ethereum_muir_glacier_vm_gas_REFUND_SELF_DESTRUCT :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "REFUND_SELF_DESTRUCT".
+Axiom ethereum_muir_glacier_vm_gas_calculate_gas_extend_memory :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "calculate_gas_extend_memory".
+Axiom ethereum_muir_glacier_vm_gas_calculate_message_call_gas :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "calculate_message_call_gas".
+Axiom ethereum_muir_glacier_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "charge_gas".
+Axiom ethereum_muir_glacier_vm_gas_max_message_call_gas :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "max_message_call_gas".
 
-Require memory.
-Axiom memory_memory_read_bytes :
-  IsGlobalAlias globals memory.globals "memory_read_bytes".
-Axiom memory_memory_write :
-  IsGlobalAlias globals memory.globals "memory_write".
+Require ethereum.muir_glacier.vm.memory.
+Axiom ethereum_muir_glacier_vm_memory_memory_read_bytes :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.memory.globals "memory_read_bytes".
+Axiom ethereum_muir_glacier_vm_memory_memory_write :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.memory.globals "memory_write".
 
-Require stack.
-Axiom stack_pop :
-  IsGlobalAlias globals stack.globals "pop".
-Axiom stack_push :
-  IsGlobalAlias globals stack.globals "push".
+Require ethereum.muir_glacier.vm.stack.
+Axiom ethereum_muir_glacier_vm_stack_pop :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.stack.globals "pop".
+Axiom ethereum_muir_glacier_vm_stack_push :
+  IsGlobalAlias globals ethereum.muir_glacier.vm.stack.globals "push".
 
 Definition generic_create : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -165,9 +165,113 @@ Definition generic_create : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        BoolOp.or (|
+          Compare.lt (|
+            M.get_field (| M.get_name (| globals, "sender" |), "balance" |),
+            M.get_name (| globals, "endowment" |)
+          |),
+          ltac:(M.monadic (
+            BoolOp.or (|
+              Compare.eq (|
+                M.get_field (| M.get_name (| globals, "sender" |), "nonce" |),
+                M.call (|
+                  M.get_name (| globals, "Uint" |),
+                  make_list [
+                    BinOp.sub (|
+                      BinOp.pow (|
+                        Constant.int 2,
+                        Constant.int 64
+                      |),
+                      Constant.int 1
+                    |)
+                  ],
+                  make_dict []
+                |)
+              |),
+              ltac:(M.monadic (
+                Compare.gt (|
+                  BinOp.add (|
+                    M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "depth" |),
+                    Constant.int 1
+                  |),
+                  M.get_name (| globals, "STACK_DEPTH_LIMIT" |)
+                |)
+              ))
+            |)
+          ))
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign_op (|
+          BinOp.add,
+          M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |),
+          M.get_name (| globals, "create_message_gas" |)
+        |) in
+        let _ := M.call (|
+    M.get_name (| globals, "push" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.call (|
+        M.get_name (| globals, "U256" |),
+        make_list [
+          Constant.int 0
+        ],
+        make_dict []
+      |)
+    ],
+    make_dict []
+  |) in
+        let _ := M.return_ (|
+          Constant.None_
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.call (|
+          M.get_name (| globals, "account_has_code_or_nonce" |),
+          make_list [
+            M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "state" |);
+            M.get_name (| globals, "contract_address" |)
+          ],
+          make_dict []
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_name (| globals, "increment_nonce" |),
+    make_list [
+      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "state" |);
+      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "current_target" |)
+    ],
+    make_dict []
+  |) in
+        let _ := M.call (|
+    M.get_name (| globals, "push" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.call (|
+        M.get_name (| globals, "U256" |),
+        make_list [
+          Constant.int 0
+        ],
+        make_dict []
+      |)
+    ],
+    make_dict []
+  |) in
+        let _ := M.return_ (|
+          Constant.None_
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let call_data :=
@@ -204,6 +308,40 @@ Definition generic_create : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.get_field (| M.get_name (| globals, "child_evm" |), "error" |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_name (| globals, "incorporate_child_on_error" |),
+    make_list [
+      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, "child_evm" |)
+    ],
+    make_dict []
+  |) in
+        let _ := M.assign (|
+          M.get_field (| M.get_name (| globals, "evm" |), "return_data" |),
+          M.get_field (| M.get_name (| globals, "child_evm" |), "output" |)
+        |) in
+        let _ := M.call (|
+    M.get_name (| globals, "push" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.call (|
+        M.get_name (| globals, "U256" |),
+        make_list [
+          Constant.int 0
+        ],
+        make_dict []
+      |)
+    ],
+    make_dict []
+  |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.call (|
     M.get_name (| globals, "incorporate_child_on_success" |),
     make_list [
@@ -560,6 +698,42 @@ Definition generic_call : Value.t -> Value.t -> M :=
       Constant.bytes ""
     |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.gt (|
+          BinOp.add (|
+            M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "depth" |),
+            Constant.int 1
+          |),
+          M.get_name (| globals, "STACK_DEPTH_LIMIT" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign_op (|
+          BinOp.add,
+          M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |),
+          M.get_name (| globals, "gas" |)
+        |) in
+        let _ := M.call (|
+    M.get_name (| globals, "push" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.call (|
+        M.get_name (| globals, "U256" |),
+        make_list [
+          Constant.int 0
+        ],
+        make_dict []
+      |)
+    ],
+    make_dict []
+  |) in
+        let _ := M.return_ (|
+          Constant.None_
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let call_data :=
@@ -597,6 +771,40 @@ Definition generic_call : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.get_field (| M.get_name (| globals, "child_evm" |), "error" |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_name (| globals, "incorporate_child_on_error" |),
+    make_list [
+      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, "child_evm" |)
+    ],
+    make_dict []
+  |) in
+        let _ := M.assign (|
+          M.get_field (| M.get_name (| globals, "evm" |), "return_data" |),
+          M.get_field (| M.get_name (| globals, "child_evm" |), "output" |)
+        |) in
+        let _ := M.call (|
+    M.get_name (| globals, "push" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.call (|
+        M.get_name (| globals, "U256" |),
+        make_list [
+          Constant.int 0
+        ],
+        make_dict []
+      |)
+    ],
+    make_dict []
+  |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.call (|
     M.get_name (| globals, "incorporate_child_on_success" |),
     make_list [
@@ -651,7 +859,7 @@ Definition generic_call : Value.t -> Value.t -> M :=
     make_list [
       M.get_field (| M.get_name (| globals, "evm" |), "memory" |);
       M.get_name (| globals, "memory_output_start_position" |);
-      M.get_subscript (| M.get_field (| M.get_name (| globals, "child_evm" |), "output" |), Constant.None_:M.get_name (| globals, "actual_output_size" |) |)
+      M.get_subscript (| M.get_field (| M.get_name (| globals, "child_evm" |), "output" |), M.slice (| Constant.None_, M.get_name (| globals, "actual_output_size" |) |) |)
     ],
     make_dict []
   |) in
@@ -749,49 +957,57 @@ Definition call : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let create_gas_cost :=
-      (* if *)
-M.if_then_else (|
-  BoolOp.or (|
-    Compare.eq (|
-      M.get_name (| globals, "value" |),
-      Constant.int 0
-    |),
-    ltac:(M.monadic (
-      M.call (|
-        M.get_name (| globals, "is_account_alive" |),
-        make_list [
-          M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "state" |);
-          M.get_name (| globals, "to" |)
-        ],
-        make_dict []
-      |)
-    ))
-  |),
-(* then *)
-ltac:(M.monadic (
+            (* if *)
+      M.if_then_else (|
+        BoolOp.or (|
+          Compare.eq (|
+            M.get_name (| globals, "value" |),
+            Constant.int 0
+          |),
+          ltac:(M.monadic (
+            M.call (|
+              M.get_name (| globals, "is_account_alive" |),
+              make_list [
+                M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "state" |);
+                M.get_name (| globals, "to" |)
+              ],
+              make_dict []
+            |)
+          ))
+        |),
+      (* then *)
+      ltac:(M.monadic (
 M.call (|
-    M.get_name (| globals, "Uint" |),
-    make_list [
-      Constant.int 0
-    ],
-    make_dict []
-  |) in
+          M.get_name (| globals, "Uint" |),
+          make_list [
+            Constant.int 0
+          ],
+          make_dict []
+        |)
+      (* else *)
+      )), ltac:(M.monadic (
+M.get_name (| globals, "GAS_NEW_ACCOUNT" |)
+      )) |) in
     let transfer_gas_cost :=
-      (* if *)
-M.if_then_else (|
-  Compare.eq (|
-    M.get_name (| globals, "value" |),
-    Constant.int 0
-  |),
-(* then *)
-ltac:(M.monadic (
+            (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "value" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
 M.call (|
-    M.get_name (| globals, "Uint" |),
-    make_list [
-      Constant.int 0
-    ],
-    make_dict []
-  |) in
+          M.get_name (| globals, "Uint" |),
+          make_list [
+            Constant.int 0
+          ],
+          make_dict []
+        |)
+      (* else *)
+      )), ltac:(M.monadic (
+M.get_name (| globals, "GAS_CALL_VALUE" |)
+      )) |) in
     let message_call_gas :=
       M.call (|
         M.get_name (| globals, "calculate_message_call_gas" |),
@@ -867,6 +1083,40 @@ M.call (|
         make_dict []
       |), "balance" |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.lt (|
+          M.get_name (| globals, "sender_balance" |),
+          M.get_name (| globals, "value" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_name (| globals, "push" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.call (|
+        M.get_name (| globals, "U256" |),
+        make_list [
+          Constant.int 0
+        ],
+        make_dict []
+      |)
+    ],
+    make_dict []
+  |) in
+        let _ := M.assign (|
+          M.get_field (| M.get_name (| globals, "evm" |), "return_data" |),
+          Constant.bytes ""
+        |) in
+        let _ := M.assign_op (|
+          BinOp.add,
+          M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |),
+          M.get_field (| M.get_name (| globals, "message_call_gas" |), "stipend" |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.call (|
     M.get_name (| globals, "generic_call" |),
     make_list [
@@ -988,21 +1238,25 @@ Definition callcode : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let transfer_gas_cost :=
-      (* if *)
-M.if_then_else (|
-  Compare.eq (|
-    M.get_name (| globals, "value" |),
-    Constant.int 0
-  |),
-(* then *)
-ltac:(M.monadic (
+            (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "value" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
 M.call (|
-    M.get_name (| globals, "Uint" |),
-    make_list [
-      Constant.int 0
-    ],
-    make_dict []
-  |) in
+          M.get_name (| globals, "Uint" |),
+          make_list [
+            Constant.int 0
+          ],
+          make_dict []
+        |)
+      (* else *)
+      )), ltac:(M.monadic (
+M.get_name (| globals, "GAS_CALL_VALUE" |)
+      )) |) in
     let message_call_gas :=
       M.call (|
         M.get_name (| globals, "calculate_message_call_gas" |),
@@ -1053,6 +1307,40 @@ M.call (|
         make_dict []
       |), "balance" |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.lt (|
+          M.get_name (| globals, "sender_balance" |),
+          M.get_name (| globals, "value" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_name (| globals, "push" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.call (|
+        M.get_name (| globals, "U256" |),
+        make_list [
+          Constant.int 0
+        ],
+        make_dict []
+      |)
+    ],
+    make_dict []
+  |) in
+        let _ := M.assign (|
+          M.get_field (| M.get_name (| globals, "evm" |), "return_data" |),
+          Constant.bytes ""
+        |) in
+        let _ := M.assign_op (|
+          BinOp.add,
+          M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |),
+          M.get_field (| M.get_name (| globals, "message_call_gas" |), "stipend" |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.call (|
     M.get_name (| globals, "generic_call" |),
     make_list [
@@ -1108,6 +1396,39 @@ Definition selfdestruct : Value.t -> Value.t -> M :=
     let gas_cost :=
       M.get_name (| globals, "GAS_SELF_DESTRUCT" |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        BoolOp.and (|
+          UnOp.not (| M.call (|
+            M.get_name (| globals, "is_account_alive" |),
+            make_list [
+              M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "state" |);
+              M.get_name (| globals, "beneficiary" |)
+            ],
+            make_dict []
+          |) |),
+          ltac:(M.monadic (
+            Compare.not_eq (|
+              M.get_field (| M.call (|
+                M.get_name (| globals, "get_account" |),
+                make_list [
+                  M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "state" |);
+                  M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "current_target" |)
+                ],
+                make_dict []
+              |), "balance" |),
+              Constant.int 0
+            |)
+          ))
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let gas_cost := BinOp.add
+          M.get_name (| globals, "GAS_SELF_DESTRUCT_NEW_ACCOUNT" |)
+          M.get_name (| globals, "GAS_SELF_DESTRUCT_NEW_ACCOUNT" |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let originator :=
@@ -1131,6 +1452,22 @@ Definition selfdestruct : Value.t -> Value.t -> M :=
         M.get_field (| M.get_field (| M.get_name (| globals, "parent_evm" |), "message" |), "parent_evm" |) in
     EndWhile.
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.not_in (|
+          M.get_name (| globals, "originator" |),
+          M.get_name (| globals, "refunded_accounts" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign_op (|
+          BinOp.add,
+          M.get_field (| M.get_name (| globals, "evm" |), "refund_counter" |),
+          M.get_name (| globals, "REFUND_SELF_DESTRUCT" |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
@@ -1202,6 +1539,28 @@ Definition selfdestruct : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.call (|
+          M.get_name (| globals, "account_exists_and_is_empty" |),
+          make_list [
+            M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "state" |);
+            M.get_name (| globals, "beneficiary" |)
+          ],
+          make_dict []
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "touched_accounts" |), "add" |),
+    make_list [
+      M.get_name (| globals, "beneficiary" |)
+    ],
+    make_dict []
+  |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.assign (|
@@ -1593,6 +1952,6 @@ Definition revert : Value.t -> Value.t -> M :=
         make_dict []
       |)
     |) in
-    let _ := M.raise (| Some(M.get_name (| globals, "Revert" |))
+    let _ := M.raise (| Some(M.get_name (| globals, "Revert" |)) |) in
     let _ := M.pass (| |) in
     M.pure Constant.None_)).

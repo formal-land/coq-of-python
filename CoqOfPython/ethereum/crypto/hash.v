@@ -21,13 +21,13 @@ Require Crypto.Hash.
 Axiom Crypto_Hash_keccak :
   IsGlobalAlias globals Crypto.Hash.globals "keccak".
 
-Require base_types.
-Axiom base_types_Bytes :
-  IsGlobalAlias globals base_types.globals "Bytes".
-Axiom base_types_Bytes32 :
-  IsGlobalAlias globals base_types.globals "Bytes32".
-Axiom base_types_Bytes64 :
-  IsGlobalAlias globals base_types.globals "Bytes64".
+Require ethereum.base_types.
+Axiom ethereum_base_types_Bytes :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
+Axiom ethereum_base_types_Bytes32 :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes32".
+Axiom ethereum_base_types_Bytes64 :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes64".
 
 Definition Hash32 : Value.t := M.run ltac:(M.monadic (
   M.get_name (| globals, "Bytes32" |)
@@ -77,6 +77,7 @@ Definition keccak256 : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition keccak512 : Value.t -> Value.t -> M :=
@@ -119,4 +120,5 @@ Definition keccak512 : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).

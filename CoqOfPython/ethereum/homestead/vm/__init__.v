@@ -48,17 +48,17 @@ Require ethereum.crypto.hash.
 Axiom ethereum_crypto_hash_Hash32 :
   IsGlobalAlias globals ethereum.crypto.hash.globals "Hash32".
 
-Require blocks.
-Axiom blocks_Log :
-  IsGlobalAlias globals blocks.globals "Log".
+Require ethereum.homestead.blocks.
+Axiom ethereum_homestead_blocks_Log :
+  IsGlobalAlias globals ethereum.homestead.blocks.globals "Log".
 
-Require fork_types.
-Axiom fork_types_Address :
-  IsGlobalAlias globals fork_types.globals "Address".
+Require ethereum.homestead.fork_types.
+Axiom ethereum_homestead_fork_types_Address :
+  IsGlobalAlias globals ethereum.homestead.fork_types.globals "Address".
 
-Require state.
-Axiom state_State :
-  IsGlobalAlias globals state.globals "State".
+Require ethereum.homestead.state.
+Axiom ethereum_homestead_state_State :
+  IsGlobalAlias globals ethereum.homestead.state.globals "State".
 
 Definition __all__ : Value.t := M.run ltac:(M.monadic (
   make_tuple [ Constant.str "Environment"; Constant.str "Evm"; Constant.str "Message" ]

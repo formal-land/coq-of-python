@@ -63,6 +63,7 @@ Definition has_hex_prefix : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition remove_hex_prefix : Value.t -> Value.t -> M :=
@@ -83,10 +84,34 @@ Definition remove_hex_prefix : Value.t -> Value.t -> M :=
         The hexadecimal string with the 0x prefix removed if present.
     " in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.call (|
+          M.get_name (| globals, "has_hex_prefix" |),
+          make_list [
+            M.get_name (| globals, "hex_string" |)
+          ],
+          make_dict []
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.return_ (|
+          M.get_subscript (| M.get_name (| globals, "hex_string" |), M.slice (| M.call (|
+            M.get_name (| globals, "len" |),
+            make_list [
+              Constant.str "0x"
+            ],
+            make_dict []
+          |), Constant.None_ |) |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.return_ (|
       M.get_name (| globals, "hex_string" |)
+    |) in
     M.pure Constant.None_)).
 
 Definition hex_to_bytes : Value.t -> Value.t -> M :=
@@ -119,6 +144,7 @@ Definition hex_to_bytes : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition hex_to_bytes8 : Value.t -> Value.t -> M :=
@@ -164,6 +190,7 @@ Definition hex_to_bytes8 : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition hex_to_bytes20 : Value.t -> Value.t -> M :=
@@ -209,6 +236,7 @@ Definition hex_to_bytes20 : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition hex_to_bytes32 : Value.t -> Value.t -> M :=
@@ -254,6 +282,7 @@ Definition hex_to_bytes32 : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition hex_to_bytes256 : Value.t -> Value.t -> M :=
@@ -299,6 +328,7 @@ Definition hex_to_bytes256 : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition hex_to_hash : Value.t -> Value.t -> M :=
@@ -337,6 +367,7 @@ Definition hex_to_hash : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition hex_to_uint : Value.t -> Value.t -> M :=
@@ -376,6 +407,7 @@ Definition hex_to_uint : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition hex_to_u64 : Value.t -> Value.t -> M :=
@@ -415,6 +447,7 @@ Definition hex_to_u64 : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition hex_to_u256 : Value.t -> Value.t -> M :=
@@ -454,4 +487,5 @@ Definition hex_to_u256 : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).

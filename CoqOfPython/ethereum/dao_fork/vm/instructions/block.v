@@ -21,23 +21,23 @@ Require ethereum.base_types.
 Axiom ethereum_base_types_U256 :
   IsGlobalAlias globals ethereum.base_types.globals "U256".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.dao_fork.vm.__init__.
+Axiom ethereum_dao_fork_vm___init___Evm :
+  IsGlobalAlias globals ethereum.dao_fork.vm.__init__.globals "Evm".
 
-Require gas.
-Axiom gas_GAS_BASE :
-  IsGlobalAlias globals gas.globals "GAS_BASE".
-Axiom gas_GAS_BLOCK_HASH :
-  IsGlobalAlias globals gas.globals "GAS_BLOCK_HASH".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
+Require ethereum.dao_fork.vm.gas.
+Axiom ethereum_dao_fork_vm_gas_GAS_BASE :
+  IsGlobalAlias globals ethereum.dao_fork.vm.gas.globals "GAS_BASE".
+Axiom ethereum_dao_fork_vm_gas_GAS_BLOCK_HASH :
+  IsGlobalAlias globals ethereum.dao_fork.vm.gas.globals "GAS_BLOCK_HASH".
+Axiom ethereum_dao_fork_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.dao_fork.vm.gas.globals "charge_gas".
 
-Require stack.
-Axiom stack_pop :
-  IsGlobalAlias globals stack.globals "pop".
-Axiom stack_push :
-  IsGlobalAlias globals stack.globals "push".
+Require ethereum.dao_fork.vm.stack.
+Axiom ethereum_dao_fork_vm_stack_pop :
+  IsGlobalAlias globals ethereum.dao_fork.vm.stack.globals "pop".
+Axiom ethereum_dao_fork_vm_stack_push :
+  IsGlobalAlias globals ethereum.dao_fork.vm.stack.globals "push".
 
 Definition block_hash : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -69,6 +69,30 @@ Definition block_hash : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        BoolOp.or (|
+          Compare.lt_e (|
+            M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "number" |),
+            M.get_name (| globals, "block_number" |)
+          |),
+          ltac:(M.monadic (
+            Compare.gt (|
+              M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "number" |),
+              BinOp.add (|
+                M.get_name (| globals, "block_number" |),
+                Constant.int 256
+              |)
+            |)
+          ))
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let hash :=
+          Constant.bytes "00" in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let hash :=
           M.get_subscript (| M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "block_hashes" |), UnOp.sub (| BinOp.sub (|
             M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "number" |),

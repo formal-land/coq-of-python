@@ -27,45 +27,45 @@ Require ethereum.utils.numeric.
 Axiom ethereum_utils_numeric_ceil32 :
   IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
 
-Require state.
-Axiom state_get_account :
-  IsGlobalAlias globals state.globals "get_account".
+Require ethereum.tangerine_whistle.state.
+Axiom ethereum_tangerine_whistle_state_get_account :
+  IsGlobalAlias globals ethereum.tangerine_whistle.state.globals "get_account".
 
-Require utils.address.
-Axiom utils_address_to_address :
-  IsGlobalAlias globals utils.address.globals "to_address".
+Require ethereum.tangerine_whistle.utils.address.
+Axiom ethereum_tangerine_whistle_utils_address_to_address :
+  IsGlobalAlias globals ethereum.tangerine_whistle.utils.address.globals "to_address".
 
-Require vm.memory.
-Axiom vm_memory_buffer_read :
-  IsGlobalAlias globals vm.memory.globals "buffer_read".
-Axiom vm_memory_memory_write :
-  IsGlobalAlias globals vm.memory.globals "memory_write".
+Require ethereum.tangerine_whistle.vm.memory.
+Axiom ethereum_tangerine_whistle_vm_memory_buffer_read :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.memory.globals "buffer_read".
+Axiom ethereum_tangerine_whistle_vm_memory_memory_write :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.memory.globals "memory_write".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.tangerine_whistle.vm.__init__.
+Axiom ethereum_tangerine_whistle_vm___init___Evm :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.__init__.globals "Evm".
 
-Require gas.
-Axiom gas_GAS_BALANCE :
-  IsGlobalAlias globals gas.globals "GAS_BALANCE".
-Axiom gas_GAS_BASE :
-  IsGlobalAlias globals gas.globals "GAS_BASE".
-Axiom gas_GAS_COPY :
-  IsGlobalAlias globals gas.globals "GAS_COPY".
-Axiom gas_GAS_EXTERNAL :
-  IsGlobalAlias globals gas.globals "GAS_EXTERNAL".
-Axiom gas_GAS_VERY_LOW :
-  IsGlobalAlias globals gas.globals "GAS_VERY_LOW".
-Axiom gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals gas.globals "calculate_gas_extend_memory".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
+Require ethereum.tangerine_whistle.vm.gas.
+Axiom ethereum_tangerine_whistle_vm_gas_GAS_BALANCE :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_BALANCE".
+Axiom ethereum_tangerine_whistle_vm_gas_GAS_BASE :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_BASE".
+Axiom ethereum_tangerine_whistle_vm_gas_GAS_COPY :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_COPY".
+Axiom ethereum_tangerine_whistle_vm_gas_GAS_EXTERNAL :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_EXTERNAL".
+Axiom ethereum_tangerine_whistle_vm_gas_GAS_VERY_LOW :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_VERY_LOW".
+Axiom ethereum_tangerine_whistle_vm_gas_calculate_gas_extend_memory :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "calculate_gas_extend_memory".
+Axiom ethereum_tangerine_whistle_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "charge_gas".
 
-Require stack.
-Axiom stack_pop :
-  IsGlobalAlias globals stack.globals "pop".
-Axiom stack_push :
-  IsGlobalAlias globals stack.globals "push".
+Require ethereum.tangerine_whistle.vm.stack.
+Axiom ethereum_tangerine_whistle_vm_stack_pop :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.stack.globals "pop".
+Axiom ethereum_tangerine_whistle_vm_stack_push :
+  IsGlobalAlias globals ethereum.tangerine_whistle.vm.stack.globals "push".
 
 Definition address : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

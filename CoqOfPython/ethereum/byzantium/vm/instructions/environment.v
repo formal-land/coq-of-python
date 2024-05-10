@@ -31,51 +31,51 @@ Require ethereum.utils.numeric.
 Axiom ethereum_utils_numeric_ceil32 :
   IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
 
-Require state.
-Axiom state_get_account :
-  IsGlobalAlias globals state.globals "get_account".
+Require ethereum.byzantium.state.
+Axiom ethereum_byzantium_state_get_account :
+  IsGlobalAlias globals ethereum.byzantium.state.globals "get_account".
 
-Require utils.address.
-Axiom utils_address_to_address :
-  IsGlobalAlias globals utils.address.globals "to_address".
+Require ethereum.byzantium.utils.address.
+Axiom ethereum_byzantium_utils_address_to_address :
+  IsGlobalAlias globals ethereum.byzantium.utils.address.globals "to_address".
 
-Require vm.memory.
-Axiom vm_memory_buffer_read :
-  IsGlobalAlias globals vm.memory.globals "buffer_read".
-Axiom vm_memory_memory_write :
-  IsGlobalAlias globals vm.memory.globals "memory_write".
+Require ethereum.byzantium.vm.memory.
+Axiom ethereum_byzantium_vm_memory_buffer_read :
+  IsGlobalAlias globals ethereum.byzantium.vm.memory.globals "buffer_read".
+Axiom ethereum_byzantium_vm_memory_memory_write :
+  IsGlobalAlias globals ethereum.byzantium.vm.memory.globals "memory_write".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.byzantium.vm.__init__.
+Axiom ethereum_byzantium_vm___init___Evm :
+  IsGlobalAlias globals ethereum.byzantium.vm.__init__.globals "Evm".
 
-Require exceptions.
-Axiom exceptions_OutOfBoundsRead :
-  IsGlobalAlias globals exceptions.globals "OutOfBoundsRead".
+Require ethereum.byzantium.vm.exceptions.
+Axiom ethereum_byzantium_vm_exceptions_OutOfBoundsRead :
+  IsGlobalAlias globals ethereum.byzantium.vm.exceptions.globals "OutOfBoundsRead".
 
-Require gas.
-Axiom gas_GAS_BALANCE :
-  IsGlobalAlias globals gas.globals "GAS_BALANCE".
-Axiom gas_GAS_BASE :
-  IsGlobalAlias globals gas.globals "GAS_BASE".
-Axiom gas_GAS_COPY :
-  IsGlobalAlias globals gas.globals "GAS_COPY".
-Axiom gas_GAS_EXTERNAL :
-  IsGlobalAlias globals gas.globals "GAS_EXTERNAL".
-Axiom gas_GAS_RETURN_DATA_COPY :
-  IsGlobalAlias globals gas.globals "GAS_RETURN_DATA_COPY".
-Axiom gas_GAS_VERY_LOW :
-  IsGlobalAlias globals gas.globals "GAS_VERY_LOW".
-Axiom gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals gas.globals "calculate_gas_extend_memory".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
+Require ethereum.byzantium.vm.gas.
+Axiom ethereum_byzantium_vm_gas_GAS_BALANCE :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_BALANCE".
+Axiom ethereum_byzantium_vm_gas_GAS_BASE :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_BASE".
+Axiom ethereum_byzantium_vm_gas_GAS_COPY :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_COPY".
+Axiom ethereum_byzantium_vm_gas_GAS_EXTERNAL :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_EXTERNAL".
+Axiom ethereum_byzantium_vm_gas_GAS_RETURN_DATA_COPY :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_RETURN_DATA_COPY".
+Axiom ethereum_byzantium_vm_gas_GAS_VERY_LOW :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_VERY_LOW".
+Axiom ethereum_byzantium_vm_gas_calculate_gas_extend_memory :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "calculate_gas_extend_memory".
+Axiom ethereum_byzantium_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "charge_gas".
 
-Require stack.
-Axiom stack_pop :
-  IsGlobalAlias globals stack.globals "pop".
-Axiom stack_push :
-  IsGlobalAlias globals stack.globals "push".
+Require ethereum.byzantium.vm.stack.
+Axiom ethereum_byzantium_vm_stack_pop :
+  IsGlobalAlias globals ethereum.byzantium.vm.stack.globals "pop".
+Axiom ethereum_byzantium_vm_stack_push :
+  IsGlobalAlias globals ethereum.byzantium.vm.stack.globals "push".
 
 Definition address : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -1122,7 +1122,10 @@ Definition returndatacopy : Value.t -> Value.t -> M :=
   |)
     |) in
     let value :=
-      M.get_subscript (| M.get_field (| M.get_name (| globals, "evm" |), "return_data" |), M.get_name (| globals, "return_data_start_position" |) |) in
+      M.get_subscript (| M.get_field (| M.get_name (| globals, "evm" |), "return_data" |), M.slice (| M.get_name (| globals, "return_data_start_position" |), BinOp.add (|
+        M.get_name (| globals, "return_data_start_position" |),
+        M.get_name (| globals, "size" |)
+      |) |) |) in
     let _ := M.call (|
     M.get_name (| globals, "memory_write" |),
     make_list [

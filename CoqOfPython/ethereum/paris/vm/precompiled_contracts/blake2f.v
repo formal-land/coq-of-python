@@ -25,19 +25,19 @@ Require ethereum.utils.ensure.
 Axiom ethereum_utils_ensure_ensure :
   IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
 
-Require vm.
-Axiom vm_Evm :
-  IsGlobalAlias globals vm.globals "Evm".
+Require ethereum.paris.vm.__init__.
+Axiom ethereum_paris_vm___init___Evm :
+  IsGlobalAlias globals ethereum.paris.vm.__init__.globals "Evm".
 
-Require vm.gas.
-Axiom vm_gas_GAS_BLAKE2_PER_ROUND :
-  IsGlobalAlias globals vm.gas.globals "GAS_BLAKE2_PER_ROUND".
-Axiom vm_gas_charge_gas :
-  IsGlobalAlias globals vm.gas.globals "charge_gas".
+Require ethereum.paris.vm.gas.
+Axiom ethereum_paris_vm_gas_GAS_BLAKE2_PER_ROUND :
+  IsGlobalAlias globals ethereum.paris.vm.gas.globals "GAS_BLAKE2_PER_ROUND".
+Axiom ethereum_paris_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.paris.vm.gas.globals "charge_gas".
 
-Require exceptions.
-Axiom exceptions_InvalidParameter :
-  IsGlobalAlias globals exceptions.globals "InvalidParameter".
+Require ethereum.paris.vm.exceptions.
+Axiom ethereum_paris_vm_exceptions_InvalidParameter :
+  IsGlobalAlias globals ethereum.paris.vm.exceptions.globals "InvalidParameter".
 
 Definition blake2f : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

@@ -31,29 +31,29 @@ Require ethereum.utils.numeric.
 Axiom ethereum_utils_numeric_ceil32 :
   IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.byzantium.vm.__init__.
+Axiom ethereum_byzantium_vm___init___Evm :
+  IsGlobalAlias globals ethereum.byzantium.vm.__init__.globals "Evm".
 
-Require gas.
-Axiom gas_GAS_KECCAK256 :
-  IsGlobalAlias globals gas.globals "GAS_KECCAK256".
-Axiom gas_GAS_KECCAK256_WORD :
-  IsGlobalAlias globals gas.globals "GAS_KECCAK256_WORD".
-Axiom gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals gas.globals "calculate_gas_extend_memory".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
+Require ethereum.byzantium.vm.gas.
+Axiom ethereum_byzantium_vm_gas_GAS_KECCAK256 :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_KECCAK256".
+Axiom ethereum_byzantium_vm_gas_GAS_KECCAK256_WORD :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_KECCAK256_WORD".
+Axiom ethereum_byzantium_vm_gas_calculate_gas_extend_memory :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "calculate_gas_extend_memory".
+Axiom ethereum_byzantium_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "charge_gas".
 
-Require memory.
-Axiom memory_memory_read_bytes :
-  IsGlobalAlias globals memory.globals "memory_read_bytes".
+Require ethereum.byzantium.vm.memory.
+Axiom ethereum_byzantium_vm_memory_memory_read_bytes :
+  IsGlobalAlias globals ethereum.byzantium.vm.memory.globals "memory_read_bytes".
 
-Require stack.
-Axiom stack_pop :
-  IsGlobalAlias globals stack.globals "pop".
-Axiom stack_push :
-  IsGlobalAlias globals stack.globals "push".
+Require ethereum.byzantium.vm.stack.
+Axiom ethereum_byzantium_vm_stack_pop :
+  IsGlobalAlias globals ethereum.byzantium.vm.stack.globals "pop".
+Axiom ethereum_byzantium_vm_stack_push :
+  IsGlobalAlias globals ethereum.byzantium.vm.stack.globals "push".
 
 Definition keccak : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

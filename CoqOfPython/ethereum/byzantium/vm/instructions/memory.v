@@ -23,31 +23,31 @@ Axiom ethereum_base_types_U256 :
 Axiom ethereum_base_types_Bytes :
   IsGlobalAlias globals ethereum.base_types.globals "Bytes".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.byzantium.vm.__init__.
+Axiom ethereum_byzantium_vm___init___Evm :
+  IsGlobalAlias globals ethereum.byzantium.vm.__init__.globals "Evm".
 
-Require gas.
-Axiom gas_GAS_BASE :
-  IsGlobalAlias globals gas.globals "GAS_BASE".
-Axiom gas_GAS_VERY_LOW :
-  IsGlobalAlias globals gas.globals "GAS_VERY_LOW".
-Axiom gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals gas.globals "calculate_gas_extend_memory".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
+Require ethereum.byzantium.vm.gas.
+Axiom ethereum_byzantium_vm_gas_GAS_BASE :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_BASE".
+Axiom ethereum_byzantium_vm_gas_GAS_VERY_LOW :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_VERY_LOW".
+Axiom ethereum_byzantium_vm_gas_calculate_gas_extend_memory :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "calculate_gas_extend_memory".
+Axiom ethereum_byzantium_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "charge_gas".
 
-Require memory.
-Axiom memory_memory_read_bytes :
-  IsGlobalAlias globals memory.globals "memory_read_bytes".
-Axiom memory_memory_write :
-  IsGlobalAlias globals memory.globals "memory_write".
+Require ethereum.byzantium.vm.memory.
+Axiom ethereum_byzantium_vm_memory_memory_read_bytes :
+  IsGlobalAlias globals ethereum.byzantium.vm.memory.globals "memory_read_bytes".
+Axiom ethereum_byzantium_vm_memory_memory_write :
+  IsGlobalAlias globals ethereum.byzantium.vm.memory.globals "memory_write".
 
-Require stack.
-Axiom stack_pop :
-  IsGlobalAlias globals stack.globals "pop".
-Axiom stack_push :
-  IsGlobalAlias globals stack.globals "push".
+Require ethereum.byzantium.vm.stack.
+Axiom ethereum_byzantium_vm_stack_pop :
+  IsGlobalAlias globals ethereum.byzantium.vm.stack.globals "pop".
+Axiom ethereum_byzantium_vm_stack_push :
+  IsGlobalAlias globals ethereum.byzantium.vm.stack.globals "push".
 
 Definition mstore : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

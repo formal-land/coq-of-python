@@ -25,17 +25,17 @@ Require ethereum.utils.numeric.
 Axiom ethereum_utils_numeric_ceil32 :
   IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
 
-Require vm.
-Axiom vm_Evm :
-  IsGlobalAlias globals vm.globals "Evm".
+Require ethereum.homestead.vm.__init__.
+Axiom ethereum_homestead_vm___init___Evm :
+  IsGlobalAlias globals ethereum.homestead.vm.__init__.globals "Evm".
 
-Require vm.gas.
-Axiom vm_gas_GAS_IDENTITY :
-  IsGlobalAlias globals vm.gas.globals "GAS_IDENTITY".
-Axiom vm_gas_GAS_IDENTITY_WORD :
-  IsGlobalAlias globals vm.gas.globals "GAS_IDENTITY_WORD".
-Axiom vm_gas_charge_gas :
-  IsGlobalAlias globals vm.gas.globals "charge_gas".
+Require ethereum.homestead.vm.gas.
+Axiom ethereum_homestead_vm_gas_GAS_IDENTITY :
+  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_IDENTITY".
+Axiom ethereum_homestead_vm_gas_GAS_IDENTITY_WORD :
+  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_IDENTITY_WORD".
+Axiom ethereum_homestead_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "charge_gas".
 
 Definition identity : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

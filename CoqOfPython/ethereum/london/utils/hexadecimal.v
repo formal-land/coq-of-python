@@ -22,13 +22,13 @@ Require ethereum.utils.hexadecimal.
 Axiom ethereum_utils_hexadecimal_remove_hex_prefix :
   IsGlobalAlias globals ethereum.utils.hexadecimal.globals "remove_hex_prefix".
 
-Require fork_types.
-Axiom fork_types_Address :
-  IsGlobalAlias globals fork_types.globals "Address".
-Axiom fork_types_Bloom :
-  IsGlobalAlias globals fork_types.globals "Bloom".
-Axiom fork_types_Root :
-  IsGlobalAlias globals fork_types.globals "Root".
+Require ethereum.london.fork_types.
+Axiom ethereum_london_fork_types_Address :
+  IsGlobalAlias globals ethereum.london.fork_types.globals "Address".
+Axiom ethereum_london_fork_types_Bloom :
+  IsGlobalAlias globals ethereum.london.fork_types.globals "Bloom".
+Axiom ethereum_london_fork_types_Root :
+  IsGlobalAlias globals ethereum.london.fork_types.globals "Root".
 
 Definition hex_to_root : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -66,6 +66,7 @@ Definition hex_to_root : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition hex_to_bloom : Value.t -> Value.t -> M :=
@@ -104,6 +105,7 @@ Definition hex_to_bloom : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition hex_to_address : Value.t -> Value.t -> M :=
@@ -149,4 +151,5 @@ Definition hex_to_address : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).

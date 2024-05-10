@@ -43,23 +43,23 @@ Require ethereum.utils.numeric.
 Axiom ethereum_utils_numeric_ceil32 :
   IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
 
-Require fork_types.
-Axiom fork_types_Address :
-  IsGlobalAlias globals fork_types.globals "Address".
+Require ethereum.homestead.fork_types.
+Axiom ethereum_homestead_fork_types_Address :
+  IsGlobalAlias globals ethereum.homestead.fork_types.globals "Address".
 
-Require state.
-Axiom state_State :
-  IsGlobalAlias globals state.globals "State".
-Axiom state_account_exists :
-  IsGlobalAlias globals state.globals "account_exists".
+Require ethereum.homestead.state.
+Axiom ethereum_homestead_state_State :
+  IsGlobalAlias globals ethereum.homestead.state.globals "State".
+Axiom ethereum_homestead_state_account_exists :
+  IsGlobalAlias globals ethereum.homestead.state.globals "account_exists".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.homestead.vm.__init__.
+Axiom ethereum_homestead_vm___init___Evm :
+  IsGlobalAlias globals ethereum.homestead.vm.__init__.globals "Evm".
 
-Require exceptions.
-Axiom exceptions_OutOfGasError :
-  IsGlobalAlias globals exceptions.globals "OutOfGasError".
+Require ethereum.homestead.vm.exceptions.
+Axiom ethereum_homestead_vm_exceptions_OutOfGasError :
+  IsGlobalAlias globals ethereum.homestead.vm.exceptions.globals "OutOfGasError".
 
 Definition GAS_JUMPDEST : Value.t := M.run ltac:(M.monadic (
   M.call (|
@@ -480,6 +480,18 @@ Definition charge_gas : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.lt (|
+          M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |),
+          M.get_name (| globals, "amount" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some(M.get_name (| globals, "OutOfGasError" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.assign_op (|
           BinOp.sub,
           M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |),
@@ -595,6 +607,18 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
       |) in
     For make_tuple [ M.get_name (| globals, "start_position" |); M.get_name (| globals, "size" |) ] in M.get_name (| globals, "extensions" |) do
       let _ :=
+        (* if *)
+        M.if_then_else (|
+          Compare.eq (|
+            M.get_name (| globals, "size" |),
+            Constant.int 0
+          |),
+        (* then *)
+        ltac:(M.monadic (
+          let _ := M.continue (| |) in
+          M.pure Constant.None_
+        (* else *)
+        )), ltac:(M.monadic (
           M.pure Constant.None_
         )) |) in
       let before_size :=
@@ -629,6 +653,18 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
           make_dict []
         |) in
       let _ :=
+        (* if *)
+        M.if_then_else (|
+          Compare.lt_e (|
+            M.get_name (| globals, "after_size" |),
+            M.get_name (| globals, "before_size" |)
+          |),
+        (* then *)
+        ltac:(M.monadic (
+          let _ := M.continue (| |) in
+          M.pure Constant.None_
+        (* else *)
+        )), ltac:(M.monadic (
           M.pure Constant.None_
         )) |) in
       let size_to_extend := BinOp.add
@@ -677,6 +713,7 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition calculate_message_call_gas : Value.t -> Value.t -> M :=
@@ -701,41 +738,49 @@ Definition calculate_message_call_gas : Value.t -> Value.t -> M :=
     message_call_gas: `MessageCallGas`
     " in
     let create_gas_cost :=
-      (* if *)
-M.if_then_else (|
-  M.call (|
-    M.get_name (| globals, "account_exists" |),
-    make_list [
-      M.get_name (| globals, "state" |);
-      M.get_name (| globals, "to" |)
-    ],
-    make_dict []
-  |),
-(* then *)
-ltac:(M.monadic (
+            (* if *)
+      M.if_then_else (|
+        M.call (|
+          M.get_name (| globals, "account_exists" |),
+          make_list [
+            M.get_name (| globals, "state" |);
+            M.get_name (| globals, "to" |)
+          ],
+          make_dict []
+        |),
+      (* then *)
+      ltac:(M.monadic (
 M.call (|
-    M.get_name (| globals, "Uint" |),
-    make_list [
-      Constant.int 0
-    ],
-    make_dict []
-  |) in
+          M.get_name (| globals, "Uint" |),
+          make_list [
+            Constant.int 0
+          ],
+          make_dict []
+        |)
+      (* else *)
+      )), ltac:(M.monadic (
+M.get_name (| globals, "GAS_NEW_ACCOUNT" |)
+      )) |) in
     let transfer_gas_cost :=
-      (* if *)
-M.if_then_else (|
-  Compare.eq (|
-    M.get_name (| globals, "value" |),
-    Constant.int 0
-  |),
-(* then *)
-ltac:(M.monadic (
+            (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "value" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
 M.call (|
-    M.get_name (| globals, "Uint" |),
-    make_list [
-      Constant.int 0
-    ],
-    make_dict []
-  |) in
+          M.get_name (| globals, "Uint" |),
+          make_list [
+            Constant.int 0
+          ],
+          make_dict []
+        |)
+      (* else *)
+      )), ltac:(M.monadic (
+M.get_name (| globals, "GAS_CALL_VALUE" |)
+      )) |) in
     let cost :=
       BinOp.add (|
         BinOp.add (|
@@ -748,15 +793,22 @@ M.call (|
         M.get_name (| globals, "transfer_gas_cost" |)
       |) in
     let stipend :=
-      (* if *)
-M.if_then_else (|
-  Compare.eq (|
-    M.get_name (| globals, "value" |),
-    Constant.int 0
-  |),
-(* then *)
-ltac:(M.monadic (
-M.get_name (| globals, "gas" |) in
+            (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "value" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+M.get_name (| globals, "gas" |)
+      (* else *)
+      )), ltac:(M.monadic (
+BinOp.add (|
+          M.get_name (| globals, "GAS_CALL_STIPEND" |),
+          M.get_name (| globals, "gas" |)
+        |)
+      )) |) in
     let _ := M.return_ (|
       M.call (|
         M.get_name (| globals, "MessageCallGas" |),
@@ -766,4 +818,5 @@ M.get_name (| globals, "gas" |) in
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).

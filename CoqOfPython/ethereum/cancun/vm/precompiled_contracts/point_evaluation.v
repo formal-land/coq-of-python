@@ -35,19 +35,19 @@ Require ethereum.utils.ensure.
 Axiom ethereum_utils_ensure_ensure :
   IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
 
-Require vm.
-Axiom vm_Evm :
-  IsGlobalAlias globals vm.globals "Evm".
+Require ethereum.cancun.vm.__init__.
+Axiom ethereum_cancun_vm___init___Evm :
+  IsGlobalAlias globals ethereum.cancun.vm.__init__.globals "Evm".
 
-Require vm.exceptions.
-Axiom vm_exceptions_KZGProofError :
-  IsGlobalAlias globals vm.exceptions.globals "KZGProofError".
+Require ethereum.cancun.vm.exceptions.
+Axiom ethereum_cancun_vm_exceptions_KZGProofError :
+  IsGlobalAlias globals ethereum.cancun.vm.exceptions.globals "KZGProofError".
 
-Require vm.gas.
-Axiom vm_gas_GAS_POINT_EVALUATION :
-  IsGlobalAlias globals vm.gas.globals "GAS_POINT_EVALUATION".
-Axiom vm_gas_charge_gas :
-  IsGlobalAlias globals vm.gas.globals "charge_gas".
+Require ethereum.cancun.vm.gas.
+Axiom ethereum_cancun_vm_gas_GAS_POINT_EVALUATION :
+  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_POINT_EVALUATION".
+Axiom ethereum_cancun_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "charge_gas".
 
 Definition FIELD_ELEMENTS_PER_BLOB : Value.t := M.run ltac:(M.monadic (
   Constant.int 4096
@@ -94,21 +94,21 @@ Definition point_evaluation : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let versioned_hash :=
-      M.get_subscript (| M.get_name (| globals, "data" |), Constant.None_:Constant.int 32 |) in
+      M.get_subscript (| M.get_name (| globals, "data" |), M.slice (| Constant.None_, Constant.int 32 |) |) in
     let z :=
-      M.get_subscript (| M.get_name (| globals, "data" |), Constant.int 32 |) in
+      M.get_subscript (| M.get_name (| globals, "data" |), M.slice (| Constant.int 32, Constant.int 64 |) |) in
     let y :=
-      M.get_subscript (| M.get_name (| globals, "data" |), Constant.int 64 |) in
+      M.get_subscript (| M.get_name (| globals, "data" |), M.slice (| Constant.int 64, Constant.int 96 |) |) in
     let commitment :=
       M.call (|
         M.get_name (| globals, "KZGCommitment" |),
         make_list [
-          M.get_subscript (| M.get_name (| globals, "data" |), Constant.int 96 |)
+          M.get_subscript (| M.get_name (| globals, "data" |), M.slice (| Constant.int 96, Constant.int 144 |) |)
         ],
         make_dict []
       |) in
     let proof :=
-      M.get_subscript (| M.get_name (| globals, "data" |), Constant.int 144 |) in
+      M.get_subscript (| M.get_name (| globals, "data" |), M.slice (| Constant.int 144, Constant.int 192 |) |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [

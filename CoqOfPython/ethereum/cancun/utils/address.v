@@ -38,13 +38,13 @@ Require ethereum.utils.byte.
 Axiom ethereum_utils_byte_left_pad_zero_bytes :
   IsGlobalAlias globals ethereum.utils.byte.globals "left_pad_zero_bytes".
 
-Require __init__.
-Axiom __init___rlp :
-  IsGlobalAlias globals __init__.globals "rlp".
+Require ethereum.__init__.
+Axiom ethereum___init___rlp :
+  IsGlobalAlias globals ethereum.__init__.globals "rlp".
 
-Require fork_types.
-Axiom fork_types_Address :
-  IsGlobalAlias globals fork_types.globals "Address".
+Require ethereum.cancun.fork_types.
+Axiom ethereum_cancun_fork_types_Address :
+  IsGlobalAlias globals ethereum.cancun.fork_types.globals "Address".
 
 Definition to_address : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -70,10 +70,11 @@ Definition to_address : Value.t -> Value.t -> M :=
             M.get_field (| M.get_name (| globals, "data" |), "to_be_bytes32" |),
             make_list [],
             make_dict []
-          |), UnOp.sub (| Constant.int 20 |) |)
+          |), M.slice (| UnOp.sub (| Constant.int 20 |), Constant.None_ |) |)
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition compute_contract_address : Value.t -> Value.t -> M :=
@@ -113,7 +114,7 @@ Definition compute_contract_address : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let canonical_address :=
-      M.get_subscript (| M.get_name (| globals, "computed_address" |), UnOp.sub (| Constant.int 20 |) |) in
+      M.get_subscript (| M.get_name (| globals, "computed_address" |), M.slice (| UnOp.sub (| Constant.int 20 |), Constant.None_ |) |) in
     let padded_address :=
       M.call (|
         M.get_name (| globals, "left_pad_zero_bytes" |),
@@ -131,6 +132,7 @@ Definition compute_contract_address : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition compute_create2_contract_address : Value.t -> Value.t -> M :=
@@ -180,7 +182,7 @@ Definition compute_create2_contract_address : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let canonical_address :=
-      M.get_subscript (| M.get_name (| globals, "computed_address" |), UnOp.sub (| Constant.int 20 |) |) in
+      M.get_subscript (| M.get_name (| globals, "computed_address" |), M.slice (| UnOp.sub (| Constant.int 20 |), Constant.None_ |) |) in
     let padded_address :=
       M.call (|
         M.get_name (| globals, "left_pad_zero_bytes" |),
@@ -198,4 +200,5 @@ Definition compute_create2_contract_address : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).

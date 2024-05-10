@@ -29,27 +29,27 @@ Require ethereum.utils.ensure.
 Axiom ethereum_utils_ensure_ensure :
   IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
-Axiom __init___stack :
-  IsGlobalAlias globals __init__.globals "stack".
+Require ethereum.cancun.vm.__init__.
+Axiom ethereum_cancun_vm___init___Evm :
+  IsGlobalAlias globals ethereum.cancun.vm.__init__.globals "Evm".
+Axiom ethereum_cancun_vm___init___stack :
+  IsGlobalAlias globals ethereum.cancun.vm.__init__.globals "stack".
 
-Require exceptions.
-Axiom exceptions_StackUnderflowError :
-  IsGlobalAlias globals exceptions.globals "StackUnderflowError".
+Require ethereum.cancun.vm.exceptions.
+Axiom ethereum_cancun_vm_exceptions_StackUnderflowError :
+  IsGlobalAlias globals ethereum.cancun.vm.exceptions.globals "StackUnderflowError".
 
-Require gas.
-Axiom gas_GAS_BASE :
-  IsGlobalAlias globals gas.globals "GAS_BASE".
-Axiom gas_GAS_VERY_LOW :
-  IsGlobalAlias globals gas.globals "GAS_VERY_LOW".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
+Require ethereum.cancun.vm.gas.
+Axiom ethereum_cancun_vm_gas_GAS_BASE :
+  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_BASE".
+Axiom ethereum_cancun_vm_gas_GAS_VERY_LOW :
+  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_VERY_LOW".
+Axiom ethereum_cancun_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "charge_gas".
 
-Require memory.
-Axiom memory_buffer_read :
-  IsGlobalAlias globals memory.globals "buffer_read".
+Require ethereum.cancun.vm.memory.
+Axiom ethereum_cancun_vm_memory_buffer_read :
+  IsGlobalAlias globals ethereum.cancun.vm.memory.globals "buffer_read".
 
 Definition pop : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -104,6 +104,25 @@ Definition push_n : Value.t -> Value.t -> M :=
     " in
     let _ := M.pass (| |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "num_bytes" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_name (| globals, "charge_gas" |),
+    make_list [
+      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, "GAS_BASE" |)
+    ],
+    make_dict []
+  |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [

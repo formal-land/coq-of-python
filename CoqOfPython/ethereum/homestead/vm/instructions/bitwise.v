@@ -21,21 +21,21 @@ Require ethereum.base_types.
 Axiom ethereum_base_types_U256 :
   IsGlobalAlias globals ethereum.base_types.globals "U256".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.homestead.vm.__init__.
+Axiom ethereum_homestead_vm___init___Evm :
+  IsGlobalAlias globals ethereum.homestead.vm.__init__.globals "Evm".
 
-Require gas.
-Axiom gas_GAS_VERY_LOW :
-  IsGlobalAlias globals gas.globals "GAS_VERY_LOW".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
+Require ethereum.homestead.vm.gas.
+Axiom ethereum_homestead_vm_gas_GAS_VERY_LOW :
+  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_VERY_LOW".
+Axiom ethereum_homestead_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "charge_gas".
 
-Require stack.
-Axiom stack_pop :
-  IsGlobalAlias globals stack.globals "pop".
-Axiom stack_push :
-  IsGlobalAlias globals stack.globals "push".
+Require ethereum.homestead.vm.stack.
+Axiom ethereum_homestead_vm_stack_pop :
+  IsGlobalAlias globals ethereum.homestead.vm.stack.globals "pop".
+Axiom ethereum_homestead_vm_stack_push :
+  IsGlobalAlias globals ethereum.homestead.vm.stack.globals "push".
 
 Definition bitwise_and : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -285,6 +285,25 @@ Definition get_byte : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.gt_e (|
+          M.get_name (| globals, "byte_index" |),
+          Constant.int 32
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let result :=
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let extra_bytes_to_right :=
           BinOp.sub (|
             Constant.int 31,

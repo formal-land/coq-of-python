@@ -17,33 +17,33 @@ Introduction
 Implementations of the EVM storage related instructions.
 ".
 
-Require state.
-Axiom state_get_storage :
-  IsGlobalAlias globals state.globals "get_storage".
-Axiom state_set_storage :
-  IsGlobalAlias globals state.globals "set_storage".
+Require ethereum.homestead.state.
+Axiom ethereum_homestead_state_get_storage :
+  IsGlobalAlias globals ethereum.homestead.state.globals "get_storage".
+Axiom ethereum_homestead_state_set_storage :
+  IsGlobalAlias globals ethereum.homestead.state.globals "set_storage".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.homestead.vm.__init__.
+Axiom ethereum_homestead_vm___init___Evm :
+  IsGlobalAlias globals ethereum.homestead.vm.__init__.globals "Evm".
 
-Require gas.
-Axiom gas_GAS_SLOAD :
-  IsGlobalAlias globals gas.globals "GAS_SLOAD".
-Axiom gas_GAS_STORAGE_CLEAR_REFUND :
-  IsGlobalAlias globals gas.globals "GAS_STORAGE_CLEAR_REFUND".
-Axiom gas_GAS_STORAGE_SET :
-  IsGlobalAlias globals gas.globals "GAS_STORAGE_SET".
-Axiom gas_GAS_STORAGE_UPDATE :
-  IsGlobalAlias globals gas.globals "GAS_STORAGE_UPDATE".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
+Require ethereum.homestead.vm.gas.
+Axiom ethereum_homestead_vm_gas_GAS_SLOAD :
+  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_SLOAD".
+Axiom ethereum_homestead_vm_gas_GAS_STORAGE_CLEAR_REFUND :
+  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_STORAGE_CLEAR_REFUND".
+Axiom ethereum_homestead_vm_gas_GAS_STORAGE_SET :
+  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_STORAGE_SET".
+Axiom ethereum_homestead_vm_gas_GAS_STORAGE_UPDATE :
+  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_STORAGE_UPDATE".
+Axiom ethereum_homestead_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "charge_gas".
 
-Require stack.
-Axiom stack_pop :
-  IsGlobalAlias globals stack.globals "pop".
-Axiom stack_push :
-  IsGlobalAlias globals stack.globals "push".
+Require ethereum.homestead.vm.stack.
+Axiom ethereum_homestead_vm_stack_pop :
+  IsGlobalAlias globals ethereum.homestead.vm.stack.globals "pop".
+Axiom ethereum_homestead_vm_stack_push :
+  IsGlobalAlias globals ethereum.homestead.vm.stack.globals "push".
 
 Definition sload : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -146,11 +146,56 @@ Definition sstore : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        BoolOp.and (|
+          Compare.not_eq (|
+            M.get_name (| globals, "new_value" |),
+            Constant.int 0
+          |),
+          ltac:(M.monadic (
+            Compare.eq (|
+              M.get_name (| globals, "current_value" |),
+              Constant.int 0
+            |)
+          ))
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let gas_cost :=
+          M.get_name (| globals, "GAS_STORAGE_SET" |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let gas_cost :=
           M.get_name (| globals, "GAS_STORAGE_UPDATE" |) in
         M.pure Constant.None_
       )) |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        BoolOp.and (|
+          Compare.eq (|
+            M.get_name (| globals, "new_value" |),
+            Constant.int 0
+          |),
+          ltac:(M.monadic (
+            Compare.not_eq (|
+              M.get_name (| globals, "current_value" |),
+              Constant.int 0
+            |)
+          ))
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign_op (|
+          BinOp.add,
+          M.get_field (| M.get_name (| globals, "evm" |), "refund_counter" |),
+          M.get_name (| globals, "GAS_STORAGE_CLEAR_REFUND" |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|

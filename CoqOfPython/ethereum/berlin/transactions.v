@@ -19,37 +19,37 @@ Axiom typing_Tuple :
 Axiom typing_Union :
   IsGlobalAlias globals typing.globals "Union".
 
-Require __init__.
-Axiom __init___rlp :
-  IsGlobalAlias globals __init__.globals "rlp".
+Require ethereum.__init__.
+Axiom ethereum___init___rlp :
+  IsGlobalAlias globals ethereum.__init__.globals "rlp".
 
-Require base_types.
-Axiom base_types_U64 :
-  IsGlobalAlias globals base_types.globals "U64".
-Axiom base_types_U256 :
-  IsGlobalAlias globals base_types.globals "U256".
-Axiom base_types_Bytes :
-  IsGlobalAlias globals base_types.globals "Bytes".
-Axiom base_types_Bytes0 :
-  IsGlobalAlias globals base_types.globals "Bytes0".
-Axiom base_types_Bytes32 :
-  IsGlobalAlias globals base_types.globals "Bytes32".
-Axiom base_types_Uint :
-  IsGlobalAlias globals base_types.globals "Uint".
-Axiom base_types_slotted_freezable :
-  IsGlobalAlias globals base_types.globals "slotted_freezable".
+Require ethereum.base_types.
+Axiom ethereum_base_types_U64 :
+  IsGlobalAlias globals ethereum.base_types.globals "U64".
+Axiom ethereum_base_types_U256 :
+  IsGlobalAlias globals ethereum.base_types.globals "U256".
+Axiom ethereum_base_types_Bytes :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
+Axiom ethereum_base_types_Bytes0 :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes0".
+Axiom ethereum_base_types_Bytes32 :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes32".
+Axiom ethereum_base_types_Uint :
+  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_slotted_freezable :
+  IsGlobalAlias globals ethereum.base_types.globals "slotted_freezable".
 
-Require exceptions.
-Axiom exceptions_InvalidBlock :
-  IsGlobalAlias globals exceptions.globals "InvalidBlock".
+Require ethereum.exceptions.
+Axiom ethereum_exceptions_InvalidBlock :
+  IsGlobalAlias globals ethereum.exceptions.globals "InvalidBlock".
 
-Require utils.ensure.
-Axiom utils_ensure_ensure :
-  IsGlobalAlias globals utils.ensure.globals "ensure".
+Require ethereum.utils.ensure.
+Axiom ethereum_utils_ensure_ensure :
+  IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
 
-Require fork_types.
-Axiom fork_types_Address :
-  IsGlobalAlias globals fork_types.globals "Address".
+Require ethereum.berlin.fork_types.
+Axiom ethereum_berlin_fork_types_Address :
+  IsGlobalAlias globals ethereum.berlin.fork_types.globals "Address".
 
 Definition TX_BASE_COST : Value.t := M.run ltac:(M.monadic (
   Constant.int 21000
@@ -106,14 +106,59 @@ Definition encode_transaction : Value.t -> Value.t -> M :=
     Encode a transaction. Needed because non-legacy transactions aren't RLP.
     " in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.call (|
+          M.get_name (| globals, "isinstance" |),
+          make_list [
+            M.get_name (| globals, "tx" |);
+            M.get_name (| globals, "LegacyTransaction" |)
+          ],
+          make_dict []
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.return_ (|
+          M.get_name (| globals, "tx" |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ :=
+          (* if *)
+          M.if_then_else (|
+            M.call (|
+              M.get_name (| globals, "isinstance" |),
+              make_list [
+                M.get_name (| globals, "tx" |);
+                M.get_name (| globals, "AccessListTransaction" |)
+              ],
+              make_dict []
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let _ := M.return_ (|
+              BinOp.add (|
+                Constant.bytes "01",
+                M.call (|
+                  M.get_field (| M.get_name (| globals, "rlp" |), "encode" |),
+                  make_list [
+                    M.get_name (| globals, "tx" |)
+                  ],
+                  make_dict []
+                |)
+              |)
+            |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
             let _ := M.raise (| Some(M.call (|
               M.get_name (| globals, "Exception" |),
               make_list [
-                (* At expr: unsupported node type: JoinedStr *)
+                Constant.str "(* At expr: unsupported node type: JoinedStr *)"
               ],
               make_dict []
-            |))
+            |)) |) in
             M.pure Constant.None_
           )) |) in
         M.pure Constant.None_
@@ -127,8 +172,45 @@ Definition decode_transaction : Value.t -> Value.t -> M :=
     Decode a transaction. Needed because non-legacy transactions aren't RLP.
     " in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.call (|
+          M.get_name (| globals, "isinstance" |),
+          make_list [
+            M.get_name (| globals, "tx" |);
+            M.get_name (| globals, "Bytes" |)
+          ],
+          make_dict []
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.call (|
+    M.get_name (| globals, "ensure" |),
+    make_list [
+      Compare.eq (|
+        M.get_subscript (| M.get_name (| globals, "tx" |), Constant.int 0 |),
+        Constant.int 1
+      |);
+      M.get_name (| globals, "InvalidBlock" |)
+    ],
+    make_dict []
+  |) in
+        let _ := M.return_ (|
+          M.call (|
+            M.get_field (| M.get_name (| globals, "rlp" |), "decode_to" |),
+            make_list [
+              M.get_name (| globals, "AccessListTransaction" |);
+              M.get_subscript (| M.get_name (| globals, "tx" |), M.slice (| Constant.int 1, Constant.None_ |) |)
+            ],
+            make_dict []
+          |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.return_ (|
           M.get_name (| globals, "tx" |)
+        |) in
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).

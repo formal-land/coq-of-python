@@ -8,11 +8,11 @@ The alt_bn128 curve
 ^^^^^^^^^^^^^^^^^^^
 ".
 
-Require __init__.
-Axiom __init___elliptic_curve :
-  IsGlobalAlias globals __init__.globals "elliptic_curve".
-Axiom __init___finite_field :
-  IsGlobalAlias globals __init__.globals "finite_field".
+Require ethereum.crypto.__init__.
+Axiom ethereum_crypto___init___elliptic_curve :
+  IsGlobalAlias globals ethereum.crypto.__init__.globals "elliptic_curve".
+Axiom ethereum_crypto___init___finite_field :
+  IsGlobalAlias globals ethereum.crypto.__init__.globals "finite_field".
 
 Definition ALT_BN128_PRIME : Value.t := M.run ltac:(M.monadic (
   Constant.int 21888242871839275222246405745257275088696311157297823662689037894645226208583
@@ -170,10 +170,11 @@ Definition BNF12 : Value.t :=
               M.get_field (| M.get_name (| globals, "BNF12" |), "__new__" |),
               make_list [
                 M.get_name (| globals, "BNF12" |);
-                M.get_subscript (| M.get_name (| globals, "mul" |), Constant.None_:Constant.int 12 |)
+                M.get_subscript (| M.get_name (| globals, "mul" |), M.slice (| Constant.None_, Constant.int 12 |) |)
               ],
               make_dict []
             |)
+          |) in
           M.pure Constant.None_))
       )
     ].
@@ -238,6 +239,7 @@ Definition bnf2_to_bnf12 : Value.t -> Value.t -> M :=
           |)
         |)
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition bnp_to_bnp12 : Value.t -> Value.t -> M :=
@@ -279,6 +281,7 @@ Definition bnp_to_bnp12 : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition twist : Value.t -> Value.t -> M :=
@@ -320,6 +323,7 @@ Definition twist : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition linefunc : Value.t -> Value.t -> M :=
@@ -335,12 +339,102 @@ Definition linefunc : Value.t -> Value.t -> M :=
     matter.
     " in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.not_eq (|
+          M.get_field (| M.get_name (| globals, "p1" |), "x" |),
+          M.get_field (| M.get_name (| globals, "p2" |), "x" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let lam :=
+          BinOp.div (|
+            BinOp.sub (|
+              M.get_field (| M.get_name (| globals, "p2" |), "y" |),
+              M.get_field (| M.get_name (| globals, "p1" |), "y" |)
+            |),
+            BinOp.sub (|
+              M.get_field (| M.get_name (| globals, "p2" |), "x" |),
+              M.get_field (| M.get_name (| globals, "p1" |), "x" |)
+            |)
+          |) in
+        let _ := M.return_ (|
+          BinOp.sub (|
+            BinOp.mult (|
+              M.get_name (| globals, "lam" |),
+              BinOp.sub (|
+                M.get_field (| M.get_name (| globals, "t" |), "x" |),
+                M.get_field (| M.get_name (| globals, "p1" |), "x" |)
+              |)
+            |),
+            BinOp.sub (|
+              M.get_field (| M.get_name (| globals, "t" |), "y" |),
+              M.get_field (| M.get_name (| globals, "p1" |), "y" |)
+            |)
+          |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ :=
+          (* if *)
+          M.if_then_else (|
+            Compare.eq (|
+              M.get_field (| M.get_name (| globals, "p1" |), "y" |),
+              M.get_field (| M.get_name (| globals, "p2" |), "y" |)
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let lam :=
+              BinOp.div (|
+                BinOp.mult (|
+                  M.call (|
+                    M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
+                    make_list [
+                      Constant.int 3
+                    ],
+                    make_dict []
+                  |),
+                  BinOp.pow (|
+                    M.get_field (| M.get_name (| globals, "p1" |), "x" |),
+                    Constant.int 2
+                  |)
+                |),
+                BinOp.mult (|
+                  M.call (|
+                    M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
+                    make_list [
+                      Constant.int 2
+                    ],
+                    make_dict []
+                  |),
+                  M.get_field (| M.get_name (| globals, "p1" |), "y" |)
+                |)
+              |) in
+            let _ := M.return_ (|
+              BinOp.sub (|
+                BinOp.mult (|
+                  M.get_name (| globals, "lam" |),
+                  BinOp.sub (|
+                    M.get_field (| M.get_name (| globals, "t" |), "x" |),
+                    M.get_field (| M.get_name (| globals, "p1" |), "x" |)
+                  |)
+                |),
+                BinOp.sub (|
+                  M.get_field (| M.get_name (| globals, "t" |), "y" |),
+                  M.get_field (| M.get_name (| globals, "p1" |), "y" |)
+                |)
+              |)
+            |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
             let _ := M.return_ (|
               BinOp.sub (|
                 M.get_field (| M.get_name (| globals, "t" |), "x" |),
                 M.get_field (| M.get_name (| globals, "p1" |), "x" |)
               |)
+            |) in
             M.pure Constant.None_
           )) |) in
         M.pure Constant.None_
@@ -354,6 +448,42 @@ Definition miller_loop : Value.t -> Value.t -> M :=
     The core of the pairing algorithm.
     " in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        BoolOp.or (|
+          Compare.eq (|
+            M.get_name (| globals, "p" |),
+            M.call (|
+              M.get_field (| M.get_name (| globals, "BNP12" |), "point_at_infinity" |),
+              make_list [],
+              make_dict []
+            |)
+          |),
+          ltac:(M.monadic (
+            Compare.eq (|
+              M.get_name (| globals, "q" |),
+              M.call (|
+                M.get_field (| M.get_name (| globals, "BNP12" |), "point_at_infinity" |),
+                make_list [],
+                make_dict []
+              |)
+            |)
+          ))
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.return_ (|
+          M.call (|
+            M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
+            make_list [
+              Constant.int 1
+            ],
+            make_dict []
+          |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let r :=
@@ -398,6 +528,41 @@ Definition miller_loop : Value.t -> Value.t -> M :=
           make_dict []
         |) in
       let _ :=
+        (* if *)
+        M.if_then_else (|
+          BinOp.bit_and (|
+            BinOp.sub (|
+              M.get_name (| globals, "ATE_PAIRING_COUNT" |),
+              Constant.int 1
+            |),
+            BinOp.pow (|
+              Constant.int 2,
+              M.get_name (| globals, "i" |)
+            |)
+          |),
+        (* then *)
+        ltac:(M.monadic (
+          let f :=
+            BinOp.mult (|
+              M.get_name (| globals, "f" |),
+              M.call (|
+                M.get_name (| globals, "linefunc" |),
+                make_list [
+                  M.get_name (| globals, "r" |);
+                  M.get_name (| globals, "q" |);
+                  M.get_name (| globals, "p" |)
+                ],
+                make_dict []
+              |)
+            |) in
+          let r :=
+            BinOp.add (|
+              M.get_name (| globals, "r" |),
+              M.get_name (| globals, "q" |)
+            |) in
+          M.pure Constant.None_
+        (* else *)
+        )), ltac:(M.monadic (
           M.pure Constant.None_
         )) |) in
     EndFor.
@@ -493,6 +658,7 @@ Definition miller_loop : Value.t -> Value.t -> M :=
           M.get_name (| globals, "ALT_BN128_CURVE_ORDER" |)
         |)
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition pairing : Value.t -> Value.t -> M :=
@@ -522,4 +688,5 @@ Definition pairing : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).

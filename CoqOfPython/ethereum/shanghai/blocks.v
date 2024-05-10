@@ -24,37 +24,37 @@ Axiom typing_Tuple :
 Axiom typing_Union :
   IsGlobalAlias globals typing.globals "Union".
 
-Require base_types.
-Axiom base_types_U64 :
-  IsGlobalAlias globals base_types.globals "U64".
-Axiom base_types_U256 :
-  IsGlobalAlias globals base_types.globals "U256".
-Axiom base_types_Bytes :
-  IsGlobalAlias globals base_types.globals "Bytes".
-Axiom base_types_Bytes8 :
-  IsGlobalAlias globals base_types.globals "Bytes8".
-Axiom base_types_Bytes32 :
-  IsGlobalAlias globals base_types.globals "Bytes32".
-Axiom base_types_Uint :
-  IsGlobalAlias globals base_types.globals "Uint".
-Axiom base_types_slotted_freezable :
-  IsGlobalAlias globals base_types.globals "slotted_freezable".
+Require ethereum.base_types.
+Axiom ethereum_base_types_U64 :
+  IsGlobalAlias globals ethereum.base_types.globals "U64".
+Axiom ethereum_base_types_U256 :
+  IsGlobalAlias globals ethereum.base_types.globals "U256".
+Axiom ethereum_base_types_Bytes :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
+Axiom ethereum_base_types_Bytes8 :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes8".
+Axiom ethereum_base_types_Bytes32 :
+  IsGlobalAlias globals ethereum.base_types.globals "Bytes32".
+Axiom ethereum_base_types_Uint :
+  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_slotted_freezable :
+  IsGlobalAlias globals ethereum.base_types.globals "slotted_freezable".
 
-Require crypto.hash.
-Axiom crypto_hash_Hash32 :
-  IsGlobalAlias globals crypto.hash.globals "Hash32".
+Require ethereum.crypto.hash.
+Axiom ethereum_crypto_hash_Hash32 :
+  IsGlobalAlias globals ethereum.crypto.hash.globals "Hash32".
 
-Require fork_types.
-Axiom fork_types_Address :
-  IsGlobalAlias globals fork_types.globals "Address".
-Axiom fork_types_Bloom :
-  IsGlobalAlias globals fork_types.globals "Bloom".
-Axiom fork_types_Root :
-  IsGlobalAlias globals fork_types.globals "Root".
+Require ethereum.shanghai.fork_types.
+Axiom ethereum_shanghai_fork_types_Address :
+  IsGlobalAlias globals ethereum.shanghai.fork_types.globals "Address".
+Axiom ethereum_shanghai_fork_types_Bloom :
+  IsGlobalAlias globals ethereum.shanghai.fork_types.globals "Bloom".
+Axiom ethereum_shanghai_fork_types_Root :
+  IsGlobalAlias globals ethereum.shanghai.fork_types.globals "Root".
 
-Require transactions.
-Axiom transactions_LegacyTransaction :
-  IsGlobalAlias globals transactions.globals "LegacyTransaction".
+Require ethereum.shanghai.transactions.
+Axiom ethereum_shanghai_transactions_LegacyTransaction :
+  IsGlobalAlias globals ethereum.shanghai.transactions.globals "LegacyTransaction".
 
 Definition Withdrawal : Value.t :=
   builtins.make_klass

@@ -29,37 +29,37 @@ Require ethereum.utils.ensure.
 Axiom ethereum_utils_ensure_ensure :
   IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
 
-Require blocks.
-Axiom blocks_Log :
-  IsGlobalAlias globals blocks.globals "Log".
+Require ethereum.berlin.blocks.
+Axiom ethereum_berlin_blocks_Log :
+  IsGlobalAlias globals ethereum.berlin.blocks.globals "Log".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.berlin.vm.__init__.
+Axiom ethereum_berlin_vm___init___Evm :
+  IsGlobalAlias globals ethereum.berlin.vm.__init__.globals "Evm".
 
-Require exceptions.
-Axiom exceptions_WriteInStaticContext :
-  IsGlobalAlias globals exceptions.globals "WriteInStaticContext".
+Require ethereum.berlin.vm.exceptions.
+Axiom ethereum_berlin_vm_exceptions_WriteInStaticContext :
+  IsGlobalAlias globals ethereum.berlin.vm.exceptions.globals "WriteInStaticContext".
 
-Require gas.
-Axiom gas_GAS_LOG :
-  IsGlobalAlias globals gas.globals "GAS_LOG".
-Axiom gas_GAS_LOG_DATA :
-  IsGlobalAlias globals gas.globals "GAS_LOG_DATA".
-Axiom gas_GAS_LOG_TOPIC :
-  IsGlobalAlias globals gas.globals "GAS_LOG_TOPIC".
-Axiom gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals gas.globals "calculate_gas_extend_memory".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
+Require ethereum.berlin.vm.gas.
+Axiom ethereum_berlin_vm_gas_GAS_LOG :
+  IsGlobalAlias globals ethereum.berlin.vm.gas.globals "GAS_LOG".
+Axiom ethereum_berlin_vm_gas_GAS_LOG_DATA :
+  IsGlobalAlias globals ethereum.berlin.vm.gas.globals "GAS_LOG_DATA".
+Axiom ethereum_berlin_vm_gas_GAS_LOG_TOPIC :
+  IsGlobalAlias globals ethereum.berlin.vm.gas.globals "GAS_LOG_TOPIC".
+Axiom ethereum_berlin_vm_gas_calculate_gas_extend_memory :
+  IsGlobalAlias globals ethereum.berlin.vm.gas.globals "calculate_gas_extend_memory".
+Axiom ethereum_berlin_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.berlin.vm.gas.globals "charge_gas".
 
-Require memory.
-Axiom memory_memory_read_bytes :
-  IsGlobalAlias globals memory.globals "memory_read_bytes".
+Require ethereum.berlin.vm.memory.
+Axiom ethereum_berlin_vm_memory_memory_read_bytes :
+  IsGlobalAlias globals ethereum.berlin.vm.memory.globals "memory_read_bytes".
 
-Require stack.
-Axiom stack_pop :
-  IsGlobalAlias globals stack.globals "pop".
+Require ethereum.berlin.vm.stack.
+Axiom ethereum_berlin_vm_stack_pop :
+  IsGlobalAlias globals ethereum.berlin.vm.stack.globals "pop".
 
 Definition log_n : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

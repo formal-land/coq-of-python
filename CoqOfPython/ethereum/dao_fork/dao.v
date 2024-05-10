@@ -20,20 +20,20 @@ collection of accounts (The Dao and all its children) to a recovery contract.
 The recovery contract was previously created using normal contract deployment.
 ".
 
-Require state.
-Axiom state_State :
-  IsGlobalAlias globals state.globals "State".
-Axiom state_get_account :
-  IsGlobalAlias globals state.globals "get_account".
-Axiom state_move_ether :
-  IsGlobalAlias globals state.globals "move_ether".
+Require ethereum.dao_fork.state.
+Axiom ethereum_dao_fork_state_State :
+  IsGlobalAlias globals ethereum.dao_fork.state.globals "State".
+Axiom ethereum_dao_fork_state_get_account :
+  IsGlobalAlias globals ethereum.dao_fork.state.globals "get_account".
+Axiom ethereum_dao_fork_state_move_ether :
+  IsGlobalAlias globals ethereum.dao_fork.state.globals "move_ether".
 
-Require utils.hexadecimal.
-Axiom utils_hexadecimal_hex_to_address :
-  IsGlobalAlias globals utils.hexadecimal.globals "hex_to_address".
+Require ethereum.dao_fork.utils.hexadecimal.
+Axiom ethereum_dao_fork_utils_hexadecimal_hex_to_address :
+  IsGlobalAlias globals ethereum.dao_fork.utils.hexadecimal.globals "hex_to_address".
 
 Definition DAO_ACCOUNTS : Value.t := M.run ltac:(M.monadic (
-  (* At expr: unsupported node type: ListComp *)
+  Constant.str "(* At expr: unsupported node type: ListComp *)"
 )).
 
 Definition DAO_RECOVERY : Value.t := M.run ltac:(M.monadic (

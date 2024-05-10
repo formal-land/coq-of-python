@@ -21,21 +21,21 @@ Require ethereum.base_types.
 Axiom ethereum_base_types_U256 :
   IsGlobalAlias globals ethereum.base_types.globals "U256".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.berlin.vm.__init__.
+Axiom ethereum_berlin_vm___init___Evm :
+  IsGlobalAlias globals ethereum.berlin.vm.__init__.globals "Evm".
 
-Require gas.
-Axiom gas_GAS_VERY_LOW :
-  IsGlobalAlias globals gas.globals "GAS_VERY_LOW".
-Axiom gas_charge_gas :
-  IsGlobalAlias globals gas.globals "charge_gas".
+Require ethereum.berlin.vm.gas.
+Axiom ethereum_berlin_vm_gas_GAS_VERY_LOW :
+  IsGlobalAlias globals ethereum.berlin.vm.gas.globals "GAS_VERY_LOW".
+Axiom ethereum_berlin_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.berlin.vm.gas.globals "charge_gas".
 
-Require stack.
-Axiom stack_pop :
-  IsGlobalAlias globals stack.globals "pop".
-Axiom stack_push :
-  IsGlobalAlias globals stack.globals "push".
+Require ethereum.berlin.vm.stack.
+Axiom ethereum_berlin_vm_stack_pop :
+  IsGlobalAlias globals ethereum.berlin.vm.stack.globals "pop".
+Axiom ethereum_berlin_vm_stack_push :
+  IsGlobalAlias globals ethereum.berlin.vm.stack.globals "push".
 
 Definition less_than : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

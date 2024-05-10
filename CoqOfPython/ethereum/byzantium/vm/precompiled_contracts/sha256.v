@@ -27,17 +27,17 @@ Require ethereum.utils.numeric.
 Axiom ethereum_utils_numeric_ceil32 :
   IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
 
-Require vm.
-Axiom vm_Evm :
-  IsGlobalAlias globals vm.globals "Evm".
+Require ethereum.byzantium.vm.__init__.
+Axiom ethereum_byzantium_vm___init___Evm :
+  IsGlobalAlias globals ethereum.byzantium.vm.__init__.globals "Evm".
 
-Require vm.gas.
-Axiom vm_gas_GAS_SHA256 :
-  IsGlobalAlias globals vm.gas.globals "GAS_SHA256".
-Axiom vm_gas_GAS_SHA256_WORD :
-  IsGlobalAlias globals vm.gas.globals "GAS_SHA256_WORD".
-Axiom vm_gas_charge_gas :
-  IsGlobalAlias globals vm.gas.globals "charge_gas".
+Require ethereum.byzantium.vm.gas.
+Axiom ethereum_byzantium_vm_gas_GAS_SHA256 :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_SHA256".
+Axiom ethereum_byzantium_vm_gas_GAS_SHA256_WORD :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_SHA256_WORD".
+Axiom ethereum_byzantium_vm_gas_charge_gas :
+  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "charge_gas".
 
 Definition sha256 : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

@@ -62,7 +62,10 @@ Definition spit_le_to_uint : Value.t -> Value.t -> M :=
       M.call (|
         M.get_field (| M.get_name (| globals, "Uint" |), "from_le_bytes" |),
         make_list [
-          M.get_subscript (| M.get_name (| globals, "data" |), M.get_name (| globals, "start_position" |) |)
+          M.get_subscript (| M.get_name (| globals, "data" |), M.slice (| M.get_name (| globals, "start_position" |), BinOp.add (|
+            M.get_name (| globals, "start_position" |),
+            Constant.int 8
+          |) |) |)
         ],
         make_dict []
       |)
@@ -72,6 +75,7 @@ Definition spit_le_to_uint : Value.t -> Value.t -> M :=
     EndFor.
     let _ := M.return_ (|
       M.get_name (| globals, "words" |)
+    |) in
     M.pure Constant.None_)).
 
 Definition Blake2 : Value.t :=
@@ -98,7 +102,7 @@ Definition Blake2 : Value.t :=
             M.call (|
               M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
               make_list [
-                M.get_subscript (| M.get_name (| globals, "data" |), Constant.None_:Constant.int 4 |)
+                M.get_subscript (| M.get_name (| globals, "data" |), M.slice (| Constant.None_, Constant.int 4 |) |)
               ],
               make_dict []
             |) in
@@ -138,12 +142,13 @@ Definition Blake2 : Value.t :=
             M.call (|
               M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
               make_list [
-                M.get_subscript (| M.get_name (| globals, "data" |), Constant.int 212 |)
+                M.get_subscript (| M.get_name (| globals, "data" |), M.slice (| Constant.int 212, Constant.None_ |) |)
               ],
               make_dict []
             |) in
           let _ := M.return_ (|
             make_tuple [ M.get_name (| globals, "rounds" |); M.get_name (| globals, "h" |); M.get_name (| globals, "m" |); M.get_name (| globals, "t_0" |); M.get_name (| globals, "t_1" |); M.get_name (| globals, "f" |) ]
+          |) in
           M.pure Constant.None_))
       );
       (
@@ -299,6 +304,7 @@ Definition Blake2 : Value.t :=
           |) in
           let _ := M.return_ (|
             M.get_name (| globals, "v" |)
+          |) in
           M.pure Constant.None_))
       );
       (
@@ -330,11 +336,11 @@ Definition Blake2 : Value.t :=
               Constant.int 16
             |) in
           let _ := M.assign (|
-            M.get_subscript (| M.get_name (| globals, "v" |), Constant.int 0 |),
+            M.get_subscript (| M.get_name (| globals, "v" |), M.slice (| Constant.int 0, Constant.int 8 |) |),
             M.get_name (| globals, "h" |)
           |) in
           let _ := M.assign (|
-            M.get_subscript (| M.get_name (| globals, "v" |), Constant.int 8 |),
+            M.get_subscript (| M.get_name (| globals, "v" |), M.slice (| Constant.int 8, Constant.int 15 |) |),
             M.get_field (| M.get_name (| globals, "self" |), "IV" |)
           |) in
           let _ := M.assign (|
@@ -352,6 +358,21 @@ Definition Blake2 : Value.t :=
             |)
           |) in
           let _ :=
+            (* if *)
+            M.if_then_else (|
+              M.get_name (| globals, "f" |),
+            (* then *)
+            ltac:(M.monadic (
+              let _ := M.assign (|
+                M.get_subscript (| M.get_name (| globals, "v" |), Constant.int 14 |),
+                BinOp.bit_xor (|
+                  M.get_subscript (| M.get_name (| globals, "v" |), Constant.int 14 |),
+                  M.get_field (| M.get_name (| globals, "self" |), "mask_bits" |)
+                |)
+              |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
           For M.get_name (| globals, "r" |) in M.call (|
@@ -480,7 +501,7 @@ Definition Blake2 : Value.t :=
               |) in
           EndFor.
           let result_message_words :=
-            (* At expr: unsupported node type: GeneratorExp *) in
+            Constant.str "(* At expr: unsupported node type: GeneratorExp *)" in
           let _ := M.return_ (|
             M.call (|
               M.get_field (| M.get_name (| globals, "struct" |), "pack" |),
@@ -495,6 +516,7 @@ Definition Blake2 : Value.t :=
               ] |),
               make_dict []
             |)
+          |) in
           M.pure Constant.None_))
       )
     ].

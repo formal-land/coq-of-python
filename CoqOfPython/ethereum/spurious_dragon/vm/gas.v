@@ -43,13 +43,13 @@ Require ethereum.utils.numeric.
 Axiom ethereum_utils_numeric_ceil32 :
   IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
 
-Require __init__.
-Axiom __init___Evm :
-  IsGlobalAlias globals __init__.globals "Evm".
+Require ethereum.spurious_dragon.vm.__init__.
+Axiom ethereum_spurious_dragon_vm___init___Evm :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.__init__.globals "Evm".
 
-Require exceptions.
-Axiom exceptions_OutOfGasError :
-  IsGlobalAlias globals exceptions.globals "OutOfGasError".
+Require ethereum.spurious_dragon.vm.exceptions.
+Axiom ethereum_spurious_dragon_vm_exceptions_OutOfGasError :
+  IsGlobalAlias globals ethereum.spurious_dragon.vm.exceptions.globals "OutOfGasError".
 
 Definition GAS_JUMPDEST : Value.t := M.run ltac:(M.monadic (
   M.call (|
@@ -490,6 +490,18 @@ Definition charge_gas : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.lt (|
+          M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |),
+          M.get_name (| globals, "amount" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some(M.get_name (| globals, "OutOfGasError" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         let _ := M.assign_op (|
           BinOp.sub,
           M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |),
@@ -605,6 +617,18 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
       |) in
     For make_tuple [ M.get_name (| globals, "start_position" |); M.get_name (| globals, "size" |) ] in M.get_name (| globals, "extensions" |) do
       let _ :=
+        (* if *)
+        M.if_then_else (|
+          Compare.eq (|
+            M.get_name (| globals, "size" |),
+            Constant.int 0
+          |),
+        (* then *)
+        ltac:(M.monadic (
+          let _ := M.continue (| |) in
+          M.pure Constant.None_
+        (* else *)
+        )), ltac:(M.monadic (
           M.pure Constant.None_
         )) |) in
       let before_size :=
@@ -639,6 +663,18 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
           make_dict []
         |) in
       let _ :=
+        (* if *)
+        M.if_then_else (|
+          Compare.lt_e (|
+            M.get_name (| globals, "after_size" |),
+            M.get_name (| globals, "before_size" |)
+          |),
+        (* then *)
+        ltac:(M.monadic (
+          let _ := M.continue (| |) in
+          M.pure Constant.None_
+        (* else *)
+        )), ltac:(M.monadic (
           M.pure Constant.None_
         )) |) in
       let size_to_extend := BinOp.add
@@ -687,6 +723,7 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition calculate_message_call_gas : Value.t -> Value.t -> M :=
@@ -718,22 +755,56 @@ Definition calculate_message_call_gas : Value.t -> Value.t -> M :=
     message_call_gas: `MessageCallGas`
     " in
     let call_stipend :=
-      (* if *)
-M.if_then_else (|
-  Compare.eq (|
-    M.get_name (| globals, "value" |),
-    Constant.int 0
-  |),
-(* then *)
-ltac:(M.monadic (
+            (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "value" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
 M.call (|
-    M.get_name (| globals, "Uint" |),
-    make_list [
-      Constant.int 0
-    ],
-    make_dict []
-  |) in
+          M.get_name (| globals, "Uint" |),
+          make_list [
+            Constant.int 0
+          ],
+          make_dict []
+        |)
+      (* else *)
+      )), ltac:(M.monadic (
+M.get_name (| globals, "call_stipend" |)
+      )) |) in
     let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.lt (|
+          M.get_name (| globals, "gas_left" |),
+          BinOp.add (|
+            M.get_name (| globals, "extra_gas" |),
+            M.get_name (| globals, "memory_cost" |)
+          |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.return_ (|
+          M.call (|
+            M.get_name (| globals, "MessageCallGas" |),
+            make_list [
+              BinOp.add (|
+                M.get_name (| globals, "gas" |),
+                M.get_name (| globals, "extra_gas" |)
+              |);
+              BinOp.add (|
+                M.get_name (| globals, "gas" |),
+                M.get_name (| globals, "call_stipend" |)
+              |)
+            ],
+            make_dict []
+          |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let gas :=
@@ -772,6 +843,7 @@ M.call (|
         ],
         make_dict []
       |)
+    |) in
     M.pure Constant.None_)).
 
 Definition max_message_call_gas : Value.t -> Value.t -> M :=
@@ -798,4 +870,5 @@ Definition max_message_call_gas : Value.t -> Value.t -> M :=
           Constant.int 64
         |)
       |)
+    |) in
     M.pure Constant.None_)).

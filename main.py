@@ -15,6 +15,9 @@ def generate_error(kind, node):
 
     print(message, file=sys.stderr)
 
+    if kind == "expr":
+        return f"Constant.str \"{message}\""
+
     return message
 
 
@@ -77,6 +80,38 @@ def generate_mod(node: ast.mod):
         return generate_error("mod", node)
 
 
+def get_require_path_from_path(path: str) -> str:
+    # Check if it is a folder
+    if os.path.isdir(path):
+        require_path = path + "/__init__"
+    else:
+        require_path = path
+
+    return require_path.replace("/", ".")
+
+
+def get_require_path(node: ast.ImportFrom) -> str:
+    module = node.module.replace(".", "/") if node.module is not None else ""
+
+    # If this is an external package
+    if node.level == 0 and module.split("/")[0] != "ethereum":
+        return module.replace("/", ".")
+
+    # Otherwise we map the module to an actual file system path
+    # Absolute path
+    if node.level == 0:
+        return get_require_path_from_path(module)
+
+    # Relative path
+    actual_path = input_file_name
+    for _ in range(node.level):
+        actual_path = os.path.dirname(actual_path)
+    if module != "":
+        actual_path += "/" + module
+
+    return get_require_path_from_path(actual_path)
+
+
 def generate_top_level_stmt(node: ast.stmt):
     if isinstance(node, ast.FunctionDef):
         return f"Definition {node.name} : Value.t -> Value.t -> M :=\n" + \
@@ -85,8 +120,7 @@ def generate_top_level_stmt(node: ast.stmt):
         return generate_error("top_level_stmt", node)
     elif isinstance(node, ast.ClassDef):
         text = f"Definition {generate_name(node.name)} : Value.t :=\n"
-        text += generate_indent(1) + \
-            "builtins.make_klass\n"
+        text += generate_indent(1) + "builtins.make_klass\n"
 
         # Bases
         text += generate_indent(2) + "["
@@ -152,7 +186,7 @@ def generate_top_level_stmt(node: ast.stmt):
     elif isinstance(node, ast.Import):
         return generate_error("top_level_stmt", node)
     elif isinstance(node, ast.ImportFrom):
-        module = node.module if node.module is not None else "__init__"
+        module = get_require_path(node)
         snake_module = module.replace(".", "_")
 
         return f"Require {module}.\n" + \
@@ -188,22 +222,22 @@ def generate_if_then_else(
     indent,
     condition: ast.expr,
     success: ast.expr | list[ast.stmt],
-    error: ast.expr | list[ast.stmt]
+    error: ast.expr | list[ast.stmt],
 ):
     return generate_indent(indent) + "(* if *)\n" + \
         generate_indent(indent) + "M.if_then_else (|\n" + \
         generate_indent(indent + 1) + generate_expr(indent + 1, False, condition) + ",\n" + \
         generate_indent(indent) + "(* then *)\n" + \
         generate_indent(indent) + "ltac:(M.monadic (\n" + \
-        generate_expr(indent + 1, False, success) \
-        if isinstance(success, ast.expr) \
-        else generate_stmts(indent + 1, success) + \
+        (generate_expr(indent + 1, False, success)
+         if isinstance(success, ast.expr)
+         else generate_stmts(indent + 1, success)) + \
         "\n" + \
         generate_indent(indent) + "(* else *)\n" + \
         generate_indent(indent) + ")), ltac:(M.monadic (\n" + \
-        generate_expr(indent + 1, False, error) \
-        if isinstance(error, ast.expr) \
-        else generate_stmts(indent + 1, error) + \
+        (generate_expr(indent + 1, False, error)
+         if isinstance(error, ast.expr)
+         else generate_stmts(indent + 1, error)) + \
         "\n" + \
         generate_indent(indent) + ")) |)"
 
@@ -225,9 +259,9 @@ def generate_stmt(indent, node: ast.stmt):
     elif isinstance(node, ast.Return):
         return generate_indent(indent) + "let _ := M.return_ (|\n" + \
             generate_indent(indent + 1) + \
-            generate_expr(indent + 1, False, node.value) \
-            if node.value is not None \
-            else "Constant.None_" + \
+            (generate_expr(indent + 1, False, node.value)
+             if node.value is not None
+             else "Constant.None_") + \
             "\n" + \
             generate_indent(indent) + "|) in"
     elif isinstance(node, ast.Delete):
@@ -293,9 +327,9 @@ def generate_stmt(indent, node: ast.stmt):
         return generate_error("stmt", node)
     elif isinstance(node, ast.Raise):
         return generate_indent(indent) + "let _ := M.raise (| " + \
-            "Some(" + generate_expr(indent, False, node.exc) + ")" \
-            if node.exc is not None \
-            else "None" + \
+            ("Some(" + generate_expr(indent, False, node.exc) + ")"
+             if node.exc is not None
+             else "None") + \
             " |) in"
     elif isinstance(node, ast.Try):
         return generate_error("stmt", node)
@@ -465,14 +499,14 @@ def generate_expr(indent, is_with_paren, node: ast.expr):
     elif isinstance(node, ast.IfExp):
         return paren(
             is_with_paren,
-            generate_if_then_else(0, node.test, node.body, node.orelse)
+            generate_if_then_else(indent, node.test, node.body, node.orelse)
         )
     elif isinstance(node, ast.Dict):
         return "{" + \
             ", ".join(
-                generate_expr(indent, False, key)
-                if key is not None
-                else "?" +
+                (generate_expr(indent, False, key)
+                 if key is not None
+                 else "?") +
                 ": " + generate_expr(indent, False, value)
                 for key, value in zip(node.keys, node.values)
             ) + \
@@ -496,9 +530,9 @@ def generate_expr(indent, is_with_paren, node: ast.expr):
         return paren(
             is_with_paren,
             "M.yield (| " +
-            generate_expr(indent, False, node.value)
-            if node.value is not None
-            else "Constant.None_" +
+            (generate_expr(indent, False, node.value)
+             if node.value is not None
+             else "Constant.None_") +
             " |)"
         )
     elif isinstance(node, ast.YieldFrom):
@@ -560,13 +594,15 @@ def generate_expr(indent, is_with_paren, node: ast.expr):
     elif isinstance(node, ast.Slice):
         return paren(
             is_with_paren,
-            generate_expr(indent, False, node.lower)
-            if node.lower is not None
-            else "Constant.None_" +
-            ":" +
-            generate_expr(indent, False, node.upper)
-            if node.upper is not None
-            else "Constant.None_"
+            "M.slice (| " +
+            (generate_expr(indent, False, node.lower)
+             if node.lower is not None
+             else "Constant.None_") +
+            ", " +
+            (generate_expr(indent, False, node.upper)
+             if node.upper is not None
+             else "Constant.None_") +
+            " |)"
         )
     else:
         return generate_error("expr", node)
@@ -654,8 +690,9 @@ def generate_arg(node):
     return generate_name(node.arg)
 
 
-input_file_name = "../execution-specs/src/ethereum/" + sys.argv[1]
-output_file_name = "CoqOfPython/ethereum/" + sys.argv[1].replace(".py", ".v")
+input_file_name = sys.argv[1]
+output_file_name = "../../translate-ethereum-specs/CoqOfPython/" + \
+    input_file_name.replace(".py", ".v")
 
 file_content = open(input_file_name).read()
 parsed_tree = ast.parse(file_content)
