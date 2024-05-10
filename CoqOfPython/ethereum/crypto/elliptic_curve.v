@@ -1,0 +1,772 @@
+Require Import CoqOfPython.CoqOfPython.
+
+Definition globals : string := "ethereum.crypto.elliptic_curve".
+
+Definition expr_1 : Value.t :=
+  Constant.str "
+Elliptic Curves
+^^^^^^^^^^^^^^^
+".
+
+Axiom typing_imports_Generic :
+  IsImported globals "typing" "Generic".
+Axiom typing_imports_Type :
+  IsImported globals "typing" "Type".
+Axiom typing_imports_TypeVar :
+  IsImported globals "typing" "TypeVar".
+
+(* At top_level_stmt: unsupported node type: Import *)
+
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Bytes :
+  IsImported globals "ethereum.base_types" "Bytes".
+
+Axiom ethereum_crypto_finite_field_imports_Field :
+  IsImported globals "ethereum.crypto.finite_field" "Field".
+
+Axiom ethereum_crypto_hash_imports_Hash32 :
+  IsImported globals "ethereum.crypto.hash" "Hash32".
+
+Definition SECP256K1N : Value.t := M.run ltac:(M.monadic (
+  Constant.int 115792089237316195423570985008687907852837564279074904382605163141518161494337
+)).
+
+Definition F : Value.t := M.run ltac:(M.monadic (
+  M.call (|
+    M.get_name (| globals, "TypeVar" |),
+    make_list [
+      Constant.str "F"
+    ],
+    make_dict []
+  |)
+)).
+
+Definition T : Value.t := M.run ltac:(M.monadic (
+  M.call (|
+    M.get_name (| globals, "TypeVar" |),
+    make_list [
+      Constant.str "T"
+    ],
+    make_dict []
+  |)
+)).
+
+Definition secp256k1_recover : Value.t -> Value.t -> M :=
+  fun (args kwargs : Value.t) => ltac:(M.monadic (
+    let _ := M.set_locals (| args, kwargs, [ "r"; "s"; "v"; "msg_hash" ] |) in
+    let _ := Constant.str "
+    Recovers the public key from a given signature.
+
+    Parameters
+    ----------
+    r :
+        TODO
+    s :
+        TODO
+    v :
+        TODO
+    msg_hash :
+        Hash of the message being recovered.
+
+    Returns
+    -------
+    public_key : `ethereum.base_types.Bytes`
+        Recovered public key.
+    " in
+    let _ := M.assign_local (|
+      "r_bytes" ,
+      M.call (|
+        M.get_field (| M.get_name (| globals, "r" |), "to_be_bytes32" |),
+        make_list [],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "s_bytes" ,
+      M.call (|
+        M.get_field (| M.get_name (| globals, "s" |), "to_be_bytes32" |),
+        make_list [],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "signature" ,
+      M.call (|
+        M.get_name (| globals, "bytearray" |),
+        make_list [
+          BinOp.mult (|
+            make_list [
+              Constant.int 0
+            ],
+            Constant.int 65
+          |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign (|
+      M.slice (|
+        M.get_name (| globals, "signature" |),
+        BinOp.sub (|
+          Constant.int 32,
+          M.call (|
+            M.get_name (| globals, "len" |),
+            make_list [
+              M.get_name (| globals, "r_bytes" |)
+            ],
+            make_dict []
+          |)
+        |),
+        Constant.int 32,
+        Constant.None_
+      |),
+      M.get_name (| globals, "r_bytes" |)
+    |) in
+    let _ := M.assign (|
+      M.slice (|
+        M.get_name (| globals, "signature" |),
+        BinOp.sub (|
+          Constant.int 64,
+          M.call (|
+            M.get_name (| globals, "len" |),
+            make_list [
+              M.get_name (| globals, "s_bytes" |)
+            ],
+            make_dict []
+          |)
+        |),
+        Constant.int 64,
+        Constant.None_
+      |),
+      M.get_name (| globals, "s_bytes" |)
+    |) in
+    let _ := M.assign (|
+      M.get_subscript (|
+        M.get_name (| globals, "signature" |),
+        Constant.int 64
+      |),
+      M.get_name (| globals, "v" |)
+    |) in
+    let _ := M.assign_local (|
+      "public_key" ,
+      M.call (|
+        M.get_field (| M.get_field (| M.get_name (| globals, "coincurve" |), "PublicKey" |), "from_signature_and_message" |),
+        make_list [
+          M.call (|
+            M.get_name (| globals, "bytes" |),
+            make_list [
+              M.get_name (| globals, "signature" |)
+            ],
+            make_dict []
+          |);
+          M.get_name (| globals, "msg_hash" |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "public_key" ,
+      M.slice (|
+        M.call (|
+          M.get_field (| M.get_name (| globals, "public_key" |), "format" |),
+          make_list [],
+          make_dict []
+        |),
+        Constant.int 1,
+        Constant.None_,
+        Constant.None_
+      |)
+    |) in
+    let _ := M.return_ (|
+      M.get_name (| globals, "public_key" |)
+    |) in
+    M.pure Constant.None_)).
+
+Definition EllipticCurve : Value.t :=
+  builtins.make_klass
+    [(* At base: unsupported node type: Subscript *)]
+    [
+      (
+        "point_at_infinity",
+        fun (args kwargs : Value.t) => ltac:(M.monadic (
+          let _ := M.set_locals (| args, kwargs, [ "cls" ] |) in
+          let _ := Constant.str "
+        Return the point at infinity. This is the identity element of the group
+        operation.
+
+        The point at infinity doesn't actually have coordinates so we use
+        `(0, 0)` (which isn't on the curve) to represent it.
+        " in
+          let _ := M.return_ (|
+            M.call (|
+              M.get_field (| M.get_name (| globals, "cls" |), "__new__" |),
+              make_list [
+                M.get_name (| globals, "cls" |);
+                M.call (|
+                  M.get_field (| M.get_field (| M.get_name (| globals, "cls" |), "FIELD" |), "zero" |),
+                  make_list [],
+                  make_dict []
+                |);
+                M.call (|
+                  M.get_field (| M.get_field (| M.get_name (| globals, "cls" |), "FIELD" |), "zero" |),
+                  make_list [],
+                  make_dict []
+                |)
+              ],
+              make_dict []
+            |)
+          |) in
+          M.pure Constant.None_))
+      )
+    ]
+    [
+      (
+        "__new__",
+        fun (args kwargs : Value.t) => ltac:(M.monadic (
+          let _ := M.set_locals (| args, kwargs, [ "cls"; "x"; "y" ] |) in
+          let _ := Constant.str "
+        Make new point on the curve. The point is not checked to see if it is
+        on the curve.
+        " in
+          let _ := M.assign_local (|
+            "res" ,
+            M.call (|
+              M.get_field (| M.get_name (| globals, "object" |), "__new__" |),
+              make_list [
+                M.get_name (| globals, "cls" |)
+              ],
+              make_dict []
+            |)
+          |) in
+          let _ := M.assign (|
+            M.get_field (| M.get_name (| globals, "res" |), "x" |),
+            M.get_name (| globals, "x" |)
+          |) in
+          let _ := M.assign (|
+            M.get_field (| M.get_name (| globals, "res" |), "y" |),
+            M.get_name (| globals, "y" |)
+          |) in
+          let _ := M.return_ (|
+            M.get_name (| globals, "res" |)
+          |) in
+          M.pure Constant.None_))
+      );
+      (
+        "__init__",
+        fun (args kwargs : Value.t) => ltac:(M.monadic (
+          let _ := M.set_locals (| args, kwargs, [ "self"; "x"; "y" ] |) in
+          let _ := Constant.str "
+        Checks if the point is on the curve. To skip this check call
+        `__new__()` directly.
+        " in
+          let _ :=
+            (* if *)
+            M.if_then_else (|
+              BoolOp.and (|
+                BoolOp.or (|
+                  Compare.not_eq (|
+                    M.get_name (| globals, "x" |),
+                    M.call (|
+                      M.get_field (| M.get_field (| M.get_name (| globals, "self" |), "FIELD" |), "zero" |),
+                      make_list [],
+                      make_dict []
+                    |)
+                  |),
+                  ltac:(M.monadic (
+                    Compare.not_eq (|
+                      M.get_name (| globals, "y" |),
+                      M.call (|
+                        M.get_field (| M.get_field (| M.get_name (| globals, "self" |), "FIELD" |), "zero" |),
+                        make_list [],
+                        make_dict []
+                      |)
+                    |)
+                  ))
+                |),
+                ltac:(M.monadic (
+                  Compare.not_eq (|
+                    BinOp.sub (|
+                      BinOp.sub (|
+                        BinOp.sub (|
+                          BinOp.pow (|
+                            M.get_name (| globals, "y" |),
+                            Constant.int 2
+                          |),
+                          BinOp.pow (|
+                            M.get_name (| globals, "x" |),
+                            Constant.int 3
+                          |)
+                        |),
+                        BinOp.mult (|
+                          M.get_field (| M.get_name (| globals, "self" |), "A" |),
+                          M.get_name (| globals, "x" |)
+                        |)
+                      |),
+                      M.get_field (| M.get_name (| globals, "self" |), "B" |)
+                    |),
+                    M.call (|
+                      M.get_field (| M.get_field (| M.get_name (| globals, "self" |), "FIELD" |), "zero" |),
+                      make_list [],
+                      make_dict []
+                    |)
+                  |)
+                ))
+              |),
+            (* then *)
+            ltac:(M.monadic (
+              let _ := M.raise (| Some (M.call (|
+                M.get_name (| globals, "ValueError" |),
+                make_list [
+                  Constant.str "Point not on curve"
+                ],
+                make_dict []
+              |)) |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
+              M.pure Constant.None_
+            )) |) in
+          M.pure Constant.None_))
+      );
+      (
+        "__eq__",
+        fun (args kwargs : Value.t) => ltac:(M.monadic (
+          let _ := M.set_locals (| args, kwargs, [ "self"; "other" ] |) in
+          let _ := Constant.str "
+        Test two points for equality.
+        " in
+          let _ :=
+            (* if *)
+            M.if_then_else (|
+              UnOp.not (| M.call (|
+                M.get_name (| globals, "isinstance" |),
+                make_list [
+                  M.get_name (| globals, "other" |);
+                  M.call (|
+                    M.get_name (| globals, "type" |),
+                    make_list [
+                      M.get_name (| globals, "self" |)
+                    ],
+                    make_dict []
+                  |)
+                ],
+                make_dict []
+              |) |),
+            (* then *)
+            ltac:(M.monadic (
+              let _ := M.return_ (|
+                Constant.bool false
+              |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
+              M.pure Constant.None_
+            )) |) in
+          let _ := M.return_ (|
+            BoolOp.and (|
+              Compare.eq (|
+                M.get_field (| M.get_name (| globals, "self" |), "x" |),
+                M.get_field (| M.get_name (| globals, "other" |), "x" |)
+              |),
+              ltac:(M.monadic (
+                Compare.eq (|
+                  M.get_field (| M.get_name (| globals, "self" |), "y" |),
+                  M.get_field (| M.get_name (| globals, "other" |), "y" |)
+                |)
+              ))
+            |)
+          |) in
+          M.pure Constant.None_))
+      );
+      (
+        "__str__",
+        fun (args kwargs : Value.t) => ltac:(M.monadic (
+          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+          let _ := Constant.str "
+        Stringify a point as its coordinates.
+        " in
+          let _ := M.return_ (|
+            M.call (|
+              M.get_name (| globals, "str" |),
+              make_list [
+                make_tuple [ M.get_field (| M.get_name (| globals, "self" |), "x" |); M.get_field (| M.get_name (| globals, "self" |), "y" |) ]
+              ],
+              make_dict []
+            |)
+          |) in
+          M.pure Constant.None_))
+      );
+      (
+        "double",
+        fun (args kwargs : Value.t) => ltac:(M.monadic (
+          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+          let _ := Constant.str "
+        Add a point to itself.
+        " in
+          let _ := M.assign (|
+            make_tuple [ M.get_name (| globals, "x" |); M.get_name (| globals, "y" |); M.get_name (| globals, "F" |) ],
+            make_tuple [ M.get_field (| M.get_name (| globals, "self" |), "x" |); M.get_field (| M.get_name (| globals, "self" |), "y" |); M.get_field (| M.get_name (| globals, "self" |), "FIELD" |) ]
+          |) in
+          let _ :=
+            (* if *)
+            M.if_then_else (|
+              BoolOp.and (|
+                Compare.eq (|
+                  M.get_name (| globals, "x" |),
+                  Constant.int 0
+                |),
+                ltac:(M.monadic (
+                  Compare.eq (|
+                    M.get_name (| globals, "y" |),
+                    Constant.int 0
+                  |)
+                ))
+              |),
+            (* then *)
+            ltac:(M.monadic (
+              let _ := M.return_ (|
+                M.get_name (| globals, "self" |)
+              |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
+              M.pure Constant.None_
+            )) |) in
+          let _ := M.assign_local (|
+            "lam" ,
+            BinOp.div (|
+              BinOp.add (|
+                BinOp.mult (|
+                  M.call (|
+                    M.get_field (| M.get_name (| globals, "F" |), "from_int" |),
+                    make_list [
+                      Constant.int 3
+                    ],
+                    make_dict []
+                  |),
+                  BinOp.pow (|
+                    M.get_name (| globals, "x" |),
+                    Constant.int 2
+                  |)
+                |),
+                M.get_field (| M.get_name (| globals, "self" |), "A" |)
+              |),
+              BinOp.mult (|
+                M.call (|
+                  M.get_field (| M.get_name (| globals, "F" |), "from_int" |),
+                  make_list [
+                    Constant.int 2
+                  ],
+                  make_dict []
+                |),
+                M.get_name (| globals, "y" |)
+              |)
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "new_x" ,
+            BinOp.sub (|
+              BinOp.sub (|
+                BinOp.pow (|
+                  M.get_name (| globals, "lam" |),
+                  Constant.int 2
+                |),
+                M.get_name (| globals, "x" |)
+              |),
+              M.get_name (| globals, "x" |)
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "new_y" ,
+            BinOp.sub (|
+              BinOp.mult (|
+                M.get_name (| globals, "lam" |),
+                BinOp.sub (|
+                  M.get_name (| globals, "x" |),
+                  M.get_name (| globals, "new_x" |)
+                |)
+              |),
+              M.get_name (| globals, "y" |)
+            |)
+          |) in
+          let _ := M.return_ (|
+            M.call (|
+              M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
+              make_list [
+                M.call (|
+                  M.get_name (| globals, "type" |),
+                  make_list [
+                    M.get_name (| globals, "self" |)
+                  ],
+                  make_dict []
+                |);
+                M.get_name (| globals, "new_x" |);
+                M.get_name (| globals, "new_y" |)
+              ],
+              make_dict []
+            |)
+          |) in
+          M.pure Constant.None_))
+      );
+      (
+        "__add__",
+        fun (args kwargs : Value.t) => ltac:(M.monadic (
+          let _ := M.set_locals (| args, kwargs, [ "self"; "other" ] |) in
+          let _ := Constant.str "
+        Add two points together.
+        " in
+          let _ := M.assign_local (|
+            "ZERO" ,
+            M.call (|
+              M.get_field (| M.get_field (| M.get_name (| globals, "self" |), "FIELD" |), "zero" |),
+              make_list [],
+              make_dict []
+            |)
+          |) in
+          let _ := M.assign (|
+            make_tuple [ M.get_name (| globals, "self_x" |); M.get_name (| globals, "self_y" |); M.get_name (| globals, "other_x" |); M.get_name (| globals, "other_y" |) ],
+            make_tuple [ M.get_field (| M.get_name (| globals, "self" |), "x" |); M.get_field (| M.get_name (| globals, "self" |), "y" |); M.get_field (| M.get_name (| globals, "other" |), "x" |); M.get_field (| M.get_name (| globals, "other" |), "y" |) ]
+          |) in
+          let _ :=
+            (* if *)
+            M.if_then_else (|
+              BoolOp.and (|
+                Compare.eq (|
+                  M.get_name (| globals, "self_x" |),
+                  M.get_name (| globals, "ZERO" |)
+                |),
+                ltac:(M.monadic (
+                  Compare.eq (|
+                    M.get_name (| globals, "self_y" |),
+                    M.get_name (| globals, "ZERO" |)
+                  |)
+                ))
+              |),
+            (* then *)
+            ltac:(M.monadic (
+              let _ := M.return_ (|
+                M.get_name (| globals, "other" |)
+              |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
+              M.pure Constant.None_
+            )) |) in
+          let _ :=
+            (* if *)
+            M.if_then_else (|
+              BoolOp.and (|
+                Compare.eq (|
+                  M.get_name (| globals, "other_x" |),
+                  M.get_name (| globals, "ZERO" |)
+                |),
+                ltac:(M.monadic (
+                  Compare.eq (|
+                    M.get_name (| globals, "other_y" |),
+                    M.get_name (| globals, "ZERO" |)
+                  |)
+                ))
+              |),
+            (* then *)
+            ltac:(M.monadic (
+              let _ := M.return_ (|
+                M.get_name (| globals, "self" |)
+              |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
+              M.pure Constant.None_
+            )) |) in
+          let _ :=
+            (* if *)
+            M.if_then_else (|
+              Compare.eq (|
+                M.get_name (| globals, "self_x" |),
+                M.get_name (| globals, "other_x" |)
+              |),
+            (* then *)
+            ltac:(M.monadic (
+              let _ :=
+                (* if *)
+                M.if_then_else (|
+                  Compare.eq (|
+                    M.get_name (| globals, "self_y" |),
+                    M.get_name (| globals, "other_y" |)
+                  |),
+                (* then *)
+                ltac:(M.monadic (
+                  let _ := M.return_ (|
+                    M.call (|
+                      M.get_field (| M.get_name (| globals, "self" |), "double" |),
+                      make_list [],
+                      make_dict []
+                    |)
+                  |) in
+                  M.pure Constant.None_
+                (* else *)
+                )), ltac:(M.monadic (
+                  let _ := M.return_ (|
+                    M.call (|
+                      M.get_field (| M.get_name (| globals, "self" |), "point_at_infinity" |),
+                      make_list [],
+                      make_dict []
+                    |)
+                  |) in
+                  M.pure Constant.None_
+                )) |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
+              M.pure Constant.None_
+            )) |) in
+          let _ := M.assign_local (|
+            "lam" ,
+            BinOp.div (|
+              BinOp.sub (|
+                M.get_name (| globals, "other_y" |),
+                M.get_name (| globals, "self_y" |)
+              |),
+              BinOp.sub (|
+                M.get_name (| globals, "other_x" |),
+                M.get_name (| globals, "self_x" |)
+              |)
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "x" ,
+            BinOp.sub (|
+              BinOp.sub (|
+                BinOp.pow (|
+                  M.get_name (| globals, "lam" |),
+                  Constant.int 2
+                |),
+                M.get_name (| globals, "self_x" |)
+              |),
+              M.get_name (| globals, "other_x" |)
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "y" ,
+            BinOp.sub (|
+              BinOp.mult (|
+                M.get_name (| globals, "lam" |),
+                BinOp.sub (|
+                  M.get_name (| globals, "self_x" |),
+                  M.get_name (| globals, "x" |)
+                |)
+              |),
+              M.get_name (| globals, "self_y" |)
+            |)
+          |) in
+          let _ := M.return_ (|
+            M.call (|
+              M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
+              make_list [
+                M.call (|
+                  M.get_name (| globals, "type" |),
+                  make_list [
+                    M.get_name (| globals, "self" |)
+                  ],
+                  make_dict []
+                |);
+                M.get_name (| globals, "x" |);
+                M.get_name (| globals, "y" |)
+              ],
+              make_dict []
+            |)
+          |) in
+          M.pure Constant.None_))
+      );
+      (
+        "mul_by",
+        fun (args kwargs : Value.t) => ltac:(M.monadic (
+          let _ := M.set_locals (| args, kwargs, [ "self"; "n" ] |) in
+          let _ := Constant.str "
+        Multiply `self` by `n` using the double and add algorithm.
+        " in
+          let _ := M.assign_local (|
+            "res" ,
+            M.call (|
+              M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
+              make_list [
+                M.call (|
+                  M.get_name (| globals, "type" |),
+                  make_list [
+                    M.get_name (| globals, "self" |)
+                  ],
+                  make_dict []
+                |);
+                M.call (|
+                  M.get_field (| M.get_field (| M.get_name (| globals, "self" |), "FIELD" |), "zero" |),
+                  make_list [],
+                  make_dict []
+                |);
+                M.call (|
+                  M.get_field (| M.get_field (| M.get_name (| globals, "self" |), "FIELD" |), "zero" |),
+                  make_list [],
+                  make_dict []
+                |)
+              ],
+              make_dict []
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "s" ,
+            M.get_name (| globals, "self" |)
+          |) in
+          let _ :=
+            M.while (|
+              Compare.not_eq (|
+      M.get_name (| globals, "n" |),
+      Constant.int 0
+    |),
+              ltac:(M.monadic (
+                let _ :=
+                  (* if *)
+                  M.if_then_else (|
+                    Compare.eq (|
+                      BinOp.mod_ (|
+                        M.get_name (| globals, "n" |),
+                        Constant.int 2
+                      |),
+                      Constant.int 1
+                    |),
+                  (* then *)
+                  ltac:(M.monadic (
+                    let _ := M.assign_local (|
+                      "res" ,
+                      BinOp.add (|
+                        M.get_name (| globals, "res" |),
+                        M.get_name (| globals, "s" |)
+                      |)
+                    |) in
+                    M.pure Constant.None_
+                  (* else *)
+                  )), ltac:(M.monadic (
+                    M.pure Constant.None_
+                  )) |) in
+                let _ := M.assign_local (|
+                  "s" ,
+                  BinOp.add (|
+                    M.get_name (| globals, "s" |),
+                    M.get_name (| globals, "s" |)
+                  |)
+                |) in
+                let _ := M.assign_op_local (|
+                  BinOp.floor_div,
+                  "n",
+                  Constant.int 2
+                |) in
+                M.pure Constant.None_
+              )),
+              ltac:(M.monadic (
+                M.pure Constant.None_
+              ))
+          |) in
+          let _ := M.return_ (|
+            M.get_name (| globals, "res" |)
+          |) in
+          M.pure Constant.None_))
+      )
+    ].

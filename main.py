@@ -1,4 +1,5 @@
 import ast
+import os
 import sys
 
 
@@ -13,6 +14,9 @@ def generate_error(kind, node):
         )
 
     print(message, file=sys.stderr)
+
+    if kind == "expr":
+        return f"Constant.str \"{message}\""
 
     return message
 
@@ -54,14 +58,18 @@ def generate_constant(node, value):
     elif isinstance(value, int):
         return f"Constant.int {str(value)}"
     elif isinstance(value, float):
-        return f"Value.Float {str(value)}"
+        return f"Constant.float \"{str(value)}\""
     elif isinstance(value, str):
-        return "Constant.str \"" + value.replace("\"", "\"\"\"") + "\""
+        return "Constant.str \"" + value.replace("\"", "\"\"") + "\""
+    elif isinstance(value, bytes):
+        return "Constant.bytes \"" + value.hex() + "\""
+    elif value == ...:
+        return "Constant.ellipsis"
     else:
-        return generate_error("constant", node)
+        return generate_error(f"constant {type(value)}", node)
 
 
-def generate_mod(node):
+def generate_mod(node: ast.mod):
     if isinstance(node, ast.Module):
         return "\n\n".join(generate_top_level_stmt(stmt) for stmt in node.body)
     elif isinstance(node, ast.Interactive):
@@ -74,16 +82,32 @@ def generate_mod(node):
         return generate_error("mod", node)
 
 
-def generate_top_level_stmt(node):
+def get_globals_of_import(node: ast.ImportFrom) -> str:
+    module = node.module.replace(".", "/") if node.module is not None else ""
+
+    # If this is an absolute import
+    if node.level == 0:
+        return module.replace("/", ".")
+
+    # If this is a relative path
+    actual_path = input_file_name
+    for _ in range(node.level):
+        actual_path = os.path.dirname(actual_path)
+    if module != "":
+        actual_path += "/" + module
+
+    return actual_path.replace("/", ".")
+
+
+def generate_top_level_stmt(node: ast.stmt):
     if isinstance(node, ast.FunctionDef):
-        return f"Definition {node.name} : Value.t -> Value.t -> M :=\n" + \
+        return f"Definition {generate_name(node.name)} : Value.t -> Value.t -> M :=\n" + \
             generate_indent(1) + generate_function_def_body(1, node) + "."
     elif isinstance(node, ast.AsyncFunctionDef):
         return generate_error("top_level_stmt", node)
     elif isinstance(node, ast.ClassDef):
         text = f"Definition {generate_name(node.name)} : Value.t :=\n"
-        text += generate_indent(1) + \
-            "builtins.make_klass\n"
+        text += generate_indent(1) + "builtins.make_klass\n"
 
         # Bases
         text += generate_indent(2) + "["
@@ -149,17 +173,15 @@ def generate_top_level_stmt(node):
     elif isinstance(node, ast.Import):
         return generate_error("top_level_stmt", node)
     elif isinstance(node, ast.ImportFrom):
-        module = node.module if node.module is not None else "__init__"
+        module = get_globals_of_import(node)
         snake_module = module.replace(".", "_")
 
-        return f"Require {module}.\n" + \
-            "\n".join(
-                f"Axiom {snake_module}_{generate_name(alias.name)} :\n" +
-                generate_indent(1) +
-                f"IsGlobalAlias globals {module}.globals " +
-                f"\"{generate_name(alias.name)}\"."
-                for alias in node.names
-            )
+        return "\n".join(
+            f"Axiom {snake_module}_imports_{alias.name} :\n" +
+            generate_indent(1) +
+            f"IsImported globals \"{module}\" \"{alias.name}\"."
+            for alias in node.names
+        )
     elif isinstance(node, ast.Global):
         return generate_error("top_level_stmt", node)
     elif isinstance(node, ast.Nonlocal):
@@ -181,27 +203,38 @@ def generate_function_def_body(indent, node):
         body + "))"
 
 
-def generate_if_then_else(indent, condition, success, error):
+def generate_if_then_else(
+    indent,
+    condition: ast.expr,
+    success: ast.expr | list[ast.stmt],
+    error: ast.expr | list[ast.stmt],
+):
     return generate_indent(indent) + "(* if *)\n" + \
         generate_indent(indent) + "M.if_then_else (|\n" + \
         generate_indent(indent + 1) + generate_expr(indent + 1, False, condition) + ",\n" + \
         generate_indent(indent) + "(* then *)\n" + \
         generate_indent(indent) + "ltac:(M.monadic (\n" + \
-        generate_stmts(indent + 1, success) + "\n" + \
+        (generate_expr(indent + 1, False, success)
+         if isinstance(success, ast.expr)
+         else generate_stmts(indent + 1, success)) + \
+        "\n" + \
         generate_indent(indent) + "(* else *)\n" + \
         generate_indent(indent) + ")), ltac:(M.monadic (\n" + \
-        generate_stmts(indent + 1, error) + "\n" + \
+        (generate_expr(indent + 1, False, error)
+         if isinstance(error, ast.expr)
+         else generate_stmts(indent + 1, error)) + \
+        "\n" + \
         generate_indent(indent) + ")) |)"
 
 
-def generate_stmts(indent, nodes):
+def generate_stmts(indent, nodes: list[ast.stmt]):
     return "\n".join(
         [generate_stmt(indent, stmt) for stmt in nodes] +
         [generate_indent(indent) + "M.pure Constant.None_"]
     )
 
 
-def generate_stmt(indent, node):
+def generate_stmt(indent, node: ast.stmt):
     if isinstance(node, ast.FunctionDef):
         return generate_error("stmt", node)
     elif isinstance(node, ast.AsyncFunctionDef):
@@ -211,7 +244,10 @@ def generate_stmt(indent, node):
     elif isinstance(node, ast.Return):
         return generate_indent(indent) + "let _ := M.return_ (|\n" + \
             generate_indent(indent + 1) + \
-            generate_expr(indent + 1, False, node.value) + "\n" + \
+            (generate_expr(indent + 1, False, node.value)
+             if node.value is not None
+             else "Constant.None_") + \
+            "\n" + \
             generate_indent(indent) + "|) in"
     elif isinstance(node, ast.Delete):
         return "\n".join(
@@ -226,9 +262,12 @@ def generate_stmt(indent, node):
         target = node.targets[0]
 
         if isinstance(target, ast.Name):
-            return generate_indent(indent) + "let " + target.id + " :=\n" + \
+            return generate_indent(indent) + "let _ := M.assign_local (|\n" + \
                 generate_indent(indent + 1) + \
-                generate_expr(indent + 1, False, node.value) + " in"
+                "\"" + target.id + "\" ,\n" + \
+                generate_indent(indent + 1) + \
+                generate_expr(indent + 1, False, node.value) + "\n" + \
+                generate_indent(indent) + "|) in"
 
         return generate_indent(indent) + "let _ := M.assign (|\n" + \
             generate_indent(indent + 1) + \
@@ -240,11 +279,11 @@ def generate_stmt(indent, node):
     #     return generate_error("stmt", node)
     elif isinstance(node, ast.AugAssign):
         if isinstance(node.target, ast.Name):
-            return generate_indent(indent) + "let " + node.target.id + " := " + \
-                generate_operator(node.op) + "\n" + \
-                generate_indent(indent + 1) + generate_expr(1, False, node.value) + "\n" + \
-                generate_indent(indent + 1) + \
-                generate_expr(1, False, node.value) + " in"
+            return generate_indent(indent) + "let _ := M.assign_op_local (|\n" + \
+                generate_indent(indent + 1) + generate_operator(node.op) + ",\n" + \
+                generate_indent(indent + 1) + "\"" + node.target.id + "\",\n" + \
+                generate_indent(indent + 1) + generate_expr(1, False, node.value) + "\n" +\
+                generate_indent(indent) + "|) in"
 
         return generate_indent(indent) + "let _ := M.assign_op (|\n" + \
             generate_indent(indent + 1) + generate_operator(node.op) + ",\n" + \
@@ -254,16 +293,30 @@ def generate_stmt(indent, node):
     elif isinstance(node, ast.AnnAssign):
         return generate_error("stmt", node)
     elif isinstance(node, ast.For):
-        return generate_indent(indent) + "For " + generate_expr(1, False, node.target) + " in " + \
-            generate_expr(1, False, node.iter) + " do\n" + \
-            "\n".join(generate_stmt(indent + 1, stmt) for stmt in node.body) + "\n" + \
-            generate_indent(indent) + "EndFor."
+        return generate_indent(indent) + "let _ :=\n" + \
+            generate_indent(indent + 1) + "M.for_ (|\n" + \
+            generate_indent(indent + 2) + generate_expr(2, False, node.target) + ",\n" + \
+            generate_indent(indent + 2) + generate_expr(2, False, node.iter) + ",\n" + \
+            generate_indent(indent + 2) + "ltac:(M.monadic (\n" + \
+            generate_stmts(indent + 3, node.body) + "\n" + \
+            generate_indent(indent + 2) + ")),\n" + \
+            generate_indent(indent + 2) + "ltac:(M.monadic (\n" + \
+            generate_stmts(indent + 3, node.orelse) + "\n" + \
+            generate_indent(indent + 2) + "))\n" + \
+            generate_indent(indent) + "|) in"
     elif isinstance(node, ast.AsyncFor):
         return generate_error("stmt", node)
     elif isinstance(node, ast.While):
-        return generate_indent(indent) + "While " + generate_expr(1, False, node.test) + " do\n" + \
-            "\n".join(generate_stmt(indent + 1, stmt) for stmt in node.body) + "\n" + \
-            generate_indent(indent) + "EndWhile."
+        return generate_indent(indent) + "let _ :=\n" + \
+            generate_indent(indent + 1) + "M.while (|\n" + \
+            generate_indent(indent + 2) + generate_expr(2, False, node.test) + ",\n" + \
+            generate_indent(indent + 2) + "ltac:(M.monadic (\n" + \
+            generate_stmts(indent + 3, node.body) + "\n" + \
+            generate_indent(indent + 2) + ")),\n" + \
+            generate_indent(indent + 2) + "ltac:(M.monadic (\n" + \
+            generate_stmts(indent + 3, node.orelse) + "\n" + \
+            generate_indent(indent + 2) + "))\n" + \
+            generate_indent(indent) + "|) in"
     elif isinstance(node, ast.If):
         return generate_indent(indent) + "let _ :=\n" + \
             generate_if_then_else(indent + 1, node.test, node.body, node.orelse) + \
@@ -276,7 +329,10 @@ def generate_stmt(indent, node):
         return generate_error("stmt", node)
     elif isinstance(node, ast.Raise):
         return generate_indent(indent) + "let _ := M.raise (| " + \
-            generate_expr(indent, False, node.exc) + " |) in"
+            ("Some (" + generate_expr(indent, False, node.exc) + ")"
+             if node.exc is not None
+             else "None") + \
+            " |) in"
     elif isinstance(node, ast.Try):
         return generate_error("stmt", node)
     # elif isinstance(node, ast.TryStar):
@@ -312,16 +368,48 @@ def generate_bool_op(indent, is_with_paren, op, nodes):
     if len(nodes) == 0:
         return generate_error("expr", nodes)
     elif len(nodes) == 1:
-        return generate_expr(indent + 1, False, nodes[0])
+        return generate_expr(indent, False, nodes[0])
 
     return paren(
         is_with_paren,
-        generate_boolop(op) + " (|\n" +
+        op + " (|\n" +
         generate_indent(indent + 1) +
         generate_expr(indent + 1, False, nodes[0]) + ",\n" +
         generate_indent(indent + 1) + "ltac:(M.monadic (\n" +
         generate_indent(indent + 2) +
         generate_bool_op(indent + 2, False, op, nodes[1:]) + "\n" +
+        generate_indent(indent + 1) + "))\n" +
+        generate_indent(indent) + "|)"
+    )
+
+
+def generate_compare(indent, is_with_paren, op, left, right):
+    return paren(
+        is_with_paren,
+        generate_cmpop(op) + " (|\n" +
+        generate_indent(indent + 1) +
+        generate_expr(indent + 1, False, left) + ",\n" +
+        generate_indent(indent + 1) +
+        generate_expr(indent + 1, False, right) + "\n" +
+        generate_indent(indent) + "|)"
+    )
+
+
+def generate_compares(indent, is_with_paren, left, ops, comparators):
+    if len(ops) == 0:
+        raise ValueError("No comparison operators provided")
+    elif len(ops) == 1:
+        return generate_compare(indent, is_with_paren, ops[0], left, comparators[0])
+
+    return paren(
+        is_with_paren,
+        "BoolOp.and (|\n" +
+        generate_indent(indent + 1) +
+        generate_compare(indent + 1, is_with_paren, ops[0], left, comparators[0]) + ",\n" +
+        generate_indent(indent + 1) + "ltac:(M.monadic (\n" +
+        generate_indent(indent + 2) +
+        generate_compares(indent + 2, False, comparators[0], ops[1:], comparators[1:]) +
+        "\n" +
         generate_indent(indent + 1) + "))\n" +
         generate_indent(indent) + "|)"
     )
@@ -381,9 +469,11 @@ def generate_list(indent, is_with_paren, nodes):
     )
 
 
-def generate_expr(indent, is_with_paren, node):
+def generate_expr(indent, is_with_paren, node: ast.expr):
     if isinstance(node, ast.BoolOp):
-        return generate_bool_op(indent, is_with_paren, node.op, node.values)
+        return generate_bool_op(
+            indent, is_with_paren, generate_boolop(node.op), node.values
+        )
     elif isinstance(node, ast.NamedExpr):
         return generate_error("expr", node)
     elif isinstance(node, ast.BinOp):
@@ -406,25 +496,25 @@ def generate_expr(indent, is_with_paren, node):
     elif isinstance(node, ast.Lambda):
         return paren(
             is_with_paren,
-            f"fun {generate_expr(indent, False, node.args)} => {generate_expr(indent, False, node.body)}"
+            f"fun (args kwargs : Value.t) => {generate_expr(indent, False, node.body)}"
         )
     elif isinstance(node, ast.IfExp):
         return paren(
             is_with_paren,
-            generate_if_then_else(0, node.test, node.body, node.orelse)
+            generate_if_then_else(indent, node.test, node.body, node.orelse)
         )
     elif isinstance(node, ast.Dict):
-        return "{" + ", ".join(generate_expr(indent, False, key) + ": " + generate_expr(indent, False, value) for key, value in zip(node.keys, node.values)) + "}"
+        return generate_error("expr", node)
     elif isinstance(node, ast.Set):
-        return "{" + ", ".join(generate_expr(indent, False, elt) for elt in node.elts) + "}"
+        return generate_error("expr", node)
     elif isinstance(node, ast.ListComp):
-        return f"[{generate_expr(indent, False, node.elt)} for {generate_expr(indent, False, node.generators)}]"
+        return generate_error("expr", node)
     elif isinstance(node, ast.SetComp):
-        return f"{{{generate_expr(indent, False, node.elt)} for {generate_expr(indent, False, node.generators)}}}"
+        return generate_error("expr", node)
     elif isinstance(node, ast.DictComp):
-        return f"{{{generate_expr(indent, False, node.key)}: {generate_expr(indent, False, node.value)} for {generate_expr(indent, False, node.generators)}}}"
+        return generate_error("expr", node)
     elif isinstance(node, ast.GeneratorExp):
-        return f"({generate_expr(indent, False, node.elt)} for {generate_expr(indent, False, node.generators)})"
+        return generate_error("expr", node)
     elif isinstance(node, ast.Await):
         return paren(
             is_with_paren,
@@ -433,7 +523,11 @@ def generate_expr(indent, is_with_paren, node):
     elif isinstance(node, ast.Yield):
         return paren(
             is_with_paren,
-            f"M.yield (| {generate_expr(indent, False, node.value)} |)"
+            "M.yield (| " +
+            (generate_expr(indent, False, node.value)
+             if node.value is not None
+             else "Constant.None_") +
+            " |)"
         )
     elif isinstance(node, ast.YieldFrom):
         return paren(
@@ -441,12 +535,8 @@ def generate_expr(indent, is_with_paren, node):
             f"M.yield_from (| {generate_expr(indent, False, node.value)} |)"
         )
     elif isinstance(node, ast.Compare):
-        if len(node.ops) >= 2 or len(node.comparators) >= 2:
-            return generate_error("expr", node)
-
-        return paren(
-            is_with_paren,
-            f"{generate_cmpop(node.ops[0])} (| {generate_expr(indent, False, node.left)}, {generate_expr(indent, False, node.comparators[0])} |)"
+        return generate_compares(
+            indent, is_with_paren, node.left, node.ops, node.comparators
         )
     elif isinstance(node, ast.Call):
         return paren(
@@ -474,9 +564,37 @@ def generate_expr(indent, is_with_paren, node):
             f"M.get_field (| {generate_expr(indent, False, node.value)}, \"{node.attr}\" |)"
         )
     elif isinstance(node, ast.Subscript):
+        slice = node.slice
+
+        if isinstance(slice, ast.Slice):
+            return paren(
+                is_with_paren,
+                "M.slice (|\n" +
+                generate_indent(indent + 1) +
+                generate_expr(indent + 1, False, node.value) + ",\n" +
+                generate_indent(indent + 1) +
+                (generate_expr(indent + 1, False, slice.lower)
+                 if slice.lower is not None
+                 else "Constant.None_") + ",\n" +
+                generate_indent(indent + 1) +
+                (generate_expr(indent + 1, False, slice.upper)
+                 if slice.upper is not None
+                 else "Constant.None_") + ",\n" +
+                generate_indent(indent + 1) +
+                (generate_expr(indent + 1, False, slice.step)
+                 if slice.step is not None
+                 else "Constant.None_") + "\n" +
+                generate_indent(indent) + "|)"
+            )
+
         return paren(
             is_with_paren,
-            f"M.get_subscript (| {generate_expr(indent, False, node.value)}, {generate_expr(indent, False, node.slice)} |)"
+            "M.get_subscript (|\n" +
+            generate_indent(indent + 1) +
+            generate_expr(indent + 1, False, node.value) + ",\n" +
+            generate_indent(indent + 1) +
+            generate_expr(indent + 1, False, slice) + "\n" +
+            generate_indent(indent) + "|)"
         )
     elif isinstance(node, ast.Starred):
         # We should handle this kind of expression as part of the enclosing expression
@@ -496,9 +614,19 @@ def generate_expr(indent, is_with_paren, node):
             " ]"
         )
     elif isinstance(node, ast.Slice):
+        # This case is supposed to only appear as part of a Subscript node, so we
+        # do not handle it here.
         return paren(
             is_with_paren,
-            f"{generate_expr(indent, False, node.lower)}:{generate_expr(indent, False, node.upper)}"
+            "M.slice (| " +
+            (generate_expr(indent, False, node.lower)
+             if node.lower is not None
+             else "Constant.None_") +
+            ", " +
+            (generate_expr(indent, False, node.upper)
+             if node.upper is not None
+             else "Constant.None_") +
+            " |)"
         )
     else:
         return generate_error("expr", node)
@@ -575,7 +703,7 @@ def generate_cmpop(node):
     elif isinstance(node, ast.IsNot):
         return "Compare.is_not"
     elif isinstance(node, ast.In):
-        return "Compare.in"
+        return "Compare.in_"
     elif isinstance(node, ast.NotIn):
         return "Compare.not_in"
     else:
@@ -586,21 +714,33 @@ def generate_arg(node):
     return generate_name(node.arg)
 
 
-input_file_name = "../execution-specs/src/ethereum/" + sys.argv[1]
-output_file_name = "CoqOfPython/ethereum/" + sys.argv[1].replace(".py", ".v")
+input_file_name = sys.argv[1]
+output_file_name = "../../translate-ethereum-specs/CoqOfPython/" + \
+    input_file_name.replace(".py", ".v")
 
 file_content = open(input_file_name).read()
 parsed_tree = ast.parse(file_content)
 
+globals = input_file_name.replace("/", ".").replace(".py", "")
+
 # Generate Coq code from the AST
 coq_code = f"""Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "{globals}".
 
 {generate_mod(parsed_tree)}
 """
 
-# Output the generated Coq code
+# Ensure that the directory exists
+output_directory = os.path.dirname(output_file_name)
+if not os.path.exists(output_directory):
+    os.makedirs(output_directory)
+
+# Output the generated Coq code only if the content changed
+if os.path.exists(output_file_name):
+    with open(output_file_name, "r") as output_file:
+        if output_file.read() == coq_code:
+            sys.exit(0)
 with open(output_file_name, "w") as output_file:
     output_file.write(coq_code)
 

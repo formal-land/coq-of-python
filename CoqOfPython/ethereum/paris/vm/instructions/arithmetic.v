@@ -1,7 +1,9 @@
 Require Import CoqOfPython.CoqOfPython.
 
+Definition globals : string := "ethereum.paris.vm.instructions.arithmetic".
+
 Definition expr_1 : Value.t :=
-  (Value.String "
+  Constant.str "
 Ethereum Virtual Machine (EVM) Arithmetic Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -13,36 +15,45 @@ Introduction
 ------------
 
 Implementations of the EVM Arithmetic instructions.
-").
+".
 
-Require ethereum.base_types.
-Definition U255_CEIL_VALUE := U255_CEIL_VALUE.
-Definition U256 := U256.
-Definition U256_CEIL_VALUE := U256_CEIL_VALUE.
-Definition Uint := Uint.
+Axiom ethereum_base_types_imports_U255_CEIL_VALUE :
+  IsImported globals "ethereum.base_types" "U255_CEIL_VALUE".
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_U256_CEIL_VALUE :
+  IsImported globals "ethereum.base_types" "U256_CEIL_VALUE".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Require ethereum.utils.numeric.
-Definition get_sign := get_sign.
+Axiom ethereum_utils_numeric_imports_get_sign :
+  IsImported globals "ethereum.utils.numeric" "get_sign".
 
-Require __init__.
-Definition Evm := Evm.
+Axiom ethereum_paris_vm_imports_Evm :
+  IsImported globals "ethereum.paris.vm" "Evm".
 
-Require gas.
-Definition GAS_EXPONENTIATION := GAS_EXPONENTIATION.
-Definition GAS_EXPONENTIATION_PER_BYTE := GAS_EXPONENTIATION_PER_BYTE.
-Definition GAS_LOW := GAS_LOW.
-Definition GAS_MID := GAS_MID.
-Definition GAS_VERY_LOW := GAS_VERY_LOW.
-Definition charge_gas := charge_gas.
+Axiom ethereum_paris_vm_gas_imports_GAS_EXPONENTIATION :
+  IsImported globals "ethereum.paris.vm.gas" "GAS_EXPONENTIATION".
+Axiom ethereum_paris_vm_gas_imports_GAS_EXPONENTIATION_PER_BYTE :
+  IsImported globals "ethereum.paris.vm.gas" "GAS_EXPONENTIATION_PER_BYTE".
+Axiom ethereum_paris_vm_gas_imports_GAS_LOW :
+  IsImported globals "ethereum.paris.vm.gas" "GAS_LOW".
+Axiom ethereum_paris_vm_gas_imports_GAS_MID :
+  IsImported globals "ethereum.paris.vm.gas" "GAS_MID".
+Axiom ethereum_paris_vm_gas_imports_GAS_VERY_LOW :
+  IsImported globals "ethereum.paris.vm.gas" "GAS_VERY_LOW".
+Axiom ethereum_paris_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.paris.vm.gas" "charge_gas".
 
-Require stack.
-Definition pop := pop.
-Definition push := push.
+Axiom ethereum_paris_vm_stack_imports_pop :
+  IsImported globals "ethereum.paris.vm.stack" "pop".
+Axiom ethereum_paris_vm_stack_imports_push :
+  IsImported globals "ethereum.paris.vm.stack" "push".
 
-Definition add (args : list Value.t) : M :=
-  match args with
-  | [evm] => ltac:(M.monadic (
-  let _ := (Value.String "
+Definition add : Value.t -> Value.t -> M :=
+  fun (args kwargs : Value.t) => ltac:(M.monadic (
+    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+    let _ := Constant.str "
     Adds the top two elements of the stack together, and pushes the result back
     on the stack.
 
@@ -51,24 +62,64 @@ Definition add (args : list Value.t) : M :=
     evm :
         The current EVM frame.
 
-    ") in
-  let x := (M.call (| pop, [evm.stack] |)) in
-  let y := (M.call (| pop, [evm.stack] |)) in
-  let _ := (M.call (| charge_gas, [evm; GAS_VERY_LOW] |)) in
-  let result := (M.call (| x.wrapping_add, [y] |)) in
-  let _ := (M.call (| push, [evm.stack; result] |)) in
-  let _ := M.assign_op (|
-    BinOp.add,
-    evm.pc,
-    (Value.Integer 1)
-  |) in))
-  | _ => M.impossible
-  end.
+    " in
+    let _ := M.assign_local (|
+      "x" ,
+      M.call (|
+        M.get_name (| globals, "pop" |),
+        make_list [
+          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y" ,
+      M.call (|
+        M.get_name (| globals, "pop" |),
+        make_list [
+          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.call (|
+    M.get_name (| globals, "charge_gas" |),
+    make_list [
+      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, "GAS_VERY_LOW" |)
+    ],
+    make_dict []
+  |) in
+    let _ := M.assign_local (|
+      "result" ,
+      M.call (|
+        M.get_field (| M.get_name (| globals, "x" |), "wrapping_add" |),
+        make_list [
+          M.get_name (| globals, "y" |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.call (|
+    M.get_name (| globals, "push" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.get_name (| globals, "result" |)
+    ],
+    make_dict []
+  |) in
+    let _ := M.assign_op (|
+      BinOp.add,
+      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      Constant.int 1
+    |) in
+    M.pure Constant.None_)).
 
-Definition sub (args : list Value.t) : M :=
-  match args with
-  | [evm] => ltac:(M.monadic (
-  let _ := (Value.String "
+Definition sub : Value.t -> Value.t -> M :=
+  fun (args kwargs : Value.t) => ltac:(M.monadic (
+    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+    let _ := Constant.str "
     Subtracts the top two elements of the stack, and pushes the result back
     on the stack.
 
@@ -77,24 +128,64 @@ Definition sub (args : list Value.t) : M :=
     evm :
         The current EVM frame.
 
-    ") in
-  let x := (M.call (| pop, [evm.stack] |)) in
-  let y := (M.call (| pop, [evm.stack] |)) in
-  let _ := (M.call (| charge_gas, [evm; GAS_VERY_LOW] |)) in
-  let result := (M.call (| x.wrapping_sub, [y] |)) in
-  let _ := (M.call (| push, [evm.stack; result] |)) in
-  let _ := M.assign_op (|
-    BinOp.add,
-    evm.pc,
-    (Value.Integer 1)
-  |) in))
-  | _ => M.impossible
-  end.
+    " in
+    let _ := M.assign_local (|
+      "x" ,
+      M.call (|
+        M.get_name (| globals, "pop" |),
+        make_list [
+          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y" ,
+      M.call (|
+        M.get_name (| globals, "pop" |),
+        make_list [
+          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.call (|
+    M.get_name (| globals, "charge_gas" |),
+    make_list [
+      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, "GAS_VERY_LOW" |)
+    ],
+    make_dict []
+  |) in
+    let _ := M.assign_local (|
+      "result" ,
+      M.call (|
+        M.get_field (| M.get_name (| globals, "x" |), "wrapping_sub" |),
+        make_list [
+          M.get_name (| globals, "y" |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.call (|
+    M.get_name (| globals, "push" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.get_name (| globals, "result" |)
+    ],
+    make_dict []
+  |) in
+    let _ := M.assign_op (|
+      BinOp.add,
+      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      Constant.int 1
+    |) in
+    M.pure Constant.None_)).
 
-Definition mul (args : list Value.t) : M :=
-  match args with
-  | [evm] => ltac:(M.monadic (
-  let _ := (Value.String "
+Definition mul : Value.t -> Value.t -> M :=
+  fun (args kwargs : Value.t) => ltac:(M.monadic (
+    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+    let _ := Constant.str "
     Multiply the top two elements of the stack, and pushes the result back
     on the stack.
 
@@ -103,24 +194,64 @@ Definition mul (args : list Value.t) : M :=
     evm :
         The current EVM frame.
 
-    ") in
-  let x := (M.call (| pop, [evm.stack] |)) in
-  let y := (M.call (| pop, [evm.stack] |)) in
-  let _ := (M.call (| charge_gas, [evm; GAS_LOW] |)) in
-  let result := (M.call (| x.wrapping_mul, [y] |)) in
-  let _ := (M.call (| push, [evm.stack; result] |)) in
-  let _ := M.assign_op (|
-    BinOp.add,
-    evm.pc,
-    (Value.Integer 1)
-  |) in))
-  | _ => M.impossible
-  end.
+    " in
+    let _ := M.assign_local (|
+      "x" ,
+      M.call (|
+        M.get_name (| globals, "pop" |),
+        make_list [
+          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y" ,
+      M.call (|
+        M.get_name (| globals, "pop" |),
+        make_list [
+          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.call (|
+    M.get_name (| globals, "charge_gas" |),
+    make_list [
+      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, "GAS_LOW" |)
+    ],
+    make_dict []
+  |) in
+    let _ := M.assign_local (|
+      "result" ,
+      M.call (|
+        M.get_field (| M.get_name (| globals, "x" |), "wrapping_mul" |),
+        make_list [
+          M.get_name (| globals, "y" |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.call (|
+    M.get_name (| globals, "push" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.get_name (| globals, "result" |)
+    ],
+    make_dict []
+  |) in
+    let _ := M.assign_op (|
+      BinOp.add,
+      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      Constant.int 1
+    |) in
+    M.pure Constant.None_)).
 
-Definition div (args : list Value.t) : M :=
-  match args with
-  | [evm] => ltac:(M.monadic (
-  let _ := (Value.String "
+Definition div : Value.t -> Value.t -> M :=
+  fun (args kwargs : Value.t) => ltac:(M.monadic (
+    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+    let _ := Constant.str "
     Integer division of the top two elements of the stack. Pushes the result
     back on the stack.
 
@@ -129,28 +260,85 @@ Definition div (args : list Value.t) : M :=
     evm :
         The current EVM frame.
 
-    ") in
-  let dividend := (M.call (| pop, [evm.stack] |)) in
-  let divisor := (M.call (| pop, [evm.stack] |)) in
-  let _ := (M.call (| charge_gas, [evm; GAS_LOW] |)) in
-  let _ :=
-    if M.is_true (Compare.eq (| divisor, (Value.Integer 0) |)) then
-      let quotient := (M.call (| U256, [(Value.Integer 0)] |)) in
-    else
-      let quotient := BinOp.floor_div (| dividend, divisor |) in in
-  let _ := (M.call (| push, [evm.stack; quotient] |)) in
-  let _ := M.assign_op (|
-    BinOp.add,
-    evm.pc,
-    (Value.Integer 1)
-  |) in))
-  | _ => M.impossible
-  end.
+    " in
+    let _ := M.assign_local (|
+      "dividend" ,
+      M.call (|
+        M.get_name (| globals, "pop" |),
+        make_list [
+          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "divisor" ,
+      M.call (|
+        M.get_name (| globals, "pop" |),
+        make_list [
+          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.call (|
+    M.get_name (| globals, "charge_gas" |),
+    make_list [
+      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, "GAS_LOW" |)
+    ],
+    make_dict []
+  |) in
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "divisor" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign_local (|
+          "quotient" ,
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        let _ := M.assign_local (|
+          "quotient" ,
+          BinOp.floor_div (|
+            M.get_name (| globals, "dividend" |),
+            M.get_name (| globals, "divisor" |)
+          |)
+        |) in
+        M.pure Constant.None_
+      )) |) in
+    let _ := M.call (|
+    M.get_name (| globals, "push" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.get_name (| globals, "quotient" |)
+    ],
+    make_dict []
+  |) in
+    let _ := M.assign_op (|
+      BinOp.add,
+      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      Constant.int 1
+    |) in
+    M.pure Constant.None_)).
 
-Definition sdiv (args : list Value.t) : M :=
-  match args with
-  | [evm] => ltac:(M.monadic (
-  let _ := (Value.String "
+Definition sdiv : Value.t -> Value.t -> M :=
+  fun (args kwargs : Value.t) => ltac:(M.monadic (
+    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+    let _ := Constant.str "
     Signed integer division of the top two elements of the stack. Pushes the
     result back on the stack.
 
@@ -159,33 +347,147 @@ Definition sdiv (args : list Value.t) : M :=
     evm :
         The current EVM frame.
 
-    ") in
-  let dividend := (M.call (| (M.call (| pop, [evm.stack] |)).to_signed, [] |)) in
-  let divisor := (M.call (| (M.call (| pop, [evm.stack] |)).to_signed, [] |)) in
-  let _ := (M.call (| charge_gas, [evm; GAS_LOW] |)) in
-  let _ :=
-    if M.is_true (Compare.eq (| divisor, (Value.Integer 0) |)) then
-      let quotient := (Value.Integer 0) in
-    else
-      let _ :=
-        if M.is_true (BoolOp.and(Compare.eq (| dividend, (UnOp.subU255_CEIL_VALUE) |)) (Compare.eq (| divisor, (UnOp.sub(Value.Integer 1)) |))) then
-          let quotient := (UnOp.subU255_CEIL_VALUE) in
-        else
-          let sign := (M.call (| get_sign, [BinOp.mult (| dividend, divisor |)] |)) in
-          let quotient := BinOp.mult (| sign, BinOp.floor_div (| (M.call (| abs, [dividend] |)), (M.call (| abs, [divisor] |)) |) |) in in in
-  let _ := (M.call (| push, [evm.stack; (M.call (| U256.from_signed, [quotient] |))] |)) in
-  let _ := M.assign_op (|
-    BinOp.add,
-    evm.pc,
-    (Value.Integer 1)
-  |) in))
-  | _ => M.impossible
-  end.
+    " in
+    let _ := M.assign_local (|
+      "dividend" ,
+      M.call (|
+        M.get_field (| M.call (|
+          M.get_name (| globals, "pop" |),
+          make_list [
+            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          ],
+          make_dict []
+        |), "to_signed" |),
+        make_list [],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "divisor" ,
+      M.call (|
+        M.get_field (| M.call (|
+          M.get_name (| globals, "pop" |),
+          make_list [
+            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          ],
+          make_dict []
+        |), "to_signed" |),
+        make_list [],
+        make_dict []
+      |)
+    |) in
+    let _ := M.call (|
+    M.get_name (| globals, "charge_gas" |),
+    make_list [
+      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, "GAS_LOW" |)
+    ],
+    make_dict []
+  |) in
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "divisor" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign_local (|
+          "quotient" ,
+          Constant.int 0
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        let _ :=
+          (* if *)
+          M.if_then_else (|
+            BoolOp.and (|
+              Compare.eq (|
+                M.get_name (| globals, "dividend" |),
+                UnOp.sub (| M.get_name (| globals, "U255_CEIL_VALUE" |) |)
+              |),
+              ltac:(M.monadic (
+                Compare.eq (|
+                  M.get_name (| globals, "divisor" |),
+                  UnOp.sub (| Constant.int 1 |)
+                |)
+              ))
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let _ := M.assign_local (|
+              "quotient" ,
+              UnOp.sub (| M.get_name (| globals, "U255_CEIL_VALUE" |) |)
+            |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
+            let _ := M.assign_local (|
+              "sign" ,
+              M.call (|
+                M.get_name (| globals, "get_sign" |),
+                make_list [
+                  BinOp.mult (|
+                    M.get_name (| globals, "dividend" |),
+                    M.get_name (| globals, "divisor" |)
+                  |)
+                ],
+                make_dict []
+              |)
+            |) in
+            let _ := M.assign_local (|
+              "quotient" ,
+              BinOp.mult (|
+                M.get_name (| globals, "sign" |),
+                BinOp.floor_div (|
+                  M.call (|
+                    M.get_name (| globals, "abs" |),
+                    make_list [
+                      M.get_name (| globals, "dividend" |)
+                    ],
+                    make_dict []
+                  |),
+                  M.call (|
+                    M.get_name (| globals, "abs" |),
+                    make_list [
+                      M.get_name (| globals, "divisor" |)
+                    ],
+                    make_dict []
+                  |)
+                |)
+              |)
+            |) in
+            M.pure Constant.None_
+          )) |) in
+        M.pure Constant.None_
+      )) |) in
+    let _ := M.call (|
+    M.get_name (| globals, "push" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.call (|
+        M.get_field (| M.get_name (| globals, "U256" |), "from_signed" |),
+        make_list [
+          M.get_name (| globals, "quotient" |)
+        ],
+        make_dict []
+      |)
+    ],
+    make_dict []
+  |) in
+    let _ := M.assign_op (|
+      BinOp.add,
+      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      Constant.int 1
+    |) in
+    M.pure Constant.None_)).
 
-Definition mod (args : list Value.t) : M :=
-  match args with
-  | [evm] => ltac:(M.monadic (
-  let _ := (Value.String "
+Definition mod_ : Value.t -> Value.t -> M :=
+  fun (args kwargs : Value.t) => ltac:(M.monadic (
+    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+    let _ := Constant.str "
     Modulo remainder of the top two elements of the stack. Pushes the result
     back on the stack.
 
@@ -194,28 +496,85 @@ Definition mod (args : list Value.t) : M :=
     evm :
         The current EVM frame.
 
-    ") in
-  let x := (M.call (| pop, [evm.stack] |)) in
-  let y := (M.call (| pop, [evm.stack] |)) in
-  let _ := (M.call (| charge_gas, [evm; GAS_LOW] |)) in
-  let _ :=
-    if M.is_true (Compare.eq (| y, (Value.Integer 0) |)) then
-      let remainder := (M.call (| U256, [(Value.Integer 0)] |)) in
-    else
-      let remainder := BinOp.mod_ (| x, y |) in in
-  let _ := (M.call (| push, [evm.stack; remainder] |)) in
-  let _ := M.assign_op (|
-    BinOp.add,
-    evm.pc,
-    (Value.Integer 1)
-  |) in))
-  | _ => M.impossible
-  end.
+    " in
+    let _ := M.assign_local (|
+      "x" ,
+      M.call (|
+        M.get_name (| globals, "pop" |),
+        make_list [
+          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y" ,
+      M.call (|
+        M.get_name (| globals, "pop" |),
+        make_list [
+          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.call (|
+    M.get_name (| globals, "charge_gas" |),
+    make_list [
+      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, "GAS_LOW" |)
+    ],
+    make_dict []
+  |) in
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "y" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign_local (|
+          "remainder" ,
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        let _ := M.assign_local (|
+          "remainder" ,
+          BinOp.mod_ (|
+            M.get_name (| globals, "x" |),
+            M.get_name (| globals, "y" |)
+          |)
+        |) in
+        M.pure Constant.None_
+      )) |) in
+    let _ := M.call (|
+    M.get_name (| globals, "push" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.get_name (| globals, "remainder" |)
+    ],
+    make_dict []
+  |) in
+    let _ := M.assign_op (|
+      BinOp.add,
+      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      Constant.int 1
+    |) in
+    M.pure Constant.None_)).
 
-Definition smod (args : list Value.t) : M :=
-  match args with
-  | [evm] => ltac:(M.monadic (
-  let _ := (Value.String "
+Definition smod : Value.t -> Value.t -> M :=
+  fun (args kwargs : Value.t) => ltac:(M.monadic (
+    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+    let _ := Constant.str "
     Signed modulo remainder of the top two elements of the stack. Pushes the
     result back on the stack.
 
@@ -224,28 +583,114 @@ Definition smod (args : list Value.t) : M :=
     evm :
         The current EVM frame.
 
-    ") in
-  let x := (M.call (| (M.call (| pop, [evm.stack] |)).to_signed, [] |)) in
-  let y := (M.call (| (M.call (| pop, [evm.stack] |)).to_signed, [] |)) in
-  let _ := (M.call (| charge_gas, [evm; GAS_LOW] |)) in
-  let _ :=
-    if M.is_true (Compare.eq (| y, (Value.Integer 0) |)) then
-      let remainder := (Value.Integer 0) in
-    else
-      let remainder := BinOp.mult (| (M.call (| get_sign, [x] |)), BinOp.mod_ (| (M.call (| abs, [x] |)), (M.call (| abs, [y] |)) |) |) in in
-  let _ := (M.call (| push, [evm.stack; (M.call (| U256.from_signed, [remainder] |))] |)) in
-  let _ := M.assign_op (|
-    BinOp.add,
-    evm.pc,
-    (Value.Integer 1)
-  |) in))
-  | _ => M.impossible
-  end.
+    " in
+    let _ := M.assign_local (|
+      "x" ,
+      M.call (|
+        M.get_field (| M.call (|
+          M.get_name (| globals, "pop" |),
+          make_list [
+            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          ],
+          make_dict []
+        |), "to_signed" |),
+        make_list [],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y" ,
+      M.call (|
+        M.get_field (| M.call (|
+          M.get_name (| globals, "pop" |),
+          make_list [
+            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          ],
+          make_dict []
+        |), "to_signed" |),
+        make_list [],
+        make_dict []
+      |)
+    |) in
+    let _ := M.call (|
+    M.get_name (| globals, "charge_gas" |),
+    make_list [
+      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, "GAS_LOW" |)
+    ],
+    make_dict []
+  |) in
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "y" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign_local (|
+          "remainder" ,
+          Constant.int 0
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        let _ := M.assign_local (|
+          "remainder" ,
+          BinOp.mult (|
+            M.call (|
+              M.get_name (| globals, "get_sign" |),
+              make_list [
+                M.get_name (| globals, "x" |)
+              ],
+              make_dict []
+            |),
+            BinOp.mod_ (|
+              M.call (|
+                M.get_name (| globals, "abs" |),
+                make_list [
+                  M.get_name (| globals, "x" |)
+                ],
+                make_dict []
+              |),
+              M.call (|
+                M.get_name (| globals, "abs" |),
+                make_list [
+                  M.get_name (| globals, "y" |)
+                ],
+                make_dict []
+              |)
+            |)
+          |)
+        |) in
+        M.pure Constant.None_
+      )) |) in
+    let _ := M.call (|
+    M.get_name (| globals, "push" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.call (|
+        M.get_field (| M.get_name (| globals, "U256" |), "from_signed" |),
+        make_list [
+          M.get_name (| globals, "remainder" |)
+        ],
+        make_dict []
+      |)
+    ],
+    make_dict []
+  |) in
+    let _ := M.assign_op (|
+      BinOp.add,
+      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      Constant.int 1
+    |) in
+    M.pure Constant.None_)).
 
-Definition addmod (args : list Value.t) : M :=
-  match args with
-  | [evm] => ltac:(M.monadic (
-  let _ := (Value.String "
+Definition addmod : Value.t -> Value.t -> M :=
+  fun (args kwargs : Value.t) => ltac:(M.monadic (
+    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+    let _ := Constant.str "
     Modulo addition of the top 2 elements with the 3rd element. Pushes the
     result back on the stack.
 
@@ -254,29 +699,122 @@ Definition addmod (args : list Value.t) : M :=
     evm :
         The current EVM frame.
 
-    ") in
-  let x := (M.call (| Uint, [(M.call (| pop, [evm.stack] |))] |)) in
-  let y := (M.call (| Uint, [(M.call (| pop, [evm.stack] |))] |)) in
-  let z := (M.call (| Uint, [(M.call (| pop, [evm.stack] |))] |)) in
-  let _ := (M.call (| charge_gas, [evm; GAS_MID] |)) in
-  let _ :=
-    if M.is_true (Compare.eq (| z, (Value.Integer 0) |)) then
-      let result := (M.call (| U256, [(Value.Integer 0)] |)) in
-    else
-      let result := (M.call (| U256, [BinOp.mod_ (| BinOp.add (| x, y |), z |)] |)) in in
-  let _ := (M.call (| push, [evm.stack; result] |)) in
-  let _ := M.assign_op (|
-    BinOp.add,
-    evm.pc,
-    (Value.Integer 1)
-  |) in))
-  | _ => M.impossible
-  end.
+    " in
+    let _ := M.assign_local (|
+      "x" ,
+      M.call (|
+        M.get_name (| globals, "Uint" |),
+        make_list [
+          M.call (|
+            M.get_name (| globals, "pop" |),
+            make_list [
+              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            ],
+            make_dict []
+          |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y" ,
+      M.call (|
+        M.get_name (| globals, "Uint" |),
+        make_list [
+          M.call (|
+            M.get_name (| globals, "pop" |),
+            make_list [
+              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            ],
+            make_dict []
+          |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "z" ,
+      M.call (|
+        M.get_name (| globals, "Uint" |),
+        make_list [
+          M.call (|
+            M.get_name (| globals, "pop" |),
+            make_list [
+              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            ],
+            make_dict []
+          |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.call (|
+    M.get_name (| globals, "charge_gas" |),
+    make_list [
+      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, "GAS_MID" |)
+    ],
+    make_dict []
+  |) in
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "z" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign_local (|
+          "result" ,
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        let _ := M.assign_local (|
+          "result" ,
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              BinOp.mod_ (|
+                BinOp.add (|
+                  M.get_name (| globals, "x" |),
+                  M.get_name (| globals, "y" |)
+                |),
+                M.get_name (| globals, "z" |)
+              |)
+            ],
+            make_dict []
+          |)
+        |) in
+        M.pure Constant.None_
+      )) |) in
+    let _ := M.call (|
+    M.get_name (| globals, "push" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.get_name (| globals, "result" |)
+    ],
+    make_dict []
+  |) in
+    let _ := M.assign_op (|
+      BinOp.add,
+      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      Constant.int 1
+    |) in
+    M.pure Constant.None_)).
 
-Definition mulmod (args : list Value.t) : M :=
-  match args with
-  | [evm] => ltac:(M.monadic (
-  let _ := (Value.String "
+Definition mulmod : Value.t -> Value.t -> M :=
+  fun (args kwargs : Value.t) => ltac:(M.monadic (
+    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+    let _ := Constant.str "
     Modulo multiplication of the top 2 elements with the 3rd element. Pushes
     the result back on the stack.
 
@@ -285,29 +823,122 @@ Definition mulmod (args : list Value.t) : M :=
     evm :
         The current EVM frame.
 
-    ") in
-  let x := (M.call (| Uint, [(M.call (| pop, [evm.stack] |))] |)) in
-  let y := (M.call (| Uint, [(M.call (| pop, [evm.stack] |))] |)) in
-  let z := (M.call (| Uint, [(M.call (| pop, [evm.stack] |))] |)) in
-  let _ := (M.call (| charge_gas, [evm; GAS_MID] |)) in
-  let _ :=
-    if M.is_true (Compare.eq (| z, (Value.Integer 0) |)) then
-      let result := (M.call (| U256, [(Value.Integer 0)] |)) in
-    else
-      let result := (M.call (| U256, [BinOp.mod_ (| BinOp.mult (| x, y |), z |)] |)) in in
-  let _ := (M.call (| push, [evm.stack; result] |)) in
-  let _ := M.assign_op (|
-    BinOp.add,
-    evm.pc,
-    (Value.Integer 1)
-  |) in))
-  | _ => M.impossible
-  end.
+    " in
+    let _ := M.assign_local (|
+      "x" ,
+      M.call (|
+        M.get_name (| globals, "Uint" |),
+        make_list [
+          M.call (|
+            M.get_name (| globals, "pop" |),
+            make_list [
+              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            ],
+            make_dict []
+          |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y" ,
+      M.call (|
+        M.get_name (| globals, "Uint" |),
+        make_list [
+          M.call (|
+            M.get_name (| globals, "pop" |),
+            make_list [
+              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            ],
+            make_dict []
+          |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "z" ,
+      M.call (|
+        M.get_name (| globals, "Uint" |),
+        make_list [
+          M.call (|
+            M.get_name (| globals, "pop" |),
+            make_list [
+              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            ],
+            make_dict []
+          |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.call (|
+    M.get_name (| globals, "charge_gas" |),
+    make_list [
+      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, "GAS_MID" |)
+    ],
+    make_dict []
+  |) in
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.eq (|
+          M.get_name (| globals, "z" |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign_local (|
+          "result" ,
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              Constant.int 0
+            ],
+            make_dict []
+          |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        let _ := M.assign_local (|
+          "result" ,
+          M.call (|
+            M.get_name (| globals, "U256" |),
+            make_list [
+              BinOp.mod_ (|
+                BinOp.mult (|
+                  M.get_name (| globals, "x" |),
+                  M.get_name (| globals, "y" |)
+                |),
+                M.get_name (| globals, "z" |)
+              |)
+            ],
+            make_dict []
+          |)
+        |) in
+        M.pure Constant.None_
+      )) |) in
+    let _ := M.call (|
+    M.get_name (| globals, "push" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.get_name (| globals, "result" |)
+    ],
+    make_dict []
+  |) in
+    let _ := M.assign_op (|
+      BinOp.add,
+      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      Constant.int 1
+    |) in
+    M.pure Constant.None_)).
 
-Definition exp (args : list Value.t) : M :=
-  match args with
-  | [evm] => ltac:(M.monadic (
-  let _ := (Value.String "
+Definition exp : Value.t -> Value.t -> M :=
+  fun (args kwargs : Value.t) => ltac:(M.monadic (
+    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+    let _ := Constant.str "
     Exponential operation of the top 2 elements. Pushes the result back on
     the stack.
 
@@ -316,26 +947,108 @@ Definition exp (args : list Value.t) : M :=
     evm :
         The current EVM frame.
 
-    ") in
-  let base := (M.call (| Uint, [(M.call (| pop, [evm.stack] |))] |)) in
-  let exponent := (M.call (| Uint, [(M.call (| pop, [evm.stack] |))] |)) in
-  let exponent_bits := (M.call (| exponent.bit_length, [] |)) in
-  let exponent_bytes := BinOp.floor_div (| BinOp.add (| exponent_bits, (Value.Integer 7) |), (Value.Integer 8) |) in
-  let _ := (M.call (| charge_gas, [evm; BinOp.add (| GAS_EXPONENTIATION, BinOp.mult (| GAS_EXPONENTIATION_PER_BYTE, exponent_bytes |) |)] |)) in
-  let result := (M.call (| U256, [(M.call (| pow, [base; exponent; U256_CEIL_VALUE] |))] |)) in
-  let _ := (M.call (| push, [evm.stack; result] |)) in
-  let _ := M.assign_op (|
-    BinOp.add,
-    evm.pc,
-    (Value.Integer 1)
-  |) in))
-  | _ => M.impossible
-  end.
+    " in
+    let _ := M.assign_local (|
+      "base" ,
+      M.call (|
+        M.get_name (| globals, "Uint" |),
+        make_list [
+          M.call (|
+            M.get_name (| globals, "pop" |),
+            make_list [
+              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            ],
+            make_dict []
+          |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "exponent" ,
+      M.call (|
+        M.get_name (| globals, "Uint" |),
+        make_list [
+          M.call (|
+            M.get_name (| globals, "pop" |),
+            make_list [
+              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            ],
+            make_dict []
+          |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "exponent_bits" ,
+      M.call (|
+        M.get_field (| M.get_name (| globals, "exponent" |), "bit_length" |),
+        make_list [],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "exponent_bytes" ,
+      BinOp.floor_div (|
+        BinOp.add (|
+          M.get_name (| globals, "exponent_bits" |),
+          Constant.int 7
+        |),
+        Constant.int 8
+      |)
+    |) in
+    let _ := M.call (|
+    M.get_name (| globals, "charge_gas" |),
+    make_list [
+      M.get_name (| globals, "evm" |);
+      BinOp.add (|
+        M.get_name (| globals, "GAS_EXPONENTIATION" |),
+        BinOp.mult (|
+          M.get_name (| globals, "GAS_EXPONENTIATION_PER_BYTE" |),
+          M.get_name (| globals, "exponent_bytes" |)
+        |)
+      |)
+    ],
+    make_dict []
+  |) in
+    let _ := M.assign_local (|
+      "result" ,
+      M.call (|
+        M.get_name (| globals, "U256" |),
+        make_list [
+          M.call (|
+            M.get_name (| globals, "pow" |),
+            make_list [
+              M.get_name (| globals, "base" |);
+              M.get_name (| globals, "exponent" |);
+              M.get_name (| globals, "U256_CEIL_VALUE" |)
+            ],
+            make_dict []
+          |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.call (|
+    M.get_name (| globals, "push" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.get_name (| globals, "result" |)
+    ],
+    make_dict []
+  |) in
+    let _ := M.assign_op (|
+      BinOp.add,
+      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      Constant.int 1
+    |) in
+    M.pure Constant.None_)).
 
-Definition signextend (args : list Value.t) : M :=
-  match args with
-  | [evm] => ltac:(M.monadic (
-  let _ := (Value.String "
+Definition signextend : Value.t -> Value.t -> M :=
+  fun (args kwargs : Value.t) => ltac:(M.monadic (
+    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+    let _ := Constant.str "
     Sign extend operation. In other words, extend a signed number which
     fits in N bytes to 32 bytes.
 
@@ -344,28 +1057,164 @@ Definition signextend (args : list Value.t) : M :=
     evm :
         The current EVM frame.
 
-    ") in
-  let byte_num := (M.call (| pop, [evm.stack] |)) in
-  let value := (M.call (| pop, [evm.stack] |)) in
-  let _ := (M.call (| charge_gas, [evm; GAS_LOW] |)) in
-  let _ :=
-    if M.is_true (Compare.gt (| byte_num, (Value.Integer 31) |)) then
-      let result := value in
-    else
-      let value_bytes := (M.call (| bytes, [(M.call (| value.to_be_bytes32, [] |))] |)) in
-      let value_bytes := value_bytes[BinOp.sub (| (Value.Integer 31), (M.call (| int, [byte_num] |)) |):(* At stmt: unsupported node type: NoneType *)] in
-      let sign_bit := BinOp.r_shift (| value_bytes[(Value.Integer 0)], (Value.Integer 7) |) in
-      let _ :=
-        if M.is_true (Compare.eq (| sign_bit, (Value.Integer 0) |)) then
-          let result := (M.call (| U256.from_be_bytes, [value_bytes] |)) in
-        else
-          let num_bytes_prepend := BinOp.sub (| (Value.Integer 32), BinOp.add (| byte_num, (Value.Integer 1) |) |) in
-          let result := (M.call (| U256.from_be_bytes, [BinOp.add (| (M.call (| bytearray, [BinOp.mult (| [(Value.Integer 255)], num_bytes_prepend |)] |)), value_bytes |)] |)) in in in
-  let _ := (M.call (| push, [evm.stack; result] |)) in
-  let _ := M.assign_op (|
-    BinOp.add,
-    evm.pc,
-    (Value.Integer 1)
-  |) in))
-  | _ => M.impossible
-  end.
+    " in
+    let _ := M.assign_local (|
+      "byte_num" ,
+      M.call (|
+        M.get_name (| globals, "pop" |),
+        make_list [
+          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "value" ,
+      M.call (|
+        M.get_name (| globals, "pop" |),
+        make_list [
+          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+        ],
+        make_dict []
+      |)
+    |) in
+    let _ := M.call (|
+    M.get_name (| globals, "charge_gas" |),
+    make_list [
+      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, "GAS_LOW" |)
+    ],
+    make_dict []
+  |) in
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.gt (|
+          M.get_name (| globals, "byte_num" |),
+          Constant.int 31
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.assign_local (|
+          "result" ,
+          M.get_name (| globals, "value" |)
+        |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        let _ := M.assign_local (|
+          "value_bytes" ,
+          M.call (|
+            M.get_name (| globals, "bytes" |),
+            make_list [
+              M.call (|
+                M.get_field (| M.get_name (| globals, "value" |), "to_be_bytes32" |),
+                make_list [],
+                make_dict []
+              |)
+            ],
+            make_dict []
+          |)
+        |) in
+        let _ := M.assign_local (|
+          "value_bytes" ,
+          M.slice (|
+            M.get_name (| globals, "value_bytes" |),
+            BinOp.sub (|
+              Constant.int 31,
+              M.call (|
+                M.get_name (| globals, "int" |),
+                make_list [
+                  M.get_name (| globals, "byte_num" |)
+                ],
+                make_dict []
+              |)
+            |),
+            Constant.None_,
+            Constant.None_
+          |)
+        |) in
+        let _ := M.assign_local (|
+          "sign_bit" ,
+          BinOp.r_shift (|
+            M.get_subscript (|
+              M.get_name (| globals, "value_bytes" |),
+              Constant.int 0
+            |),
+            Constant.int 7
+          |)
+        |) in
+        let _ :=
+          (* if *)
+          M.if_then_else (|
+            Compare.eq (|
+              M.get_name (| globals, "sign_bit" |),
+              Constant.int 0
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let _ := M.assign_local (|
+              "result" ,
+              M.call (|
+                M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
+                make_list [
+                  M.get_name (| globals, "value_bytes" |)
+                ],
+                make_dict []
+              |)
+            |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
+            let _ := M.assign_local (|
+              "num_bytes_prepend" ,
+              BinOp.sub (|
+                Constant.int 32,
+                BinOp.add (|
+                  M.get_name (| globals, "byte_num" |),
+                  Constant.int 1
+                |)
+              |)
+            |) in
+            let _ := M.assign_local (|
+              "result" ,
+              M.call (|
+                M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
+                make_list [
+                  BinOp.add (|
+                    M.call (|
+                      M.get_name (| globals, "bytearray" |),
+                      make_list [
+                        BinOp.mult (|
+                          make_list [
+                            Constant.int 255
+                          ],
+                          M.get_name (| globals, "num_bytes_prepend" |)
+                        |)
+                      ],
+                      make_dict []
+                    |),
+                    M.get_name (| globals, "value_bytes" |)
+                  |)
+                ],
+                make_dict []
+              |)
+            |) in
+            M.pure Constant.None_
+          )) |) in
+        M.pure Constant.None_
+      )) |) in
+    let _ := M.call (|
+    M.get_name (| globals, "push" |),
+    make_list [
+      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.get_name (| globals, "result" |)
+    ],
+    make_dict []
+  |) in
+    let _ := M.assign_op (|
+      BinOp.add,
+      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      Constant.int 1
+    |) in
+    M.pure Constant.None_)).
