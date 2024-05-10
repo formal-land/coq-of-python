@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.byzantium.vm.instructions.system".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,95 +17,35 @@ Introduction
 Implementations of the EVM system related instructions.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes0 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes0".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes0"; "Uint" ].
 
-Require ethereum.utils.ensure.
-Axiom ethereum_utils_ensure_ensure :
-  IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
+Axiom ethereum_utils_ensure_imports :
+  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
 
-Require ethereum.byzantium.fork_types.
-Axiom ethereum_byzantium_fork_types_Address :
-  IsGlobalAlias globals ethereum.byzantium.fork_types.globals "Address".
+Axiom ethereum_byzantium_fork_types_imports :
+  AreImported globals "ethereum.byzantium.fork_types" [ "Address" ].
 
-Require ethereum.byzantium.state.
-Axiom ethereum_byzantium_state_account_exists_and_is_empty :
-  IsGlobalAlias globals ethereum.byzantium.state.globals "account_exists_and_is_empty".
-Axiom ethereum_byzantium_state_account_has_code_or_nonce :
-  IsGlobalAlias globals ethereum.byzantium.state.globals "account_has_code_or_nonce".
-Axiom ethereum_byzantium_state_get_account :
-  IsGlobalAlias globals ethereum.byzantium.state.globals "get_account".
-Axiom ethereum_byzantium_state_increment_nonce :
-  IsGlobalAlias globals ethereum.byzantium.state.globals "increment_nonce".
-Axiom ethereum_byzantium_state_is_account_alive :
-  IsGlobalAlias globals ethereum.byzantium.state.globals "is_account_alive".
-Axiom ethereum_byzantium_state_set_account_balance :
-  IsGlobalAlias globals ethereum.byzantium.state.globals "set_account_balance".
+Axiom ethereum_byzantium_state_imports :
+  AreImported globals "ethereum.byzantium.state" [ "account_exists_and_is_empty"; "account_has_code_or_nonce"; "get_account"; "increment_nonce"; "is_account_alive"; "set_account_balance" ].
 
-Require ethereum.byzantium.utils.address.
-Axiom ethereum_byzantium_utils_address_compute_contract_address :
-  IsGlobalAlias globals ethereum.byzantium.utils.address.globals "compute_contract_address".
-Axiom ethereum_byzantium_utils_address_to_address :
-  IsGlobalAlias globals ethereum.byzantium.utils.address.globals "to_address".
+Axiom ethereum_byzantium_utils_address_imports :
+  AreImported globals "ethereum.byzantium.utils.address" [ "compute_contract_address"; "to_address" ].
 
-Require ethereum.byzantium.vm.__init__.
-Axiom ethereum_byzantium_vm___init___Evm :
-  IsGlobalAlias globals ethereum.byzantium.vm.__init__.globals "Evm".
-Axiom ethereum_byzantium_vm___init___Message :
-  IsGlobalAlias globals ethereum.byzantium.vm.__init__.globals "Message".
-Axiom ethereum_byzantium_vm___init___incorporate_child_on_error :
-  IsGlobalAlias globals ethereum.byzantium.vm.__init__.globals "incorporate_child_on_error".
-Axiom ethereum_byzantium_vm___init___incorporate_child_on_success :
-  IsGlobalAlias globals ethereum.byzantium.vm.__init__.globals "incorporate_child_on_success".
+Axiom ethereum_byzantium_vm_imports :
+  AreImported globals "ethereum.byzantium.vm" [ "Evm"; "Message"; "incorporate_child_on_error"; "incorporate_child_on_success" ].
 
-Require ethereum.byzantium.vm.exceptions.
-Axiom ethereum_byzantium_vm_exceptions_Revert :
-  IsGlobalAlias globals ethereum.byzantium.vm.exceptions.globals "Revert".
-Axiom ethereum_byzantium_vm_exceptions_WriteInStaticContext :
-  IsGlobalAlias globals ethereum.byzantium.vm.exceptions.globals "WriteInStaticContext".
+Axiom ethereum_byzantium_vm_exceptions_imports :
+  AreImported globals "ethereum.byzantium.vm.exceptions" [ "Revert"; "WriteInStaticContext" ].
 
-Require ethereum.byzantium.vm.gas.
-Axiom ethereum_byzantium_vm_gas_GAS_CALL :
-  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_CALL".
-Axiom ethereum_byzantium_vm_gas_GAS_CALL_VALUE :
-  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_CALL_VALUE".
-Axiom ethereum_byzantium_vm_gas_GAS_CREATE :
-  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_CREATE".
-Axiom ethereum_byzantium_vm_gas_GAS_NEW_ACCOUNT :
-  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_NEW_ACCOUNT".
-Axiom ethereum_byzantium_vm_gas_GAS_SELF_DESTRUCT :
-  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_SELF_DESTRUCT".
-Axiom ethereum_byzantium_vm_gas_GAS_SELF_DESTRUCT_NEW_ACCOUNT :
-  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_SELF_DESTRUCT_NEW_ACCOUNT".
-Axiom ethereum_byzantium_vm_gas_GAS_ZERO :
-  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_ZERO".
-Axiom ethereum_byzantium_vm_gas_REFUND_SELF_DESTRUCT :
-  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "REFUND_SELF_DESTRUCT".
-Axiom ethereum_byzantium_vm_gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "calculate_gas_extend_memory".
-Axiom ethereum_byzantium_vm_gas_calculate_message_call_gas :
-  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "calculate_message_call_gas".
-Axiom ethereum_byzantium_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "charge_gas".
-Axiom ethereum_byzantium_vm_gas_max_message_call_gas :
-  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "max_message_call_gas".
+Axiom ethereum_byzantium_vm_gas_imports :
+  AreImported globals "ethereum.byzantium.vm.gas" [ "GAS_CALL"; "GAS_CALL_VALUE"; "GAS_CREATE"; "GAS_NEW_ACCOUNT"; "GAS_SELF_DESTRUCT"; "GAS_SELF_DESTRUCT_NEW_ACCOUNT"; "GAS_ZERO"; "REFUND_SELF_DESTRUCT"; "calculate_gas_extend_memory"; "calculate_message_call_gas"; "charge_gas"; "max_message_call_gas" ].
 
-Require ethereum.byzantium.vm.memory.
-Axiom ethereum_byzantium_vm_memory_memory_read_bytes :
-  IsGlobalAlias globals ethereum.byzantium.vm.memory.globals "memory_read_bytes".
-Axiom ethereum_byzantium_vm_memory_memory_write :
-  IsGlobalAlias globals ethereum.byzantium.vm.memory.globals "memory_write".
+Axiom ethereum_byzantium_vm_memory_imports :
+  AreImported globals "ethereum.byzantium.vm.memory" [ "memory_read_bytes"; "memory_write" ].
 
-Require ethereum.byzantium.vm.stack.
-Axiom ethereum_byzantium_vm_stack_pop :
-  IsGlobalAlias globals ethereum.byzantium.vm.stack.globals "pop".
-Axiom ethereum_byzantium_vm_stack_push :
-  IsGlobalAlias globals ethereum.byzantium.vm.stack.globals "push".
+Axiom ethereum_byzantium_vm_stack_imports :
+  AreImported globals "ethereum.byzantium.vm.stack" [ "pop"; "push" ].
 
 Definition create : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -687,7 +627,12 @@ Definition generic_call : Value.t -> Value.t -> M :=
     make_list [
       M.get_field (| M.get_name (| globals, "evm" |), "memory" |);
       M.get_name (| globals, "memory_output_start_position" |);
-      M.get_subscript (| M.get_field (| M.get_name (| globals, "child_evm" |), "output" |), M.slice (| Constant.None_, M.get_name (| globals, "actual_output_size" |) |) |)
+      M.slice (|
+        M.get_field (| M.get_name (| globals, "child_evm" |), "output" |),
+        Constant.None_,
+        M.get_name (| globals, "actual_output_size" |),
+        Constant.None_
+      |)
     ],
     make_dict []
   |) in
@@ -1265,20 +1210,28 @@ Definition selfdestruct : Value.t -> Value.t -> M :=
       M.get_field (| M.get_name (| globals, "evm" |), "accounts_to_delete" |) in
     let parent_evm :=
       M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "parent_evm" |) in
-    While Compare.is_not (|
-    M.get_name (| globals, "parent_evm" |),
-    Constant.None_
-  |) do
-      let _ := M.call (|
+    let _ :=
+      M.while (|
+        Compare.is_not (|
+      M.get_name (| globals, "parent_evm" |),
+      Constant.None_
+    |),
+        ltac:(M.monadic (
+          let _ := M.call (|
     M.get_field (| M.get_name (| globals, "refunded_accounts" |), "update" |),
     make_list [
       M.get_field (| M.get_name (| globals, "parent_evm" |), "accounts_to_delete" |)
     ],
     make_dict []
   |) in
-      let parent_evm :=
-        M.get_field (| M.get_field (| M.get_name (| globals, "parent_evm" |), "message" |), "parent_evm" |) in
-    EndWhile.
+          let parent_evm :=
+            M.get_field (| M.get_field (| M.get_name (| globals, "parent_evm" |), "message" |), "parent_evm" |) in
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -1780,6 +1733,6 @@ Definition revert : Value.t -> Value.t -> M :=
         make_dict []
       |)
     |) in
-    let _ := M.raise (| Some(M.get_name (| globals, "Revert" |)) |) in
+    let _ := M.raise (| Some (M.get_name (| globals, "Revert" |)) |) in
     let _ := M.pass (| |) in
     M.pure Constant.None_)).

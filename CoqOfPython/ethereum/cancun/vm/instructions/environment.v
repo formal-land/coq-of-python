@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.cancun.vm.instructions.environment".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,81 +17,41 @@ Introduction
 Implementations of the EVM environment related instructions.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes32 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes32".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes32"; "Uint" ].
 
-Require ethereum.crypto.hash.
-Axiom ethereum_crypto_hash_keccak256 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "keccak256".
+Axiom ethereum_crypto_hash_imports :
+  AreImported globals "ethereum.crypto.hash" [ "keccak256" ].
 
-Require ethereum.utils.ensure.
-Axiom ethereum_utils_ensure_ensure :
-  IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
+Axiom ethereum_utils_ensure_imports :
+  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
 
-Require ethereum.utils.numeric.
-Axiom ethereum_utils_numeric_ceil32 :
-  IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
+Axiom ethereum_utils_numeric_imports :
+  AreImported globals "ethereum.utils.numeric" [ "ceil32" ].
 
-Require ethereum.cancun.fork_types.
-Axiom ethereum_cancun_fork_types_EMPTY_ACCOUNT :
-  IsGlobalAlias globals ethereum.cancun.fork_types.globals "EMPTY_ACCOUNT".
+Axiom ethereum_cancun_fork_types_imports :
+  AreImported globals "ethereum.cancun.fork_types" [ "EMPTY_ACCOUNT" ].
 
-Require ethereum.cancun.state.
-Axiom ethereum_cancun_state_get_account :
-  IsGlobalAlias globals ethereum.cancun.state.globals "get_account".
+Axiom ethereum_cancun_state_imports :
+  AreImported globals "ethereum.cancun.state" [ "get_account" ].
 
-Require ethereum.cancun.utils.address.
-Axiom ethereum_cancun_utils_address_to_address :
-  IsGlobalAlias globals ethereum.cancun.utils.address.globals "to_address".
+Axiom ethereum_cancun_utils_address_imports :
+  AreImported globals "ethereum.cancun.utils.address" [ "to_address" ].
 
-Require ethereum.cancun.vm.memory.
-Axiom ethereum_cancun_vm_memory_buffer_read :
-  IsGlobalAlias globals ethereum.cancun.vm.memory.globals "buffer_read".
-Axiom ethereum_cancun_vm_memory_memory_write :
-  IsGlobalAlias globals ethereum.cancun.vm.memory.globals "memory_write".
+Axiom ethereum_cancun_vm_memory_imports :
+  AreImported globals "ethereum.cancun.vm.memory" [ "buffer_read"; "memory_write" ].
 
-Require ethereum.cancun.vm.__init__.
-Axiom ethereum_cancun_vm___init___Evm :
-  IsGlobalAlias globals ethereum.cancun.vm.__init__.globals "Evm".
+Axiom ethereum_cancun_vm_imports :
+  AreImported globals "ethereum.cancun.vm" [ "Evm" ].
 
-Require ethereum.cancun.vm.exceptions.
-Axiom ethereum_cancun_vm_exceptions_OutOfBoundsRead :
-  IsGlobalAlias globals ethereum.cancun.vm.exceptions.globals "OutOfBoundsRead".
+Axiom ethereum_cancun_vm_exceptions_imports :
+  AreImported globals "ethereum.cancun.vm.exceptions" [ "OutOfBoundsRead" ].
 
-Require ethereum.cancun.vm.gas.
-Axiom ethereum_cancun_vm_gas_GAS_BASE :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_BASE".
-Axiom ethereum_cancun_vm_gas_GAS_BLOBHASH_OPCODE :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_BLOBHASH_OPCODE".
-Axiom ethereum_cancun_vm_gas_GAS_COLD_ACCOUNT_ACCESS :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_COLD_ACCOUNT_ACCESS".
-Axiom ethereum_cancun_vm_gas_GAS_COPY :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_COPY".
-Axiom ethereum_cancun_vm_gas_GAS_FAST_STEP :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_FAST_STEP".
-Axiom ethereum_cancun_vm_gas_GAS_RETURN_DATA_COPY :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_RETURN_DATA_COPY".
-Axiom ethereum_cancun_vm_gas_GAS_VERY_LOW :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_VERY_LOW".
-Axiom ethereum_cancun_vm_gas_GAS_WARM_ACCESS :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_WARM_ACCESS".
-Axiom ethereum_cancun_vm_gas_calculate_blob_gas_price :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "calculate_blob_gas_price".
-Axiom ethereum_cancun_vm_gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "calculate_gas_extend_memory".
-Axiom ethereum_cancun_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "charge_gas".
+Axiom ethereum_cancun_vm_gas_imports :
+  AreImported globals "ethereum.cancun.vm.gas" [ "GAS_BASE"; "GAS_BLOBHASH_OPCODE"; "GAS_COLD_ACCOUNT_ACCESS"; "GAS_COPY"; "GAS_FAST_STEP"; "GAS_RETURN_DATA_COPY"; "GAS_VERY_LOW"; "GAS_WARM_ACCESS"; "calculate_blob_gas_price"; "calculate_gas_extend_memory"; "charge_gas" ].
 
-Require ethereum.cancun.vm.stack.
-Axiom ethereum_cancun_vm_stack_pop :
-  IsGlobalAlias globals ethereum.cancun.vm.stack.globals "pop".
-Axiom ethereum_cancun_vm_stack_push :
-  IsGlobalAlias globals ethereum.cancun.vm.stack.globals "push".
+Axiom ethereum_cancun_vm_stack_imports :
+  AreImported globals "ethereum.cancun.vm.stack" [ "pop"; "push" ].
 
 Definition address : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -164,7 +124,7 @@ Definition balance : Value.t -> Value.t -> M :=
     let _ :=
       (* if *)
       M.if_then_else (|
-        Compare.in (|
+        Compare.in_ (|
           M.get_name (| globals, "address" |),
           M.get_field (| M.get_name (| globals, "evm" |), "accessed_addresses" |)
         |),
@@ -816,7 +776,7 @@ Definition extcodesize : Value.t -> Value.t -> M :=
     let _ :=
       (* if *)
       M.if_then_else (|
-        Compare.in (|
+        Compare.in_ (|
           M.get_name (| globals, "address" |),
           M.get_field (| M.get_name (| globals, "evm" |), "accessed_addresses" |)
         |),
@@ -972,7 +932,7 @@ Definition extcodecopy : Value.t -> Value.t -> M :=
     let _ :=
       (* if *)
       M.if_then_else (|
-        Compare.in (|
+        Compare.in_ (|
           M.get_name (| globals, "address" |),
           M.get_field (| M.get_name (| globals, "evm" |), "accessed_addresses" |)
         |),
@@ -1231,10 +1191,15 @@ Definition returndatacopy : Value.t -> Value.t -> M :=
   |)
     |) in
     let value :=
-      M.get_subscript (| M.get_field (| M.get_name (| globals, "evm" |), "return_data" |), M.slice (| M.get_name (| globals, "return_data_start_position" |), BinOp.add (|
+      M.slice (|
+        M.get_field (| M.get_name (| globals, "evm" |), "return_data" |),
         M.get_name (| globals, "return_data_start_position" |),
-        M.get_name (| globals, "size" |)
-      |) |) |) in
+        BinOp.add (|
+          M.get_name (| globals, "return_data_start_position" |),
+          M.get_name (| globals, "size" |)
+        |),
+        Constant.None_
+      |) in
     let _ := M.call (|
     M.get_name (| globals, "memory_write" |),
     make_list [
@@ -1278,7 +1243,7 @@ Definition extcodehash : Value.t -> Value.t -> M :=
     let _ :=
       (* if *)
       M.if_then_else (|
-        Compare.in (|
+        Compare.in_ (|
           M.get_name (| globals, "address" |),
           M.get_field (| M.get_name (| globals, "evm" |), "accessed_addresses" |)
         |),
@@ -1503,7 +1468,10 @@ Definition blob_hash : Value.t -> Value.t -> M :=
       (* then *)
       ltac:(M.monadic (
         let blob_hash :=
-          M.get_subscript (| M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "blob_versioned_hashes" |), M.get_name (| globals, "index" |) |) in
+          M.get_subscript (|
+            M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "blob_versioned_hashes" |),
+            M.get_name (| globals, "index" |)
+          |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (

@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.genesis".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -22,49 +22,20 @@ different chains.
 
 (* At top_level_stmt: unsupported node type: Import *)
 
-Require dataclasses.
-Axiom dataclasses_dataclass :
-  IsGlobalAlias globals dataclasses.globals "dataclass".
+Axiom dataclasses_imports :
+  AreImported globals "dataclasses" [ "dataclass" ].
 
-Require typing.
-Axiom typing_Any :
-  IsGlobalAlias globals typing.globals "Any".
-Axiom typing_Dict :
-  IsGlobalAlias globals typing.globals "Dict".
-Axiom typing_cast :
-  IsGlobalAlias globals typing.globals "cast".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Any"; "Dict"; "cast" ].
 
-Require ethereum.__init__.
-Axiom ethereum___init___rlp :
-  IsGlobalAlias globals ethereum.__init__.globals "rlp".
+Axiom ethereum_imports :
+  AreImported globals "ethereum" [ "rlp" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U64 :
-  IsGlobalAlias globals ethereum.base_types.globals "U64".
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Bytes8 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes8".
-Axiom ethereum_base_types_Bytes20 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes20".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
-Axiom ethereum_base_types_slotted_freezable :
-  IsGlobalAlias globals ethereum.base_types.globals "slotted_freezable".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U64"; "U256"; "Bytes"; "Bytes8"; "Bytes20"; "Uint"; "slotted_freezable" ].
 
-Require ethereum.utils.hexadecimal.
-Axiom ethereum_utils_hexadecimal_hex_to_bytes :
-  IsGlobalAlias globals ethereum.utils.hexadecimal.globals "hex_to_bytes".
-Axiom ethereum_utils_hexadecimal_hex_to_bytes8 :
-  IsGlobalAlias globals ethereum.utils.hexadecimal.globals "hex_to_bytes8".
-Axiom ethereum_utils_hexadecimal_hex_to_bytes32 :
-  IsGlobalAlias globals ethereum.utils.hexadecimal.globals "hex_to_bytes32".
-Axiom ethereum_utils_hexadecimal_hex_to_u256 :
-  IsGlobalAlias globals ethereum.utils.hexadecimal.globals "hex_to_u256".
-Axiom ethereum_utils_hexadecimal_hex_to_uint :
-  IsGlobalAlias globals ethereum.utils.hexadecimal.globals "hex_to_uint".
+Axiom ethereum_utils_hexadecimal_imports :
+  AreImported globals "ethereum.utils.hexadecimal" [ "hex_to_bytes"; "hex_to_bytes8"; "hex_to_bytes32"; "hex_to_u256"; "hex_to_uint" ].
 
 Definition Address : Value.t := M.run ltac:(M.monadic (
   M.get_name (| globals, "Bytes20" |)
@@ -233,20 +204,24 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
     genesis :
         The genesis configuration to use.
     " in
-    For make_tuple [ M.get_name (| globals, "address" |); M.get_name (| globals, "account" |) ] in M.call (|
-    M.get_field (| M.get_field (| M.get_name (| globals, "genesis" |), "initial_accounts" |), "items" |),
-    make_list [],
-    make_dict []
-  |) do
-      let address :=
+    let _ :=
+      M.for_ (|
+        make_tuple [ M.get_name (| globals, "address" |); M.get_name (| globals, "account" |) ],
         M.call (|
-          M.get_field (| M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "utils" |), "hexadecimal" |), "hex_to_address" |),
-          make_list [
-            M.get_name (| globals, "address" |)
-          ],
-          make_dict []
-        |) in
-      let _ := M.call (|
+      M.get_field (| M.get_field (| M.get_name (| globals, "genesis" |), "initial_accounts" |), "items" |),
+      make_list [],
+      make_dict []
+    |),
+        ltac:(M.monadic (
+          let address :=
+            M.call (|
+              M.get_field (| M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "utils" |), "hexadecimal" |), "hex_to_address" |),
+              make_list [
+                M.get_name (| globals, "address" |)
+              ],
+              make_dict []
+            |) in
+          let _ := M.call (|
     M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "state" |), "set_account" |),
     make_list [
       M.get_field (| M.get_name (| globals, "chain" |), "state" |);
@@ -308,19 +283,23 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-      For make_tuple [ M.get_name (| globals, "key" |); M.get_name (| globals, "value" |) ] in M.call (|
-    M.get_field (| M.call (|
-      M.get_field (| M.get_name (| globals, "account" |), "get" |),
-      make_list [
-        Constant.str "storage";
-        {}
-      ],
+          let _ :=
+            M.for_ (|
+              make_tuple [ M.get_name (| globals, "key" |); M.get_name (| globals, "value" |) ],
+              M.call (|
+      M.get_field (| M.call (|
+        M.get_field (| M.get_name (| globals, "account" |), "get" |),
+        make_list [
+          Constant.str "storage";
+          {}
+        ],
+        make_dict []
+      |), "items" |),
+      make_list [],
       make_dict []
-    |), "items" |),
-    make_list [],
-    make_dict []
-  |) do
-        let _ := M.call (|
+    |),
+              ltac:(M.monadic (
+                let _ := M.call (|
     M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "state" |), "set_storage" |),
     make_list [
       M.get_field (| M.get_name (| globals, "chain" |), "state" |);
@@ -342,8 +321,18 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-      EndFor.
-    EndFor.
+                M.pure Constant.None_
+              )),
+              ltac:(M.monadic (
+                M.pure Constant.None_
+              ))
+          |) in
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let fields :=
       {Constant.str "parent_hash": M.call (|
         M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "fork_types" |), "Hash32" |),
@@ -437,7 +426,10 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
       (* then *)
       ltac:(M.monadic (
         let _ := M.assign (|
-          M.get_subscript (| M.get_name (| globals, "fields" |), Constant.str "mix_digest" |),
+          M.get_subscript (|
+            M.get_name (| globals, "fields" |),
+            Constant.str "mix_digest"
+          |),
           M.call (|
             M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "fork_types" |), "Hash32" |),
             make_list [
@@ -453,7 +445,10 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
       (* else *)
       )), ltac:(M.monadic (
         let _ := M.assign (|
-          M.get_subscript (| M.get_name (| globals, "fields" |), Constant.str "prev_randao" |),
+          M.get_subscript (|
+            M.get_name (| globals, "fields" |),
+            Constant.str "prev_randao"
+          |),
           M.call (|
             M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "fork_types" |), "Hash32" |),
             make_list [
@@ -481,7 +476,10 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
       (* then *)
       ltac:(M.monadic (
         let _ := M.assign (|
-          M.get_subscript (| M.get_name (| globals, "fields" |), Constant.str "base_fee_per_gas" |),
+          M.get_subscript (|
+            M.get_name (| globals, "fields" |),
+            Constant.str "base_fee_per_gas"
+          |),
           M.call (|
             M.get_name (| globals, "Uint" |),
             make_list [

@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.byzantium.vm.__init__".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -18,53 +18,29 @@ The abstract computer which runs the code stored in an
 `.fork_types.Account`.
 ".
 
-Require dataclasses.
-Axiom dataclasses_dataclass :
-  IsGlobalAlias globals dataclasses.globals "dataclass".
+Axiom dataclasses_imports :
+  AreImported globals "dataclasses" [ "dataclass" ].
 
-Require typing.
-Axiom typing_List :
-  IsGlobalAlias globals typing.globals "List".
-Axiom typing_Optional :
-  IsGlobalAlias globals typing.globals "Optional".
-Axiom typing_Set_ :
-  IsGlobalAlias globals typing.globals "Set_".
-Axiom typing_Tuple :
-  IsGlobalAlias globals typing.globals "Tuple".
-Axiom typing_Union :
-  IsGlobalAlias globals typing.globals "Union".
+Axiom typing_imports :
+  AreImported globals "typing" [ "List"; "Optional"; "Set"; "Tuple"; "Union" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Bytes0 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes0".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Bytes0"; "Uint" ].
 
-Require ethereum.crypto.hash.
-Axiom ethereum_crypto_hash_Hash32 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "Hash32".
+Axiom ethereum_crypto_hash_imports :
+  AreImported globals "ethereum.crypto.hash" [ "Hash32" ].
 
-Require ethereum.byzantium.blocks.
-Axiom ethereum_byzantium_blocks_Log :
-  IsGlobalAlias globals ethereum.byzantium.blocks.globals "Log".
+Axiom ethereum_byzantium_blocks_imports :
+  AreImported globals "ethereum.byzantium.blocks" [ "Log" ].
 
-Require ethereum.byzantium.fork_types.
-Axiom ethereum_byzantium_fork_types_Address :
-  IsGlobalAlias globals ethereum.byzantium.fork_types.globals "Address".
+Axiom ethereum_byzantium_fork_types_imports :
+  AreImported globals "ethereum.byzantium.fork_types" [ "Address" ].
 
-Require ethereum.byzantium.state.
-Axiom ethereum_byzantium_state_State :
-  IsGlobalAlias globals ethereum.byzantium.state.globals "State".
-Axiom ethereum_byzantium_state_account_exists_and_is_empty :
-  IsGlobalAlias globals ethereum.byzantium.state.globals "account_exists_and_is_empty".
+Axiom ethereum_byzantium_state_imports :
+  AreImported globals "ethereum.byzantium.state" [ "State"; "account_exists_and_is_empty" ].
 
-Require ethereum.byzantium.vm.precompiled_contracts.__init__.
-Axiom ethereum_byzantium_vm_precompiled_contracts___init___RIPEMD160_ADDRESS :
-  IsGlobalAlias globals ethereum.byzantium.vm.precompiled_contracts.__init__.globals "RIPEMD160_ADDRESS".
+Axiom ethereum_byzantium_vm_precompiled_contracts_imports :
+  AreImported globals "ethereum.byzantium.vm.precompiled_contracts" [ "RIPEMD160_ADDRESS" ].
 
 Definition __all__ : Value.t := M.run ltac:(M.monadic (
   make_tuple [ Constant.str "Environment"; Constant.str "Evm"; Constant.str "Message" ]
@@ -185,7 +161,7 @@ Definition incorporate_child_on_error : Value.t -> Value.t -> M :=
     let _ :=
       (* if *)
       M.if_then_else (|
-        Compare.in (|
+        Compare.in_ (|
           M.get_name (| globals, "RIPEMD160_ADDRESS" |),
           M.get_field (| M.get_name (| globals, "child_evm" |), "touched_accounts" |)
         |),

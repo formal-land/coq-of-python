@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.spurious_dragon.utils.__init__".
 
 Definition expr_1 : Value.t :=
   Constant.str "

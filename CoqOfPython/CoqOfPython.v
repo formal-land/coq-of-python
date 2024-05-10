@@ -31,7 +31,7 @@ Module Data.
   | Dict (dict : list (string * Value))
   | Closure {Value M : Set} (f : Value -> Value -> M)
   | Klass {Value M : Set}
-    (bases : list (Set * string))
+    (bases : list (string * string))
     (class_methods : list (string * (Value -> Value -> M)))
     (methods : list (string * (Value -> Value -> M))).
   Arguments Bool {_}.
@@ -71,17 +71,14 @@ End Pointer.
 
 Module Value.
   Inductive t : Set :=
-  | Make (globals : Set) (klass : string) (value : Pointer.t t).
+  | Make (globals : string) (klass : string) (value : Pointer.t t).
 End Value.
 
 Parameter M : Set.
 
-Parameter IsInGlobals : Set -> Value.t -> string -> Prop.
+Parameter IsInGlobals : string -> Value.t -> string -> Prop.
 
-Definition IsGlobalAlias (globals required_globals : Set) (name : string) : Prop :=
-  forall (value : Value.t),
-    IsInGlobals required_globals value name ->
-    IsInGlobals globals value name.
+Parameter AreImported : string -> string -> list string -> Prop.
 
 Module M.
   Parameter pure : Value.t -> M.
@@ -95,21 +92,37 @@ Module M.
   (** For the `x[i]` syntax. *)
   Parameter get_subscript : Value.t -> Value.t -> M.
 
-  Parameter get_name : Set -> string -> M.
+  Parameter slice : Value.t -> Value.t -> Value.t -> Value.t -> M.
+
+  Parameter get_name : string -> string -> M.
 
   Parameter set_locals : Value.t -> Value.t -> list string -> M.
 
   Parameter assign : Value.t -> Value.t -> M.
 
+  Parameter assign_op : (Value.t -> Value.t -> M) -> Value.t -> Value.t -> M.
+
+  Parameter delete : Value.t -> M.
+
   Parameter return_ : Value.t -> M.
 
-  Parameter raise : Value.t -> M.
+  Parameter pass : M.
+
+  Parameter break : M.
+
+  Parameter continue : M.
+
+  Parameter raise : option Value.t -> M.
 
   Parameter assert : Value.t -> M.
 
   Parameter impossible : M.
 
   Parameter if_then_else : Value.t -> M -> M -> M.
+
+  Parameter for_ : Value.t -> Value.t -> M -> M -> M.
+
+  Parameter while : Value.t -> M -> M -> M.
 
   Parameter run : M -> Value.t.
 
@@ -118,7 +131,7 @@ Module M.
       (run ((.. (e e1) ..) en))
       (at level 100).
 
-    Notation "e (||)" :=
+    Notation "e (| |)" :=
       (run e)
       (at level 100).
   End Notations.
@@ -168,7 +181,7 @@ End M.
 
 Export M.Notations.
 
-Parameter Inherit : Set -> Set -> Prop.
+Parameter Inherit : string -> string -> Prop.
 
 Module BoolOp.
   Parameter and : Value.t -> M -> M.
@@ -183,7 +196,7 @@ Module BinOp.
 
   Parameter mult : Value.t -> Value.t -> M.
 
-  Parameter matmult : Value.t -> Value.t -> M.
+  Parameter mat_mult : Value.t -> Value.t -> M.
 
   Parameter div : Value.t -> Value.t -> M.
 
@@ -191,9 +204,9 @@ Module BinOp.
 
   Parameter pow : Value.t -> Value.t -> M.
 
-  Parameter lshift : Value.t -> Value.t -> M.
+  Parameter l_shift : Value.t -> Value.t -> M.
 
-  Parameter rshift : Value.t -> Value.t -> M.
+  Parameter r_shift : Value.t -> Value.t -> M.
 
   Parameter bit_or : Value.t -> Value.t -> M.
 
@@ -238,10 +251,10 @@ End Compare.
 
 (** ** Builtins *)
 Module builtins.
-  Inductive globals : Set :=.
+  Definition globals : string := "builtins".
 
   Definition make_klass
-    (bases : list (Set * string))
+    (bases : list (string * string))
     (class_methods : list (string * (Value.t -> Value.t -> M)))
     (methods : list (string * (Value.t -> Value.t -> M))) :
     Value.t :=
@@ -277,6 +290,9 @@ Module Constant.
 
   Definition str (s : string) : Value.t :=
     Value.Make builtins.globals "str" (Pointer.Imm (Object.wrapper (Data.String s))).
+
+  Definition bytes (b : string) : Value.t :=
+    Value.Make builtins.globals "bytes" (Pointer.Imm (Object.wrapper (Data.String b))).
 End Constant.
 
 Definition make_tuple (items : list Value.t) : Value.t :=

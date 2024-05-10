@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.utils.safe_arithmetic".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,19 +17,11 @@ Introduction
 Safe arithmetic utility functions for U256 integer type.
 ".
 
-Require typing.
-Axiom typing_Optional :
-  IsGlobalAlias globals typing.globals "Optional".
-Axiom typing_Type_ :
-  IsGlobalAlias globals typing.globals "Type_".
-Axiom typing_Union :
-  IsGlobalAlias globals typing.globals "Union".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Optional"; "Type"; "Union" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Uint" ].
 
 Definition u256_safe_add : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -91,6 +83,9 @@ Definition u256_safe_multiply : Value.t -> Value.t -> M :=
         else `exception_type` is raised.
     " in
     let result :=
-      M.get_subscript (| M.get_name (| globals, "numbers" |), Constant.int 0 |) in
+      M.get_subscript (|
+        M.get_name (| globals, "numbers" |),
+        Constant.int 0
+      |) in
 (* At stmt: unsupported node type: Try *)
     M.pure Constant.None_)).

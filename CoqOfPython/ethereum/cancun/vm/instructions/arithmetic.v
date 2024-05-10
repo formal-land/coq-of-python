@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.cancun.vm.instructions.arithmetic".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,43 +17,20 @@ Introduction
 Implementations of the EVM Arithmetic instructions.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U255_CEIL_VALUE :
-  IsGlobalAlias globals ethereum.base_types.globals "U255_CEIL_VALUE".
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_U256_CEIL_VALUE :
-  IsGlobalAlias globals ethereum.base_types.globals "U256_CEIL_VALUE".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U255_CEIL_VALUE"; "U256"; "U256_CEIL_VALUE"; "Uint" ].
 
-Require ethereum.utils.numeric.
-Axiom ethereum_utils_numeric_get_sign :
-  IsGlobalAlias globals ethereum.utils.numeric.globals "get_sign".
+Axiom ethereum_utils_numeric_imports :
+  AreImported globals "ethereum.utils.numeric" [ "get_sign" ].
 
-Require ethereum.cancun.vm.__init__.
-Axiom ethereum_cancun_vm___init___Evm :
-  IsGlobalAlias globals ethereum.cancun.vm.__init__.globals "Evm".
+Axiom ethereum_cancun_vm_imports :
+  AreImported globals "ethereum.cancun.vm" [ "Evm" ].
 
-Require ethereum.cancun.vm.gas.
-Axiom ethereum_cancun_vm_gas_GAS_EXPONENTIATION :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_EXPONENTIATION".
-Axiom ethereum_cancun_vm_gas_GAS_EXPONENTIATION_PER_BYTE :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_EXPONENTIATION_PER_BYTE".
-Axiom ethereum_cancun_vm_gas_GAS_LOW :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_LOW".
-Axiom ethereum_cancun_vm_gas_GAS_MID :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_MID".
-Axiom ethereum_cancun_vm_gas_GAS_VERY_LOW :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_VERY_LOW".
-Axiom ethereum_cancun_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "charge_gas".
+Axiom ethereum_cancun_vm_gas_imports :
+  AreImported globals "ethereum.cancun.vm.gas" [ "GAS_EXPONENTIATION"; "GAS_EXPONENTIATION_PER_BYTE"; "GAS_LOW"; "GAS_MID"; "GAS_VERY_LOW"; "charge_gas" ].
 
-Require ethereum.cancun.vm.stack.
-Axiom ethereum_cancun_vm_stack_pop :
-  IsGlobalAlias globals ethereum.cancun.vm.stack.globals "pop".
-Axiom ethereum_cancun_vm_stack_push :
-  IsGlobalAlias globals ethereum.cancun.vm.stack.globals "push".
+Axiom ethereum_cancun_vm_stack_imports :
+  AreImported globals "ethereum.cancun.vm.stack" [ "pop"; "push" ].
 
 Definition add : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -1030,19 +1007,27 @@ Definition signextend : Value.t -> Value.t -> M :=
             make_dict []
           |) in
         let value_bytes :=
-          M.get_subscript (| M.get_name (| globals, "value_bytes" |), M.slice (| BinOp.sub (|
-            Constant.int 31,
-            M.call (|
-              M.get_name (| globals, "int" |),
-              make_list [
-                M.get_name (| globals, "byte_num" |)
-              ],
-              make_dict []
-            |)
-          |), Constant.None_ |) |) in
+          M.slice (|
+            M.get_name (| globals, "value_bytes" |),
+            BinOp.sub (|
+              Constant.int 31,
+              M.call (|
+                M.get_name (| globals, "int" |),
+                make_list [
+                  M.get_name (| globals, "byte_num" |)
+                ],
+                make_dict []
+              |)
+            |),
+            Constant.None_,
+            Constant.None_
+          |) in
         let sign_bit :=
           BinOp.r_shift (|
-            M.get_subscript (| M.get_name (| globals, "value_bytes" |), Constant.int 0 |),
+            M.get_subscript (|
+              M.get_name (| globals, "value_bytes" |),
+              Constant.int 0
+            |),
             Constant.int 7
           |) in
         let _ :=

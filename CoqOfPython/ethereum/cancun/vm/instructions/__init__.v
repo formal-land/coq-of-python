@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.cancun.vm.instructions.__init__".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -20,59 +20,44 @@ implementations.
 
 (* At top_level_stmt: unsupported node type: Import *)
 
-Require typing.
-Axiom typing_Callable :
-  IsGlobalAlias globals typing.globals "Callable".
-Axiom typing_Dict :
-  IsGlobalAlias globals typing.globals "Dict".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Callable"; "Dict" ].
 
-Require ethereum.cancun.vm.instructions.__init__.
-Axiom ethereum_cancun_vm_instructions___init___arithmetic :
-  IsGlobalAlias globals ethereum.cancun.vm.instructions.__init__.globals "arithmetic".
+Axiom ethereum_cancun_vm_instructions_imports :
+  AreImported globals "ethereum.cancun.vm.instructions" [ "arithmetic" ].
 
-Require ethereum.cancun.vm.instructions.__init__.
-Axiom ethereum_cancun_vm_instructions___init___bitwise :
-  IsGlobalAlias globals ethereum.cancun.vm.instructions.__init__.globals "bitwise".
+Axiom ethereum_cancun_vm_instructions_imports :
+  AreImported globals "ethereum.cancun.vm.instructions" [ "bitwise" ].
 
-Require ethereum.cancun.vm.instructions.__init__.
-Axiom ethereum_cancun_vm_instructions___init___block :
-  IsGlobalAlias globals ethereum.cancun.vm.instructions.__init__.globals "block".
+Axiom ethereum_cancun_vm_instructions_imports :
+  AreImported globals "ethereum.cancun.vm.instructions" [ "block" ].
 
-Require ethereum.cancun.vm.instructions.__init__.
-Axiom ethereum_cancun_vm_instructions___init___comparison :
-  IsGlobalAlias globals ethereum.cancun.vm.instructions.__init__.globals "comparison".
+Axiom ethereum_cancun_vm_instructions_imports :
+  AreImported globals "ethereum.cancun.vm.instructions" [ "comparison" ].
 
-Require ethereum.cancun.vm.instructions.__init__.
-Axiom ethereum_cancun_vm_instructions___init___control_flow :
-  IsGlobalAlias globals ethereum.cancun.vm.instructions.__init__.globals "control_flow".
+Axiom ethereum_cancun_vm_instructions_imports :
+  AreImported globals "ethereum.cancun.vm.instructions" [ "control_flow" ].
 
-Require ethereum.cancun.vm.instructions.__init__.
-Axiom ethereum_cancun_vm_instructions___init___environment :
-  IsGlobalAlias globals ethereum.cancun.vm.instructions.__init__.globals "environment".
+Axiom ethereum_cancun_vm_instructions_imports :
+  AreImported globals "ethereum.cancun.vm.instructions" [ "environment" ].
 
-Require ethereum.cancun.vm.instructions.__init__.
-Axiom ethereum_cancun_vm_instructions___init___keccak :
-  IsGlobalAlias globals ethereum.cancun.vm.instructions.__init__.globals "keccak".
+Axiom ethereum_cancun_vm_instructions_imports :
+  AreImported globals "ethereum.cancun.vm.instructions" [ "keccak" ].
 
-Require ethereum.cancun.vm.instructions.__init__.
-Axiom ethereum_cancun_vm_instructions___init___log :
-  IsGlobalAlias globals ethereum.cancun.vm.instructions.__init__.globals "log".
+Axiom ethereum_cancun_vm_instructions_imports :
+  AreImported globals "ethereum.cancun.vm.instructions" [ "log" ].
 
-Require ethereum.cancun.vm.instructions.__init__.
-Axiom ethereum_cancun_vm_instructions___init___memory :
-  IsGlobalAlias globals ethereum.cancun.vm.instructions.__init__.globals "memory".
+Axiom ethereum_cancun_vm_instructions_imports :
+  AreImported globals "ethereum.cancun.vm.instructions" [ "memory" ].
 
-Require ethereum.cancun.vm.instructions.__init__.
-Axiom ethereum_cancun_vm_instructions___init___stack :
-  IsGlobalAlias globals ethereum.cancun.vm.instructions.__init__.globals "stack".
+Axiom ethereum_cancun_vm_instructions_imports :
+  AreImported globals "ethereum.cancun.vm.instructions" [ "stack" ].
 
-Require ethereum.cancun.vm.instructions.__init__.
-Axiom ethereum_cancun_vm_instructions___init___storage :
-  IsGlobalAlias globals ethereum.cancun.vm.instructions.__init__.globals "storage".
+Axiom ethereum_cancun_vm_instructions_imports :
+  AreImported globals "ethereum.cancun.vm.instructions" [ "storage" ].
 
-Require ethereum.cancun.vm.instructions.__init__.
-Axiom ethereum_cancun_vm_instructions___init___system :
-  IsGlobalAlias globals ethereum.cancun.vm.instructions.__init__.globals "system".
+Axiom ethereum_cancun_vm_instructions_imports :
+  AreImported globals "ethereum.cancun.vm.instructions" [ "system" ].
 
 Definition Ops : Value.t :=
   builtins.make_klass

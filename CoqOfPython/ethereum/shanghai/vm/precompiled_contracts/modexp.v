@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.shanghai.vm.precompiled_contracts.modexp".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,25 +17,17 @@ Introduction
 Implementation of the `MODEXP` precompiled contract.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Uint" ].
 
-Require ethereum.shanghai.vm.__init__.
-Axiom ethereum_shanghai_vm___init___Evm :
-  IsGlobalAlias globals ethereum.shanghai.vm.__init__.globals "Evm".
+Axiom ethereum_shanghai_vm_imports :
+  AreImported globals "ethereum.shanghai.vm" [ "Evm" ].
 
-Require ethereum.shanghai.vm.gas.
-Axiom ethereum_shanghai_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.shanghai.vm.gas.globals "charge_gas".
+Axiom ethereum_shanghai_vm_gas_imports :
+  AreImported globals "ethereum.shanghai.vm.gas" [ "charge_gas" ].
 
-Require ethereum.shanghai.vm.memory.
-Axiom ethereum_shanghai_vm_memory_buffer_read :
-  IsGlobalAlias globals ethereum.shanghai.vm.memory.globals "buffer_read".
+Axiom ethereum_shanghai_vm_memory_imports :
+  AreImported globals "ethereum.shanghai.vm.memory" [ "buffer_read" ].
 
 Definition GQUADDIVISOR : Value.t := M.run ltac:(M.monadic (
   Constant.int 3

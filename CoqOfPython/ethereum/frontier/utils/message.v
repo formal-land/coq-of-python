@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.frontier.utils.message".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,39 +17,23 @@ Introduction
 Message specific functions used in this frontier version of specification.
 ".
 
-Require typing.
-Axiom typing_Optional :
-  IsGlobalAlias globals typing.globals "Optional".
-Axiom typing_Union :
-  IsGlobalAlias globals typing.globals "Union".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Optional"; "Union" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Bytes0 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes0".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Bytes0"; "Uint" ].
 
-Require ethereum.frontier.fork_types.
-Axiom ethereum_frontier_fork_types_Address :
-  IsGlobalAlias globals ethereum.frontier.fork_types.globals "Address".
+Axiom ethereum_frontier_fork_types_imports :
+  AreImported globals "ethereum.frontier.fork_types" [ "Address" ].
 
-Require ethereum.frontier.state.
-Axiom ethereum_frontier_state_get_account :
-  IsGlobalAlias globals ethereum.frontier.state.globals "get_account".
+Axiom ethereum_frontier_state_imports :
+  AreImported globals "ethereum.frontier.state" [ "get_account" ].
 
-Require ethereum.frontier.vm.__init__.
-Axiom ethereum_frontier_vm___init___Environment :
-  IsGlobalAlias globals ethereum.frontier.vm.__init__.globals "Environment".
-Axiom ethereum_frontier_vm___init___Message :
-  IsGlobalAlias globals ethereum.frontier.vm.__init__.globals "Message".
+Axiom ethereum_frontier_vm_imports :
+  AreImported globals "ethereum.frontier.vm" [ "Environment"; "Message" ].
 
-Require ethereum.frontier.utils.address.
-Axiom ethereum_frontier_utils_address_compute_contract_address :
-  IsGlobalAlias globals ethereum.frontier.utils.address.globals "compute_contract_address".
+Axiom ethereum_frontier_utils_address_imports :
+  AreImported globals "ethereum.frontier.utils.address" [ "compute_contract_address" ].
 
 Definition prepare_message : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -177,7 +161,7 @@ Definition prepare_message : Value.t -> Value.t -> M :=
             M.pure Constant.None_
           (* else *)
           )), ltac:(M.monadic (
-            let _ := M.raise (| Some(M.call (|
+            let _ := M.raise (| Some (M.call (|
               M.get_name (| globals, "AssertionError" |),
               make_list [
                 Constant.str "Target must be address or empty bytes"

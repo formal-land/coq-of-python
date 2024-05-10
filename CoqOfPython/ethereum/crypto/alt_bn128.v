@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.crypto.alt_bn128".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -8,11 +8,8 @@ The alt_bn128 curve
 ^^^^^^^^^^^^^^^^^^^
 ".
 
-Require ethereum.crypto.__init__.
-Axiom ethereum_crypto___init___elliptic_curve :
-  IsGlobalAlias globals ethereum.crypto.__init__.globals "elliptic_curve".
-Axiom ethereum_crypto___init___finite_field :
-  IsGlobalAlias globals ethereum.crypto.__init__.globals "finite_field".
+Axiom ethereum_crypto_imports :
+  AreImported globals "ethereum.crypto" [ "elliptic_curve"; "finite_field" ].
 
 Definition ALT_BN128_PRIME : Value.t := M.run ltac:(M.monadic (
   Constant.int 21888242871839275222246405745257275088696311157297823662689037894645226208583
@@ -106,71 +103,124 @@ Definition BNF12 : Value.t :=
               ],
               Constant.int 23
             |) in
-          For M.get_name (| globals, "i" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      Constant.int 12
-    ],
-    make_dict []
-  |) do
-            For M.get_name (| globals, "j" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      Constant.int 12
-    ],
-    make_dict []
-  |) do
-              let _ := M.assign_op (|
-                BinOp.add,
-                M.get_subscript (| M.get_name (| globals, "mul" |), BinOp.add (|
-    M.get_name (| globals, "i" |),
-    M.get_name (| globals, "j" |)
-  |) |),
-                BinOp.mult (|
-    M.get_subscript (| M.get_name (| globals, "self" |), M.get_name (| globals, "i" |) |),
-    M.get_subscript (| M.get_name (| globals, "right" |), M.get_name (| globals, "j" |) |)
+          let _ :=
+            M.for_ (|
+              M.get_name (| globals, "i" |),
+              M.call (|
+      M.get_name (| globals, "range" |),
+      make_list [
+        Constant.int 12
+      ],
+      make_dict []
+    |),
+              ltac:(M.monadic (
+                let _ :=
+                  M.for_ (|
+                    M.get_name (| globals, "j" |),
+                    M.call (|
+      M.get_name (| globals, "range" |),
+      make_list [
+        Constant.int 12
+      ],
+      make_dict []
+    |),
+                    ltac:(M.monadic (
+                      let _ := M.assign_op (|
+                        BinOp.add,
+                        M.get_subscript (|
+    M.get_name (| globals, "mul" |),
+    BinOp.add (|
+      M.get_name (| globals, "i" |),
+      M.get_name (| globals, "j" |)
+    |)
+  |),
+                        BinOp.mult (|
+    M.get_subscript (|
+      M.get_name (| globals, "self" |),
+      M.get_name (| globals, "i" |)
+    |),
+    M.get_subscript (|
+      M.get_name (| globals, "right" |),
+      M.get_name (| globals, "j" |)
+    |)
   |)
-              |) in
-            EndFor.
-          EndFor.
-          For M.get_name (| globals, "i" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      Constant.int 22;
-      Constant.int 11;
-      UnOp.sub (| Constant.int 1 |)
-    ],
-    make_dict []
-  |) do
-            let _ := M.assign_op (|
-              BinOp.sub,
-              M.get_subscript (| M.get_name (| globals, "mul" |), BinOp.sub (|
-    M.get_name (| globals, "i" |),
-    Constant.int 6
-  |) |),
-              BinOp.mult (|
-    M.get_subscript (| M.get_name (| globals, "mul" |), M.get_name (| globals, "i" |) |),
+                      |) in
+                      M.pure Constant.None_
+                    )),
+                    ltac:(M.monadic (
+                      M.pure Constant.None_
+                    ))
+                |) in
+                M.pure Constant.None_
+              )),
+              ltac:(M.monadic (
+                M.pure Constant.None_
+              ))
+          |) in
+          let _ :=
+            M.for_ (|
+              M.get_name (| globals, "i" |),
+              M.call (|
+      M.get_name (| globals, "range" |),
+      make_list [
+        Constant.int 22;
+        Constant.int 11;
+        UnOp.sub (| Constant.int 1 |)
+      ],
+      make_dict []
+    |),
+              ltac:(M.monadic (
+                let _ := M.assign_op (|
+                  BinOp.sub,
+                  M.get_subscript (|
+    M.get_name (| globals, "mul" |),
+    BinOp.sub (|
+      M.get_name (| globals, "i" |),
+      Constant.int 6
+    |)
+  |),
+                  BinOp.mult (|
+    M.get_subscript (|
+      M.get_name (| globals, "mul" |),
+      M.get_name (| globals, "i" |)
+    |),
     UnOp.sub (| Constant.int 18 |)
   |)
-            |) in
-            let _ := M.assign_op (|
-              BinOp.sub,
-              M.get_subscript (| M.get_name (| globals, "mul" |), BinOp.sub (|
-    M.get_name (| globals, "i" |),
-    Constant.int 12
-  |) |),
-              BinOp.mult (|
-    M.get_subscript (| M.get_name (| globals, "mul" |), M.get_name (| globals, "i" |) |),
+                |) in
+                let _ := M.assign_op (|
+                  BinOp.sub,
+                  M.get_subscript (|
+    M.get_name (| globals, "mul" |),
+    BinOp.sub (|
+      M.get_name (| globals, "i" |),
+      Constant.int 12
+    |)
+  |),
+                  BinOp.mult (|
+    M.get_subscript (|
+      M.get_name (| globals, "mul" |),
+      M.get_name (| globals, "i" |)
+    |),
     Constant.int 82
   |)
-            |) in
-          EndFor.
+                |) in
+                M.pure Constant.None_
+              )),
+              ltac:(M.monadic (
+                M.pure Constant.None_
+              ))
+          |) in
           let _ := M.return_ (|
             M.call (|
               M.get_field (| M.get_name (| globals, "BNF12" |), "__new__" |),
               make_list [
                 M.get_name (| globals, "BNF12" |);
-                M.get_subscript (| M.get_name (| globals, "mul" |), M.slice (| Constant.None_, Constant.int 12 |) |)
+                M.slice (|
+                  M.get_name (| globals, "mul" |),
+                  Constant.None_,
+                  Constant.int 12,
+                  Constant.None_
+                |)
               ],
               make_dict []
             |)
@@ -215,7 +265,10 @@ Definition bnf2_to_bnf12 : Value.t -> Value.t -> M :=
         M.call (|
           M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
           make_list [
-            M.get_subscript (| M.get_name (| globals, "x" |), Constant.int 0 |)
+            M.get_subscript (|
+              M.get_name (| globals, "x" |),
+              Constant.int 0
+            |)
           ],
           make_dict []
         |),
@@ -223,7 +276,10 @@ Definition bnf2_to_bnf12 : Value.t -> Value.t -> M :=
           M.call (|
             M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
             make_list [
-              M.get_subscript (| M.get_name (| globals, "x" |), Constant.int 1 |)
+              M.get_subscript (|
+                M.get_name (| globals, "x" |),
+                Constant.int 1
+              |)
             ],
             make_dict []
           |),
@@ -496,76 +552,85 @@ Definition miller_loop : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |) in
-    For M.get_name (| globals, "i" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      M.get_name (| globals, "ATE_PAIRING_COUNT_BITS" |);
-      UnOp.sub (| Constant.int 1 |);
-      UnOp.sub (| Constant.int 1 |)
-    ],
-    make_dict []
-  |) do
-      let f :=
-        BinOp.mult (|
-          BinOp.mult (|
-            M.get_name (| globals, "f" |),
-            M.get_name (| globals, "f" |)
-          |),
-          M.call (|
-            M.get_name (| globals, "linefunc" |),
-            make_list [
-              M.get_name (| globals, "r" |);
-              M.get_name (| globals, "r" |);
-              M.get_name (| globals, "p" |)
-            ],
-            make_dict []
-          |)
-        |) in
-      let r :=
+    let _ :=
+      M.for_ (|
+        M.get_name (| globals, "i" |),
         M.call (|
-          M.get_field (| M.get_name (| globals, "r" |), "double" |),
-          make_list [],
-          make_dict []
-        |) in
-      let _ :=
-        (* if *)
-        M.if_then_else (|
-          BinOp.bit_and (|
-            BinOp.sub (|
-              M.get_name (| globals, "ATE_PAIRING_COUNT" |),
-              Constant.int 1
-            |),
-            BinOp.pow (|
-              Constant.int 2,
-              M.get_name (| globals, "i" |)
-            |)
-          |),
-        (* then *)
+      M.get_name (| globals, "range" |),
+      make_list [
+        M.get_name (| globals, "ATE_PAIRING_COUNT_BITS" |);
+        UnOp.sub (| Constant.int 1 |);
+        UnOp.sub (| Constant.int 1 |)
+      ],
+      make_dict []
+    |),
         ltac:(M.monadic (
           let f :=
             BinOp.mult (|
-              M.get_name (| globals, "f" |),
+              BinOp.mult (|
+                M.get_name (| globals, "f" |),
+                M.get_name (| globals, "f" |)
+              |),
               M.call (|
                 M.get_name (| globals, "linefunc" |),
                 make_list [
                   M.get_name (| globals, "r" |);
-                  M.get_name (| globals, "q" |);
+                  M.get_name (| globals, "r" |);
                   M.get_name (| globals, "p" |)
                 ],
                 make_dict []
               |)
             |) in
           let r :=
-            BinOp.add (|
-              M.get_name (| globals, "r" |),
-              M.get_name (| globals, "q" |)
+            M.call (|
+              M.get_field (| M.get_name (| globals, "r" |), "double" |),
+              make_list [],
+              make_dict []
             |) in
+          let _ :=
+            (* if *)
+            M.if_then_else (|
+              BinOp.bit_and (|
+                BinOp.sub (|
+                  M.get_name (| globals, "ATE_PAIRING_COUNT" |),
+                  Constant.int 1
+                |),
+                BinOp.pow (|
+                  Constant.int 2,
+                  M.get_name (| globals, "i" |)
+                |)
+              |),
+            (* then *)
+            ltac:(M.monadic (
+              let f :=
+                BinOp.mult (|
+                  M.get_name (| globals, "f" |),
+                  M.call (|
+                    M.get_name (| globals, "linefunc" |),
+                    make_list [
+                      M.get_name (| globals, "r" |);
+                      M.get_name (| globals, "q" |);
+                      M.get_name (| globals, "p" |)
+                    ],
+                    make_dict []
+                  |)
+                |) in
+              let r :=
+                BinOp.add (|
+                  M.get_name (| globals, "r" |),
+                  M.get_name (| globals, "q" |)
+                |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
+              M.pure Constant.None_
+            )) |) in
           M.pure Constant.None_
-        (* else *)
-        )), ltac:(M.monadic (
+        )),
+        ltac:(M.monadic (
           M.pure Constant.None_
-        )) |) in
-    EndFor.
+        ))
+    |) in
     let _ := M.assert (| Compare.eq (|
     M.get_name (| globals, "r" |),
     M.call (|

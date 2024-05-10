@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.tangerine_whistle.vm.instructions.environment".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,55 +17,29 @@ Introduction
 Implementations of the EVM environment related instructions.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Uint" ].
 
-Require ethereum.utils.numeric.
-Axiom ethereum_utils_numeric_ceil32 :
-  IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
+Axiom ethereum_utils_numeric_imports :
+  AreImported globals "ethereum.utils.numeric" [ "ceil32" ].
 
-Require ethereum.tangerine_whistle.state.
-Axiom ethereum_tangerine_whistle_state_get_account :
-  IsGlobalAlias globals ethereum.tangerine_whistle.state.globals "get_account".
+Axiom ethereum_tangerine_whistle_state_imports :
+  AreImported globals "ethereum.tangerine_whistle.state" [ "get_account" ].
 
-Require ethereum.tangerine_whistle.utils.address.
-Axiom ethereum_tangerine_whistle_utils_address_to_address :
-  IsGlobalAlias globals ethereum.tangerine_whistle.utils.address.globals "to_address".
+Axiom ethereum_tangerine_whistle_utils_address_imports :
+  AreImported globals "ethereum.tangerine_whistle.utils.address" [ "to_address" ].
 
-Require ethereum.tangerine_whistle.vm.memory.
-Axiom ethereum_tangerine_whistle_vm_memory_buffer_read :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.memory.globals "buffer_read".
-Axiom ethereum_tangerine_whistle_vm_memory_memory_write :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.memory.globals "memory_write".
+Axiom ethereum_tangerine_whistle_vm_memory_imports :
+  AreImported globals "ethereum.tangerine_whistle.vm.memory" [ "buffer_read"; "memory_write" ].
 
-Require ethereum.tangerine_whistle.vm.__init__.
-Axiom ethereum_tangerine_whistle_vm___init___Evm :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.__init__.globals "Evm".
+Axiom ethereum_tangerine_whistle_vm_imports :
+  AreImported globals "ethereum.tangerine_whistle.vm" [ "Evm" ].
 
-Require ethereum.tangerine_whistle.vm.gas.
-Axiom ethereum_tangerine_whistle_vm_gas_GAS_BALANCE :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_BALANCE".
-Axiom ethereum_tangerine_whistle_vm_gas_GAS_BASE :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_BASE".
-Axiom ethereum_tangerine_whistle_vm_gas_GAS_COPY :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_COPY".
-Axiom ethereum_tangerine_whistle_vm_gas_GAS_EXTERNAL :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_EXTERNAL".
-Axiom ethereum_tangerine_whistle_vm_gas_GAS_VERY_LOW :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_VERY_LOW".
-Axiom ethereum_tangerine_whistle_vm_gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "calculate_gas_extend_memory".
-Axiom ethereum_tangerine_whistle_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "charge_gas".
+Axiom ethereum_tangerine_whistle_vm_gas_imports :
+  AreImported globals "ethereum.tangerine_whistle.vm.gas" [ "GAS_BALANCE"; "GAS_BASE"; "GAS_COPY"; "GAS_EXTERNAL"; "GAS_VERY_LOW"; "calculate_gas_extend_memory"; "charge_gas" ].
 
-Require ethereum.tangerine_whistle.vm.stack.
-Axiom ethereum_tangerine_whistle_vm_stack_pop :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.stack.globals "pop".
-Axiom ethereum_tangerine_whistle_vm_stack_push :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.stack.globals "push".
+Axiom ethereum_tangerine_whistle_vm_stack_imports :
+  AreImported globals "ethereum.tangerine_whistle.vm.stack" [ "pop"; "push" ].
 
 Definition address : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.fork_criteria".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -19,17 +19,11 @@ Classes for specifying criteria for Mainnet forks.
 
 (* At top_level_stmt: unsupported node type: Import *)
 
-Require abc.
-Axiom abc_ABC :
-  IsGlobalAlias globals abc.globals "ABC".
-Axiom abc_abstractmethod :
-  IsGlobalAlias globals abc.globals "abstractmethod".
+Axiom abc_imports :
+  AreImported globals "abc" [ "ABC"; "abstractmethod" ].
 
-Require typing.
-Axiom typing_Final :
-  IsGlobalAlias globals typing.globals "Final".
-Axiom typing_Tuple :
-  IsGlobalAlias globals typing.globals "Tuple".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Final"; "Tuple" ].
 
 Definition ForkCriteria : Value.t :=
   builtins.make_klass

@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.cancun.vm.instructions.block".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,27 +17,17 @@ Introduction
 Implementations of the EVM block instructions.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256" ].
 
-Require ethereum.cancun.vm.__init__.
-Axiom ethereum_cancun_vm___init___Evm :
-  IsGlobalAlias globals ethereum.cancun.vm.__init__.globals "Evm".
+Axiom ethereum_cancun_vm_imports :
+  AreImported globals "ethereum.cancun.vm" [ "Evm" ].
 
-Require ethereum.cancun.vm.gas.
-Axiom ethereum_cancun_vm_gas_GAS_BASE :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_BASE".
-Axiom ethereum_cancun_vm_gas_GAS_BLOCK_HASH :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_BLOCK_HASH".
-Axiom ethereum_cancun_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "charge_gas".
+Axiom ethereum_cancun_vm_gas_imports :
+  AreImported globals "ethereum.cancun.vm.gas" [ "GAS_BASE"; "GAS_BLOCK_HASH"; "charge_gas" ].
 
-Require ethereum.cancun.vm.stack.
-Axiom ethereum_cancun_vm_stack_pop :
-  IsGlobalAlias globals ethereum.cancun.vm.stack.globals "pop".
-Axiom ethereum_cancun_vm_stack_push :
-  IsGlobalAlias globals ethereum.cancun.vm.stack.globals "push".
+Axiom ethereum_cancun_vm_stack_imports :
+  AreImported globals "ethereum.cancun.vm.stack" [ "pop"; "push" ].
 
 Definition block_hash : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -100,10 +90,13 @@ Definition block_hash : Value.t -> Value.t -> M :=
       (* else *)
       )), ltac:(M.monadic (
         let hash :=
-          M.get_subscript (| M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "block_hashes" |), UnOp.sub (| BinOp.sub (|
-            M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "number" |),
-            M.get_name (| globals, "block_number" |)
-          |) |) |) in
+          M.get_subscript (|
+            M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "block_hashes" |),
+            UnOp.sub (| BinOp.sub (|
+              M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "number" |),
+              M.get_name (| globals, "block_number" |)
+            |) |)
+          |) in
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|

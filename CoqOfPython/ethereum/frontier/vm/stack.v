@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.frontier.vm.stack".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,19 +17,14 @@ Introduction
 Implementation of the stack operators for the EVM.
 ".
 
-Require typing.
-Axiom typing_List :
-  IsGlobalAlias globals typing.globals "List".
+Axiom typing_imports :
+  AreImported globals "typing" [ "List" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256" ].
 
-Require ethereum.frontier.vm.exceptions.
-Axiom ethereum_frontier_vm_exceptions_StackOverflowError :
-  IsGlobalAlias globals ethereum.frontier.vm.exceptions.globals "StackOverflowError".
-Axiom ethereum_frontier_vm_exceptions_StackUnderflowError :
-  IsGlobalAlias globals ethereum.frontier.vm.exceptions.globals "StackUnderflowError".
+Axiom ethereum_frontier_vm_exceptions_imports :
+  AreImported globals "ethereum.frontier.vm.exceptions" [ "StackOverflowError"; "StackUnderflowError" ].
 
 Definition pop : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -63,7 +58,7 @@ Definition pop : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let _ := M.raise (| Some(M.get_name (| globals, "StackUnderflowError" |)) |) in
+        let _ := M.raise (| Some (M.get_name (| globals, "StackUnderflowError" |)) |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
@@ -108,7 +103,7 @@ Definition push : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let _ := M.raise (| Some(M.get_name (| globals, "StackOverflowError" |)) |) in
+        let _ := M.raise (| Some (M.get_name (| globals, "StackOverflowError" |)) |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (

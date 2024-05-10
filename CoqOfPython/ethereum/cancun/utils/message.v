@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.cancun.utils.message".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -18,49 +18,26 @@ Message specific functions used in this cancun version of
 specification.
 ".
 
-Require typing.
-Axiom typing_FrozenSet :
-  IsGlobalAlias globals typing.globals "FrozenSet".
-Axiom typing_Optional :
-  IsGlobalAlias globals typing.globals "Optional".
-Axiom typing_Tuple :
-  IsGlobalAlias globals typing.globals "Tuple".
-Axiom typing_Union :
-  IsGlobalAlias globals typing.globals "Union".
+Axiom typing_imports :
+  AreImported globals "typing" [ "FrozenSet"; "Optional"; "Tuple"; "Union" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Bytes0 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes0".
-Axiom ethereum_base_types_Bytes32 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes32".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Bytes0"; "Bytes32"; "Uint" ].
 
-Require ethereum.cancun.fork_types.
-Axiom ethereum_cancun_fork_types_Address :
-  IsGlobalAlias globals ethereum.cancun.fork_types.globals "Address".
+Axiom ethereum_cancun_fork_types_imports :
+  AreImported globals "ethereum.cancun.fork_types" [ "Address" ].
 
-Require ethereum.cancun.state.
-Axiom ethereum_cancun_state_get_account :
-  IsGlobalAlias globals ethereum.cancun.state.globals "get_account".
+Axiom ethereum_cancun_state_imports :
+  AreImported globals "ethereum.cancun.state" [ "get_account" ].
 
-Require ethereum.cancun.vm.__init__.
-Axiom ethereum_cancun_vm___init___Environment :
-  IsGlobalAlias globals ethereum.cancun.vm.__init__.globals "Environment".
-Axiom ethereum_cancun_vm___init___Message :
-  IsGlobalAlias globals ethereum.cancun.vm.__init__.globals "Message".
+Axiom ethereum_cancun_vm_imports :
+  AreImported globals "ethereum.cancun.vm" [ "Environment"; "Message" ].
 
-Require ethereum.cancun.vm.precompiled_contracts.mapping.
-Axiom ethereum_cancun_vm_precompiled_contracts_mapping_PRE_COMPILED_CONTRACTS :
-  IsGlobalAlias globals ethereum.cancun.vm.precompiled_contracts.mapping.globals "PRE_COMPILED_CONTRACTS".
+Axiom ethereum_cancun_vm_precompiled_contracts_mapping_imports :
+  AreImported globals "ethereum.cancun.vm.precompiled_contracts.mapping" [ "PRE_COMPILED_CONTRACTS" ].
 
-Require ethereum.cancun.utils.address.
-Axiom ethereum_cancun_utils_address_compute_contract_address :
-  IsGlobalAlias globals ethereum.cancun.utils.address.globals "compute_contract_address".
+Axiom ethereum_cancun_utils_address_imports :
+  AreImported globals "ethereum.cancun.utils.address" [ "compute_contract_address" ].
 
 Definition prepare_message : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -198,7 +175,7 @@ Definition prepare_message : Value.t -> Value.t -> M :=
             M.pure Constant.None_
           (* else *)
           )), ltac:(M.monadic (
-            let _ := M.raise (| Some(M.call (|
+            let _ := M.raise (| Some (M.call (|
               M.get_name (| globals, "AssertionError" |),
               make_list [
                 Constant.str "Target must be address or empty bytes"

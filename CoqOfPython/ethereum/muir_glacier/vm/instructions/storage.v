@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.muir_glacier.vm.instructions.storage".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,47 +17,23 @@ Introduction
 Implementations of the EVM storage related instructions.
 ".
 
-Require ethereum.utils.ensure.
-Axiom ethereum_utils_ensure_ensure :
-  IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
+Axiom ethereum_utils_ensure_imports :
+  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
 
-Require ethereum.muir_glacier.state.
-Axiom ethereum_muir_glacier_state_get_storage :
-  IsGlobalAlias globals ethereum.muir_glacier.state.globals "get_storage".
-Axiom ethereum_muir_glacier_state_get_storage_original :
-  IsGlobalAlias globals ethereum.muir_glacier.state.globals "get_storage_original".
-Axiom ethereum_muir_glacier_state_set_storage :
-  IsGlobalAlias globals ethereum.muir_glacier.state.globals "set_storage".
+Axiom ethereum_muir_glacier_state_imports :
+  AreImported globals "ethereum.muir_glacier.state" [ "get_storage"; "get_storage_original"; "set_storage" ].
 
-Require ethereum.muir_glacier.vm.__init__.
-Axiom ethereum_muir_glacier_vm___init___Evm :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.__init__.globals "Evm".
+Axiom ethereum_muir_glacier_vm_imports :
+  AreImported globals "ethereum.muir_glacier.vm" [ "Evm" ].
 
-Require ethereum.muir_glacier.vm.exceptions.
-Axiom ethereum_muir_glacier_vm_exceptions_OutOfGasError :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.exceptions.globals "OutOfGasError".
-Axiom ethereum_muir_glacier_vm_exceptions_WriteInStaticContext :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.exceptions.globals "WriteInStaticContext".
+Axiom ethereum_muir_glacier_vm_exceptions_imports :
+  AreImported globals "ethereum.muir_glacier.vm.exceptions" [ "OutOfGasError"; "WriteInStaticContext" ].
 
-Require ethereum.muir_glacier.vm.gas.
-Axiom ethereum_muir_glacier_vm_gas_GAS_CALL_STIPEND :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "GAS_CALL_STIPEND".
-Axiom ethereum_muir_glacier_vm_gas_GAS_SLOAD :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "GAS_SLOAD".
-Axiom ethereum_muir_glacier_vm_gas_GAS_STORAGE_CLEAR_REFUND :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "GAS_STORAGE_CLEAR_REFUND".
-Axiom ethereum_muir_glacier_vm_gas_GAS_STORAGE_SET :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "GAS_STORAGE_SET".
-Axiom ethereum_muir_glacier_vm_gas_GAS_STORAGE_UPDATE :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "GAS_STORAGE_UPDATE".
-Axiom ethereum_muir_glacier_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "charge_gas".
+Axiom ethereum_muir_glacier_vm_gas_imports :
+  AreImported globals "ethereum.muir_glacier.vm.gas" [ "GAS_CALL_STIPEND"; "GAS_SLOAD"; "GAS_STORAGE_CLEAR_REFUND"; "GAS_STORAGE_SET"; "GAS_STORAGE_UPDATE"; "charge_gas" ].
 
-Require ethereum.muir_glacier.vm.stack.
-Axiom ethereum_muir_glacier_vm_stack_pop :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.stack.globals "pop".
-Axiom ethereum_muir_glacier_vm_stack_push :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.stack.globals "push".
+Axiom ethereum_muir_glacier_vm_stack_imports :
+  AreImported globals "ethereum.muir_glacier.vm.stack" [ "pop"; "push" ].
 
 Definition sload : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

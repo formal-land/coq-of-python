@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.trace".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -21,15 +21,11 @@ Defines the functions required for creating evm traces during execution.
 
 (* At top_level_stmt: unsupported node type: Import *)
 
-Require dataclasses.
-Axiom dataclasses_dataclass :
-  IsGlobalAlias globals dataclasses.globals "dataclass".
+Axiom dataclasses_imports :
+  AreImported globals "dataclasses" [ "dataclass" ].
 
-Require typing.
-Axiom typing_Optional :
-  IsGlobalAlias globals typing.globals "Optional".
-Axiom typing_Union :
-  IsGlobalAlias globals typing.globals "Union".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Optional"; "Union" ].
 
 Definition TransactionStart : Value.t :=
   builtins.make_klass
@@ -122,7 +118,10 @@ Definition GasAndRefund : Value.t :=
     ].
 
 Definition TraceEvent : Value.t := M.run ltac:(M.monadic (
-  M.get_subscript (| M.get_name (| globals, "Union" |), make_tuple [ M.get_name (| globals, "TransactionStart" |); M.get_name (| globals, "TransactionEnd" |); M.get_name (| globals, "PrecompileStart" |); M.get_name (| globals, "PrecompileEnd" |); M.get_name (| globals, "OpStart" |); M.get_name (| globals, "OpEnd" |); M.get_name (| globals, "OpException" |); M.get_name (| globals, "EvmStop" |); M.get_name (| globals, "GasAndRefund" |) ] |)
+  M.get_subscript (|
+    M.get_name (| globals, "Union" |),
+    make_tuple [ M.get_name (| globals, "TransactionStart" |); M.get_name (| globals, "TransactionEnd" |); M.get_name (| globals, "PrecompileStart" |); M.get_name (| globals, "PrecompileEnd" |); M.get_name (| globals, "OpStart" |); M.get_name (| globals, "OpEnd" |); M.get_name (| globals, "OpException" |); M.get_name (| globals, "EvmStop" |); M.get_name (| globals, "GasAndRefund" |) ]
+  |)
 )).
 
 Definition evm_trace : Value.t -> Value.t -> M :=

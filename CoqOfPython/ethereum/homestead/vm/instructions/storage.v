@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.homestead.vm.instructions.storage".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,33 +17,17 @@ Introduction
 Implementations of the EVM storage related instructions.
 ".
 
-Require ethereum.homestead.state.
-Axiom ethereum_homestead_state_get_storage :
-  IsGlobalAlias globals ethereum.homestead.state.globals "get_storage".
-Axiom ethereum_homestead_state_set_storage :
-  IsGlobalAlias globals ethereum.homestead.state.globals "set_storage".
+Axiom ethereum_homestead_state_imports :
+  AreImported globals "ethereum.homestead.state" [ "get_storage"; "set_storage" ].
 
-Require ethereum.homestead.vm.__init__.
-Axiom ethereum_homestead_vm___init___Evm :
-  IsGlobalAlias globals ethereum.homestead.vm.__init__.globals "Evm".
+Axiom ethereum_homestead_vm_imports :
+  AreImported globals "ethereum.homestead.vm" [ "Evm" ].
 
-Require ethereum.homestead.vm.gas.
-Axiom ethereum_homestead_vm_gas_GAS_SLOAD :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_SLOAD".
-Axiom ethereum_homestead_vm_gas_GAS_STORAGE_CLEAR_REFUND :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_STORAGE_CLEAR_REFUND".
-Axiom ethereum_homestead_vm_gas_GAS_STORAGE_SET :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_STORAGE_SET".
-Axiom ethereum_homestead_vm_gas_GAS_STORAGE_UPDATE :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_STORAGE_UPDATE".
-Axiom ethereum_homestead_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "charge_gas".
+Axiom ethereum_homestead_vm_gas_imports :
+  AreImported globals "ethereum.homestead.vm.gas" [ "GAS_SLOAD"; "GAS_STORAGE_CLEAR_REFUND"; "GAS_STORAGE_SET"; "GAS_STORAGE_UPDATE"; "charge_gas" ].
 
-Require ethereum.homestead.vm.stack.
-Axiom ethereum_homestead_vm_stack_pop :
-  IsGlobalAlias globals ethereum.homestead.vm.stack.globals "pop".
-Axiom ethereum_homestead_vm_stack_push :
-  IsGlobalAlias globals ethereum.homestead.vm.stack.globals "push".
+Axiom ethereum_homestead_vm_stack_imports :
+  AreImported globals "ethereum.homestead.vm.stack" [ "pop"; "push" ].
 
 Definition sload : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

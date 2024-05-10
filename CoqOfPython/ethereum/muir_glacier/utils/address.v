@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.muir_glacier.utils.address".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -18,33 +18,23 @@ Address specific functions used in this muir_glacier version of
 specification.
 ".
 
-Require typing.
-Axiom typing_Union :
-  IsGlobalAlias globals typing.globals "Union".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Union" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes32 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes32".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes32"; "Uint" ].
 
-Require ethereum.crypto.hash.
-Axiom ethereum_crypto_hash_keccak256 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "keccak256".
+Axiom ethereum_crypto_hash_imports :
+  AreImported globals "ethereum.crypto.hash" [ "keccak256" ].
 
-Require ethereum.utils.byte.
-Axiom ethereum_utils_byte_left_pad_zero_bytes :
-  IsGlobalAlias globals ethereum.utils.byte.globals "left_pad_zero_bytes".
+Axiom ethereum_utils_byte_imports :
+  AreImported globals "ethereum.utils.byte" [ "left_pad_zero_bytes" ].
 
-Require ethereum.__init__.
-Axiom ethereum___init___rlp :
-  IsGlobalAlias globals ethereum.__init__.globals "rlp".
+Axiom ethereum_imports :
+  AreImported globals "ethereum" [ "rlp" ].
 
-Require ethereum.muir_glacier.fork_types.
-Axiom ethereum_muir_glacier_fork_types_Address :
-  IsGlobalAlias globals ethereum.muir_glacier.fork_types.globals "Address".
+Axiom ethereum_muir_glacier_fork_types_imports :
+  AreImported globals "ethereum.muir_glacier.fork_types" [ "Address" ].
 
 Definition to_address : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -66,11 +56,16 @@ Definition to_address : Value.t -> Value.t -> M :=
       M.call (|
         M.get_name (| globals, "Address" |),
         make_list [
-          M.get_subscript (| M.call (|
-            M.get_field (| M.get_name (| globals, "data" |), "to_be_bytes32" |),
-            make_list [],
-            make_dict []
-          |), M.slice (| UnOp.sub (| Constant.int 20 |), Constant.None_ |) |)
+          M.slice (|
+            M.call (|
+              M.get_field (| M.get_name (| globals, "data" |), "to_be_bytes32" |),
+              make_list [],
+              make_dict []
+            |),
+            UnOp.sub (| Constant.int 20 |),
+            Constant.None_,
+            Constant.None_
+          |)
         ],
         make_dict []
       |)
@@ -114,7 +109,12 @@ Definition compute_contract_address : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let canonical_address :=
-      M.get_subscript (| M.get_name (| globals, "computed_address" |), M.slice (| UnOp.sub (| Constant.int 20 |), Constant.None_ |) |) in
+      M.slice (|
+        M.get_name (| globals, "computed_address" |),
+        UnOp.sub (| Constant.int 20 |),
+        Constant.None_,
+        Constant.None_
+      |) in
     let padded_address :=
       M.call (|
         M.get_name (| globals, "left_pad_zero_bytes" |),
@@ -182,7 +182,12 @@ Definition compute_create2_contract_address : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let canonical_address :=
-      M.get_subscript (| M.get_name (| globals, "computed_address" |), M.slice (| UnOp.sub (| Constant.int 20 |), Constant.None_ |) |) in
+      M.slice (|
+        M.get_name (| globals, "computed_address" |),
+        UnOp.sub (| Constant.int 20 |),
+        Constant.None_,
+        Constant.None_
+      |) in
     let padded_address :=
       M.call (|
         M.get_name (| globals, "left_pad_zero_bytes" |),

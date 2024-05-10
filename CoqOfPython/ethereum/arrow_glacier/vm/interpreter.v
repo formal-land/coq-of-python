@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.arrow_glacier.vm.interpreter".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,127 +17,50 @@ Introduction
 A straightforward interpreter that executes EVM code.
 ".
 
-Require dataclasses.
-Axiom dataclasses_dataclass :
-  IsGlobalAlias globals dataclasses.globals "dataclass".
+Axiom dataclasses_imports :
+  AreImported globals "dataclasses" [ "dataclass" ].
 
-Require typing.
-Axiom typing_Iterable :
-  IsGlobalAlias globals typing.globals "Iterable".
-Axiom typing_Optional :
-  IsGlobalAlias globals typing.globals "Optional".
-Axiom typing_Set_ :
-  IsGlobalAlias globals typing.globals "Set_".
-Axiom typing_Tuple :
-  IsGlobalAlias globals typing.globals "Tuple".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Iterable"; "Optional"; "Set"; "Tuple" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes0 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes0".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes0"; "Uint" ].
 
-Require ethereum.trace.
-Axiom ethereum_trace_EvmStop :
-  IsGlobalAlias globals ethereum.trace.globals "EvmStop".
-Axiom ethereum_trace_OpEnd :
-  IsGlobalAlias globals ethereum.trace.globals "OpEnd".
-Axiom ethereum_trace_OpException :
-  IsGlobalAlias globals ethereum.trace.globals "OpException".
-Axiom ethereum_trace_OpStart :
-  IsGlobalAlias globals ethereum.trace.globals "OpStart".
-Axiom ethereum_trace_PrecompileEnd :
-  IsGlobalAlias globals ethereum.trace.globals "PrecompileEnd".
-Axiom ethereum_trace_PrecompileStart :
-  IsGlobalAlias globals ethereum.trace.globals "PrecompileStart".
-Axiom ethereum_trace_TransactionEnd :
-  IsGlobalAlias globals ethereum.trace.globals "TransactionEnd".
-Axiom ethereum_trace_evm_trace :
-  IsGlobalAlias globals ethereum.trace.globals "evm_trace".
+Axiom ethereum_trace_imports :
+  AreImported globals "ethereum.trace" [ "EvmStop"; "OpEnd"; "OpException"; "OpStart"; "PrecompileEnd"; "PrecompileStart"; "TransactionEnd"; "evm_trace" ].
 
-Require ethereum.utils.ensure.
-Axiom ethereum_utils_ensure_ensure :
-  IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
+Axiom ethereum_utils_ensure_imports :
+  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
 
-Require ethereum.arrow_glacier.blocks.
-Axiom ethereum_arrow_glacier_blocks_Log :
-  IsGlobalAlias globals ethereum.arrow_glacier.blocks.globals "Log".
+Axiom ethereum_arrow_glacier_blocks_imports :
+  AreImported globals "ethereum.arrow_glacier.blocks" [ "Log" ].
 
-Require ethereum.arrow_glacier.fork_types.
-Axiom ethereum_arrow_glacier_fork_types_Address :
-  IsGlobalAlias globals ethereum.arrow_glacier.fork_types.globals "Address".
+Axiom ethereum_arrow_glacier_fork_types_imports :
+  AreImported globals "ethereum.arrow_glacier.fork_types" [ "Address" ].
 
-Require ethereum.arrow_glacier.state.
-Axiom ethereum_arrow_glacier_state_account_exists_and_is_empty :
-  IsGlobalAlias globals ethereum.arrow_glacier.state.globals "account_exists_and_is_empty".
-Axiom ethereum_arrow_glacier_state_account_has_code_or_nonce :
-  IsGlobalAlias globals ethereum.arrow_glacier.state.globals "account_has_code_or_nonce".
-Axiom ethereum_arrow_glacier_state_begin_transaction :
-  IsGlobalAlias globals ethereum.arrow_glacier.state.globals "begin_transaction".
-Axiom ethereum_arrow_glacier_state_commit_transaction :
-  IsGlobalAlias globals ethereum.arrow_glacier.state.globals "commit_transaction".
-Axiom ethereum_arrow_glacier_state_destroy_storage :
-  IsGlobalAlias globals ethereum.arrow_glacier.state.globals "destroy_storage".
-Axiom ethereum_arrow_glacier_state_increment_nonce :
-  IsGlobalAlias globals ethereum.arrow_glacier.state.globals "increment_nonce".
-Axiom ethereum_arrow_glacier_state_mark_account_created :
-  IsGlobalAlias globals ethereum.arrow_glacier.state.globals "mark_account_created".
-Axiom ethereum_arrow_glacier_state_move_ether :
-  IsGlobalAlias globals ethereum.arrow_glacier.state.globals "move_ether".
-Axiom ethereum_arrow_glacier_state_rollback_transaction :
-  IsGlobalAlias globals ethereum.arrow_glacier.state.globals "rollback_transaction".
-Axiom ethereum_arrow_glacier_state_set_code :
-  IsGlobalAlias globals ethereum.arrow_glacier.state.globals "set_code".
-Axiom ethereum_arrow_glacier_state_touch_account :
-  IsGlobalAlias globals ethereum.arrow_glacier.state.globals "touch_account".
+Axiom ethereum_arrow_glacier_state_imports :
+  AreImported globals "ethereum.arrow_glacier.state" [ "account_exists_and_is_empty"; "account_has_code_or_nonce"; "begin_transaction"; "commit_transaction"; "destroy_storage"; "increment_nonce"; "mark_account_created"; "move_ether"; "rollback_transaction"; "set_code"; "touch_account" ].
 
-Require ethereum.arrow_glacier.vm.__init__.
-Axiom ethereum_arrow_glacier_vm___init___Message :
-  IsGlobalAlias globals ethereum.arrow_glacier.vm.__init__.globals "Message".
+Axiom ethereum_arrow_glacier_vm_imports :
+  AreImported globals "ethereum.arrow_glacier.vm" [ "Message" ].
 
-Require ethereum.arrow_glacier.vm.gas.
-Axiom ethereum_arrow_glacier_vm_gas_GAS_CODE_DEPOSIT :
-  IsGlobalAlias globals ethereum.arrow_glacier.vm.gas.globals "GAS_CODE_DEPOSIT".
-Axiom ethereum_arrow_glacier_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.arrow_glacier.vm.gas.globals "charge_gas".
+Axiom ethereum_arrow_glacier_vm_gas_imports :
+  AreImported globals "ethereum.arrow_glacier.vm.gas" [ "GAS_CODE_DEPOSIT"; "charge_gas" ].
 
-Require ethereum.arrow_glacier.vm.precompiled_contracts.mapping.
-Axiom ethereum_arrow_glacier_vm_precompiled_contracts_mapping_PRE_COMPILED_CONTRACTS :
-  IsGlobalAlias globals ethereum.arrow_glacier.vm.precompiled_contracts.mapping.globals "PRE_COMPILED_CONTRACTS".
+Axiom ethereum_arrow_glacier_vm_precompiled_contracts_mapping_imports :
+  AreImported globals "ethereum.arrow_glacier.vm.precompiled_contracts.mapping" [ "PRE_COMPILED_CONTRACTS" ].
 
-Require ethereum.arrow_glacier.vm.__init__.
-Axiom ethereum_arrow_glacier_vm___init___Environment :
-  IsGlobalAlias globals ethereum.arrow_glacier.vm.__init__.globals "Environment".
-Axiom ethereum_arrow_glacier_vm___init___Evm :
-  IsGlobalAlias globals ethereum.arrow_glacier.vm.__init__.globals "Evm".
+Axiom ethereum_arrow_glacier_vm_imports :
+  AreImported globals "ethereum.arrow_glacier.vm" [ "Environment"; "Evm" ].
 
-Require ethereum.arrow_glacier.vm.exceptions.
-Axiom ethereum_arrow_glacier_vm_exceptions_AddressCollision :
-  IsGlobalAlias globals ethereum.arrow_glacier.vm.exceptions.globals "AddressCollision".
-Axiom ethereum_arrow_glacier_vm_exceptions_ExceptionalHalt :
-  IsGlobalAlias globals ethereum.arrow_glacier.vm.exceptions.globals "ExceptionalHalt".
-Axiom ethereum_arrow_glacier_vm_exceptions_InvalidContractPrefix :
-  IsGlobalAlias globals ethereum.arrow_glacier.vm.exceptions.globals "InvalidContractPrefix".
-Axiom ethereum_arrow_glacier_vm_exceptions_InvalidOpcode :
-  IsGlobalAlias globals ethereum.arrow_glacier.vm.exceptions.globals "InvalidOpcode".
-Axiom ethereum_arrow_glacier_vm_exceptions_OutOfGasError :
-  IsGlobalAlias globals ethereum.arrow_glacier.vm.exceptions.globals "OutOfGasError".
-Axiom ethereum_arrow_glacier_vm_exceptions_Revert :
-  IsGlobalAlias globals ethereum.arrow_glacier.vm.exceptions.globals "Revert".
-Axiom ethereum_arrow_glacier_vm_exceptions_StackDepthLimitError :
-  IsGlobalAlias globals ethereum.arrow_glacier.vm.exceptions.globals "StackDepthLimitError".
+Axiom ethereum_arrow_glacier_vm_exceptions_imports :
+  AreImported globals "ethereum.arrow_glacier.vm.exceptions" [ "AddressCollision"; "ExceptionalHalt"; "InvalidContractPrefix"; "InvalidOpcode"; "OutOfGasError"; "Revert"; "StackDepthLimitError" ].
 
-Require ethereum.arrow_glacier.vm.instructions.__init__.
-Axiom ethereum_arrow_glacier_vm_instructions___init___Ops :
-  IsGlobalAlias globals ethereum.arrow_glacier.vm.instructions.__init__.globals "Ops".
-Axiom ethereum_arrow_glacier_vm_instructions___init___op_implementation :
-  IsGlobalAlias globals ethereum.arrow_glacier.vm.instructions.__init__.globals "op_implementation".
+Axiom ethereum_arrow_glacier_vm_instructions_imports :
+  AreImported globals "ethereum.arrow_glacier.vm.instructions" [ "Ops"; "op_implementation" ].
 
-Require ethereum.arrow_glacier.vm.runtime.
-Axiom ethereum_arrow_glacier_vm_runtime_get_valid_jump_destinations :
-  IsGlobalAlias globals ethereum.arrow_glacier.vm.runtime.globals "get_valid_jump_destinations".
+Axiom ethereum_arrow_glacier_vm_runtime_imports :
+  AreImported globals "ethereum.arrow_glacier.vm.runtime" [ "get_valid_jump_destinations" ].
 
 Definition STACK_DEPTH_LIMIT : Value.t := M.run ltac:(M.monadic (
   M.call (|
@@ -518,7 +441,7 @@ Definition process_message : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let _ := M.raise (| Some(M.call (|
+        let _ := M.raise (| Some (M.call (|
           M.get_name (| globals, "StackDepthLimitError" |),
           make_list [
             Constant.str "Stack depth limit reached"

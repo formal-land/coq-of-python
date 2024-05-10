@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.spurious_dragon.utils.message".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -18,39 +18,23 @@ Message specific functions used in this spurious dragon version of
 specification.
 ".
 
-Require typing.
-Axiom typing_Optional :
-  IsGlobalAlias globals typing.globals "Optional".
-Axiom typing_Union :
-  IsGlobalAlias globals typing.globals "Union".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Optional"; "Union" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Bytes0 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes0".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Bytes0"; "Uint" ].
 
-Require ethereum.spurious_dragon.fork_types.
-Axiom ethereum_spurious_dragon_fork_types_Address :
-  IsGlobalAlias globals ethereum.spurious_dragon.fork_types.globals "Address".
+Axiom ethereum_spurious_dragon_fork_types_imports :
+  AreImported globals "ethereum.spurious_dragon.fork_types" [ "Address" ].
 
-Require ethereum.spurious_dragon.state.
-Axiom ethereum_spurious_dragon_state_get_account :
-  IsGlobalAlias globals ethereum.spurious_dragon.state.globals "get_account".
+Axiom ethereum_spurious_dragon_state_imports :
+  AreImported globals "ethereum.spurious_dragon.state" [ "get_account" ].
 
-Require ethereum.spurious_dragon.vm.__init__.
-Axiom ethereum_spurious_dragon_vm___init___Environment :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.__init__.globals "Environment".
-Axiom ethereum_spurious_dragon_vm___init___Message :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.__init__.globals "Message".
+Axiom ethereum_spurious_dragon_vm_imports :
+  AreImported globals "ethereum.spurious_dragon.vm" [ "Environment"; "Message" ].
 
-Require ethereum.spurious_dragon.utils.address.
-Axiom ethereum_spurious_dragon_utils_address_compute_contract_address :
-  IsGlobalAlias globals ethereum.spurious_dragon.utils.address.globals "compute_contract_address".
+Axiom ethereum_spurious_dragon_utils_address_imports :
+  AreImported globals "ethereum.spurious_dragon.utils.address" [ "compute_contract_address" ].
 
 Definition prepare_message : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -180,7 +164,7 @@ Definition prepare_message : Value.t -> Value.t -> M :=
             M.pure Constant.None_
           (* else *)
           )), ltac:(M.monadic (
-            let _ := M.raise (| Some(M.call (|
+            let _ := M.raise (| Some (M.call (|
               M.get_name (| globals, "AssertionError" |),
               make_list [
                 Constant.str "Target must be address or empty bytes"

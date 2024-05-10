@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.utils.byte".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,9 +17,8 @@ Introduction
 Byte specific utility functions used in this specification.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "Bytes" ].
 
 Definition left_pad_zero_bytes : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

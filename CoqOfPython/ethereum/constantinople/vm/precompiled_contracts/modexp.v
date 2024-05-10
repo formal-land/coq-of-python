@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.constantinople.vm.precompiled_contracts.modexp".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,25 +17,17 @@ Introduction
 Implementation of the `MODEXP` precompiled contract.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Uint" ].
 
-Require ethereum.constantinople.vm.__init__.
-Axiom ethereum_constantinople_vm___init___Evm :
-  IsGlobalAlias globals ethereum.constantinople.vm.__init__.globals "Evm".
+Axiom ethereum_constantinople_vm_imports :
+  AreImported globals "ethereum.constantinople.vm" [ "Evm" ].
 
-Require ethereum.constantinople.vm.gas.
-Axiom ethereum_constantinople_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "charge_gas".
+Axiom ethereum_constantinople_vm_gas_imports :
+  AreImported globals "ethereum.constantinople.vm.gas" [ "charge_gas" ].
 
-Require ethereum.constantinople.vm.memory.
-Axiom ethereum_constantinople_vm_memory_buffer_read :
-  IsGlobalAlias globals ethereum.constantinople.vm.memory.globals "buffer_read".
+Axiom ethereum_constantinople_vm_memory_imports :
+  AreImported globals "ethereum.constantinople.vm.memory" [ "buffer_read" ].
 
 Definition GQUADDIVISOR : Value.t := M.run ltac:(M.monadic (
   M.call (|

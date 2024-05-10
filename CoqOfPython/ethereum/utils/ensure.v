@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.utils.ensure".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,11 +17,8 @@ Introduction
 Functions that simplify checking assertions and raising exceptions.
 ".
 
-Require typing.
-Axiom typing_Type_ :
-  IsGlobalAlias globals typing.globals "Type_".
-Axiom typing_Union :
-  IsGlobalAlias globals typing.globals "Union".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Type"; "Union" ].
 
 Definition ensure : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -53,5 +50,5 @@ Definition ensure : Value.t -> Value.t -> M :=
       )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
-    let _ := M.raise (| Some(M.get_name (| globals, "exception" |)) |) in
+    let _ := M.raise (| Some (M.get_name (| globals, "exception" |)) |) in
     M.pure Constant.None_)).

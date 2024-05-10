@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.homestead.vm.__init__".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -18,47 +18,26 @@ The abstract computer which runs the code stored in an
 `.fork_types.Account`.
 ".
 
-Require dataclasses.
-Axiom dataclasses_dataclass :
-  IsGlobalAlias globals dataclasses.globals "dataclass".
+Axiom dataclasses_imports :
+  AreImported globals "dataclasses" [ "dataclass" ].
 
-Require typing.
-Axiom typing_List :
-  IsGlobalAlias globals typing.globals "List".
-Axiom typing_Optional :
-  IsGlobalAlias globals typing.globals "Optional".
-Axiom typing_Set_ :
-  IsGlobalAlias globals typing.globals "Set_".
-Axiom typing_Tuple :
-  IsGlobalAlias globals typing.globals "Tuple".
-Axiom typing_Union :
-  IsGlobalAlias globals typing.globals "Union".
+Axiom typing_imports :
+  AreImported globals "typing" [ "List"; "Optional"; "Set"; "Tuple"; "Union" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Bytes0 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes0".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Bytes0"; "Uint" ].
 
-Require ethereum.crypto.hash.
-Axiom ethereum_crypto_hash_Hash32 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "Hash32".
+Axiom ethereum_crypto_hash_imports :
+  AreImported globals "ethereum.crypto.hash" [ "Hash32" ].
 
-Require ethereum.homestead.blocks.
-Axiom ethereum_homestead_blocks_Log :
-  IsGlobalAlias globals ethereum.homestead.blocks.globals "Log".
+Axiom ethereum_homestead_blocks_imports :
+  AreImported globals "ethereum.homestead.blocks" [ "Log" ].
 
-Require ethereum.homestead.fork_types.
-Axiom ethereum_homestead_fork_types_Address :
-  IsGlobalAlias globals ethereum.homestead.fork_types.globals "Address".
+Axiom ethereum_homestead_fork_types_imports :
+  AreImported globals "ethereum.homestead.fork_types" [ "Address" ].
 
-Require ethereum.homestead.state.
-Axiom ethereum_homestead_state_State :
-  IsGlobalAlias globals ethereum.homestead.state.globals "State".
+Axiom ethereum_homestead_state_imports :
+  AreImported globals "ethereum.homestead.state" [ "State" ].
 
 Definition __all__ : Value.t := M.run ltac:(M.monadic (
   make_tuple [ Constant.str "Environment"; Constant.str "Evm"; Constant.str "Message" ]

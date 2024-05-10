@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.istanbul.vm.precompiled_contracts.modexp".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,25 +17,17 @@ Introduction
 Implementation of the `MODEXP` precompiled contract.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Uint" ].
 
-Require ethereum.istanbul.vm.__init__.
-Axiom ethereum_istanbul_vm___init___Evm :
-  IsGlobalAlias globals ethereum.istanbul.vm.__init__.globals "Evm".
+Axiom ethereum_istanbul_vm_imports :
+  AreImported globals "ethereum.istanbul.vm" [ "Evm" ].
 
-Require ethereum.istanbul.vm.gas.
-Axiom ethereum_istanbul_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.istanbul.vm.gas.globals "charge_gas".
+Axiom ethereum_istanbul_vm_gas_imports :
+  AreImported globals "ethereum.istanbul.vm.gas" [ "charge_gas" ].
 
-Require ethereum.istanbul.vm.memory.
-Axiom ethereum_istanbul_vm_memory_buffer_read :
-  IsGlobalAlias globals ethereum.istanbul.vm.memory.globals "buffer_read".
+Axiom ethereum_istanbul_vm_memory_imports :
+  AreImported globals "ethereum.istanbul.vm.memory" [ "buffer_read" ].
 
 Definition GQUADDIVISOR : Value.t := M.run ltac:(M.monadic (
   M.call (|

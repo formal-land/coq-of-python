@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.homestead.vm.instructions.__init__".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -20,59 +20,44 @@ implementations.
 
 (* At top_level_stmt: unsupported node type: Import *)
 
-Require typing.
-Axiom typing_Callable :
-  IsGlobalAlias globals typing.globals "Callable".
-Axiom typing_Dict :
-  IsGlobalAlias globals typing.globals "Dict".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Callable"; "Dict" ].
 
-Require ethereum.homestead.vm.instructions.__init__.
-Axiom ethereum_homestead_vm_instructions___init___arithmetic :
-  IsGlobalAlias globals ethereum.homestead.vm.instructions.__init__.globals "arithmetic".
+Axiom ethereum_homestead_vm_instructions_imports :
+  AreImported globals "ethereum.homestead.vm.instructions" [ "arithmetic" ].
 
-Require ethereum.homestead.vm.instructions.__init__.
-Axiom ethereum_homestead_vm_instructions___init___bitwise :
-  IsGlobalAlias globals ethereum.homestead.vm.instructions.__init__.globals "bitwise".
+Axiom ethereum_homestead_vm_instructions_imports :
+  AreImported globals "ethereum.homestead.vm.instructions" [ "bitwise" ].
 
-Require ethereum.homestead.vm.instructions.__init__.
-Axiom ethereum_homestead_vm_instructions___init___block :
-  IsGlobalAlias globals ethereum.homestead.vm.instructions.__init__.globals "block".
+Axiom ethereum_homestead_vm_instructions_imports :
+  AreImported globals "ethereum.homestead.vm.instructions" [ "block" ].
 
-Require ethereum.homestead.vm.instructions.__init__.
-Axiom ethereum_homestead_vm_instructions___init___comparison :
-  IsGlobalAlias globals ethereum.homestead.vm.instructions.__init__.globals "comparison".
+Axiom ethereum_homestead_vm_instructions_imports :
+  AreImported globals "ethereum.homestead.vm.instructions" [ "comparison" ].
 
-Require ethereum.homestead.vm.instructions.__init__.
-Axiom ethereum_homestead_vm_instructions___init___control_flow :
-  IsGlobalAlias globals ethereum.homestead.vm.instructions.__init__.globals "control_flow".
+Axiom ethereum_homestead_vm_instructions_imports :
+  AreImported globals "ethereum.homestead.vm.instructions" [ "control_flow" ].
 
-Require ethereum.homestead.vm.instructions.__init__.
-Axiom ethereum_homestead_vm_instructions___init___environment :
-  IsGlobalAlias globals ethereum.homestead.vm.instructions.__init__.globals "environment".
+Axiom ethereum_homestead_vm_instructions_imports :
+  AreImported globals "ethereum.homestead.vm.instructions" [ "environment" ].
 
-Require ethereum.homestead.vm.instructions.__init__.
-Axiom ethereum_homestead_vm_instructions___init___keccak :
-  IsGlobalAlias globals ethereum.homestead.vm.instructions.__init__.globals "keccak".
+Axiom ethereum_homestead_vm_instructions_imports :
+  AreImported globals "ethereum.homestead.vm.instructions" [ "keccak" ].
 
-Require ethereum.homestead.vm.instructions.__init__.
-Axiom ethereum_homestead_vm_instructions___init___log :
-  IsGlobalAlias globals ethereum.homestead.vm.instructions.__init__.globals "log".
+Axiom ethereum_homestead_vm_instructions_imports :
+  AreImported globals "ethereum.homestead.vm.instructions" [ "log" ].
 
-Require ethereum.homestead.vm.instructions.__init__.
-Axiom ethereum_homestead_vm_instructions___init___memory :
-  IsGlobalAlias globals ethereum.homestead.vm.instructions.__init__.globals "memory".
+Axiom ethereum_homestead_vm_instructions_imports :
+  AreImported globals "ethereum.homestead.vm.instructions" [ "memory" ].
 
-Require ethereum.homestead.vm.instructions.__init__.
-Axiom ethereum_homestead_vm_instructions___init___stack :
-  IsGlobalAlias globals ethereum.homestead.vm.instructions.__init__.globals "stack".
+Axiom ethereum_homestead_vm_instructions_imports :
+  AreImported globals "ethereum.homestead.vm.instructions" [ "stack" ].
 
-Require ethereum.homestead.vm.instructions.__init__.
-Axiom ethereum_homestead_vm_instructions___init___storage :
-  IsGlobalAlias globals ethereum.homestead.vm.instructions.__init__.globals "storage".
+Axiom ethereum_homestead_vm_instructions_imports :
+  AreImported globals "ethereum.homestead.vm.instructions" [ "storage" ].
 
-Require ethereum.homestead.vm.instructions.__init__.
-Axiom ethereum_homestead_vm_instructions___init___system :
-  IsGlobalAlias globals ethereum.homestead.vm.instructions.__init__.globals "system".
+Axiom ethereum_homestead_vm_instructions_imports :
+  AreImported globals "ethereum.homestead.vm.instructions" [ "system" ].
 
 Definition Ops : Value.t :=
   builtins.make_klass

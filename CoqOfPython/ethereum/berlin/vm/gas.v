@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.berlin.vm.gas".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,39 +17,26 @@ Introduction
 EVM gas constants and calculators.
 ".
 
-Require dataclasses.
-Axiom dataclasses_dataclass :
-  IsGlobalAlias globals dataclasses.globals "dataclass".
+Axiom dataclasses_imports :
+  AreImported globals "dataclasses" [ "dataclass" ].
 
-Require typing.
-Axiom typing_List :
-  IsGlobalAlias globals typing.globals "List".
-Axiom typing_Tuple :
-  IsGlobalAlias globals typing.globals "Tuple".
+Axiom typing_imports :
+  AreImported globals "typing" [ "List"; "Tuple" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Uint" ].
 
-Require ethereum.trace.
-Axiom ethereum_trace_GasAndRefund :
-  IsGlobalAlias globals ethereum.trace.globals "GasAndRefund".
-Axiom ethereum_trace_evm_trace :
-  IsGlobalAlias globals ethereum.trace.globals "evm_trace".
+Axiom ethereum_trace_imports :
+  AreImported globals "ethereum.trace" [ "GasAndRefund"; "evm_trace" ].
 
-Require ethereum.utils.numeric.
-Axiom ethereum_utils_numeric_ceil32 :
-  IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
+Axiom ethereum_utils_numeric_imports :
+  AreImported globals "ethereum.utils.numeric" [ "ceil32" ].
 
-Require ethereum.berlin.vm.__init__.
-Axiom ethereum_berlin_vm___init___Evm :
-  IsGlobalAlias globals ethereum.berlin.vm.__init__.globals "Evm".
+Axiom ethereum_berlin_vm_imports :
+  AreImported globals "ethereum.berlin.vm" [ "Evm" ].
 
-Require ethereum.berlin.vm.exceptions.
-Axiom ethereum_berlin_vm_exceptions_OutOfGasError :
-  IsGlobalAlias globals ethereum.berlin.vm.exceptions.globals "OutOfGasError".
+Axiom ethereum_berlin_vm_exceptions_imports :
+  AreImported globals "ethereum.berlin.vm.exceptions" [ "OutOfGasError" ].
 
 Definition GAS_JUMPDEST : Value.t := M.run ltac:(M.monadic (
   M.call (|
@@ -518,7 +505,7 @@ Definition charge_gas : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let _ := M.raise (| Some(M.get_name (| globals, "OutOfGasError" |)) |) in
+        let _ := M.raise (| Some (M.get_name (| globals, "OutOfGasError" |)) |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
@@ -635,105 +622,114 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |) in
-    For make_tuple [ M.get_name (| globals, "start_position" |); M.get_name (| globals, "size" |) ] in M.get_name (| globals, "extensions" |) do
-      let _ :=
-        (* if *)
-        M.if_then_else (|
-          Compare.eq (|
-            M.get_name (| globals, "size" |),
-            Constant.int 0
-          |),
-        (* then *)
+    let _ :=
+      M.for_ (|
+        make_tuple [ M.get_name (| globals, "start_position" |); M.get_name (| globals, "size" |) ],
+        M.get_name (| globals, "extensions" |),
         ltac:(M.monadic (
-          let _ := M.continue (| |) in
-          M.pure Constant.None_
-        (* else *)
-        )), ltac:(M.monadic (
-          M.pure Constant.None_
-        )) |) in
-      let before_size :=
-        M.call (|
-          M.get_name (| globals, "ceil32" |),
-          make_list [
-            M.get_name (| globals, "current_size" |)
-          ],
-          make_dict []
-        |) in
-      let after_size :=
-        M.call (|
-          M.get_name (| globals, "ceil32" |),
-          make_list [
-            BinOp.add (|
-              M.call (|
-                M.get_name (| globals, "Uint" |),
-                make_list [
-                  M.get_name (| globals, "start_position" |)
-                ],
-                make_dict []
+          let _ :=
+            (* if *)
+            M.if_then_else (|
+              Compare.eq (|
+                M.get_name (| globals, "size" |),
+                Constant.int 0
               |),
-              M.call (|
-                M.get_name (| globals, "Uint" |),
-                make_list [
-                  M.get_name (| globals, "size" |)
-                ],
-                make_dict []
-              |)
-            |)
-          ],
-          make_dict []
-        |) in
-      let _ :=
-        (* if *)
-        M.if_then_else (|
-          Compare.lt_e (|
-            M.get_name (| globals, "after_size" |),
-            M.get_name (| globals, "before_size" |)
-          |),
-        (* then *)
+            (* then *)
+            ltac:(M.monadic (
+              let _ := M.continue (| |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
+              M.pure Constant.None_
+            )) |) in
+          let before_size :=
+            M.call (|
+              M.get_name (| globals, "ceil32" |),
+              make_list [
+                M.get_name (| globals, "current_size" |)
+              ],
+              make_dict []
+            |) in
+          let after_size :=
+            M.call (|
+              M.get_name (| globals, "ceil32" |),
+              make_list [
+                BinOp.add (|
+                  M.call (|
+                    M.get_name (| globals, "Uint" |),
+                    make_list [
+                      M.get_name (| globals, "start_position" |)
+                    ],
+                    make_dict []
+                  |),
+                  M.call (|
+                    M.get_name (| globals, "Uint" |),
+                    make_list [
+                      M.get_name (| globals, "size" |)
+                    ],
+                    make_dict []
+                  |)
+                |)
+              ],
+              make_dict []
+            |) in
+          let _ :=
+            (* if *)
+            M.if_then_else (|
+              Compare.lt_e (|
+                M.get_name (| globals, "after_size" |),
+                M.get_name (| globals, "before_size" |)
+              |),
+            (* then *)
+            ltac:(M.monadic (
+              let _ := M.continue (| |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
+              M.pure Constant.None_
+            )) |) in
+          let size_to_extend := BinOp.add
+            BinOp.sub (|
+    M.get_name (| globals, "after_size" |),
+    M.get_name (| globals, "before_size" |)
+  |)
+            BinOp.sub (|
+    M.get_name (| globals, "after_size" |),
+    M.get_name (| globals, "before_size" |)
+  |) in
+          let already_paid :=
+            M.call (|
+              M.get_name (| globals, "calculate_memory_gas_cost" |),
+              make_list [
+                M.get_name (| globals, "before_size" |)
+              ],
+              make_dict []
+            |) in
+          let total_cost :=
+            M.call (|
+              M.get_name (| globals, "calculate_memory_gas_cost" |),
+              make_list [
+                M.get_name (| globals, "after_size" |)
+              ],
+              make_dict []
+            |) in
+          let to_be_paid := BinOp.add
+            BinOp.sub (|
+    M.get_name (| globals, "total_cost" |),
+    M.get_name (| globals, "already_paid" |)
+  |)
+            BinOp.sub (|
+    M.get_name (| globals, "total_cost" |),
+    M.get_name (| globals, "already_paid" |)
+  |) in
+          let current_size :=
+            M.get_name (| globals, "after_size" |) in
+          M.pure Constant.None_
+        )),
         ltac:(M.monadic (
-          let _ := M.continue (| |) in
           M.pure Constant.None_
-        (* else *)
-        )), ltac:(M.monadic (
-          M.pure Constant.None_
-        )) |) in
-      let size_to_extend := BinOp.add
-        BinOp.sub (|
-    M.get_name (| globals, "after_size" |),
-    M.get_name (| globals, "before_size" |)
-  |)
-        BinOp.sub (|
-    M.get_name (| globals, "after_size" |),
-    M.get_name (| globals, "before_size" |)
-  |) in
-      let already_paid :=
-        M.call (|
-          M.get_name (| globals, "calculate_memory_gas_cost" |),
-          make_list [
-            M.get_name (| globals, "before_size" |)
-          ],
-          make_dict []
-        |) in
-      let total_cost :=
-        M.call (|
-          M.get_name (| globals, "calculate_memory_gas_cost" |),
-          make_list [
-            M.get_name (| globals, "after_size" |)
-          ],
-          make_dict []
-        |) in
-      let to_be_paid := BinOp.add
-        BinOp.sub (|
-    M.get_name (| globals, "total_cost" |),
-    M.get_name (| globals, "already_paid" |)
-  |)
-        BinOp.sub (|
-    M.get_name (| globals, "total_cost" |),
-    M.get_name (| globals, "already_paid" |)
-  |) in
-      let current_size :=
-        M.get_name (| globals, "after_size" |) in
-    EndFor.
+        ))
+    |) in
     let _ := M.return_ (|
       M.call (|
         M.get_name (| globals, "ExtendMemory" |),

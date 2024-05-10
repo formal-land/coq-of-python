@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.paris.vm.instructions.stack".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,39 +17,26 @@ Introduction
 Implementations of the EVM stack related instructions.
 ".
 
-Require functools.
-Axiom functools_partial :
-  IsGlobalAlias globals functools.globals "partial".
+Axiom functools_imports :
+  AreImported globals "functools" [ "partial" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256" ].
 
-Require ethereum.utils.ensure.
-Axiom ethereum_utils_ensure_ensure :
-  IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
+Axiom ethereum_utils_ensure_imports :
+  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
 
-Require ethereum.paris.vm.__init__.
-Axiom ethereum_paris_vm___init___Evm :
-  IsGlobalAlias globals ethereum.paris.vm.__init__.globals "Evm".
-Axiom ethereum_paris_vm___init___stack :
-  IsGlobalAlias globals ethereum.paris.vm.__init__.globals "stack".
+Axiom ethereum_paris_vm_imports :
+  AreImported globals "ethereum.paris.vm" [ "Evm"; "stack" ].
 
-Require ethereum.paris.vm.exceptions.
-Axiom ethereum_paris_vm_exceptions_StackUnderflowError :
-  IsGlobalAlias globals ethereum.paris.vm.exceptions.globals "StackUnderflowError".
+Axiom ethereum_paris_vm_exceptions_imports :
+  AreImported globals "ethereum.paris.vm.exceptions" [ "StackUnderflowError" ].
 
-Require ethereum.paris.vm.gas.
-Axiom ethereum_paris_vm_gas_GAS_BASE :
-  IsGlobalAlias globals ethereum.paris.vm.gas.globals "GAS_BASE".
-Axiom ethereum_paris_vm_gas_GAS_VERY_LOW :
-  IsGlobalAlias globals ethereum.paris.vm.gas.globals "GAS_VERY_LOW".
-Axiom ethereum_paris_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.paris.vm.gas.globals "charge_gas".
+Axiom ethereum_paris_vm_gas_imports :
+  AreImported globals "ethereum.paris.vm.gas" [ "GAS_BASE"; "GAS_VERY_LOW"; "charge_gas" ].
 
-Require ethereum.paris.vm.memory.
-Axiom ethereum_paris_vm_memory_buffer_read :
-  IsGlobalAlias globals ethereum.paris.vm.memory.globals "buffer_read".
+Axiom ethereum_paris_vm_memory_imports :
+  AreImported globals "ethereum.paris.vm.memory" [ "buffer_read" ].
 
 Definition pop : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -203,19 +190,22 @@ Definition dup_n : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let data_to_duplicate :=
-      M.get_subscript (| M.get_field (| M.get_name (| globals, "evm" |), "stack" |), BinOp.sub (|
+      M.get_subscript (|
+        M.get_field (| M.get_name (| globals, "evm" |), "stack" |),
         BinOp.sub (|
-          M.call (|
-            M.get_name (| globals, "len" |),
-            make_list [
-              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
-            ],
-            make_dict []
+          BinOp.sub (|
+            M.call (|
+              M.get_name (| globals, "len" |),
+              make_list [
+                M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+              ],
+              make_dict []
+            |),
+            Constant.int 1
           |),
-          Constant.int 1
-        |),
-        M.get_name (| globals, "item_number" |)
-      |) |) in
+          M.get_name (| globals, "item_number" |)
+        |)
+      |) in
     let _ := M.call (|
     M.get_field (| M.get_name (| globals, "stack" |), "push" |),
     make_list [
@@ -278,14 +268,26 @@ Definition swap_n : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let _ := M.assign (|
-      make_tuple [ M.get_subscript (| M.get_field (| M.get_name (| globals, "evm" |), "stack" |), UnOp.sub (| Constant.int 1 |) |); M.get_subscript (| M.get_field (| M.get_name (| globals, "evm" |), "stack" |), BinOp.sub (|
-        UnOp.sub (| Constant.int 1 |),
-        M.get_name (| globals, "item_number" |)
-      |) |) ],
-      make_tuple [ M.get_subscript (| M.get_field (| M.get_name (| globals, "evm" |), "stack" |), BinOp.sub (|
-        UnOp.sub (| Constant.int 1 |),
-        M.get_name (| globals, "item_number" |)
-      |) |); M.get_subscript (| M.get_field (| M.get_name (| globals, "evm" |), "stack" |), UnOp.sub (| Constant.int 1 |) |) ]
+      make_tuple [ M.get_subscript (|
+        M.get_field (| M.get_name (| globals, "evm" |), "stack" |),
+        UnOp.sub (| Constant.int 1 |)
+      |); M.get_subscript (|
+        M.get_field (| M.get_name (| globals, "evm" |), "stack" |),
+        BinOp.sub (|
+          UnOp.sub (| Constant.int 1 |),
+          M.get_name (| globals, "item_number" |)
+        |)
+      |) ],
+      make_tuple [ M.get_subscript (|
+        M.get_field (| M.get_name (| globals, "evm" |), "stack" |),
+        BinOp.sub (|
+          UnOp.sub (| Constant.int 1 |),
+          M.get_name (| globals, "item_number" |)
+        |)
+      |); M.get_subscript (|
+        M.get_field (| M.get_name (| globals, "evm" |), "stack" |),
+        UnOp.sub (| Constant.int 1 |)
+      |) ]
     |) in
     let _ := M.assign_op (|
       BinOp.add,

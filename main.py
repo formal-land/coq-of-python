@@ -80,36 +80,21 @@ def generate_mod(node: ast.mod):
         return generate_error("mod", node)
 
 
-def get_require_path_from_path(path: str) -> str:
-    # Check if it is a folder
-    if os.path.isdir(path):
-        require_path = path + "/__init__"
-    else:
-        require_path = path
-
-    return require_path.replace("/", ".")
-
-
-def get_require_path(node: ast.ImportFrom) -> str:
+def get_globals_of_import(node: ast.ImportFrom) -> str:
     module = node.module.replace(".", "/") if node.module is not None else ""
 
-    # If this is an external package
-    if node.level == 0 and module.split("/")[0] != "ethereum":
+    # If this is an absolute import
+    if node.level == 0:
         return module.replace("/", ".")
 
-    # Otherwise we map the module to an actual file system path
-    # Absolute path
-    if node.level == 0:
-        return get_require_path_from_path(module)
-
-    # Relative path
+    # If this is a relative path
     actual_path = input_file_name
     for _ in range(node.level):
         actual_path = os.path.dirname(actual_path)
     if module != "":
         actual_path += "/" + module
 
-    return get_require_path_from_path(actual_path)
+    return actual_path.replace("/", ".")
 
 
 def generate_top_level_stmt(node: ast.stmt):
@@ -186,17 +171,13 @@ def generate_top_level_stmt(node: ast.stmt):
     elif isinstance(node, ast.Import):
         return generate_error("top_level_stmt", node)
     elif isinstance(node, ast.ImportFrom):
-        module = get_require_path(node)
+        module = get_globals_of_import(node)
         snake_module = module.replace(".", "_")
 
-        return f"Require {module}.\n" + \
-            "\n".join(
-                f"Axiom {snake_module}_{generate_name(alias.name)} :\n" +
-                generate_indent(1) +
-                f"IsGlobalAlias globals {module}.globals " +
-                f"\"{generate_name(alias.name)}\"."
-                for alias in node.names
-            )
+        return f"Axiom {snake_module}_imports :\n" + \
+            generate_indent(1) + \
+            f"AreImported globals \"{module}\" [ " + \
+            "; ".join(f"\"{alias.name}\"" for alias in node.names) + " ]."
     elif isinstance(node, ast.Global):
         return generate_error("top_level_stmt", node)
     elif isinstance(node, ast.Nonlocal):
@@ -305,16 +286,30 @@ def generate_stmt(indent, node: ast.stmt):
     elif isinstance(node, ast.AnnAssign):
         return generate_error("stmt", node)
     elif isinstance(node, ast.For):
-        return generate_indent(indent) + "For " + generate_expr(1, False, node.target) + " in " + \
-            generate_expr(1, False, node.iter) + " do\n" + \
-            "\n".join(generate_stmt(indent + 1, stmt) for stmt in node.body) + "\n" + \
-            generate_indent(indent) + "EndFor."
+        return generate_indent(indent) + "let _ :=\n" + \
+            generate_indent(indent + 1) + "M.for_ (|\n" + \
+            generate_indent(indent + 2) + generate_expr(2, False, node.target) + ",\n" + \
+            generate_indent(indent + 2) + generate_expr(2, False, node.iter) + ",\n" + \
+            generate_indent(indent + 2) + "ltac:(M.monadic (\n" + \
+            generate_stmts(indent + 3, node.body) + "\n" + \
+            generate_indent(indent + 2) + ")),\n" + \
+            generate_indent(indent + 2) + "ltac:(M.monadic (\n" + \
+            generate_stmts(indent + 3, node.orelse) + "\n" + \
+            generate_indent(indent + 2) + "))\n" + \
+            generate_indent(indent) + "|) in"
     elif isinstance(node, ast.AsyncFor):
         return generate_error("stmt", node)
     elif isinstance(node, ast.While):
-        return generate_indent(indent) + "While " + generate_expr(1, False, node.test) + " do\n" + \
-            "\n".join(generate_stmt(indent + 1, stmt) for stmt in node.body) + "\n" + \
-            generate_indent(indent) + "EndWhile."
+        return generate_indent(indent) + "let _ :=\n" + \
+            generate_indent(indent + 1) + "M.while (|\n" + \
+            generate_indent(indent + 2) + generate_expr(2, False, node.test) + ",\n" + \
+            generate_indent(indent + 2) + "ltac:(M.monadic (\n" + \
+            generate_stmts(indent + 3, node.body) + "\n" + \
+            generate_indent(indent + 2) + ")),\n" + \
+            generate_indent(indent + 2) + "ltac:(M.monadic (\n" + \
+            generate_stmts(indent + 3, node.orelse) + "\n" + \
+            generate_indent(indent + 2) + "))\n" + \
+            generate_indent(indent) + "|) in"
     elif isinstance(node, ast.If):
         return generate_indent(indent) + "let _ :=\n" + \
             generate_if_then_else(indent + 1, node.test, node.body, node.orelse) + \
@@ -327,7 +322,7 @@ def generate_stmt(indent, node: ast.stmt):
         return generate_error("stmt", node)
     elif isinstance(node, ast.Raise):
         return generate_indent(indent) + "let _ := M.raise (| " + \
-            ("Some(" + generate_expr(indent, False, node.exc) + ")"
+            ("Some (" + generate_expr(indent, False, node.exc) + ")"
              if node.exc is not None
              else "None") + \
             " |) in"
@@ -570,9 +565,37 @@ def generate_expr(indent, is_with_paren, node: ast.expr):
             f"M.get_field (| {generate_expr(indent, False, node.value)}, \"{node.attr}\" |)"
         )
     elif isinstance(node, ast.Subscript):
+        slice = node.slice
+
+        if isinstance(slice, ast.Slice):
+            return paren(
+                is_with_paren,
+                "M.slice (|\n" +
+                generate_indent(indent + 1) +
+                generate_expr(indent + 1, False, node.value) + ",\n" +
+                generate_indent(indent + 1) +
+                (generate_expr(indent + 1, False, slice.lower)
+                 if slice.lower is not None
+                 else "Constant.None_") + ",\n" +
+                generate_indent(indent + 1) +
+                (generate_expr(indent + 1, False, slice.upper)
+                 if slice.upper is not None
+                 else "Constant.None_") + ",\n" +
+                generate_indent(indent + 1) +
+                (generate_expr(indent + 1, False, slice.step)
+                 if slice.step is not None
+                 else "Constant.None_") + "\n" +
+                generate_indent(indent) + "|)"
+            )
+
         return paren(
             is_with_paren,
-            f"M.get_subscript (| {generate_expr(indent, False, node.value)}, {generate_expr(indent, False, node.slice)} |)"
+            "M.get_subscript (|\n" +
+            generate_indent(indent + 1) +
+            generate_expr(indent + 1, False, node.value) + ",\n" +
+            generate_indent(indent + 1) +
+            generate_expr(indent + 1, False, slice) + "\n" +
+            generate_indent(indent) + "|)"
         )
     elif isinstance(node, ast.Starred):
         # We should handle this kind of expression as part of the enclosing expression
@@ -592,6 +615,8 @@ def generate_expr(indent, is_with_paren, node: ast.expr):
             " ]"
         )
     elif isinstance(node, ast.Slice):
+        # This case is supposed to only appear as part of a Subscript node, so we
+        # do not handle it here.
         return paren(
             is_with_paren,
             "M.slice (| " +
@@ -679,7 +704,7 @@ def generate_cmpop(node):
     elif isinstance(node, ast.IsNot):
         return "Compare.is_not"
     elif isinstance(node, ast.In):
-        return "Compare.in"
+        return "Compare.in_"
     elif isinstance(node, ast.NotIn):
         return "Compare.not_in"
     else:
@@ -697,10 +722,12 @@ output_file_name = "../../translate-ethereum-specs/CoqOfPython/" + \
 file_content = open(input_file_name).read()
 parsed_tree = ast.parse(file_content)
 
+globals = input_file_name.replace("/", ".").replace(".py", "")
+
 # Generate Coq code from the AST
 coq_code = f"""Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "{globals}".
 
 {generate_mod(parsed_tree)}
 """
@@ -710,7 +737,11 @@ output_directory = os.path.dirname(output_file_name)
 if not os.path.exists(output_directory):
     os.makedirs(output_directory)
 
-# Output the generated Coq code
+# Output the generated Coq code only if the content changed
+if os.path.exists(output_file_name):
+    with open(output_file_name, "r") as output_file:
+        if output_file.read() == coq_code:
+            sys.exit(0)
 with open(output_file_name, "w") as output_file:
     output_file.write(coq_code)
 

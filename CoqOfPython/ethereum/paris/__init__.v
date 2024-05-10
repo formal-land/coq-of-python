@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.paris.__init__".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -12,9 +12,8 @@ marks the integration of the [consensus layer] with the execution layer
 [consensus layer]: https://github.com/ethereum/consensus-specs
 ".
 
-Require ethereum.fork_criteria.
-Axiom ethereum_fork_criteria_ByBlockNumber :
-  IsGlobalAlias globals ethereum.fork_criteria.globals "ByBlockNumber".
+Axiom ethereum_fork_criteria_imports :
+  AreImported globals "ethereum.fork_criteria" [ "ByBlockNumber" ].
 
 Definition FORK_CRITERIA : Value.t := M.run ltac:(M.monadic (
   M.call (|

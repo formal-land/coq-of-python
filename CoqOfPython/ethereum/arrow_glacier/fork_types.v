@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.arrow_glacier.fork_types".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,33 +17,17 @@ Introduction
 Types re-used throughout the specification, which are specific to Ethereum.
 ".
 
-Require dataclasses.
-Axiom dataclasses_dataclass :
-  IsGlobalAlias globals dataclasses.globals "dataclass".
+Axiom dataclasses_imports :
+  AreImported globals "dataclasses" [ "dataclass" ].
 
-Require ethereum.__init__.
-Axiom ethereum___init___rlp :
-  IsGlobalAlias globals ethereum.__init__.globals "rlp".
+Axiom ethereum_imports :
+  AreImported globals "ethereum" [ "rlp" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Bytes20 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes20".
-Axiom ethereum_base_types_Bytes256 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes256".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
-Axiom ethereum_base_types_slotted_freezable :
-  IsGlobalAlias globals ethereum.base_types.globals "slotted_freezable".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Bytes20"; "Bytes256"; "Uint"; "slotted_freezable" ].
 
-Require ethereum.crypto.hash.
-Axiom ethereum_crypto_hash_Hash32 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "Hash32".
-Axiom ethereum_crypto_hash_keccak256 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "keccak256".
+Axiom ethereum_crypto_hash_imports :
+  AreImported globals "ethereum.crypto.hash" [ "Hash32"; "keccak256" ].
 
 Definition Address : Value.t := M.run ltac:(M.monadic (
   M.get_name (| globals, "Bytes20" |)

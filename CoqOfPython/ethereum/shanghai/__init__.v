@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.shanghai.__init__".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -9,9 +9,8 @@ push-zero EVM instruction, limits the maximum size of initialization
 bytecode, and deprecates the self-destruct EVM instruction.
 ".
 
-Require ethereum.fork_criteria.
-Axiom ethereum_fork_criteria_ByTimestamp :
-  IsGlobalAlias globals ethereum.fork_criteria.globals "ByTimestamp".
+Axiom ethereum_fork_criteria_imports :
+  AreImported globals "ethereum.fork_criteria" [ "ByTimestamp" ].
 
 Definition FORK_CRITERIA : Value.t := M.run ltac:(M.monadic (
   M.call (|

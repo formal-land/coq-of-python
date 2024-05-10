@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.cancun.vm.instructions.comparison".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,25 +17,17 @@ Introduction
 Implementations of the EVM Comparison instructions.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256" ].
 
-Require ethereum.cancun.vm.__init__.
-Axiom ethereum_cancun_vm___init___Evm :
-  IsGlobalAlias globals ethereum.cancun.vm.__init__.globals "Evm".
+Axiom ethereum_cancun_vm_imports :
+  AreImported globals "ethereum.cancun.vm" [ "Evm" ].
 
-Require ethereum.cancun.vm.gas.
-Axiom ethereum_cancun_vm_gas_GAS_VERY_LOW :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_VERY_LOW".
-Axiom ethereum_cancun_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "charge_gas".
+Axiom ethereum_cancun_vm_gas_imports :
+  AreImported globals "ethereum.cancun.vm.gas" [ "GAS_VERY_LOW"; "charge_gas" ].
 
-Require ethereum.cancun.vm.stack.
-Axiom ethereum_cancun_vm_stack_pop :
-  IsGlobalAlias globals ethereum.cancun.vm.stack.globals "pop".
-Axiom ethereum_cancun_vm_stack_push :
-  IsGlobalAlias globals ethereum.cancun.vm.stack.globals "push".
+Axiom ethereum_cancun_vm_stack_imports :
+  AreImported globals "ethereum.cancun.vm.stack" [ "pop"; "push" ].
 
 Definition less_than : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

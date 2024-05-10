@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.homestead.vm.instructions.system".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,71 +17,29 @@ Introduction
 Implementations of the EVM system related instructions.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes0 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes0".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes0"; "Uint" ].
 
-Require ethereum.homestead.fork_types.
-Axiom ethereum_homestead_fork_types_Address :
-  IsGlobalAlias globals ethereum.homestead.fork_types.globals "Address".
+Axiom ethereum_homestead_fork_types_imports :
+  AreImported globals "ethereum.homestead.fork_types" [ "Address" ].
 
-Require ethereum.homestead.state.
-Axiom ethereum_homestead_state_account_has_code_or_nonce :
-  IsGlobalAlias globals ethereum.homestead.state.globals "account_has_code_or_nonce".
-Axiom ethereum_homestead_state_get_account :
-  IsGlobalAlias globals ethereum.homestead.state.globals "get_account".
-Axiom ethereum_homestead_state_increment_nonce :
-  IsGlobalAlias globals ethereum.homestead.state.globals "increment_nonce".
-Axiom ethereum_homestead_state_set_account_balance :
-  IsGlobalAlias globals ethereum.homestead.state.globals "set_account_balance".
+Axiom ethereum_homestead_state_imports :
+  AreImported globals "ethereum.homestead.state" [ "account_has_code_or_nonce"; "get_account"; "increment_nonce"; "set_account_balance" ].
 
-Require ethereum.homestead.utils.address.
-Axiom ethereum_homestead_utils_address_compute_contract_address :
-  IsGlobalAlias globals ethereum.homestead.utils.address.globals "compute_contract_address".
-Axiom ethereum_homestead_utils_address_to_address :
-  IsGlobalAlias globals ethereum.homestead.utils.address.globals "to_address".
+Axiom ethereum_homestead_utils_address_imports :
+  AreImported globals "ethereum.homestead.utils.address" [ "compute_contract_address"; "to_address" ].
 
-Require ethereum.homestead.vm.__init__.
-Axiom ethereum_homestead_vm___init___Evm :
-  IsGlobalAlias globals ethereum.homestead.vm.__init__.globals "Evm".
-Axiom ethereum_homestead_vm___init___Message :
-  IsGlobalAlias globals ethereum.homestead.vm.__init__.globals "Message".
-Axiom ethereum_homestead_vm___init___incorporate_child_on_error :
-  IsGlobalAlias globals ethereum.homestead.vm.__init__.globals "incorporate_child_on_error".
-Axiom ethereum_homestead_vm___init___incorporate_child_on_success :
-  IsGlobalAlias globals ethereum.homestead.vm.__init__.globals "incorporate_child_on_success".
+Axiom ethereum_homestead_vm_imports :
+  AreImported globals "ethereum.homestead.vm" [ "Evm"; "Message"; "incorporate_child_on_error"; "incorporate_child_on_success" ].
 
-Require ethereum.homestead.vm.gas.
-Axiom ethereum_homestead_vm_gas_GAS_CALL :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_CALL".
-Axiom ethereum_homestead_vm_gas_GAS_CREATE :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_CREATE".
-Axiom ethereum_homestead_vm_gas_GAS_ZERO :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_ZERO".
-Axiom ethereum_homestead_vm_gas_REFUND_SELF_DESTRUCT :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "REFUND_SELF_DESTRUCT".
-Axiom ethereum_homestead_vm_gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "calculate_gas_extend_memory".
-Axiom ethereum_homestead_vm_gas_calculate_message_call_gas :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "calculate_message_call_gas".
-Axiom ethereum_homestead_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "charge_gas".
+Axiom ethereum_homestead_vm_gas_imports :
+  AreImported globals "ethereum.homestead.vm.gas" [ "GAS_CALL"; "GAS_CREATE"; "GAS_ZERO"; "REFUND_SELF_DESTRUCT"; "calculate_gas_extend_memory"; "calculate_message_call_gas"; "charge_gas" ].
 
-Require ethereum.homestead.vm.memory.
-Axiom ethereum_homestead_vm_memory_memory_read_bytes :
-  IsGlobalAlias globals ethereum.homestead.vm.memory.globals "memory_read_bytes".
-Axiom ethereum_homestead_vm_memory_memory_write :
-  IsGlobalAlias globals ethereum.homestead.vm.memory.globals "memory_write".
+Axiom ethereum_homestead_vm_memory_imports :
+  AreImported globals "ethereum.homestead.vm.memory" [ "memory_read_bytes"; "memory_write" ].
 
-Require ethereum.homestead.vm.stack.
-Axiom ethereum_homestead_vm_stack_pop :
-  IsGlobalAlias globals ethereum.homestead.vm.stack.globals "pop".
-Axiom ethereum_homestead_vm_stack_push :
-  IsGlobalAlias globals ethereum.homestead.vm.stack.globals "push".
+Axiom ethereum_homestead_vm_stack_imports :
+  AreImported globals "ethereum.homestead.vm.stack" [ "pop"; "push" ].
 
 Definition create : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -624,7 +582,12 @@ Definition generic_call : Value.t -> Value.t -> M :=
     make_list [
       M.get_field (| M.get_name (| globals, "evm" |), "memory" |);
       M.get_name (| globals, "memory_output_start_position" |);
-      M.get_subscript (| M.get_field (| M.get_name (| globals, "child_evm" |), "output" |), M.slice (| Constant.None_, M.get_name (| globals, "actual_output_size" |) |) |)
+      M.slice (|
+        M.get_field (| M.get_name (| globals, "child_evm" |), "output" |),
+        Constant.None_,
+        M.get_name (| globals, "actual_output_size" |),
+        Constant.None_
+      |)
     ],
     make_dict []
   |) in
@@ -1039,20 +1002,28 @@ Definition selfdestruct : Value.t -> Value.t -> M :=
       M.get_field (| M.get_name (| globals, "evm" |), "accounts_to_delete" |) in
     let parent_evm :=
       M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "parent_evm" |) in
-    While Compare.is_not (|
-    M.get_name (| globals, "parent_evm" |),
-    Constant.None_
-  |) do
-      let _ := M.call (|
+    let _ :=
+      M.while (|
+        Compare.is_not (|
+      M.get_name (| globals, "parent_evm" |),
+      Constant.None_
+    |),
+        ltac:(M.monadic (
+          let _ := M.call (|
     M.get_field (| M.get_name (| globals, "refunded_accounts" |), "update" |),
     make_list [
       M.get_field (| M.get_name (| globals, "parent_evm" |), "accounts_to_delete" |)
     ],
     make_dict []
   |) in
-      let parent_evm :=
-        M.get_field (| M.get_field (| M.get_name (| globals, "parent_evm" |), "message" |), "parent_evm" |) in
-    EndWhile.
+          let parent_evm :=
+            M.get_field (| M.get_field (| M.get_name (| globals, "parent_evm" |), "message" |), "parent_evm" |) in
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|

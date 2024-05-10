@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.ethash".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -13,6 +13,15 @@ header, while the set itself is changed every [`epoch`].
 
 At a high level, the Ethash algorithm is as follows:
 
+1. Create a **seed** value, generated with [`generate_seed`] and based on the
+   preceding block numbers.
+1. From the seed, compute a pseudorandom **cache** with [`generate_cache`].
+1. From the cache, generate a **dataset** with [`generate_dataset`]. The
+   dataset grows over time based on [`DATASET_EPOCH_GROWTH_SIZE`].
+1. Miners hash slices of the dataset together, which is where the memory
+   hardness is introduced. Verification of the proof-of-work only requires the
+   cache to be able to recompute a much smaller subset of the full dataset.
+
 [`DATASET_EPOCH_GROWTH_SIZE`]: ref:ethereum.ethash.DATASET_EPOCH_GROWTH_SIZE
 [`generate_dataset`]: ref:ethereum.ethash.generate_dataset
 [`generate_cache`]: ref:ethereum.ethash.generate_cache
@@ -22,41 +31,17 @@ At a high level, the Ethash algorithm is as follows:
 [mem-hard]: https://en.wikipedia.org/wiki/Memory-hard_function
 ".
 
-Require typing.
-Axiom typing_Callable :
-  IsGlobalAlias globals typing.globals "Callable".
-Axiom typing_Tuple :
-  IsGlobalAlias globals typing.globals "Tuple".
-Axiom typing_Union :
-  IsGlobalAlias globals typing.globals "Union".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Callable"; "Tuple"; "Union" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U32 :
-  IsGlobalAlias globals ethereum.base_types.globals "U32".
-Axiom ethereum_base_types_Bytes8 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes8".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U32"; "Bytes8"; "Uint" ].
 
-Require ethereum.crypto.hash.
-Axiom ethereum_crypto_hash_Hash32 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "Hash32".
-Axiom ethereum_crypto_hash_Hash64 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "Hash64".
-Axiom ethereum_crypto_hash_keccak256 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "keccak256".
-Axiom ethereum_crypto_hash_keccak512 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "keccak512".
+Axiom ethereum_crypto_hash_imports :
+  AreImported globals "ethereum.crypto.hash" [ "Hash32"; "Hash64"; "keccak256"; "keccak512" ].
 
-Require ethereum.utils.numeric.
-Axiom ethereum_utils_numeric_is_prime :
-  IsGlobalAlias globals ethereum.utils.numeric.globals "is_prime".
-Axiom ethereum_utils_numeric_le_bytes_to_uint32_sequence :
-  IsGlobalAlias globals ethereum.utils.numeric.globals "le_bytes_to_uint32_sequence".
-Axiom ethereum_utils_numeric_le_uint32_sequence_to_bytes :
-  IsGlobalAlias globals ethereum.utils.numeric.globals "le_uint32_sequence_to_bytes".
-Axiom ethereum_utils_numeric_le_uint32_sequence_to_uint :
-  IsGlobalAlias globals ethereum.utils.numeric.globals "le_uint32_sequence_to_uint".
+Axiom ethereum_utils_numeric_imports :
+  AreImported globals "ethereum.utils.numeric" [ "is_prime"; "le_bytes_to_uint32_sequence"; "le_uint32_sequence_to_bytes"; "le_uint32_sequence_to_uint" ].
 
 Definition EPOCH_SIZE : Value.t := M.run ltac:(M.monadic (
   Constant.int 30000
@@ -247,26 +232,34 @@ Definition cache_size : Value.t -> Value.t -> M :=
     let size := BinOp.sub
       M.get_name (| globals, "HASH_BYTES" |)
       M.get_name (| globals, "HASH_BYTES" |) in
-    While UnOp.not (| M.call (|
-    M.get_name (| globals, "is_prime" |),
-    make_list [
-      BinOp.floor_div (|
-        M.get_name (| globals, "size" |),
-        M.get_name (| globals, "HASH_BYTES" |)
-      |)
-    ],
-    make_dict []
-  |) |) do
-      let size := BinOp.sub
-        BinOp.mult (|
+    let _ :=
+      M.while (|
+        UnOp.not (| M.call (|
+      M.get_name (| globals, "is_prime" |),
+      make_list [
+        BinOp.floor_div (|
+          M.get_name (| globals, "size" |),
+          M.get_name (| globals, "HASH_BYTES" |)
+        |)
+      ],
+      make_dict []
+    |) |),
+        ltac:(M.monadic (
+          let size := BinOp.sub
+            BinOp.mult (|
     Constant.int 2,
     M.get_name (| globals, "HASH_BYTES" |)
   |)
-        BinOp.mult (|
+            BinOp.mult (|
     Constant.int 2,
     M.get_name (| globals, "HASH_BYTES" |)
   |) in
-    EndWhile.
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let _ := M.return_ (|
       M.get_name (| globals, "size" |)
     |) in
@@ -311,26 +304,34 @@ Definition dataset_size : Value.t -> Value.t -> M :=
     let size := BinOp.sub
       M.get_name (| globals, "MIX_BYTES" |)
       M.get_name (| globals, "MIX_BYTES" |) in
-    While UnOp.not (| M.call (|
-    M.get_name (| globals, "is_prime" |),
-    make_list [
-      BinOp.floor_div (|
-        M.get_name (| globals, "size" |),
-        M.get_name (| globals, "MIX_BYTES" |)
-      |)
-    ],
-    make_dict []
-  |) |) do
-      let size := BinOp.sub
-        BinOp.mult (|
+    let _ :=
+      M.while (|
+        UnOp.not (| M.call (|
+      M.get_name (| globals, "is_prime" |),
+      make_list [
+        BinOp.floor_div (|
+          M.get_name (| globals, "size" |),
+          M.get_name (| globals, "MIX_BYTES" |)
+        |)
+      ],
+      make_dict []
+    |) |),
+        ltac:(M.monadic (
+          let size := BinOp.sub
+            BinOp.mult (|
     Constant.int 2,
     M.get_name (| globals, "MIX_BYTES" |)
   |)
-        BinOp.mult (|
+            BinOp.mult (|
     Constant.int 2,
     M.get_name (| globals, "MIX_BYTES" |)
   |) in
-    EndWhile.
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let _ := M.return_ (|
       M.get_name (| globals, "size" |)
     |) in
@@ -358,22 +359,30 @@ Definition generate_seed : Value.t -> Value.t -> M :=
         Constant.bytes "00",
         Constant.int 32
       |) in
-    While Compare.not_eq (|
-    M.get_name (| globals, "epoch_number" |),
-    Constant.int 0
-  |) do
-      let seed :=
-        M.call (|
-          M.get_name (| globals, "keccak256" |),
-          make_list [
-            M.get_name (| globals, "seed" |)
-          ],
-          make_dict []
-        |) in
-      let epoch_number := BinOp.sub
-        Constant.int 1
-        Constant.int 1 in
-    EndWhile.
+    let _ :=
+      M.while (|
+        Compare.not_eq (|
+      M.get_name (| globals, "epoch_number" |),
+      Constant.int 0
+    |),
+        ltac:(M.monadic (
+          let seed :=
+            M.call (|
+              M.get_name (| globals, "keccak256" |),
+              make_list [
+                M.get_name (| globals, "seed" |)
+              ],
+              make_dict []
+            |) in
+          let epoch_number := BinOp.sub
+            Constant.int 1
+            Constant.int 1 in
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let _ := M.return_ (|
       M.call (|
         M.get_name (| globals, "Hash32" |),
@@ -431,95 +440,142 @@ Definition generate_cache : Value.t -> Value.t -> M :=
           make_dict []
         |)
       ] in
-    For M.get_name (| globals, "index" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      Constant.int 1;
-      M.get_name (| globals, "cache_size_words" |)
-    ],
-    make_dict []
-  |) do
-      let cache_item :=
+    let _ :=
+      M.for_ (|
+        M.get_name (| globals, "index" |),
         M.call (|
-          M.get_name (| globals, "keccak512" |),
-          make_list [
-            M.get_subscript (| M.get_name (| globals, "cache" |), BinOp.sub (|
-              M.get_name (| globals, "index" |),
-              Constant.int 1
-            |) |)
-          ],
-          make_dict []
-        |) in
-      let _ := M.call (|
+      M.get_name (| globals, "range" |),
+      make_list [
+        Constant.int 1;
+        M.get_name (| globals, "cache_size_words" |)
+      ],
+      make_dict []
+    |),
+        ltac:(M.monadic (
+          let cache_item :=
+            M.call (|
+              M.get_name (| globals, "keccak512" |),
+              make_list [
+                M.get_subscript (|
+                  M.get_name (| globals, "cache" |),
+                  BinOp.sub (|
+                    M.get_name (| globals, "index" |),
+                    Constant.int 1
+                  |)
+                |)
+              ],
+              make_dict []
+            |) in
+          let _ := M.call (|
     M.get_field (| M.get_name (| globals, "cache" |), "append" |),
     make_list [
       M.get_name (| globals, "cache_item" |)
     ],
     make_dict []
   |) in
-    EndFor.
-    For M.get_name (| globals, "_" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      M.get_name (| globals, "CACHE_ROUNDS" |)
-    ],
-    make_dict []
-  |) do
-      For M.get_name (| globals, "index" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      M.get_name (| globals, "cache_size_words" |)
-    ],
-    make_dict []
-  |) do
-        let first_cache_item :=
-          M.get_subscript (| M.get_name (| globals, "cache" |), BinOp.mod_ (|
-            BinOp.add (|
-              BinOp.sub (|
-                M.get_name (| globals, "index" |),
-                Constant.int 1
-              |),
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
+    let _ :=
+      M.for_ (|
+        M.get_name (| globals, "_" |),
+        M.call (|
+      M.get_name (| globals, "range" |),
+      make_list [
+        M.get_name (| globals, "CACHE_ROUNDS" |)
+      ],
+      make_dict []
+    |),
+        ltac:(M.monadic (
+          let _ :=
+            M.for_ (|
+              M.get_name (| globals, "index" |),
               M.call (|
-                M.get_name (| globals, "int" |),
-                make_list [
-                  M.get_name (| globals, "cache_size_words" |)
-                ],
-                make_dict []
-              |)
-            |),
-            M.get_name (| globals, "cache_size_words" |)
-          |) |) in
-        let second_cache_item :=
-          M.get_subscript (| M.get_name (| globals, "cache" |), BinOp.mod_ (|
-            M.call (|
-              M.get_field (| M.get_name (| globals, "U32" |), "from_le_bytes" |),
-              make_list [
-                M.get_subscript (| M.get_subscript (| M.get_name (| globals, "cache" |), M.get_name (| globals, "index" |) |), M.slice (| Constant.int 0, Constant.int 4 |) |)
-              ],
-              make_dict []
-            |),
-            M.get_name (| globals, "cache_size_words" |)
-          |) |) in
-        let result :=
-          M.call (|
-            M.get_name (| globals, "bytes" |),
-            make_list [
-              Constant.str "(* At expr: unsupported node type: ListComp *)"
-            ],
-            make_dict []
+      M.get_name (| globals, "range" |),
+      make_list [
+        M.get_name (| globals, "cache_size_words" |)
+      ],
+      make_dict []
+    |),
+              ltac:(M.monadic (
+                let first_cache_item :=
+                  M.get_subscript (|
+                    M.get_name (| globals, "cache" |),
+                    BinOp.mod_ (|
+                      BinOp.add (|
+                        BinOp.sub (|
+                          M.get_name (| globals, "index" |),
+                          Constant.int 1
+                        |),
+                        M.call (|
+                          M.get_name (| globals, "int" |),
+                          make_list [
+                            M.get_name (| globals, "cache_size_words" |)
+                          ],
+                          make_dict []
+                        |)
+                      |),
+                      M.get_name (| globals, "cache_size_words" |)
+                    |)
+                  |) in
+                let second_cache_item :=
+                  M.get_subscript (|
+                    M.get_name (| globals, "cache" |),
+                    BinOp.mod_ (|
+                      M.call (|
+                        M.get_field (| M.get_name (| globals, "U32" |), "from_le_bytes" |),
+                        make_list [
+                          M.slice (|
+                            M.get_subscript (|
+                              M.get_name (| globals, "cache" |),
+                              M.get_name (| globals, "index" |)
+                            |),
+                            Constant.int 0,
+                            Constant.int 4,
+                            Constant.None_
+                          |)
+                        ],
+                        make_dict []
+                      |),
+                      M.get_name (| globals, "cache_size_words" |)
+                    |)
+                  |) in
+                let result :=
+                  M.call (|
+                    M.get_name (| globals, "bytes" |),
+                    make_list [
+                      Constant.str "(* At expr: unsupported node type: ListComp *)"
+                    ],
+                    make_dict []
+                  |) in
+                let _ := M.assign (|
+                  M.get_subscript (|
+                    M.get_name (| globals, "cache" |),
+                    M.get_name (| globals, "index" |)
+                  |),
+                  M.call (|
+                    M.get_name (| globals, "keccak512" |),
+                    make_list [
+                      M.get_name (| globals, "result" |)
+                    ],
+                    make_dict []
+                  |)
+                |) in
+                M.pure Constant.None_
+              )),
+              ltac:(M.monadic (
+                M.pure Constant.None_
+              ))
           |) in
-        let _ := M.assign (|
-          M.get_subscript (| M.get_name (| globals, "cache" |), M.get_name (| globals, "index" |) |),
-          M.call (|
-            M.get_name (| globals, "keccak512" |),
-            make_list [
-              M.get_name (| globals, "result" |)
-            ],
-            make_dict []
-          |)
-        |) in
-      EndFor.
-    EndFor.
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let _ := M.return_ (|
       M.call (|
         M.get_name (| globals, "tuple" |),
@@ -600,7 +656,7 @@ Definition fnv_hash : Value.t -> Value.t -> M :=
         make_list [
           Constant.str "(* At expr: unsupported node type: GeneratorExp *)"
         ],
-        make_dict [ ]
+        make_dict []
       |)
     |) in
     M.pure Constant.None_)).
@@ -629,16 +685,19 @@ Definition generate_dataset_item : Value.t -> Value.t -> M :=
               M.call (|
                 M.get_name (| globals, "le_uint32_sequence_to_uint" |),
                 make_list [
-                  M.get_subscript (| M.get_name (| globals, "cache" |), BinOp.mod_ (|
-                    M.get_name (| globals, "index" |),
-                    M.call (|
-                      M.get_name (| globals, "len" |),
-                      make_list [
-                        M.get_name (| globals, "cache" |)
-                      ],
-                      make_dict []
+                  M.get_subscript (|
+                    M.get_name (| globals, "cache" |),
+                    BinOp.mod_ (|
+                      M.get_name (| globals, "index" |),
+                      M.call (|
+                        M.get_name (| globals, "len" |),
+                        make_list [
+                          M.get_name (| globals, "cache" |)
+                        ],
+                        make_dict []
+                      |)
                     |)
-                  |) |)
+                  |)
                 ],
                 make_dict []
               |),
@@ -658,47 +717,59 @@ Definition generate_dataset_item : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |) in
-    For M.get_name (| globals, "j" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      M.get_name (| globals, "DATASET_PARENTS" |)
-    ],
-    make_dict []
-  |) do
-(* At stmt: unsupported node type: AnnAssign *)
-      let cache_index :=
-        BinOp.mod_ (|
-          M.call (|
-            M.get_name (| globals, "fnv" |),
-            make_list [
-              BinOp.bit_xor (|
-                M.get_name (| globals, "index" |),
-                M.get_name (| globals, "j" |)
-              |);
-              M.get_name (| globals, "mix_word" |)
-            ],
-            make_dict []
-          |),
-          M.call (|
-            M.get_name (| globals, "len" |),
-            make_list [
-              M.get_name (| globals, "cache" |)
-            ],
-            make_dict []
-          |)
-        |) in
-      let parent :=
-        M.get_subscript (| M.get_name (| globals, "cache" |), M.get_name (| globals, "cache_index" |) |) in
-      let mix_integers :=
+    let _ :=
+      M.for_ (|
+        M.get_name (| globals, "j" |),
         M.call (|
-          M.get_name (| globals, "fnv_hash" |),
-          make_list [
-            M.get_name (| globals, "mix_integers" |);
-            M.get_name (| globals, "parent" |)
-          ],
-          make_dict []
-        |) in
-    EndFor.
+      M.get_name (| globals, "range" |),
+      make_list [
+        M.get_name (| globals, "DATASET_PARENTS" |)
+      ],
+      make_dict []
+    |),
+        ltac:(M.monadic (
+(* At stmt: unsupported node type: AnnAssign *)
+          let cache_index :=
+            BinOp.mod_ (|
+              M.call (|
+                M.get_name (| globals, "fnv" |),
+                make_list [
+                  BinOp.bit_xor (|
+                    M.get_name (| globals, "index" |),
+                    M.get_name (| globals, "j" |)
+                  |);
+                  M.get_name (| globals, "mix_word" |)
+                ],
+                make_dict []
+              |),
+              M.call (|
+                M.get_name (| globals, "len" |),
+                make_list [
+                  M.get_name (| globals, "cache" |)
+                ],
+                make_dict []
+              |)
+            |) in
+          let parent :=
+            M.get_subscript (|
+              M.get_name (| globals, "cache" |),
+              M.get_name (| globals, "cache_index" |)
+            |) in
+          let mix_integers :=
+            M.call (|
+              M.get_name (| globals, "fnv_hash" |),
+              make_list [
+                M.get_name (| globals, "mix_integers" |);
+                M.get_name (| globals, "parent" |)
+              ],
+              make_dict []
+            |) in
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let mix :=
       M.call (|
         M.get_name (| globals, "Hash64" |),
@@ -799,7 +870,12 @@ Definition hashimoto : Value.t -> Value.t -> M :=
       M.call (|
         M.get_field (| M.get_name (| globals, "U32" |), "from_le_bytes" |),
         make_list [
-          M.get_subscript (| M.get_name (| globals, "seed_hash" |), M.slice (| Constant.None_, Constant.int 4 |) |)
+          M.slice (|
+            M.get_name (| globals, "seed_hash" |),
+            Constant.None_,
+            Constant.int 4,
+            Constant.None_
+          |)
         ],
         make_dict []
       |) in
@@ -822,50 +898,61 @@ Definition hashimoto : Value.t -> Value.t -> M :=
           M.get_name (| globals, "HASH_BYTES" |)
         |)
       |) in
-    For M.get_name (| globals, "i" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      M.get_name (| globals, "HASHIMOTO_ACCESSES" |)
-    ],
-    make_dict []
-  |) do
+    let _ :=
+      M.for_ (|
+        M.get_name (| globals, "i" |),
+        M.call (|
+      M.get_name (| globals, "range" |),
+      make_list [
+        M.get_name (| globals, "HASHIMOTO_ACCESSES" |)
+      ],
+      make_dict []
+    |),
+        ltac:(M.monadic (
 (* At stmt: unsupported node type: AnnAssign *)
-      let parent :=
-        BinOp.mod_ (|
-          M.call (|
-            M.get_name (| globals, "fnv" |),
-            make_list [
-              BinOp.bit_xor (|
-                M.get_name (| globals, "i" |),
-                M.get_name (| globals, "seed_head" |)
-              |);
-              M.get_subscript (| M.get_name (| globals, "mix" |), BinOp.mod_ (|
-                M.get_name (| globals, "i" |),
-                M.call (|
-                  M.get_name (| globals, "len" |),
-                  make_list [
-                    M.get_name (| globals, "mix" |)
-                  ],
-                  make_dict []
-                |)
-              |) |)
-            ],
-            make_dict []
-          |),
-          M.get_name (| globals, "rows" |)
-        |) in
-      For M.get_name (| globals, "j" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      BinOp.floor_div (|
-        M.get_name (| globals, "MIX_BYTES" |),
-        M.get_name (| globals, "HASH_BYTES" |)
-      |)
-    ],
-    make_dict []
-  |) do
-        let new_data := BinOp.add
-          M.call (|
+          let parent :=
+            BinOp.mod_ (|
+              M.call (|
+                M.get_name (| globals, "fnv" |),
+                make_list [
+                  BinOp.bit_xor (|
+                    M.get_name (| globals, "i" |),
+                    M.get_name (| globals, "seed_head" |)
+                  |);
+                  M.get_subscript (|
+                    M.get_name (| globals, "mix" |),
+                    BinOp.mod_ (|
+                      M.get_name (| globals, "i" |),
+                      M.call (|
+                        M.get_name (| globals, "len" |),
+                        make_list [
+                          M.get_name (| globals, "mix" |)
+                        ],
+                        make_dict []
+                      |)
+                    |)
+                  |)
+                ],
+                make_dict []
+              |),
+              M.get_name (| globals, "rows" |)
+            |) in
+          let _ :=
+            M.for_ (|
+              M.get_name (| globals, "j" |),
+              M.call (|
+      M.get_name (| globals, "range" |),
+      make_list [
+        BinOp.floor_div (|
+          M.get_name (| globals, "MIX_BYTES" |),
+          M.get_name (| globals, "HASH_BYTES" |)
+        |)
+      ],
+      make_dict []
+    |),
+              ltac:(M.monadic (
+                let new_data := BinOp.add
+                  M.call (|
     M.get_name (| globals, "fetch_dataset_item" |),
     make_list [
       BinOp.add (|
@@ -884,7 +971,7 @@ Definition hashimoto : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |)
-          M.call (|
+                  M.call (|
     M.get_name (| globals, "fetch_dataset_item" |),
     make_list [
       BinOp.add (|
@@ -903,35 +990,49 @@ Definition hashimoto : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-      EndFor.
-      let mix :=
-        M.call (|
-          M.get_name (| globals, "fnv_hash" |),
-          make_list [
-            M.get_name (| globals, "mix" |);
-            M.get_name (| globals, "new_data" |)
-          ],
-          make_dict []
-        |) in
-    EndFor.
+                M.pure Constant.None_
+              )),
+              ltac:(M.monadic (
+                M.pure Constant.None_
+              ))
+          |) in
+          let mix :=
+            M.call (|
+              M.get_name (| globals, "fnv_hash" |),
+              make_list [
+                M.get_name (| globals, "mix" |);
+                M.get_name (| globals, "new_data" |)
+              ],
+              make_dict []
+            |) in
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let compressed_mix :=
       make_list [] in
-    For M.get_name (| globals, "i" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      Constant.int 0;
-      M.call (|
-        M.get_name (| globals, "len" |),
-        make_list [
-          M.get_name (| globals, "mix" |)
-        ],
-        make_dict []
-      |);
-      Constant.int 4
-    ],
-    make_dict []
-  |) do
-      let _ := M.call (|
+    let _ :=
+      M.for_ (|
+        M.get_name (| globals, "i" |),
+        M.call (|
+      M.get_name (| globals, "range" |),
+      make_list [
+        Constant.int 0;
+        M.call (|
+          M.get_name (| globals, "len" |),
+          make_list [
+            M.get_name (| globals, "mix" |)
+          ],
+          make_dict []
+        |);
+        Constant.int 4
+      ],
+      make_dict []
+    |),
+        ltac:(M.monadic (
+          let _ := M.call (|
     M.get_field (| M.get_name (| globals, "compressed_mix" |), "append" |),
     make_list [
       M.call (|
@@ -943,32 +1044,49 @@ Definition hashimoto : Value.t -> Value.t -> M :=
               M.call (|
                 M.get_name (| globals, "fnv" |),
                 make_list [
-                  M.get_subscript (| M.get_name (| globals, "mix" |), M.get_name (| globals, "i" |) |);
-                  M.get_subscript (| M.get_name (| globals, "mix" |), BinOp.add (|
-                    M.get_name (| globals, "i" |),
-                    Constant.int 1
-                  |) |)
+                  M.get_subscript (|
+                    M.get_name (| globals, "mix" |),
+                    M.get_name (| globals, "i" |)
+                  |);
+                  M.get_subscript (|
+                    M.get_name (| globals, "mix" |),
+                    BinOp.add (|
+                      M.get_name (| globals, "i" |),
+                      Constant.int 1
+                    |)
+                  |)
                 ],
                 make_dict []
               |);
-              M.get_subscript (| M.get_name (| globals, "mix" |), BinOp.add (|
-                M.get_name (| globals, "i" |),
-                Constant.int 2
-              |) |)
+              M.get_subscript (|
+                M.get_name (| globals, "mix" |),
+                BinOp.add (|
+                  M.get_name (| globals, "i" |),
+                  Constant.int 2
+                |)
+              |)
             ],
             make_dict []
           |);
-          M.get_subscript (| M.get_name (| globals, "mix" |), BinOp.add (|
-            M.get_name (| globals, "i" |),
-            Constant.int 3
-          |) |)
+          M.get_subscript (|
+            M.get_name (| globals, "mix" |),
+            BinOp.add (|
+              M.get_name (| globals, "i" |),
+              Constant.int 3
+            |)
+          |)
         ],
         make_dict []
       |)
     ],
     make_dict []
   |) in
-    EndFor.
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let mix_digest :=
       M.call (|
         M.get_name (| globals, "le_uint32_sequence_to_bytes" |),

@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.constantinople.vm.instructions.environment".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,75 +17,41 @@ Introduction
 Implementations of the EVM environment related instructions.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Uint" ].
 
-Require ethereum.crypto.hash.
-Axiom ethereum_crypto_hash_keccak256 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "keccak256".
+Axiom ethereum_crypto_hash_imports :
+  AreImported globals "ethereum.crypto.hash" [ "keccak256" ].
 
-Require ethereum.utils.ensure.
-Axiom ethereum_utils_ensure_ensure :
-  IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
+Axiom ethereum_utils_ensure_imports :
+  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
 
-Require ethereum.utils.numeric.
-Axiom ethereum_utils_numeric_ceil32 :
-  IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
+Axiom ethereum_utils_numeric_imports :
+  AreImported globals "ethereum.utils.numeric" [ "ceil32" ].
 
-Require ethereum.constantinople.fork_types.
-Axiom ethereum_constantinople_fork_types_EMPTY_ACCOUNT :
-  IsGlobalAlias globals ethereum.constantinople.fork_types.globals "EMPTY_ACCOUNT".
+Axiom ethereum_constantinople_fork_types_imports :
+  AreImported globals "ethereum.constantinople.fork_types" [ "EMPTY_ACCOUNT" ].
 
-Require ethereum.constantinople.state.
-Axiom ethereum_constantinople_state_get_account :
-  IsGlobalAlias globals ethereum.constantinople.state.globals "get_account".
+Axiom ethereum_constantinople_state_imports :
+  AreImported globals "ethereum.constantinople.state" [ "get_account" ].
 
-Require ethereum.constantinople.utils.address.
-Axiom ethereum_constantinople_utils_address_to_address :
-  IsGlobalAlias globals ethereum.constantinople.utils.address.globals "to_address".
+Axiom ethereum_constantinople_utils_address_imports :
+  AreImported globals "ethereum.constantinople.utils.address" [ "to_address" ].
 
-Require ethereum.constantinople.vm.memory.
-Axiom ethereum_constantinople_vm_memory_buffer_read :
-  IsGlobalAlias globals ethereum.constantinople.vm.memory.globals "buffer_read".
-Axiom ethereum_constantinople_vm_memory_memory_write :
-  IsGlobalAlias globals ethereum.constantinople.vm.memory.globals "memory_write".
+Axiom ethereum_constantinople_vm_memory_imports :
+  AreImported globals "ethereum.constantinople.vm.memory" [ "buffer_read"; "memory_write" ].
 
-Require ethereum.constantinople.vm.__init__.
-Axiom ethereum_constantinople_vm___init___Evm :
-  IsGlobalAlias globals ethereum.constantinople.vm.__init__.globals "Evm".
+Axiom ethereum_constantinople_vm_imports :
+  AreImported globals "ethereum.constantinople.vm" [ "Evm" ].
 
-Require ethereum.constantinople.vm.exceptions.
-Axiom ethereum_constantinople_vm_exceptions_OutOfBoundsRead :
-  IsGlobalAlias globals ethereum.constantinople.vm.exceptions.globals "OutOfBoundsRead".
+Axiom ethereum_constantinople_vm_exceptions_imports :
+  AreImported globals "ethereum.constantinople.vm.exceptions" [ "OutOfBoundsRead" ].
 
-Require ethereum.constantinople.vm.gas.
-Axiom ethereum_constantinople_vm_gas_GAS_BALANCE :
-  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_BALANCE".
-Axiom ethereum_constantinople_vm_gas_GAS_BASE :
-  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_BASE".
-Axiom ethereum_constantinople_vm_gas_GAS_CODE_HASH :
-  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_CODE_HASH".
-Axiom ethereum_constantinople_vm_gas_GAS_COPY :
-  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_COPY".
-Axiom ethereum_constantinople_vm_gas_GAS_EXTERNAL :
-  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_EXTERNAL".
-Axiom ethereum_constantinople_vm_gas_GAS_RETURN_DATA_COPY :
-  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_RETURN_DATA_COPY".
-Axiom ethereum_constantinople_vm_gas_GAS_VERY_LOW :
-  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_VERY_LOW".
-Axiom ethereum_constantinople_vm_gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "calculate_gas_extend_memory".
-Axiom ethereum_constantinople_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "charge_gas".
+Axiom ethereum_constantinople_vm_gas_imports :
+  AreImported globals "ethereum.constantinople.vm.gas" [ "GAS_BALANCE"; "GAS_BASE"; "GAS_CODE_HASH"; "GAS_COPY"; "GAS_EXTERNAL"; "GAS_RETURN_DATA_COPY"; "GAS_VERY_LOW"; "calculate_gas_extend_memory"; "charge_gas" ].
 
-Require ethereum.constantinople.vm.stack.
-Axiom ethereum_constantinople_vm_stack_pop :
-  IsGlobalAlias globals ethereum.constantinople.vm.stack.globals "pop".
-Axiom ethereum_constantinople_vm_stack_push :
-  IsGlobalAlias globals ethereum.constantinople.vm.stack.globals "push".
+Axiom ethereum_constantinople_vm_stack_imports :
+  AreImported globals "ethereum.constantinople.vm.stack" [ "pop"; "push" ].
 
 Definition address : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -1132,10 +1098,15 @@ Definition returndatacopy : Value.t -> Value.t -> M :=
   |)
     |) in
     let value :=
-      M.get_subscript (| M.get_field (| M.get_name (| globals, "evm" |), "return_data" |), M.slice (| M.get_name (| globals, "return_data_start_position" |), BinOp.add (|
+      M.slice (|
+        M.get_field (| M.get_name (| globals, "evm" |), "return_data" |),
         M.get_name (| globals, "return_data_start_position" |),
-        M.get_name (| globals, "size" |)
-      |) |) |) in
+        BinOp.add (|
+          M.get_name (| globals, "return_data_start_position" |),
+          M.get_name (| globals, "size" |)
+        |),
+        Constant.None_
+      |) in
     let _ := M.call (|
     M.get_name (| globals, "memory_write" |),
     make_list [

@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.istanbul.vm.instructions.storage".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,47 +17,23 @@ Introduction
 Implementations of the EVM storage related instructions.
 ".
 
-Require ethereum.utils.ensure.
-Axiom ethereum_utils_ensure_ensure :
-  IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
+Axiom ethereum_utils_ensure_imports :
+  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
 
-Require ethereum.istanbul.state.
-Axiom ethereum_istanbul_state_get_storage :
-  IsGlobalAlias globals ethereum.istanbul.state.globals "get_storage".
-Axiom ethereum_istanbul_state_get_storage_original :
-  IsGlobalAlias globals ethereum.istanbul.state.globals "get_storage_original".
-Axiom ethereum_istanbul_state_set_storage :
-  IsGlobalAlias globals ethereum.istanbul.state.globals "set_storage".
+Axiom ethereum_istanbul_state_imports :
+  AreImported globals "ethereum.istanbul.state" [ "get_storage"; "get_storage_original"; "set_storage" ].
 
-Require ethereum.istanbul.vm.__init__.
-Axiom ethereum_istanbul_vm___init___Evm :
-  IsGlobalAlias globals ethereum.istanbul.vm.__init__.globals "Evm".
+Axiom ethereum_istanbul_vm_imports :
+  AreImported globals "ethereum.istanbul.vm" [ "Evm" ].
 
-Require ethereum.istanbul.vm.exceptions.
-Axiom ethereum_istanbul_vm_exceptions_OutOfGasError :
-  IsGlobalAlias globals ethereum.istanbul.vm.exceptions.globals "OutOfGasError".
-Axiom ethereum_istanbul_vm_exceptions_WriteInStaticContext :
-  IsGlobalAlias globals ethereum.istanbul.vm.exceptions.globals "WriteInStaticContext".
+Axiom ethereum_istanbul_vm_exceptions_imports :
+  AreImported globals "ethereum.istanbul.vm.exceptions" [ "OutOfGasError"; "WriteInStaticContext" ].
 
-Require ethereum.istanbul.vm.gas.
-Axiom ethereum_istanbul_vm_gas_GAS_CALL_STIPEND :
-  IsGlobalAlias globals ethereum.istanbul.vm.gas.globals "GAS_CALL_STIPEND".
-Axiom ethereum_istanbul_vm_gas_GAS_SLOAD :
-  IsGlobalAlias globals ethereum.istanbul.vm.gas.globals "GAS_SLOAD".
-Axiom ethereum_istanbul_vm_gas_GAS_STORAGE_CLEAR_REFUND :
-  IsGlobalAlias globals ethereum.istanbul.vm.gas.globals "GAS_STORAGE_CLEAR_REFUND".
-Axiom ethereum_istanbul_vm_gas_GAS_STORAGE_SET :
-  IsGlobalAlias globals ethereum.istanbul.vm.gas.globals "GAS_STORAGE_SET".
-Axiom ethereum_istanbul_vm_gas_GAS_STORAGE_UPDATE :
-  IsGlobalAlias globals ethereum.istanbul.vm.gas.globals "GAS_STORAGE_UPDATE".
-Axiom ethereum_istanbul_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.istanbul.vm.gas.globals "charge_gas".
+Axiom ethereum_istanbul_vm_gas_imports :
+  AreImported globals "ethereum.istanbul.vm.gas" [ "GAS_CALL_STIPEND"; "GAS_SLOAD"; "GAS_STORAGE_CLEAR_REFUND"; "GAS_STORAGE_SET"; "GAS_STORAGE_UPDATE"; "charge_gas" ].
 
-Require ethereum.istanbul.vm.stack.
-Axiom ethereum_istanbul_vm_stack_pop :
-  IsGlobalAlias globals ethereum.istanbul.vm.stack.globals "pop".
-Axiom ethereum_istanbul_vm_stack_push :
-  IsGlobalAlias globals ethereum.istanbul.vm.stack.globals "push".
+Axiom ethereum_istanbul_vm_stack_imports :
+  AreImported globals "ethereum.istanbul.vm.stack" [ "pop"; "push" ].
 
 Definition sload : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

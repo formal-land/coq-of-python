@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.crypto.blake2".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -10,19 +10,14 @@ The Blake2 Implementation
 
 (* At top_level_stmt: unsupported node type: Import *)
 
-Require dataclasses.
-Axiom dataclasses_dataclass :
-  IsGlobalAlias globals dataclasses.globals "dataclass".
+Axiom dataclasses_imports :
+  AreImported globals "dataclasses" [ "dataclass" ].
 
-Require typing.
-Axiom typing_List :
-  IsGlobalAlias globals typing.globals "List".
-Axiom typing_Tuple :
-  IsGlobalAlias globals typing.globals "Tuple".
+Axiom typing_imports :
+  AreImported globals "typing" [ "List"; "Tuple" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "Uint" ].
 
 Definition spit_le_to_uint : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -41,38 +36,52 @@ Definition spit_le_to_uint : Value.t -> Value.t -> M :=
     " in
     let words :=
       make_list [] in
-    For M.get_name (| globals, "i" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      M.get_name (| globals, "num_words" |)
-    ],
-    make_dict []
-  |) do
-      let start_position :=
-        BinOp.add (|
-          M.get_name (| globals, "start" |),
-          BinOp.mult (|
-            M.get_name (| globals, "i" |),
-            Constant.int 8
-          |)
-        |) in
-      let _ := M.call (|
+    let _ :=
+      M.for_ (|
+        M.get_name (| globals, "i" |),
+        M.call (|
+      M.get_name (| globals, "range" |),
+      make_list [
+        M.get_name (| globals, "num_words" |)
+      ],
+      make_dict []
+    |),
+        ltac:(M.monadic (
+          let start_position :=
+            BinOp.add (|
+              M.get_name (| globals, "start" |),
+              BinOp.mult (|
+                M.get_name (| globals, "i" |),
+                Constant.int 8
+              |)
+            |) in
+          let _ := M.call (|
     M.get_field (| M.get_name (| globals, "words" |), "append" |),
     make_list [
       M.call (|
         M.get_field (| M.get_name (| globals, "Uint" |), "from_le_bytes" |),
         make_list [
-          M.get_subscript (| M.get_name (| globals, "data" |), M.slice (| M.get_name (| globals, "start_position" |), BinOp.add (|
+          M.slice (|
+            M.get_name (| globals, "data" |),
             M.get_name (| globals, "start_position" |),
-            Constant.int 8
-          |) |) |)
+            BinOp.add (|
+              M.get_name (| globals, "start_position" |),
+              Constant.int 8
+            |),
+            Constant.None_
+          |)
         ],
         make_dict []
       |)
     ],
     make_dict []
   |) in
-    EndFor.
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let _ := M.return_ (|
       M.get_name (| globals, "words" |)
     |) in
@@ -102,7 +111,12 @@ Definition Blake2 : Value.t :=
             M.call (|
               M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
               make_list [
-                M.get_subscript (| M.get_name (| globals, "data" |), M.slice (| Constant.None_, Constant.int 4 |) |)
+                M.slice (|
+                  M.get_name (| globals, "data" |),
+                  Constant.None_,
+                  Constant.int 4,
+                  Constant.None_
+                |)
               ],
               make_dict []
             |) in
@@ -142,7 +156,12 @@ Definition Blake2 : Value.t :=
             M.call (|
               M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
               make_list [
-                M.get_subscript (| M.get_name (| globals, "data" |), M.slice (| Constant.int 212, Constant.None_ |) |)
+                M.slice (|
+                  M.get_name (| globals, "data" |),
+                  Constant.int 212,
+                  Constant.None_,
+                  Constant.None_
+                |)
               ],
               make_dict []
             |) in
@@ -169,12 +188,21 @@ Definition Blake2 : Value.t :=
             The two input words for the mixing.
         " in
           let _ := M.assign (|
-            M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "a" |) |),
+            M.get_subscript (|
+              M.get_name (| globals, "v" |),
+              M.get_name (| globals, "a" |)
+            |),
             BinOp.mod_ (|
               BinOp.add (|
                 BinOp.add (|
-                  M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "a" |) |),
-                  M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "b" |) |)
+                  M.get_subscript (|
+                    M.get_name (| globals, "v" |),
+                    M.get_name (| globals, "a" |)
+                  |),
+                  M.get_subscript (|
+                    M.get_name (| globals, "v" |),
+                    M.get_name (| globals, "b" |)
+                  |)
                 |),
                 M.get_name (| globals, "x" |)
               |),
@@ -182,20 +210,35 @@ Definition Blake2 : Value.t :=
             |)
           |) in
           let _ := M.assign (|
-            M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "d" |) |),
+            M.get_subscript (|
+              M.get_name (| globals, "v" |),
+              M.get_name (| globals, "d" |)
+            |),
             BinOp.bit_xor (|
               BinOp.r_shift (|
                 BinOp.bit_xor (|
-                  M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "d" |) |),
-                  M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "a" |) |)
+                  M.get_subscript (|
+                    M.get_name (| globals, "v" |),
+                    M.get_name (| globals, "d" |)
+                  |),
+                  M.get_subscript (|
+                    M.get_name (| globals, "v" |),
+                    M.get_name (| globals, "a" |)
+                  |)
                 |),
                 M.get_field (| M.get_name (| globals, "self" |), "R1" |)
               |),
               BinOp.mod_ (|
                 BinOp.l_shift (|
                   BinOp.bit_xor (|
-                    M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "d" |) |),
-                    M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "a" |) |)
+                    M.get_subscript (|
+                      M.get_name (| globals, "v" |),
+                      M.get_name (| globals, "d" |)
+                    |),
+                    M.get_subscript (|
+                      M.get_name (| globals, "v" |),
+                      M.get_name (| globals, "a" |)
+                    |)
                   |),
                   M.get_field (| M.get_name (| globals, "self" |), "w_R1" |)
                 |),
@@ -204,30 +247,54 @@ Definition Blake2 : Value.t :=
             |)
           |) in
           let _ := M.assign (|
-            M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "c" |) |),
+            M.get_subscript (|
+              M.get_name (| globals, "v" |),
+              M.get_name (| globals, "c" |)
+            |),
             BinOp.mod_ (|
               BinOp.add (|
-                M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "c" |) |),
-                M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "d" |) |)
+                M.get_subscript (|
+                  M.get_name (| globals, "v" |),
+                  M.get_name (| globals, "c" |)
+                |),
+                M.get_subscript (|
+                  M.get_name (| globals, "v" |),
+                  M.get_name (| globals, "d" |)
+                |)
               |),
               M.get_field (| M.get_name (| globals, "self" |), "max_word" |)
             |)
           |) in
           let _ := M.assign (|
-            M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "b" |) |),
+            M.get_subscript (|
+              M.get_name (| globals, "v" |),
+              M.get_name (| globals, "b" |)
+            |),
             BinOp.bit_xor (|
               BinOp.r_shift (|
                 BinOp.bit_xor (|
-                  M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "b" |) |),
-                  M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "c" |) |)
+                  M.get_subscript (|
+                    M.get_name (| globals, "v" |),
+                    M.get_name (| globals, "b" |)
+                  |),
+                  M.get_subscript (|
+                    M.get_name (| globals, "v" |),
+                    M.get_name (| globals, "c" |)
+                  |)
                 |),
                 M.get_field (| M.get_name (| globals, "self" |), "R2" |)
               |),
               BinOp.mod_ (|
                 BinOp.l_shift (|
                   BinOp.bit_xor (|
-                    M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "b" |) |),
-                    M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "c" |) |)
+                    M.get_subscript (|
+                      M.get_name (| globals, "v" |),
+                      M.get_name (| globals, "b" |)
+                    |),
+                    M.get_subscript (|
+                      M.get_name (| globals, "v" |),
+                      M.get_name (| globals, "c" |)
+                    |)
                   |),
                   M.get_field (| M.get_name (| globals, "self" |), "w_R2" |)
                 |),
@@ -236,12 +303,21 @@ Definition Blake2 : Value.t :=
             |)
           |) in
           let _ := M.assign (|
-            M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "a" |) |),
+            M.get_subscript (|
+              M.get_name (| globals, "v" |),
+              M.get_name (| globals, "a" |)
+            |),
             BinOp.mod_ (|
               BinOp.add (|
                 BinOp.add (|
-                  M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "a" |) |),
-                  M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "b" |) |)
+                  M.get_subscript (|
+                    M.get_name (| globals, "v" |),
+                    M.get_name (| globals, "a" |)
+                  |),
+                  M.get_subscript (|
+                    M.get_name (| globals, "v" |),
+                    M.get_name (| globals, "b" |)
+                  |)
                 |),
                 M.get_name (| globals, "y" |)
               |),
@@ -249,20 +325,35 @@ Definition Blake2 : Value.t :=
             |)
           |) in
           let _ := M.assign (|
-            M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "d" |) |),
+            M.get_subscript (|
+              M.get_name (| globals, "v" |),
+              M.get_name (| globals, "d" |)
+            |),
             BinOp.bit_xor (|
               BinOp.r_shift (|
                 BinOp.bit_xor (|
-                  M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "d" |) |),
-                  M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "a" |) |)
+                  M.get_subscript (|
+                    M.get_name (| globals, "v" |),
+                    M.get_name (| globals, "d" |)
+                  |),
+                  M.get_subscript (|
+                    M.get_name (| globals, "v" |),
+                    M.get_name (| globals, "a" |)
+                  |)
                 |),
                 M.get_field (| M.get_name (| globals, "self" |), "R3" |)
               |),
               BinOp.mod_ (|
                 BinOp.l_shift (|
                   BinOp.bit_xor (|
-                    M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "d" |) |),
-                    M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "a" |) |)
+                    M.get_subscript (|
+                      M.get_name (| globals, "v" |),
+                      M.get_name (| globals, "d" |)
+                    |),
+                    M.get_subscript (|
+                      M.get_name (| globals, "v" |),
+                      M.get_name (| globals, "a" |)
+                    |)
                   |),
                   M.get_field (| M.get_name (| globals, "self" |), "w_R3" |)
                 |),
@@ -271,30 +362,54 @@ Definition Blake2 : Value.t :=
             |)
           |) in
           let _ := M.assign (|
-            M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "c" |) |),
+            M.get_subscript (|
+              M.get_name (| globals, "v" |),
+              M.get_name (| globals, "c" |)
+            |),
             BinOp.mod_ (|
               BinOp.add (|
-                M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "c" |) |),
-                M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "d" |) |)
+                M.get_subscript (|
+                  M.get_name (| globals, "v" |),
+                  M.get_name (| globals, "c" |)
+                |),
+                M.get_subscript (|
+                  M.get_name (| globals, "v" |),
+                  M.get_name (| globals, "d" |)
+                |)
               |),
               M.get_field (| M.get_name (| globals, "self" |), "max_word" |)
             |)
           |) in
           let _ := M.assign (|
-            M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "b" |) |),
+            M.get_subscript (|
+              M.get_name (| globals, "v" |),
+              M.get_name (| globals, "b" |)
+            |),
             BinOp.bit_xor (|
               BinOp.r_shift (|
                 BinOp.bit_xor (|
-                  M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "b" |) |),
-                  M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "c" |) |)
+                  M.get_subscript (|
+                    M.get_name (| globals, "v" |),
+                    M.get_name (| globals, "b" |)
+                  |),
+                  M.get_subscript (|
+                    M.get_name (| globals, "v" |),
+                    M.get_name (| globals, "c" |)
+                  |)
                 |),
                 M.get_field (| M.get_name (| globals, "self" |), "R4" |)
               |),
               BinOp.mod_ (|
                 BinOp.l_shift (|
                   BinOp.bit_xor (|
-                    M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "b" |) |),
-                    M.get_subscript (| M.get_name (| globals, "v" |), M.get_name (| globals, "c" |) |)
+                    M.get_subscript (|
+                      M.get_name (| globals, "v" |),
+                      M.get_name (| globals, "b" |)
+                    |),
+                    M.get_subscript (|
+                      M.get_name (| globals, "v" |),
+                      M.get_name (| globals, "c" |)
+                    |)
                   |),
                   M.get_field (| M.get_name (| globals, "self" |), "w_R4" |)
                 |),
@@ -336,25 +451,47 @@ Definition Blake2 : Value.t :=
               Constant.int 16
             |) in
           let _ := M.assign (|
-            M.get_subscript (| M.get_name (| globals, "v" |), M.slice (| Constant.int 0, Constant.int 8 |) |),
+            M.slice (|
+              M.get_name (| globals, "v" |),
+              Constant.int 0,
+              Constant.int 8,
+              Constant.None_
+            |),
             M.get_name (| globals, "h" |)
           |) in
           let _ := M.assign (|
-            M.get_subscript (| M.get_name (| globals, "v" |), M.slice (| Constant.int 8, Constant.int 15 |) |),
+            M.slice (|
+              M.get_name (| globals, "v" |),
+              Constant.int 8,
+              Constant.int 15,
+              Constant.None_
+            |),
             M.get_field (| M.get_name (| globals, "self" |), "IV" |)
           |) in
           let _ := M.assign (|
-            M.get_subscript (| M.get_name (| globals, "v" |), Constant.int 12 |),
+            M.get_subscript (|
+              M.get_name (| globals, "v" |),
+              Constant.int 12
+            |),
             BinOp.bit_xor (|
               M.get_name (| globals, "t_0" |),
-              M.get_subscript (| M.get_field (| M.get_name (| globals, "self" |), "IV" |), Constant.int 4 |)
+              M.get_subscript (|
+                M.get_field (| M.get_name (| globals, "self" |), "IV" |),
+                Constant.int 4
+              |)
             |)
           |) in
           let _ := M.assign (|
-            M.get_subscript (| M.get_name (| globals, "v" |), Constant.int 13 |),
+            M.get_subscript (|
+              M.get_name (| globals, "v" |),
+              Constant.int 13
+            |),
             BinOp.bit_xor (|
               M.get_name (| globals, "t_1" |),
-              M.get_subscript (| M.get_field (| M.get_name (| globals, "self" |), "IV" |), Constant.int 5 |)
+              M.get_subscript (|
+                M.get_field (| M.get_name (| globals, "self" |), "IV" |),
+                Constant.int 5
+              |)
             |)
           |) in
           let _ :=
@@ -364,9 +501,15 @@ Definition Blake2 : Value.t :=
             (* then *)
             ltac:(M.monadic (
               let _ := M.assign (|
-                M.get_subscript (| M.get_name (| globals, "v" |), Constant.int 14 |),
+                M.get_subscript (|
+                  M.get_name (| globals, "v" |),
+                  Constant.int 14
+                |),
                 BinOp.bit_xor (|
-                  M.get_subscript (| M.get_name (| globals, "v" |), Constant.int 14 |),
+                  M.get_subscript (|
+                    M.get_name (| globals, "v" |),
+                    Constant.int 14
+                  |),
                   M.get_field (| M.get_name (| globals, "self" |), "mask_bits" |)
                 |)
               |) in
@@ -375,131 +518,239 @@ Definition Blake2 : Value.t :=
             )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
-          For M.get_name (| globals, "r" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      M.get_name (| globals, "num_rounds" |)
-    ],
-    make_dict []
-  |) do
-            let s :=
-              M.get_subscript (| M.get_field (| M.get_name (| globals, "self" |), "sigma" |), BinOp.mod_ (|
-                M.get_name (| globals, "r" |),
-                M.get_field (| M.get_name (| globals, "self" |), "sigma_len" |)
-              |) |) in
-            let v :=
+          let _ :=
+            M.for_ (|
+              M.get_name (| globals, "r" |),
               M.call (|
-                M.get_field (| M.get_name (| globals, "self" |), "G" |),
-                make_list [
-                  M.get_name (| globals, "v" |);
-                  Constant.int 0;
-                  Constant.int 4;
-                  Constant.int 8;
-                  Constant.int 12;
-                  M.get_subscript (| M.get_name (| globals, "m" |), M.get_subscript (| M.get_name (| globals, "s" |), Constant.int 0 |) |);
-                  M.get_subscript (| M.get_name (| globals, "m" |), M.get_subscript (| M.get_name (| globals, "s" |), Constant.int 1 |) |)
-                ],
-                make_dict []
-              |) in
-            let v :=
-              M.call (|
-                M.get_field (| M.get_name (| globals, "self" |), "G" |),
-                make_list [
-                  M.get_name (| globals, "v" |);
-                  Constant.int 1;
-                  Constant.int 5;
-                  Constant.int 9;
-                  Constant.int 13;
-                  M.get_subscript (| M.get_name (| globals, "m" |), M.get_subscript (| M.get_name (| globals, "s" |), Constant.int 2 |) |);
-                  M.get_subscript (| M.get_name (| globals, "m" |), M.get_subscript (| M.get_name (| globals, "s" |), Constant.int 3 |) |)
-                ],
-                make_dict []
-              |) in
-            let v :=
-              M.call (|
-                M.get_field (| M.get_name (| globals, "self" |), "G" |),
-                make_list [
-                  M.get_name (| globals, "v" |);
-                  Constant.int 2;
-                  Constant.int 6;
-                  Constant.int 10;
-                  Constant.int 14;
-                  M.get_subscript (| M.get_name (| globals, "m" |), M.get_subscript (| M.get_name (| globals, "s" |), Constant.int 4 |) |);
-                  M.get_subscript (| M.get_name (| globals, "m" |), M.get_subscript (| M.get_name (| globals, "s" |), Constant.int 5 |) |)
-                ],
-                make_dict []
-              |) in
-            let v :=
-              M.call (|
-                M.get_field (| M.get_name (| globals, "self" |), "G" |),
-                make_list [
-                  M.get_name (| globals, "v" |);
-                  Constant.int 3;
-                  Constant.int 7;
-                  Constant.int 11;
-                  Constant.int 15;
-                  M.get_subscript (| M.get_name (| globals, "m" |), M.get_subscript (| M.get_name (| globals, "s" |), Constant.int 6 |) |);
-                  M.get_subscript (| M.get_name (| globals, "m" |), M.get_subscript (| M.get_name (| globals, "s" |), Constant.int 7 |) |)
-                ],
-                make_dict []
-              |) in
-            let v :=
-              M.call (|
-                M.get_field (| M.get_name (| globals, "self" |), "G" |),
-                make_list [
-                  M.get_name (| globals, "v" |);
-                  Constant.int 0;
-                  Constant.int 5;
-                  Constant.int 10;
-                  Constant.int 15;
-                  M.get_subscript (| M.get_name (| globals, "m" |), M.get_subscript (| M.get_name (| globals, "s" |), Constant.int 8 |) |);
-                  M.get_subscript (| M.get_name (| globals, "m" |), M.get_subscript (| M.get_name (| globals, "s" |), Constant.int 9 |) |)
-                ],
-                make_dict []
-              |) in
-            let v :=
-              M.call (|
-                M.get_field (| M.get_name (| globals, "self" |), "G" |),
-                make_list [
-                  M.get_name (| globals, "v" |);
-                  Constant.int 1;
-                  Constant.int 6;
-                  Constant.int 11;
-                  Constant.int 12;
-                  M.get_subscript (| M.get_name (| globals, "m" |), M.get_subscript (| M.get_name (| globals, "s" |), Constant.int 10 |) |);
-                  M.get_subscript (| M.get_name (| globals, "m" |), M.get_subscript (| M.get_name (| globals, "s" |), Constant.int 11 |) |)
-                ],
-                make_dict []
-              |) in
-            let v :=
-              M.call (|
-                M.get_field (| M.get_name (| globals, "self" |), "G" |),
-                make_list [
-                  M.get_name (| globals, "v" |);
-                  Constant.int 2;
-                  Constant.int 7;
-                  Constant.int 8;
-                  Constant.int 13;
-                  M.get_subscript (| M.get_name (| globals, "m" |), M.get_subscript (| M.get_name (| globals, "s" |), Constant.int 12 |) |);
-                  M.get_subscript (| M.get_name (| globals, "m" |), M.get_subscript (| M.get_name (| globals, "s" |), Constant.int 13 |) |)
-                ],
-                make_dict []
-              |) in
-            let v :=
-              M.call (|
-                M.get_field (| M.get_name (| globals, "self" |), "G" |),
-                make_list [
-                  M.get_name (| globals, "v" |);
-                  Constant.int 3;
-                  Constant.int 4;
-                  Constant.int 9;
-                  Constant.int 14;
-                  M.get_subscript (| M.get_name (| globals, "m" |), M.get_subscript (| M.get_name (| globals, "s" |), Constant.int 14 |) |);
-                  M.get_subscript (| M.get_name (| globals, "m" |), M.get_subscript (| M.get_name (| globals, "s" |), Constant.int 15 |) |)
-                ],
-                make_dict []
-              |) in
-          EndFor.
+      M.get_name (| globals, "range" |),
+      make_list [
+        M.get_name (| globals, "num_rounds" |)
+      ],
+      make_dict []
+    |),
+              ltac:(M.monadic (
+                let s :=
+                  M.get_subscript (|
+                    M.get_field (| M.get_name (| globals, "self" |), "sigma" |),
+                    BinOp.mod_ (|
+                      M.get_name (| globals, "r" |),
+                      M.get_field (| M.get_name (| globals, "self" |), "sigma_len" |)
+                    |)
+                  |) in
+                let v :=
+                  M.call (|
+                    M.get_field (| M.get_name (| globals, "self" |), "G" |),
+                    make_list [
+                      M.get_name (| globals, "v" |);
+                      Constant.int 0;
+                      Constant.int 4;
+                      Constant.int 8;
+                      Constant.int 12;
+                      M.get_subscript (|
+                        M.get_name (| globals, "m" |),
+                        M.get_subscript (|
+                          M.get_name (| globals, "s" |),
+                          Constant.int 0
+                        |)
+                      |);
+                      M.get_subscript (|
+                        M.get_name (| globals, "m" |),
+                        M.get_subscript (|
+                          M.get_name (| globals, "s" |),
+                          Constant.int 1
+                        |)
+                      |)
+                    ],
+                    make_dict []
+                  |) in
+                let v :=
+                  M.call (|
+                    M.get_field (| M.get_name (| globals, "self" |), "G" |),
+                    make_list [
+                      M.get_name (| globals, "v" |);
+                      Constant.int 1;
+                      Constant.int 5;
+                      Constant.int 9;
+                      Constant.int 13;
+                      M.get_subscript (|
+                        M.get_name (| globals, "m" |),
+                        M.get_subscript (|
+                          M.get_name (| globals, "s" |),
+                          Constant.int 2
+                        |)
+                      |);
+                      M.get_subscript (|
+                        M.get_name (| globals, "m" |),
+                        M.get_subscript (|
+                          M.get_name (| globals, "s" |),
+                          Constant.int 3
+                        |)
+                      |)
+                    ],
+                    make_dict []
+                  |) in
+                let v :=
+                  M.call (|
+                    M.get_field (| M.get_name (| globals, "self" |), "G" |),
+                    make_list [
+                      M.get_name (| globals, "v" |);
+                      Constant.int 2;
+                      Constant.int 6;
+                      Constant.int 10;
+                      Constant.int 14;
+                      M.get_subscript (|
+                        M.get_name (| globals, "m" |),
+                        M.get_subscript (|
+                          M.get_name (| globals, "s" |),
+                          Constant.int 4
+                        |)
+                      |);
+                      M.get_subscript (|
+                        M.get_name (| globals, "m" |),
+                        M.get_subscript (|
+                          M.get_name (| globals, "s" |),
+                          Constant.int 5
+                        |)
+                      |)
+                    ],
+                    make_dict []
+                  |) in
+                let v :=
+                  M.call (|
+                    M.get_field (| M.get_name (| globals, "self" |), "G" |),
+                    make_list [
+                      M.get_name (| globals, "v" |);
+                      Constant.int 3;
+                      Constant.int 7;
+                      Constant.int 11;
+                      Constant.int 15;
+                      M.get_subscript (|
+                        M.get_name (| globals, "m" |),
+                        M.get_subscript (|
+                          M.get_name (| globals, "s" |),
+                          Constant.int 6
+                        |)
+                      |);
+                      M.get_subscript (|
+                        M.get_name (| globals, "m" |),
+                        M.get_subscript (|
+                          M.get_name (| globals, "s" |),
+                          Constant.int 7
+                        |)
+                      |)
+                    ],
+                    make_dict []
+                  |) in
+                let v :=
+                  M.call (|
+                    M.get_field (| M.get_name (| globals, "self" |), "G" |),
+                    make_list [
+                      M.get_name (| globals, "v" |);
+                      Constant.int 0;
+                      Constant.int 5;
+                      Constant.int 10;
+                      Constant.int 15;
+                      M.get_subscript (|
+                        M.get_name (| globals, "m" |),
+                        M.get_subscript (|
+                          M.get_name (| globals, "s" |),
+                          Constant.int 8
+                        |)
+                      |);
+                      M.get_subscript (|
+                        M.get_name (| globals, "m" |),
+                        M.get_subscript (|
+                          M.get_name (| globals, "s" |),
+                          Constant.int 9
+                        |)
+                      |)
+                    ],
+                    make_dict []
+                  |) in
+                let v :=
+                  M.call (|
+                    M.get_field (| M.get_name (| globals, "self" |), "G" |),
+                    make_list [
+                      M.get_name (| globals, "v" |);
+                      Constant.int 1;
+                      Constant.int 6;
+                      Constant.int 11;
+                      Constant.int 12;
+                      M.get_subscript (|
+                        M.get_name (| globals, "m" |),
+                        M.get_subscript (|
+                          M.get_name (| globals, "s" |),
+                          Constant.int 10
+                        |)
+                      |);
+                      M.get_subscript (|
+                        M.get_name (| globals, "m" |),
+                        M.get_subscript (|
+                          M.get_name (| globals, "s" |),
+                          Constant.int 11
+                        |)
+                      |)
+                    ],
+                    make_dict []
+                  |) in
+                let v :=
+                  M.call (|
+                    M.get_field (| M.get_name (| globals, "self" |), "G" |),
+                    make_list [
+                      M.get_name (| globals, "v" |);
+                      Constant.int 2;
+                      Constant.int 7;
+                      Constant.int 8;
+                      Constant.int 13;
+                      M.get_subscript (|
+                        M.get_name (| globals, "m" |),
+                        M.get_subscript (|
+                          M.get_name (| globals, "s" |),
+                          Constant.int 12
+                        |)
+                      |);
+                      M.get_subscript (|
+                        M.get_name (| globals, "m" |),
+                        M.get_subscript (|
+                          M.get_name (| globals, "s" |),
+                          Constant.int 13
+                        |)
+                      |)
+                    ],
+                    make_dict []
+                  |) in
+                let v :=
+                  M.call (|
+                    M.get_field (| M.get_name (| globals, "self" |), "G" |),
+                    make_list [
+                      M.get_name (| globals, "v" |);
+                      Constant.int 3;
+                      Constant.int 4;
+                      Constant.int 9;
+                      Constant.int 14;
+                      M.get_subscript (|
+                        M.get_name (| globals, "m" |),
+                        M.get_subscript (|
+                          M.get_name (| globals, "s" |),
+                          Constant.int 14
+                        |)
+                      |);
+                      M.get_subscript (|
+                        M.get_name (| globals, "m" |),
+                        M.get_subscript (|
+                          M.get_name (| globals, "s" |),
+                          Constant.int 15
+                        |)
+                      |)
+                    ],
+                    make_dict []
+                  |) in
+                M.pure Constant.None_
+              )),
+              ltac:(M.monadic (
+                M.pure Constant.None_
+              ))
+          |) in
           let result_message_words :=
             Constant.str "(* At expr: unsupported node type: GeneratorExp *)" in
           let _ := M.return_ (|

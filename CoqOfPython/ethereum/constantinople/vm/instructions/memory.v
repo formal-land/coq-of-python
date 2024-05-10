@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.constantinople.vm.instructions.memory".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,37 +17,20 @@ Introduction
 Implementations of the EVM Memory instructions.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes" ].
 
-Require ethereum.constantinople.vm.__init__.
-Axiom ethereum_constantinople_vm___init___Evm :
-  IsGlobalAlias globals ethereum.constantinople.vm.__init__.globals "Evm".
+Axiom ethereum_constantinople_vm_imports :
+  AreImported globals "ethereum.constantinople.vm" [ "Evm" ].
 
-Require ethereum.constantinople.vm.gas.
-Axiom ethereum_constantinople_vm_gas_GAS_BASE :
-  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_BASE".
-Axiom ethereum_constantinople_vm_gas_GAS_VERY_LOW :
-  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "GAS_VERY_LOW".
-Axiom ethereum_constantinople_vm_gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "calculate_gas_extend_memory".
-Axiom ethereum_constantinople_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.constantinople.vm.gas.globals "charge_gas".
+Axiom ethereum_constantinople_vm_gas_imports :
+  AreImported globals "ethereum.constantinople.vm.gas" [ "GAS_BASE"; "GAS_VERY_LOW"; "calculate_gas_extend_memory"; "charge_gas" ].
 
-Require ethereum.constantinople.vm.memory.
-Axiom ethereum_constantinople_vm_memory_memory_read_bytes :
-  IsGlobalAlias globals ethereum.constantinople.vm.memory.globals "memory_read_bytes".
-Axiom ethereum_constantinople_vm_memory_memory_write :
-  IsGlobalAlias globals ethereum.constantinople.vm.memory.globals "memory_write".
+Axiom ethereum_constantinople_vm_memory_imports :
+  AreImported globals "ethereum.constantinople.vm.memory" [ "memory_read_bytes"; "memory_write" ].
 
-Require ethereum.constantinople.vm.stack.
-Axiom ethereum_constantinople_vm_stack_pop :
-  IsGlobalAlias globals ethereum.constantinople.vm.stack.globals "pop".
-Axiom ethereum_constantinople_vm_stack_push :
-  IsGlobalAlias globals ethereum.constantinople.vm.stack.globals "push".
+Axiom ethereum_constantinople_vm_stack_imports :
+  AreImported globals "ethereum.constantinople.vm.stack" [ "pop"; "push" ].
 
 Definition mstore : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

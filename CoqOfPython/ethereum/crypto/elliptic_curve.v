@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.crypto.elliptic_curve".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -8,29 +8,19 @@ Elliptic Curves
 ^^^^^^^^^^^^^^^
 ".
 
-Require typing.
-Axiom typing_Generic :
-  IsGlobalAlias globals typing.globals "Generic".
-Axiom typing_Type_ :
-  IsGlobalAlias globals typing.globals "Type_".
-Axiom typing_TypeVar :
-  IsGlobalAlias globals typing.globals "TypeVar".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Generic"; "Type"; "TypeVar" ].
 
 (* At top_level_stmt: unsupported node type: Import *)
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes" ].
 
-Require ethereum.crypto.finite_field.
-Axiom ethereum_crypto_finite_field_Field :
-  IsGlobalAlias globals ethereum.crypto.finite_field.globals "Field".
+Axiom ethereum_crypto_finite_field_imports :
+  AreImported globals "ethereum.crypto.finite_field" [ "Field" ].
 
-Require ethereum.crypto.hash.
-Axiom ethereum_crypto_hash_Hash32 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "Hash32".
+Axiom ethereum_crypto_hash_imports :
+  AreImported globals "ethereum.crypto.hash" [ "Hash32" ].
 
 Definition SECP256K1N : Value.t := M.run ltac:(M.monadic (
   Constant.int 115792089237316195423570985008687907852837564279074904382605163141518161494337
@@ -104,33 +94,46 @@ Definition secp256k1_recover : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let _ := M.assign (|
-      M.get_subscript (| M.get_name (| globals, "signature" |), M.slice (| BinOp.sub (|
+      M.slice (|
+        M.get_name (| globals, "signature" |),
+        BinOp.sub (|
+          Constant.int 32,
+          M.call (|
+            M.get_name (| globals, "len" |),
+            make_list [
+              M.get_name (| globals, "r_bytes" |)
+            ],
+            make_dict []
+          |)
+        |),
         Constant.int 32,
-        M.call (|
-          M.get_name (| globals, "len" |),
-          make_list [
-            M.get_name (| globals, "r_bytes" |)
-          ],
-          make_dict []
-        |)
-      |), Constant.int 32 |) |),
+        Constant.None_
+      |),
       M.get_name (| globals, "r_bytes" |)
     |) in
     let _ := M.assign (|
-      M.get_subscript (| M.get_name (| globals, "signature" |), M.slice (| BinOp.sub (|
+      M.slice (|
+        M.get_name (| globals, "signature" |),
+        BinOp.sub (|
+          Constant.int 64,
+          M.call (|
+            M.get_name (| globals, "len" |),
+            make_list [
+              M.get_name (| globals, "s_bytes" |)
+            ],
+            make_dict []
+          |)
+        |),
         Constant.int 64,
-        M.call (|
-          M.get_name (| globals, "len" |),
-          make_list [
-            M.get_name (| globals, "s_bytes" |)
-          ],
-          make_dict []
-        |)
-      |), Constant.int 64 |) |),
+        Constant.None_
+      |),
       M.get_name (| globals, "s_bytes" |)
     |) in
     let _ := M.assign (|
-      M.get_subscript (| M.get_name (| globals, "signature" |), Constant.int 64 |),
+      M.get_subscript (|
+        M.get_name (| globals, "signature" |),
+        Constant.int 64
+      |),
       M.get_name (| globals, "v" |)
     |) in
     let public_key :=
@@ -149,11 +152,16 @@ Definition secp256k1_recover : Value.t -> Value.t -> M :=
         make_dict []
       |) in
     let public_key :=
-      M.get_subscript (| M.call (|
-        M.get_field (| M.get_name (| globals, "public_key" |), "format" |),
-        make_list [],
-        make_dict []
-      |), M.slice (| Constant.int 1, Constant.None_ |) |) in
+      M.slice (|
+        M.call (|
+          M.get_field (| M.get_name (| globals, "public_key" |), "format" |),
+          make_list [],
+          make_dict []
+        |),
+        Constant.int 1,
+        Constant.None_,
+        Constant.None_
+      |) in
     let _ := M.return_ (|
       M.get_name (| globals, "public_key" |)
     |) in
@@ -289,7 +297,7 @@ Definition EllipticCurve : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "ValueError" |),
                 make_list [
                   Constant.str "Point not on curve"
@@ -671,41 +679,49 @@ Definition EllipticCurve : Value.t :=
             |) in
           let s :=
             M.get_name (| globals, "self" |) in
-          While Compare.not_eq (|
-    M.get_name (| globals, "n" |),
-    Constant.int 0
-  |) do
-            let _ :=
-              (* if *)
-              M.if_then_else (|
-                Compare.eq (|
-                  BinOp.mod_ (|
-                    M.get_name (| globals, "n" |),
-                    Constant.int 2
-                  |),
-                  Constant.int 1
-                |),
-              (* then *)
+          let _ :=
+            M.while (|
+              Compare.not_eq (|
+      M.get_name (| globals, "n" |),
+      Constant.int 0
+    |),
               ltac:(M.monadic (
-                let res :=
+                let _ :=
+                  (* if *)
+                  M.if_then_else (|
+                    Compare.eq (|
+                      BinOp.mod_ (|
+                        M.get_name (| globals, "n" |),
+                        Constant.int 2
+                      |),
+                      Constant.int 1
+                    |),
+                  (* then *)
+                  ltac:(M.monadic (
+                    let res :=
+                      BinOp.add (|
+                        M.get_name (| globals, "res" |),
+                        M.get_name (| globals, "s" |)
+                      |) in
+                    M.pure Constant.None_
+                  (* else *)
+                  )), ltac:(M.monadic (
+                    M.pure Constant.None_
+                  )) |) in
+                let s :=
                   BinOp.add (|
-                    M.get_name (| globals, "res" |),
+                    M.get_name (| globals, "s" |),
                     M.get_name (| globals, "s" |)
                   |) in
+                let n := BinOp.floor_div
+                  Constant.int 2
+                  Constant.int 2 in
                 M.pure Constant.None_
-              (* else *)
-              )), ltac:(M.monadic (
+              )),
+              ltac:(M.monadic (
                 M.pure Constant.None_
-              )) |) in
-            let s :=
-              BinOp.add (|
-                M.get_name (| globals, "s" |),
-                M.get_name (| globals, "s" |)
-              |) in
-            let n := BinOp.floor_div
-              Constant.int 2
-              Constant.int 2 in
-          EndWhile.
+              ))
+          |) in
           let _ := M.return_ (|
             M.get_name (| globals, "res" |)
           |) in

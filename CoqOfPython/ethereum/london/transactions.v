@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.london.transactions".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -9,43 +9,23 @@ submitted to be executed. If Ethereum is viewed as a state machine,
 transactions are the events that move between states.
 ".
 
-Require dataclasses.
-Axiom dataclasses_dataclass :
-  IsGlobalAlias globals dataclasses.globals "dataclass".
+Axiom dataclasses_imports :
+  AreImported globals "dataclasses" [ "dataclass" ].
 
-Require typing.
-Axiom typing_Tuple :
-  IsGlobalAlias globals typing.globals "Tuple".
-Axiom typing_Union :
-  IsGlobalAlias globals typing.globals "Union".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Tuple"; "Union" ].
 
-Require ethereum.__init__.
-Axiom ethereum___init___rlp :
-  IsGlobalAlias globals ethereum.__init__.globals "rlp".
+Axiom ethereum_imports :
+  AreImported globals "ethereum" [ "rlp" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U64 :
-  IsGlobalAlias globals ethereum.base_types.globals "U64".
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Bytes0 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes0".
-Axiom ethereum_base_types_Bytes32 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes32".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
-Axiom ethereum_base_types_slotted_freezable :
-  IsGlobalAlias globals ethereum.base_types.globals "slotted_freezable".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U64"; "U256"; "Bytes"; "Bytes0"; "Bytes32"; "Uint"; "slotted_freezable" ].
 
-Require ethereum.exceptions.
-Axiom ethereum_exceptions_InvalidBlock :
-  IsGlobalAlias globals ethereum.exceptions.globals "InvalidBlock".
+Axiom ethereum_exceptions_imports :
+  AreImported globals "ethereum.exceptions" [ "InvalidBlock" ].
 
-Require ethereum.london.fork_types.
-Axiom ethereum_london_fork_types_Address :
-  IsGlobalAlias globals ethereum.london.fork_types.globals "Address".
+Axiom ethereum_london_fork_types_imports :
+  AreImported globals "ethereum.london.fork_types" [ "Address" ].
 
 Definition TX_BASE_COST : Value.t := M.run ltac:(M.monadic (
   Constant.int 21000
@@ -102,7 +82,10 @@ Definition FeeMarketTransaction : Value.t :=
     ].
 
 Definition Transaction : Value.t := M.run ltac:(M.monadic (
-  M.get_subscript (| M.get_name (| globals, "Union" |), make_tuple [ M.get_name (| globals, "LegacyTransaction" |); M.get_name (| globals, "AccessListTransaction" |); M.get_name (| globals, "FeeMarketTransaction" |) ] |)
+  M.get_subscript (|
+    M.get_name (| globals, "Union" |),
+    make_tuple [ M.get_name (| globals, "LegacyTransaction" |); M.get_name (| globals, "AccessListTransaction" |); M.get_name (| globals, "FeeMarketTransaction" |) ]
+  |)
 )).
 
 Definition encode_transaction : Value.t -> Value.t -> M :=
@@ -186,7 +169,7 @@ Definition encode_transaction : Value.t -> Value.t -> M :=
                 M.pure Constant.None_
               (* else *)
               )), ltac:(M.monadic (
-                let _ := M.raise (| Some(M.call (|
+                let _ := M.raise (| Some (M.call (|
                   M.get_name (| globals, "Exception" |),
                   make_list [
                     Constant.str "(* At expr: unsupported node type: JoinedStr *)"
@@ -224,7 +207,10 @@ Definition decode_transaction : Value.t -> Value.t -> M :=
           (* if *)
           M.if_then_else (|
             Compare.eq (|
-              M.get_subscript (| M.get_name (| globals, "tx" |), Constant.int 0 |),
+              M.get_subscript (|
+                M.get_name (| globals, "tx" |),
+                Constant.int 0
+              |),
               Constant.int 1
             |),
           (* then *)
@@ -234,7 +220,12 @@ Definition decode_transaction : Value.t -> Value.t -> M :=
                 M.get_field (| M.get_name (| globals, "rlp" |), "decode_to" |),
                 make_list [
                   M.get_name (| globals, "AccessListTransaction" |);
-                  M.get_subscript (| M.get_name (| globals, "tx" |), M.slice (| Constant.int 1, Constant.None_ |) |)
+                  M.slice (|
+                    M.get_name (| globals, "tx" |),
+                    Constant.int 1,
+                    Constant.None_,
+                    Constant.None_
+                  |)
                 ],
                 make_dict []
               |)
@@ -246,7 +237,10 @@ Definition decode_transaction : Value.t -> Value.t -> M :=
               (* if *)
               M.if_then_else (|
                 Compare.eq (|
-                  M.get_subscript (| M.get_name (| globals, "tx" |), Constant.int 0 |),
+                  M.get_subscript (|
+                    M.get_name (| globals, "tx" |),
+                    Constant.int 0
+                  |),
                   Constant.int 2
                 |),
               (* then *)
@@ -256,7 +250,12 @@ Definition decode_transaction : Value.t -> Value.t -> M :=
                     M.get_field (| M.get_name (| globals, "rlp" |), "decode_to" |),
                     make_list [
                       M.get_name (| globals, "FeeMarketTransaction" |);
-                      M.get_subscript (| M.get_name (| globals, "tx" |), M.slice (| Constant.int 1, Constant.None_ |) |)
+                      M.slice (|
+                        M.get_name (| globals, "tx" |),
+                        Constant.int 1,
+                        Constant.None_,
+                        Constant.None_
+                      |)
                     ],
                     make_dict []
                   |)
@@ -264,7 +263,7 @@ Definition decode_transaction : Value.t -> Value.t -> M :=
                 M.pure Constant.None_
               (* else *)
               )), ltac:(M.monadic (
-                let _ := M.raise (| Some(M.get_name (| globals, "InvalidBlock" |)) |) in
+                let _ := M.raise (| Some (M.get_name (| globals, "InvalidBlock" |)) |) in
                 M.pure Constant.None_
               )) |) in
             M.pure Constant.None_

@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.homestead.vm.instructions.log".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,41 +17,26 @@ Introduction
 Implementations of the EVM logging instructions.
 ".
 
-Require functools.
-Axiom functools_partial :
-  IsGlobalAlias globals functools.globals "partial".
+Axiom functools_imports :
+  AreImported globals "functools" [ "partial" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256" ].
 
-Require ethereum.homestead.blocks.
-Axiom ethereum_homestead_blocks_Log :
-  IsGlobalAlias globals ethereum.homestead.blocks.globals "Log".
+Axiom ethereum_homestead_blocks_imports :
+  AreImported globals "ethereum.homestead.blocks" [ "Log" ].
 
-Require ethereum.homestead.vm.__init__.
-Axiom ethereum_homestead_vm___init___Evm :
-  IsGlobalAlias globals ethereum.homestead.vm.__init__.globals "Evm".
+Axiom ethereum_homestead_vm_imports :
+  AreImported globals "ethereum.homestead.vm" [ "Evm" ].
 
-Require ethereum.homestead.vm.gas.
-Axiom ethereum_homestead_vm_gas_GAS_LOG :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_LOG".
-Axiom ethereum_homestead_vm_gas_GAS_LOG_DATA :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_LOG_DATA".
-Axiom ethereum_homestead_vm_gas_GAS_LOG_TOPIC :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_LOG_TOPIC".
-Axiom ethereum_homestead_vm_gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "calculate_gas_extend_memory".
-Axiom ethereum_homestead_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "charge_gas".
+Axiom ethereum_homestead_vm_gas_imports :
+  AreImported globals "ethereum.homestead.vm.gas" [ "GAS_LOG"; "GAS_LOG_DATA"; "GAS_LOG_TOPIC"; "calculate_gas_extend_memory"; "charge_gas" ].
 
-Require ethereum.homestead.vm.memory.
-Axiom ethereum_homestead_vm_memory_memory_read_bytes :
-  IsGlobalAlias globals ethereum.homestead.vm.memory.globals "memory_read_bytes".
+Axiom ethereum_homestead_vm_memory_imports :
+  AreImported globals "ethereum.homestead.vm.memory" [ "memory_read_bytes" ].
 
-Require ethereum.homestead.vm.stack.
-Axiom ethereum_homestead_vm_stack_pop :
-  IsGlobalAlias globals ethereum.homestead.vm.stack.globals "pop".
+Axiom ethereum_homestead_vm_stack_imports :
+  AreImported globals "ethereum.homestead.vm.stack" [ "pop" ].
 
 Definition log_n : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -88,33 +73,42 @@ Definition log_n : Value.t -> Value.t -> M :=
       |) in
     let topics :=
       make_list [] in
-    For M.get_name (| globals, "_" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      M.get_name (| globals, "num_topics" |)
-    ],
-    make_dict []
-  |) do
-      let topic :=
+    let _ :=
+      M.for_ (|
+        M.get_name (| globals, "_" |),
         M.call (|
-          M.get_field (| M.call (|
-            M.get_name (| globals, "pop" |),
-            make_list [
-              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
-            ],
-            make_dict []
-          |), "to_be_bytes32" |),
-          make_list [],
-          make_dict []
-        |) in
-      let _ := M.call (|
+      M.get_name (| globals, "range" |),
+      make_list [
+        M.get_name (| globals, "num_topics" |)
+      ],
+      make_dict []
+    |),
+        ltac:(M.monadic (
+          let topic :=
+            M.call (|
+              M.get_field (| M.call (|
+                M.get_name (| globals, "pop" |),
+                make_list [
+                  M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+                ],
+                make_dict []
+              |), "to_be_bytes32" |),
+              make_list [],
+              make_dict []
+            |) in
+          let _ := M.call (|
     M.get_field (| M.get_name (| globals, "topics" |), "append" |),
     make_list [
       M.get_name (| globals, "topic" |)
     ],
     make_dict []
   |) in
-    EndFor.
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let extend_memory :=
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),

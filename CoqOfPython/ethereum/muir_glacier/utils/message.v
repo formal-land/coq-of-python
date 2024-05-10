@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.muir_glacier.utils.message".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -18,39 +18,23 @@ Message specific functions used in this muir_glacier version of
 specification.
 ".
 
-Require typing.
-Axiom typing_Optional :
-  IsGlobalAlias globals typing.globals "Optional".
-Axiom typing_Union :
-  IsGlobalAlias globals typing.globals "Union".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Optional"; "Union" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Bytes0 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes0".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Bytes0"; "Uint" ].
 
-Require ethereum.muir_glacier.fork_types.
-Axiom ethereum_muir_glacier_fork_types_Address :
-  IsGlobalAlias globals ethereum.muir_glacier.fork_types.globals "Address".
+Axiom ethereum_muir_glacier_fork_types_imports :
+  AreImported globals "ethereum.muir_glacier.fork_types" [ "Address" ].
 
-Require ethereum.muir_glacier.state.
-Axiom ethereum_muir_glacier_state_get_account :
-  IsGlobalAlias globals ethereum.muir_glacier.state.globals "get_account".
+Axiom ethereum_muir_glacier_state_imports :
+  AreImported globals "ethereum.muir_glacier.state" [ "get_account" ].
 
-Require ethereum.muir_glacier.vm.__init__.
-Axiom ethereum_muir_glacier_vm___init___Environment :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.__init__.globals "Environment".
-Axiom ethereum_muir_glacier_vm___init___Message :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.__init__.globals "Message".
+Axiom ethereum_muir_glacier_vm_imports :
+  AreImported globals "ethereum.muir_glacier.vm" [ "Environment"; "Message" ].
 
-Require ethereum.muir_glacier.utils.address.
-Axiom ethereum_muir_glacier_utils_address_compute_contract_address :
-  IsGlobalAlias globals ethereum.muir_glacier.utils.address.globals "compute_contract_address".
+Axiom ethereum_muir_glacier_utils_address_imports :
+  AreImported globals "ethereum.muir_glacier.utils.address" [ "compute_contract_address" ].
 
 Definition prepare_message : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -183,7 +167,7 @@ Definition prepare_message : Value.t -> Value.t -> M :=
             M.pure Constant.None_
           (* else *)
           )), ltac:(M.monadic (
-            let _ := M.raise (| Some(M.call (|
+            let _ := M.raise (| Some (M.call (|
               M.get_name (| globals, "AssertionError" |),
               make_list [
                 Constant.str "Target must be address or empty bytes"

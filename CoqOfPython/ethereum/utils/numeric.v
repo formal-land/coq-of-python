@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.utils.numeric".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,17 +17,11 @@ Introduction
 Numeric operations specific utility functions used in this specification.
 ".
 
-Require typing.
-Axiom typing_Sequence :
-  IsGlobalAlias globals typing.globals "Sequence".
-Axiom typing_Tuple :
-  IsGlobalAlias globals typing.globals "Tuple".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Sequence"; "Tuple" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U32 :
-  IsGlobalAlias globals ethereum.base_types.globals "U32".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U32"; "Uint" ].
 
 Definition get_sign : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -183,47 +177,56 @@ Definition is_prime : Value.t -> Value.t -> M :=
       )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
-    For M.get_name (| globals, "x" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      Constant.int 2;
-      BinOp.add (|
+    let _ :=
+      M.for_ (|
+        M.get_name (| globals, "x" |),
         M.call (|
-          M.get_name (| globals, "int" |),
-          make_list [
-            BinOp.pow (|
-              M.get_name (| globals, "number" |),
-              Value.Float 0.5
-            |)
-          ],
-          make_dict []
-        |),
-        Constant.int 1
-      |)
-    ],
-    make_dict []
-  |) do
-      let _ :=
-        (* if *)
-        M.if_then_else (|
-          Compare.eq (|
-            BinOp.mod_ (|
-              M.get_name (| globals, "number" |),
-              M.get_name (| globals, "x" |)
-            |),
-            Constant.int 0
+      M.get_name (| globals, "range" |),
+      make_list [
+        Constant.int 2;
+        BinOp.add (|
+          M.call (|
+            M.get_name (| globals, "int" |),
+            make_list [
+              BinOp.pow (|
+                M.get_name (| globals, "number" |),
+                Value.Float 0.5
+              |)
+            ],
+            make_dict []
           |),
-        (* then *)
+          Constant.int 1
+        |)
+      ],
+      make_dict []
+    |),
         ltac:(M.monadic (
-          let _ := M.return_ (|
-            Constant.bool false
-          |) in
+          let _ :=
+            (* if *)
+            M.if_then_else (|
+              Compare.eq (|
+                BinOp.mod_ (|
+                  M.get_name (| globals, "number" |),
+                  M.get_name (| globals, "x" |)
+                |),
+                Constant.int 0
+              |),
+            (* then *)
+            ltac:(M.monadic (
+              let _ := M.return_ (|
+                Constant.bool false
+              |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
+              M.pure Constant.None_
+            )) |) in
           M.pure Constant.None_
-        (* else *)
-        )), ltac:(M.monadic (
+        )),
+        ltac:(M.monadic (
           M.pure Constant.None_
-        )) |) in
-    EndFor.
+        ))
+    |) in
     let _ := M.return_ (|
       Constant.bool true
     |) in
@@ -251,38 +254,52 @@ Definition le_bytes_to_uint32_sequence : Value.t -> Value.t -> M :=
     " in
     let sequence :=
       make_list [] in
-    For M.get_name (| globals, "i" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      Constant.int 0;
-      M.call (|
-        M.get_name (| globals, "len" |),
-        make_list [
-          M.get_name (| globals, "data" |)
-        ],
-        make_dict []
-      |);
-      Constant.int 4
-    ],
-    make_dict []
-  |) do
-      let _ := M.call (|
+    let _ :=
+      M.for_ (|
+        M.get_name (| globals, "i" |),
+        M.call (|
+      M.get_name (| globals, "range" |),
+      make_list [
+        Constant.int 0;
+        M.call (|
+          M.get_name (| globals, "len" |),
+          make_list [
+            M.get_name (| globals, "data" |)
+          ],
+          make_dict []
+        |);
+        Constant.int 4
+      ],
+      make_dict []
+    |),
+        ltac:(M.monadic (
+          let _ := M.call (|
     M.get_field (| M.get_name (| globals, "sequence" |), "append" |),
     make_list [
       M.call (|
         M.get_field (| M.get_name (| globals, "U32" |), "from_le_bytes" |),
         make_list [
-          M.get_subscript (| M.get_name (| globals, "data" |), M.slice (| M.get_name (| globals, "i" |), BinOp.add (|
+          M.slice (|
+            M.get_name (| globals, "data" |),
             M.get_name (| globals, "i" |),
-            Constant.int 4
-          |) |) |)
+            BinOp.add (|
+              M.get_name (| globals, "i" |),
+              Constant.int 4
+            |),
+            Constant.None_
+          |)
         ],
         make_dict []
       |)
     ],
     make_dict []
   |) in
-    EndFor.
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let _ := M.return_ (|
       M.call (|
         M.get_name (| globals, "tuple" |),
@@ -323,19 +340,28 @@ Definition le_uint32_sequence_to_bytes : Value.t -> Value.t -> M :=
     " in
     let result_bytes :=
       Constant.bytes "" in
-    For M.get_name (| globals, "item" |) in M.get_name (| globals, "sequence" |) do
-      let result_bytes := BinOp.add
-        M.call (|
+    let _ :=
+      M.for_ (|
+        M.get_name (| globals, "item" |),
+        M.get_name (| globals, "sequence" |),
+        ltac:(M.monadic (
+          let result_bytes := BinOp.add
+            M.call (|
     M.get_field (| M.get_name (| globals, "item" |), "to_le_bytes4" |),
     make_list [],
     make_dict []
   |)
-        M.call (|
+            M.call (|
     M.get_field (| M.get_name (| globals, "item" |), "to_le_bytes4" |),
     make_list [],
     make_dict []
   |) in
-    EndFor.
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let _ := M.return_ (|
       M.get_name (| globals, "result_bytes" |)
     |) in
@@ -410,28 +436,36 @@ Definition taylor_exponential : Value.t -> Value.t -> M :=
         M.get_name (| globals, "factor" |),
         M.get_name (| globals, "denominator" |)
       |) in
-    While Compare.gt (|
-    M.get_name (| globals, "numerator_accumulated" |),
-    Constant.int 0
-  |) do
-      let output := BinOp.add
-        M.get_name (| globals, "numerator_accumulated" |)
-        M.get_name (| globals, "numerator_accumulated" |) in
-      let numerator_accumulated :=
-        BinOp.floor_div (|
-          BinOp.mult (|
-            M.get_name (| globals, "numerator_accumulated" |),
-            M.get_name (| globals, "numerator" |)
-          |),
-          BinOp.mult (|
-            M.get_name (| globals, "denominator" |),
-            M.get_name (| globals, "i" |)
-          |)
-        |) in
-      let i := BinOp.add
-        Constant.int 1
-        Constant.int 1 in
-    EndWhile.
+    let _ :=
+      M.while (|
+        Compare.gt (|
+      M.get_name (| globals, "numerator_accumulated" |),
+      Constant.int 0
+    |),
+        ltac:(M.monadic (
+          let output := BinOp.add
+            M.get_name (| globals, "numerator_accumulated" |)
+            M.get_name (| globals, "numerator_accumulated" |) in
+          let numerator_accumulated :=
+            BinOp.floor_div (|
+              BinOp.mult (|
+                M.get_name (| globals, "numerator_accumulated" |),
+                M.get_name (| globals, "numerator" |)
+              |),
+              BinOp.mult (|
+                M.get_name (| globals, "denominator" |),
+                M.get_name (| globals, "i" |)
+              |)
+            |) in
+          let i := BinOp.add
+            Constant.int 1
+            Constant.int 1 in
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let _ := M.return_ (|
       BinOp.floor_div (|
         M.get_name (| globals, "output" |),

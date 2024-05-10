@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.tangerine_whistle.vm.instructions.storage".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,33 +17,17 @@ Introduction
 Implementations of the EVM storage related instructions.
 ".
 
-Require ethereum.tangerine_whistle.state.
-Axiom ethereum_tangerine_whistle_state_get_storage :
-  IsGlobalAlias globals ethereum.tangerine_whistle.state.globals "get_storage".
-Axiom ethereum_tangerine_whistle_state_set_storage :
-  IsGlobalAlias globals ethereum.tangerine_whistle.state.globals "set_storage".
+Axiom ethereum_tangerine_whistle_state_imports :
+  AreImported globals "ethereum.tangerine_whistle.state" [ "get_storage"; "set_storage" ].
 
-Require ethereum.tangerine_whistle.vm.__init__.
-Axiom ethereum_tangerine_whistle_vm___init___Evm :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.__init__.globals "Evm".
+Axiom ethereum_tangerine_whistle_vm_imports :
+  AreImported globals "ethereum.tangerine_whistle.vm" [ "Evm" ].
 
-Require ethereum.tangerine_whistle.vm.gas.
-Axiom ethereum_tangerine_whistle_vm_gas_GAS_SLOAD :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_SLOAD".
-Axiom ethereum_tangerine_whistle_vm_gas_GAS_STORAGE_CLEAR_REFUND :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_STORAGE_CLEAR_REFUND".
-Axiom ethereum_tangerine_whistle_vm_gas_GAS_STORAGE_SET :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_STORAGE_SET".
-Axiom ethereum_tangerine_whistle_vm_gas_GAS_STORAGE_UPDATE :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "GAS_STORAGE_UPDATE".
-Axiom ethereum_tangerine_whistle_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.gas.globals "charge_gas".
+Axiom ethereum_tangerine_whistle_vm_gas_imports :
+  AreImported globals "ethereum.tangerine_whistle.vm.gas" [ "GAS_SLOAD"; "GAS_STORAGE_CLEAR_REFUND"; "GAS_STORAGE_SET"; "GAS_STORAGE_UPDATE"; "charge_gas" ].
 
-Require ethereum.tangerine_whistle.vm.stack.
-Axiom ethereum_tangerine_whistle_vm_stack_pop :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.stack.globals "pop".
-Axiom ethereum_tangerine_whistle_vm_stack_push :
-  IsGlobalAlias globals ethereum.tangerine_whistle.vm.stack.globals "push".
+Axiom ethereum_tangerine_whistle_vm_stack_imports :
+  AreImported globals "ethereum.tangerine_whistle.vm.stack" [ "pop"; "push" ].
 
 Definition sload : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

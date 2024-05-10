@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.spurious_dragon.vm.instructions.__init__".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -20,59 +20,44 @@ implementations.
 
 (* At top_level_stmt: unsupported node type: Import *)
 
-Require typing.
-Axiom typing_Callable :
-  IsGlobalAlias globals typing.globals "Callable".
-Axiom typing_Dict :
-  IsGlobalAlias globals typing.globals "Dict".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Callable"; "Dict" ].
 
-Require ethereum.spurious_dragon.vm.instructions.__init__.
-Axiom ethereum_spurious_dragon_vm_instructions___init___arithmetic :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.instructions.__init__.globals "arithmetic".
+Axiom ethereum_spurious_dragon_vm_instructions_imports :
+  AreImported globals "ethereum.spurious_dragon.vm.instructions" [ "arithmetic" ].
 
-Require ethereum.spurious_dragon.vm.instructions.__init__.
-Axiom ethereum_spurious_dragon_vm_instructions___init___bitwise :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.instructions.__init__.globals "bitwise".
+Axiom ethereum_spurious_dragon_vm_instructions_imports :
+  AreImported globals "ethereum.spurious_dragon.vm.instructions" [ "bitwise" ].
 
-Require ethereum.spurious_dragon.vm.instructions.__init__.
-Axiom ethereum_spurious_dragon_vm_instructions___init___block :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.instructions.__init__.globals "block".
+Axiom ethereum_spurious_dragon_vm_instructions_imports :
+  AreImported globals "ethereum.spurious_dragon.vm.instructions" [ "block" ].
 
-Require ethereum.spurious_dragon.vm.instructions.__init__.
-Axiom ethereum_spurious_dragon_vm_instructions___init___comparison :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.instructions.__init__.globals "comparison".
+Axiom ethereum_spurious_dragon_vm_instructions_imports :
+  AreImported globals "ethereum.spurious_dragon.vm.instructions" [ "comparison" ].
 
-Require ethereum.spurious_dragon.vm.instructions.__init__.
-Axiom ethereum_spurious_dragon_vm_instructions___init___control_flow :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.instructions.__init__.globals "control_flow".
+Axiom ethereum_spurious_dragon_vm_instructions_imports :
+  AreImported globals "ethereum.spurious_dragon.vm.instructions" [ "control_flow" ].
 
-Require ethereum.spurious_dragon.vm.instructions.__init__.
-Axiom ethereum_spurious_dragon_vm_instructions___init___environment :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.instructions.__init__.globals "environment".
+Axiom ethereum_spurious_dragon_vm_instructions_imports :
+  AreImported globals "ethereum.spurious_dragon.vm.instructions" [ "environment" ].
 
-Require ethereum.spurious_dragon.vm.instructions.__init__.
-Axiom ethereum_spurious_dragon_vm_instructions___init___keccak :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.instructions.__init__.globals "keccak".
+Axiom ethereum_spurious_dragon_vm_instructions_imports :
+  AreImported globals "ethereum.spurious_dragon.vm.instructions" [ "keccak" ].
 
-Require ethereum.spurious_dragon.vm.instructions.__init__.
-Axiom ethereum_spurious_dragon_vm_instructions___init___log :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.instructions.__init__.globals "log".
+Axiom ethereum_spurious_dragon_vm_instructions_imports :
+  AreImported globals "ethereum.spurious_dragon.vm.instructions" [ "log" ].
 
-Require ethereum.spurious_dragon.vm.instructions.__init__.
-Axiom ethereum_spurious_dragon_vm_instructions___init___memory :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.instructions.__init__.globals "memory".
+Axiom ethereum_spurious_dragon_vm_instructions_imports :
+  AreImported globals "ethereum.spurious_dragon.vm.instructions" [ "memory" ].
 
-Require ethereum.spurious_dragon.vm.instructions.__init__.
-Axiom ethereum_spurious_dragon_vm_instructions___init___stack :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.instructions.__init__.globals "stack".
+Axiom ethereum_spurious_dragon_vm_instructions_imports :
+  AreImported globals "ethereum.spurious_dragon.vm.instructions" [ "stack" ].
 
-Require ethereum.spurious_dragon.vm.instructions.__init__.
-Axiom ethereum_spurious_dragon_vm_instructions___init___storage :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.instructions.__init__.globals "storage".
+Axiom ethereum_spurious_dragon_vm_instructions_imports :
+  AreImported globals "ethereum.spurious_dragon.vm.instructions" [ "storage" ].
 
-Require ethereum.spurious_dragon.vm.instructions.__init__.
-Axiom ethereum_spurious_dragon_vm_instructions___init___system :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.instructions.__init__.globals "system".
+Axiom ethereum_spurious_dragon_vm_instructions_imports :
+  AreImported globals "ethereum.spurious_dragon.vm.instructions" [ "system" ].
 
 Definition Ops : Value.t :=
   builtins.make_klass

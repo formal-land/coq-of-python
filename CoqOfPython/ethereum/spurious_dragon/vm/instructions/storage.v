@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.spurious_dragon.vm.instructions.storage".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,33 +17,17 @@ Introduction
 Implementations of the EVM storage related instructions.
 ".
 
-Require ethereum.spurious_dragon.state.
-Axiom ethereum_spurious_dragon_state_get_storage :
-  IsGlobalAlias globals ethereum.spurious_dragon.state.globals "get_storage".
-Axiom ethereum_spurious_dragon_state_set_storage :
-  IsGlobalAlias globals ethereum.spurious_dragon.state.globals "set_storage".
+Axiom ethereum_spurious_dragon_state_imports :
+  AreImported globals "ethereum.spurious_dragon.state" [ "get_storage"; "set_storage" ].
 
-Require ethereum.spurious_dragon.vm.__init__.
-Axiom ethereum_spurious_dragon_vm___init___Evm :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.__init__.globals "Evm".
+Axiom ethereum_spurious_dragon_vm_imports :
+  AreImported globals "ethereum.spurious_dragon.vm" [ "Evm" ].
 
-Require ethereum.spurious_dragon.vm.gas.
-Axiom ethereum_spurious_dragon_vm_gas_GAS_SLOAD :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.gas.globals "GAS_SLOAD".
-Axiom ethereum_spurious_dragon_vm_gas_GAS_STORAGE_CLEAR_REFUND :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.gas.globals "GAS_STORAGE_CLEAR_REFUND".
-Axiom ethereum_spurious_dragon_vm_gas_GAS_STORAGE_SET :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.gas.globals "GAS_STORAGE_SET".
-Axiom ethereum_spurious_dragon_vm_gas_GAS_STORAGE_UPDATE :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.gas.globals "GAS_STORAGE_UPDATE".
-Axiom ethereum_spurious_dragon_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.gas.globals "charge_gas".
+Axiom ethereum_spurious_dragon_vm_gas_imports :
+  AreImported globals "ethereum.spurious_dragon.vm.gas" [ "GAS_SLOAD"; "GAS_STORAGE_CLEAR_REFUND"; "GAS_STORAGE_SET"; "GAS_STORAGE_UPDATE"; "charge_gas" ].
 
-Require ethereum.spurious_dragon.vm.stack.
-Axiom ethereum_spurious_dragon_vm_stack_pop :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.stack.globals "pop".
-Axiom ethereum_spurious_dragon_vm_stack_push :
-  IsGlobalAlias globals ethereum.spurious_dragon.vm.stack.globals "push".
+Axiom ethereum_spurious_dragon_vm_stack_imports :
+  AreImported globals "ethereum.spurious_dragon.vm.stack" [ "pop"; "push" ].
 
 Definition sload : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

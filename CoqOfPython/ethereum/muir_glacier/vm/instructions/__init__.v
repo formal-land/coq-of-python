@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.muir_glacier.vm.instructions.__init__".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -20,59 +20,44 @@ implementations.
 
 (* At top_level_stmt: unsupported node type: Import *)
 
-Require typing.
-Axiom typing_Callable :
-  IsGlobalAlias globals typing.globals "Callable".
-Axiom typing_Dict :
-  IsGlobalAlias globals typing.globals "Dict".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Callable"; "Dict" ].
 
-Require ethereum.muir_glacier.vm.instructions.__init__.
-Axiom ethereum_muir_glacier_vm_instructions___init___arithmetic :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.instructions.__init__.globals "arithmetic".
+Axiom ethereum_muir_glacier_vm_instructions_imports :
+  AreImported globals "ethereum.muir_glacier.vm.instructions" [ "arithmetic" ].
 
-Require ethereum.muir_glacier.vm.instructions.__init__.
-Axiom ethereum_muir_glacier_vm_instructions___init___bitwise :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.instructions.__init__.globals "bitwise".
+Axiom ethereum_muir_glacier_vm_instructions_imports :
+  AreImported globals "ethereum.muir_glacier.vm.instructions" [ "bitwise" ].
 
-Require ethereum.muir_glacier.vm.instructions.__init__.
-Axiom ethereum_muir_glacier_vm_instructions___init___block :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.instructions.__init__.globals "block".
+Axiom ethereum_muir_glacier_vm_instructions_imports :
+  AreImported globals "ethereum.muir_glacier.vm.instructions" [ "block" ].
 
-Require ethereum.muir_glacier.vm.instructions.__init__.
-Axiom ethereum_muir_glacier_vm_instructions___init___comparison :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.instructions.__init__.globals "comparison".
+Axiom ethereum_muir_glacier_vm_instructions_imports :
+  AreImported globals "ethereum.muir_glacier.vm.instructions" [ "comparison" ].
 
-Require ethereum.muir_glacier.vm.instructions.__init__.
-Axiom ethereum_muir_glacier_vm_instructions___init___control_flow :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.instructions.__init__.globals "control_flow".
+Axiom ethereum_muir_glacier_vm_instructions_imports :
+  AreImported globals "ethereum.muir_glacier.vm.instructions" [ "control_flow" ].
 
-Require ethereum.muir_glacier.vm.instructions.__init__.
-Axiom ethereum_muir_glacier_vm_instructions___init___environment :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.instructions.__init__.globals "environment".
+Axiom ethereum_muir_glacier_vm_instructions_imports :
+  AreImported globals "ethereum.muir_glacier.vm.instructions" [ "environment" ].
 
-Require ethereum.muir_glacier.vm.instructions.__init__.
-Axiom ethereum_muir_glacier_vm_instructions___init___keccak :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.instructions.__init__.globals "keccak".
+Axiom ethereum_muir_glacier_vm_instructions_imports :
+  AreImported globals "ethereum.muir_glacier.vm.instructions" [ "keccak" ].
 
-Require ethereum.muir_glacier.vm.instructions.__init__.
-Axiom ethereum_muir_glacier_vm_instructions___init___log :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.instructions.__init__.globals "log".
+Axiom ethereum_muir_glacier_vm_instructions_imports :
+  AreImported globals "ethereum.muir_glacier.vm.instructions" [ "log" ].
 
-Require ethereum.muir_glacier.vm.instructions.__init__.
-Axiom ethereum_muir_glacier_vm_instructions___init___memory :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.instructions.__init__.globals "memory".
+Axiom ethereum_muir_glacier_vm_instructions_imports :
+  AreImported globals "ethereum.muir_glacier.vm.instructions" [ "memory" ].
 
-Require ethereum.muir_glacier.vm.instructions.__init__.
-Axiom ethereum_muir_glacier_vm_instructions___init___stack :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.instructions.__init__.globals "stack".
+Axiom ethereum_muir_glacier_vm_instructions_imports :
+  AreImported globals "ethereum.muir_glacier.vm.instructions" [ "stack" ].
 
-Require ethereum.muir_glacier.vm.instructions.__init__.
-Axiom ethereum_muir_glacier_vm_instructions___init___storage :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.instructions.__init__.globals "storage".
+Axiom ethereum_muir_glacier_vm_instructions_imports :
+  AreImported globals "ethereum.muir_glacier.vm.instructions" [ "storage" ].
 
-Require ethereum.muir_glacier.vm.instructions.__init__.
-Axiom ethereum_muir_glacier_vm_instructions___init___system :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.instructions.__init__.globals "system".
+Axiom ethereum_muir_glacier_vm_instructions_imports :
+  AreImported globals "ethereum.muir_glacier.vm.instructions" [ "system" ].
 
 Definition Ops : Value.t :=
   builtins.make_klass

@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.byzantium.__init__".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -9,9 +9,8 @@ lets contracts make non-state-changing calls to other contracts, and adds
 cryptographic primitives for layer 2 scaling.
 ".
 
-Require ethereum.fork_criteria.
-Axiom ethereum_fork_criteria_ByBlockNumber :
-  IsGlobalAlias globals ethereum.fork_criteria.globals "ByBlockNumber".
+Axiom ethereum_fork_criteria_imports :
+  AreImported globals "ethereum.fork_criteria" [ "ByBlockNumber" ].
 
 Definition FORK_CRITERIA : Value.t := M.run ltac:(M.monadic (
   M.call (|

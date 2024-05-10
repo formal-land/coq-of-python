@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.cancun.__init__".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -10,9 +10,8 @@ instruction, limits self-destruct to only work for contracts created in the
 same transaction, and adds an instruction to read the blob base fee.
 ".
 
-Require ethereum.fork_criteria.
-Axiom ethereum_fork_criteria_ByTimestamp :
-  IsGlobalAlias globals ethereum.fork_criteria.globals "ByTimestamp".
+Axiom ethereum_fork_criteria_imports :
+  AreImported globals "ethereum.fork_criteria" [ "ByTimestamp" ].
 
 Definition FORK_CRITERIA : Value.t := M.run ltac:(M.monadic (
   M.call (|

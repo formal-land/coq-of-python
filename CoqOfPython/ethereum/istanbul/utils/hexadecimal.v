@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.istanbul.utils.hexadecimal".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -18,17 +18,11 @@ Hexadecimal utility functions used in this specification, specific to
 Istanbul types.
 ".
 
-Require ethereum.utils.hexadecimal.
-Axiom ethereum_utils_hexadecimal_remove_hex_prefix :
-  IsGlobalAlias globals ethereum.utils.hexadecimal.globals "remove_hex_prefix".
+Axiom ethereum_utils_hexadecimal_imports :
+  AreImported globals "ethereum.utils.hexadecimal" [ "remove_hex_prefix" ].
 
-Require ethereum.istanbul.fork_types.
-Axiom ethereum_istanbul_fork_types_Address :
-  IsGlobalAlias globals ethereum.istanbul.fork_types.globals "Address".
-Axiom ethereum_istanbul_fork_types_Bloom :
-  IsGlobalAlias globals ethereum.istanbul.fork_types.globals "Bloom".
-Axiom ethereum_istanbul_fork_types_Root :
-  IsGlobalAlias globals ethereum.istanbul.fork_types.globals "Root".
+Axiom ethereum_istanbul_fork_types_imports :
+  AreImported globals "ethereum.istanbul.fork_types" [ "Address"; "Bloom"; "Root" ].
 
 Definition hex_to_root : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

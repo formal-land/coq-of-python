@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.crypto.hash".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,17 +17,11 @@ Introduction
 Cryptographic hashing functions.
 ".
 
-Require Crypto.Hash.
-Axiom Crypto_Hash_keccak :
-  IsGlobalAlias globals Crypto.Hash.globals "keccak".
+Axiom Crypto_Hash_imports :
+  AreImported globals "Crypto.Hash" [ "keccak" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Bytes32 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes32".
-Axiom ethereum_base_types_Bytes64 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes64".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "Bytes"; "Bytes32"; "Bytes64" ].
 
 Definition Hash32 : Value.t := M.run ltac:(M.monadic (
   M.get_name (| globals, "Bytes32" |)

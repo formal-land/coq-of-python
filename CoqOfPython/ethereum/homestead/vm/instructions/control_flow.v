@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.homestead.vm.instructions.control_flow".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,37 +17,20 @@ Introduction
 Implementations of the EVM control flow instructions.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Uint" ].
 
-Require ethereum.homestead.vm.gas.
-Axiom ethereum_homestead_vm_gas_GAS_BASE :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_BASE".
-Axiom ethereum_homestead_vm_gas_GAS_HIGH :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_HIGH".
-Axiom ethereum_homestead_vm_gas_GAS_JUMPDEST :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_JUMPDEST".
-Axiom ethereum_homestead_vm_gas_GAS_MID :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_MID".
-Axiom ethereum_homestead_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "charge_gas".
+Axiom ethereum_homestead_vm_gas_imports :
+  AreImported globals "ethereum.homestead.vm.gas" [ "GAS_BASE"; "GAS_HIGH"; "GAS_JUMPDEST"; "GAS_MID"; "charge_gas" ].
 
-Require ethereum.homestead.vm.__init__.
-Axiom ethereum_homestead_vm___init___Evm :
-  IsGlobalAlias globals ethereum.homestead.vm.__init__.globals "Evm".
+Axiom ethereum_homestead_vm_imports :
+  AreImported globals "ethereum.homestead.vm" [ "Evm" ].
 
-Require ethereum.homestead.vm.exceptions.
-Axiom ethereum_homestead_vm_exceptions_InvalidJumpDestError :
-  IsGlobalAlias globals ethereum.homestead.vm.exceptions.globals "InvalidJumpDestError".
+Axiom ethereum_homestead_vm_exceptions_imports :
+  AreImported globals "ethereum.homestead.vm.exceptions" [ "InvalidJumpDestError" ].
 
-Require ethereum.homestead.vm.stack.
-Axiom ethereum_homestead_vm_stack_pop :
-  IsGlobalAlias globals ethereum.homestead.vm.stack.globals "pop".
-Axiom ethereum_homestead_vm_stack_push :
-  IsGlobalAlias globals ethereum.homestead.vm.stack.globals "push".
+Axiom ethereum_homestead_vm_stack_imports :
+  AreImported globals "ethereum.homestead.vm.stack" [ "pop"; "push" ].
 
 Definition stop : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -117,7 +100,7 @@ Definition jump : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let _ := M.raise (| Some(M.get_name (| globals, "InvalidJumpDestError" |)) |) in
+        let _ := M.raise (| Some (M.get_name (| globals, "InvalidJumpDestError" |)) |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
@@ -205,7 +188,7 @@ Definition jumpi : Value.t -> Value.t -> M :=
             |),
           (* then *)
           ltac:(M.monadic (
-            let _ := M.raise (| Some(M.get_name (| globals, "InvalidJumpDestError" |)) |) in
+            let _ := M.raise (| Some (M.get_name (| globals, "InvalidJumpDestError" |)) |) in
             M.pure Constant.None_
           (* else *)
           )), ltac:(M.monadic (

@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.gray_glacier.vm.instructions.bitwise".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,27 +17,17 @@ Introduction
 Implementations of the EVM bitwise instructions.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_U256_CEIL_VALUE :
-  IsGlobalAlias globals ethereum.base_types.globals "U256_CEIL_VALUE".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "U256_CEIL_VALUE" ].
 
-Require ethereum.gray_glacier.vm.__init__.
-Axiom ethereum_gray_glacier_vm___init___Evm :
-  IsGlobalAlias globals ethereum.gray_glacier.vm.__init__.globals "Evm".
+Axiom ethereum_gray_glacier_vm_imports :
+  AreImported globals "ethereum.gray_glacier.vm" [ "Evm" ].
 
-Require ethereum.gray_glacier.vm.gas.
-Axiom ethereum_gray_glacier_vm_gas_GAS_VERY_LOW :
-  IsGlobalAlias globals ethereum.gray_glacier.vm.gas.globals "GAS_VERY_LOW".
-Axiom ethereum_gray_glacier_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.gray_glacier.vm.gas.globals "charge_gas".
+Axiom ethereum_gray_glacier_vm_gas_imports :
+  AreImported globals "ethereum.gray_glacier.vm.gas" [ "GAS_VERY_LOW"; "charge_gas" ].
 
-Require ethereum.gray_glacier.vm.stack.
-Axiom ethereum_gray_glacier_vm_stack_pop :
-  IsGlobalAlias globals ethereum.gray_glacier.vm.stack.globals "pop".
-Axiom ethereum_gray_glacier_vm_stack_push :
-  IsGlobalAlias globals ethereum.gray_glacier.vm.stack.globals "push".
+Axiom ethereum_gray_glacier_vm_stack_imports :
+  AreImported globals "ethereum.gray_glacier.vm.stack" [ "pop"; "push" ].
 
 Definition bitwise_and : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

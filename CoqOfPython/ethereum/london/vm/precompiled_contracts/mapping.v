@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.london.vm.precompiled_contracts.mapping".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,66 +17,34 @@ Introduction
 Mapping of precompiled contracts their implementations.
 ".
 
-Require typing.
-Axiom typing_Callable :
-  IsGlobalAlias globals typing.globals "Callable".
-Axiom typing_Dict :
-  IsGlobalAlias globals typing.globals "Dict".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Callable"; "Dict" ].
 
-Require ethereum.london.fork_types.
-Axiom ethereum_london_fork_types_Address :
-  IsGlobalAlias globals ethereum.london.fork_types.globals "Address".
+Axiom ethereum_london_fork_types_imports :
+  AreImported globals "ethereum.london.fork_types" [ "Address" ].
 
-Require ethereum.london.vm.precompiled_contracts.__init__.
-Axiom ethereum_london_vm_precompiled_contracts___init___ALT_BN128_ADD_ADDRESS :
-  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.__init__.globals "ALT_BN128_ADD_ADDRESS".
-Axiom ethereum_london_vm_precompiled_contracts___init___ALT_BN128_MUL_ADDRESS :
-  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.__init__.globals "ALT_BN128_MUL_ADDRESS".
-Axiom ethereum_london_vm_precompiled_contracts___init___ALT_BN128_PAIRING_CHECK_ADDRESS :
-  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.__init__.globals "ALT_BN128_PAIRING_CHECK_ADDRESS".
-Axiom ethereum_london_vm_precompiled_contracts___init___BLAKE2F_ADDRESS :
-  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.__init__.globals "BLAKE2F_ADDRESS".
-Axiom ethereum_london_vm_precompiled_contracts___init___ECRECOVER_ADDRESS :
-  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.__init__.globals "ECRECOVER_ADDRESS".
-Axiom ethereum_london_vm_precompiled_contracts___init___IDENTITY_ADDRESS :
-  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.__init__.globals "IDENTITY_ADDRESS".
-Axiom ethereum_london_vm_precompiled_contracts___init___MODEXP_ADDRESS :
-  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.__init__.globals "MODEXP_ADDRESS".
-Axiom ethereum_london_vm_precompiled_contracts___init___RIPEMD160_ADDRESS :
-  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.__init__.globals "RIPEMD160_ADDRESS".
-Axiom ethereum_london_vm_precompiled_contracts___init___SHA256_ADDRESS :
-  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.__init__.globals "SHA256_ADDRESS".
+Axiom ethereum_london_vm_precompiled_contracts_imports :
+  AreImported globals "ethereum.london.vm.precompiled_contracts" [ "ALT_BN128_ADD_ADDRESS"; "ALT_BN128_MUL_ADDRESS"; "ALT_BN128_PAIRING_CHECK_ADDRESS"; "BLAKE2F_ADDRESS"; "ECRECOVER_ADDRESS"; "IDENTITY_ADDRESS"; "MODEXP_ADDRESS"; "RIPEMD160_ADDRESS"; "SHA256_ADDRESS" ].
 
-Require ethereum.london.vm.precompiled_contracts.alt_bn128.
-Axiom ethereum_london_vm_precompiled_contracts_alt_bn128_alt_bn128_add :
-  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.alt_bn128.globals "alt_bn128_add".
-Axiom ethereum_london_vm_precompiled_contracts_alt_bn128_alt_bn128_mul :
-  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.alt_bn128.globals "alt_bn128_mul".
-Axiom ethereum_london_vm_precompiled_contracts_alt_bn128_alt_bn128_pairing_check :
-  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.alt_bn128.globals "alt_bn128_pairing_check".
+Axiom ethereum_london_vm_precompiled_contracts_alt_bn128_imports :
+  AreImported globals "ethereum.london.vm.precompiled_contracts.alt_bn128" [ "alt_bn128_add"; "alt_bn128_mul"; "alt_bn128_pairing_check" ].
 
-Require ethereum.london.vm.precompiled_contracts.blake2f.
-Axiom ethereum_london_vm_precompiled_contracts_blake2f_blake2f :
-  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.blake2f.globals "blake2f".
+Axiom ethereum_london_vm_precompiled_contracts_blake2f_imports :
+  AreImported globals "ethereum.london.vm.precompiled_contracts.blake2f" [ "blake2f" ].
 
-Require ethereum.london.vm.precompiled_contracts.ecrecover.
-Axiom ethereum_london_vm_precompiled_contracts_ecrecover_ecrecover :
-  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.ecrecover.globals "ecrecover".
+Axiom ethereum_london_vm_precompiled_contracts_ecrecover_imports :
+  AreImported globals "ethereum.london.vm.precompiled_contracts.ecrecover" [ "ecrecover" ].
 
-Require ethereum.london.vm.precompiled_contracts.identity.
-Axiom ethereum_london_vm_precompiled_contracts_identity_identity :
-  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.identity.globals "identity".
+Axiom ethereum_london_vm_precompiled_contracts_identity_imports :
+  AreImported globals "ethereum.london.vm.precompiled_contracts.identity" [ "identity" ].
 
-Require ethereum.london.vm.precompiled_contracts.modexp.
-Axiom ethereum_london_vm_precompiled_contracts_modexp_modexp :
-  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.modexp.globals "modexp".
+Axiom ethereum_london_vm_precompiled_contracts_modexp_imports :
+  AreImported globals "ethereum.london.vm.precompiled_contracts.modexp" [ "modexp" ].
 
-Require ethereum.london.vm.precompiled_contracts.ripemd160.
-Axiom ethereum_london_vm_precompiled_contracts_ripemd160_ripemd160 :
-  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.ripemd160.globals "ripemd160".
+Axiom ethereum_london_vm_precompiled_contracts_ripemd160_imports :
+  AreImported globals "ethereum.london.vm.precompiled_contracts.ripemd160" [ "ripemd160" ].
 
-Require ethereum.london.vm.precompiled_contracts.sha256.
-Axiom ethereum_london_vm_precompiled_contracts_sha256_sha256 :
-  IsGlobalAlias globals ethereum.london.vm.precompiled_contracts.sha256.globals "sha256".
+Axiom ethereum_london_vm_precompiled_contracts_sha256_imports :
+  AreImported globals "ethereum.london.vm.precompiled_contracts.sha256" [ "sha256" ].
 
 (* At top_level_stmt: unsupported node type: AnnAssign *)

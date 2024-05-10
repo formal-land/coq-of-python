@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.shanghai.utils.message".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -18,49 +18,26 @@ Message specific functions used in this shanghai version of
 specification.
 ".
 
-Require typing.
-Axiom typing_FrozenSet :
-  IsGlobalAlias globals typing.globals "FrozenSet".
-Axiom typing_Optional :
-  IsGlobalAlias globals typing.globals "Optional".
-Axiom typing_Tuple :
-  IsGlobalAlias globals typing.globals "Tuple".
-Axiom typing_Union :
-  IsGlobalAlias globals typing.globals "Union".
+Axiom typing_imports :
+  AreImported globals "typing" [ "FrozenSet"; "Optional"; "Tuple"; "Union" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Bytes0 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes0".
-Axiom ethereum_base_types_Bytes32 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes32".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Bytes0"; "Bytes32"; "Uint" ].
 
-Require ethereum.shanghai.fork_types.
-Axiom ethereum_shanghai_fork_types_Address :
-  IsGlobalAlias globals ethereum.shanghai.fork_types.globals "Address".
+Axiom ethereum_shanghai_fork_types_imports :
+  AreImported globals "ethereum.shanghai.fork_types" [ "Address" ].
 
-Require ethereum.shanghai.state.
-Axiom ethereum_shanghai_state_get_account :
-  IsGlobalAlias globals ethereum.shanghai.state.globals "get_account".
+Axiom ethereum_shanghai_state_imports :
+  AreImported globals "ethereum.shanghai.state" [ "get_account" ].
 
-Require ethereum.shanghai.vm.__init__.
-Axiom ethereum_shanghai_vm___init___Environment :
-  IsGlobalAlias globals ethereum.shanghai.vm.__init__.globals "Environment".
-Axiom ethereum_shanghai_vm___init___Message :
-  IsGlobalAlias globals ethereum.shanghai.vm.__init__.globals "Message".
+Axiom ethereum_shanghai_vm_imports :
+  AreImported globals "ethereum.shanghai.vm" [ "Environment"; "Message" ].
 
-Require ethereum.shanghai.vm.precompiled_contracts.mapping.
-Axiom ethereum_shanghai_vm_precompiled_contracts_mapping_PRE_COMPILED_CONTRACTS :
-  IsGlobalAlias globals ethereum.shanghai.vm.precompiled_contracts.mapping.globals "PRE_COMPILED_CONTRACTS".
+Axiom ethereum_shanghai_vm_precompiled_contracts_mapping_imports :
+  AreImported globals "ethereum.shanghai.vm.precompiled_contracts.mapping" [ "PRE_COMPILED_CONTRACTS" ].
 
-Require ethereum.shanghai.utils.address.
-Axiom ethereum_shanghai_utils_address_compute_contract_address :
-  IsGlobalAlias globals ethereum.shanghai.utils.address.globals "compute_contract_address".
+Axiom ethereum_shanghai_utils_address_imports :
+  AreImported globals "ethereum.shanghai.utils.address" [ "compute_contract_address" ].
 
 Definition prepare_message : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -198,7 +175,7 @@ Definition prepare_message : Value.t -> Value.t -> M :=
             M.pure Constant.None_
           (* else *)
           )), ltac:(M.monadic (
-            let _ := M.raise (| Some(M.call (|
+            let _ := M.raise (| Some (M.call (|
               M.get_name (| globals, "AssertionError" |),
               make_list [
                 Constant.str "Target must be address or empty bytes"

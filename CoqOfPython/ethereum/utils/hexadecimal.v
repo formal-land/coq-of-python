@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.utils.hexadecimal".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,27 +17,11 @@ Introduction
 Hexadecimal strings specific utility functions used in this specification.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U64 :
-  IsGlobalAlias globals ethereum.base_types.globals "U64".
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Bytes8 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes8".
-Axiom ethereum_base_types_Bytes20 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes20".
-Axiom ethereum_base_types_Bytes32 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes32".
-Axiom ethereum_base_types_Bytes256 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes256".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U64"; "U256"; "Bytes"; "Bytes8"; "Bytes20"; "Bytes32"; "Bytes256"; "Uint" ].
 
-Require ethereum.crypto.hash.
-Axiom ethereum_crypto_hash_Hash32 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "Hash32".
+Axiom ethereum_crypto_hash_imports :
+  AreImported globals "ethereum.crypto.hash" [ "Hash32" ].
 
 Definition has_hex_prefix : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -96,13 +80,18 @@ Definition remove_hex_prefix : Value.t -> Value.t -> M :=
       (* then *)
       ltac:(M.monadic (
         let _ := M.return_ (|
-          M.get_subscript (| M.get_name (| globals, "hex_string" |), M.slice (| M.call (|
-            M.get_name (| globals, "len" |),
-            make_list [
-              Constant.str "0x"
-            ],
-            make_dict []
-          |), Constant.None_ |) |)
+          M.slice (|
+            M.get_name (| globals, "hex_string" |),
+            M.call (|
+              M.get_name (| globals, "len" |),
+              make_list [
+                Constant.str "0x"
+              ],
+              make_dict []
+            |),
+            Constant.None_,
+            Constant.None_
+          |)
         |) in
         M.pure Constant.None_
       (* else *)

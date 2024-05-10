@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.paris.vm.precompiled_contracts.sha256".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -19,25 +19,17 @@ Implementation of the `SHA256` precompiled contract.
 
 (* At top_level_stmt: unsupported node type: Import *)
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "Uint" ].
 
-Require ethereum.utils.numeric.
-Axiom ethereum_utils_numeric_ceil32 :
-  IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
+Axiom ethereum_utils_numeric_imports :
+  AreImported globals "ethereum.utils.numeric" [ "ceil32" ].
 
-Require ethereum.paris.vm.__init__.
-Axiom ethereum_paris_vm___init___Evm :
-  IsGlobalAlias globals ethereum.paris.vm.__init__.globals "Evm".
+Axiom ethereum_paris_vm_imports :
+  AreImported globals "ethereum.paris.vm" [ "Evm" ].
 
-Require ethereum.paris.vm.gas.
-Axiom ethereum_paris_vm_gas_GAS_SHA256 :
-  IsGlobalAlias globals ethereum.paris.vm.gas.globals "GAS_SHA256".
-Axiom ethereum_paris_vm_gas_GAS_SHA256_WORD :
-  IsGlobalAlias globals ethereum.paris.vm.gas.globals "GAS_SHA256_WORD".
-Axiom ethereum_paris_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.paris.vm.gas.globals "charge_gas".
+Axiom ethereum_paris_vm_gas_imports :
+  AreImported globals "ethereum.paris.vm.gas" [ "GAS_SHA256"; "GAS_SHA256_WORD"; "charge_gas" ].
 
 Definition sha256 : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.homestead.vm.instructions.environment".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,55 +17,29 @@ Introduction
 Implementations of the EVM environment related instructions.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Uint" ].
 
-Require ethereum.utils.numeric.
-Axiom ethereum_utils_numeric_ceil32 :
-  IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
+Axiom ethereum_utils_numeric_imports :
+  AreImported globals "ethereum.utils.numeric" [ "ceil32" ].
 
-Require ethereum.homestead.state.
-Axiom ethereum_homestead_state_get_account :
-  IsGlobalAlias globals ethereum.homestead.state.globals "get_account".
+Axiom ethereum_homestead_state_imports :
+  AreImported globals "ethereum.homestead.state" [ "get_account" ].
 
-Require ethereum.homestead.utils.address.
-Axiom ethereum_homestead_utils_address_to_address :
-  IsGlobalAlias globals ethereum.homestead.utils.address.globals "to_address".
+Axiom ethereum_homestead_utils_address_imports :
+  AreImported globals "ethereum.homestead.utils.address" [ "to_address" ].
 
-Require ethereum.homestead.vm.memory.
-Axiom ethereum_homestead_vm_memory_buffer_read :
-  IsGlobalAlias globals ethereum.homestead.vm.memory.globals "buffer_read".
-Axiom ethereum_homestead_vm_memory_memory_write :
-  IsGlobalAlias globals ethereum.homestead.vm.memory.globals "memory_write".
+Axiom ethereum_homestead_vm_memory_imports :
+  AreImported globals "ethereum.homestead.vm.memory" [ "buffer_read"; "memory_write" ].
 
-Require ethereum.homestead.vm.__init__.
-Axiom ethereum_homestead_vm___init___Evm :
-  IsGlobalAlias globals ethereum.homestead.vm.__init__.globals "Evm".
+Axiom ethereum_homestead_vm_imports :
+  AreImported globals "ethereum.homestead.vm" [ "Evm" ].
 
-Require ethereum.homestead.vm.gas.
-Axiom ethereum_homestead_vm_gas_GAS_BALANCE :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_BALANCE".
-Axiom ethereum_homestead_vm_gas_GAS_BASE :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_BASE".
-Axiom ethereum_homestead_vm_gas_GAS_COPY :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_COPY".
-Axiom ethereum_homestead_vm_gas_GAS_EXTERNAL :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_EXTERNAL".
-Axiom ethereum_homestead_vm_gas_GAS_VERY_LOW :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "GAS_VERY_LOW".
-Axiom ethereum_homestead_vm_gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "calculate_gas_extend_memory".
-Axiom ethereum_homestead_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.homestead.vm.gas.globals "charge_gas".
+Axiom ethereum_homestead_vm_gas_imports :
+  AreImported globals "ethereum.homestead.vm.gas" [ "GAS_BALANCE"; "GAS_BASE"; "GAS_COPY"; "GAS_EXTERNAL"; "GAS_VERY_LOW"; "calculate_gas_extend_memory"; "charge_gas" ].
 
-Require ethereum.homestead.vm.stack.
-Axiom ethereum_homestead_vm_stack_pop :
-  IsGlobalAlias globals ethereum.homestead.vm.stack.globals "pop".
-Axiom ethereum_homestead_vm_stack_push :
-  IsGlobalAlias globals ethereum.homestead.vm.stack.globals "push".
+Axiom ethereum_homestead_vm_stack_imports :
+  AreImported globals "ethereum.homestead.vm.stack" [ "pop"; "push" ].
 
 Definition address : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

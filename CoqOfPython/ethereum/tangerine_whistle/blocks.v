@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.tangerine_whistle.blocks".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -14,43 +14,23 @@ history of all state transitions that have happened since the genesis of the
 chain.
 ".
 
-Require dataclasses.
-Axiom dataclasses_dataclass :
-  IsGlobalAlias globals dataclasses.globals "dataclass".
+Axiom dataclasses_imports :
+  AreImported globals "dataclasses" [ "dataclass" ].
 
-Require typing.
-Axiom typing_Tuple :
-  IsGlobalAlias globals typing.globals "Tuple".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Tuple" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Bytes8 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes8".
-Axiom ethereum_base_types_Bytes32 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes32".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
-Axiom ethereum_base_types_slotted_freezable :
-  IsGlobalAlias globals ethereum.base_types.globals "slotted_freezable".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Bytes8"; "Bytes32"; "Uint"; "slotted_freezable" ].
 
-Require ethereum.crypto.hash.
-Axiom ethereum_crypto_hash_Hash32 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "Hash32".
+Axiom ethereum_crypto_hash_imports :
+  AreImported globals "ethereum.crypto.hash" [ "Hash32" ].
 
-Require ethereum.tangerine_whistle.fork_types.
-Axiom ethereum_tangerine_whistle_fork_types_Address :
-  IsGlobalAlias globals ethereum.tangerine_whistle.fork_types.globals "Address".
-Axiom ethereum_tangerine_whistle_fork_types_Bloom :
-  IsGlobalAlias globals ethereum.tangerine_whistle.fork_types.globals "Bloom".
-Axiom ethereum_tangerine_whistle_fork_types_Root :
-  IsGlobalAlias globals ethereum.tangerine_whistle.fork_types.globals "Root".
+Axiom ethereum_tangerine_whistle_fork_types_imports :
+  AreImported globals "ethereum.tangerine_whistle.fork_types" [ "Address"; "Bloom"; "Root" ].
 
-Require ethereum.tangerine_whistle.transactions.
-Axiom ethereum_tangerine_whistle_transactions_Transaction :
-  IsGlobalAlias globals ethereum.tangerine_whistle.transactions.globals "Transaction".
+Axiom ethereum_tangerine_whistle_transactions_imports :
+  AreImported globals "ethereum.tangerine_whistle.transactions" [ "Transaction" ].
 
 Definition Header : Value.t :=
   builtins.make_klass

@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.byzantium.vm.instructions.storage".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,41 +17,23 @@ Introduction
 Implementations of the EVM storage related instructions.
 ".
 
-Require ethereum.utils.ensure.
-Axiom ethereum_utils_ensure_ensure :
-  IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
+Axiom ethereum_utils_ensure_imports :
+  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
 
-Require ethereum.byzantium.state.
-Axiom ethereum_byzantium_state_get_storage :
-  IsGlobalAlias globals ethereum.byzantium.state.globals "get_storage".
-Axiom ethereum_byzantium_state_set_storage :
-  IsGlobalAlias globals ethereum.byzantium.state.globals "set_storage".
+Axiom ethereum_byzantium_state_imports :
+  AreImported globals "ethereum.byzantium.state" [ "get_storage"; "set_storage" ].
 
-Require ethereum.byzantium.vm.__init__.
-Axiom ethereum_byzantium_vm___init___Evm :
-  IsGlobalAlias globals ethereum.byzantium.vm.__init__.globals "Evm".
+Axiom ethereum_byzantium_vm_imports :
+  AreImported globals "ethereum.byzantium.vm" [ "Evm" ].
 
-Require ethereum.byzantium.vm.exceptions.
-Axiom ethereum_byzantium_vm_exceptions_WriteInStaticContext :
-  IsGlobalAlias globals ethereum.byzantium.vm.exceptions.globals "WriteInStaticContext".
+Axiom ethereum_byzantium_vm_exceptions_imports :
+  AreImported globals "ethereum.byzantium.vm.exceptions" [ "WriteInStaticContext" ].
 
-Require ethereum.byzantium.vm.gas.
-Axiom ethereum_byzantium_vm_gas_GAS_SLOAD :
-  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_SLOAD".
-Axiom ethereum_byzantium_vm_gas_GAS_STORAGE_CLEAR_REFUND :
-  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_STORAGE_CLEAR_REFUND".
-Axiom ethereum_byzantium_vm_gas_GAS_STORAGE_SET :
-  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_STORAGE_SET".
-Axiom ethereum_byzantium_vm_gas_GAS_STORAGE_UPDATE :
-  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "GAS_STORAGE_UPDATE".
-Axiom ethereum_byzantium_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.byzantium.vm.gas.globals "charge_gas".
+Axiom ethereum_byzantium_vm_gas_imports :
+  AreImported globals "ethereum.byzantium.vm.gas" [ "GAS_SLOAD"; "GAS_STORAGE_CLEAR_REFUND"; "GAS_STORAGE_SET"; "GAS_STORAGE_UPDATE"; "charge_gas" ].
 
-Require ethereum.byzantium.vm.stack.
-Axiom ethereum_byzantium_vm_stack_pop :
-  IsGlobalAlias globals ethereum.byzantium.vm.stack.globals "pop".
-Axiom ethereum_byzantium_vm_stack_push :
-  IsGlobalAlias globals ethereum.byzantium.vm.stack.globals "push".
+Axiom ethereum_byzantium_vm_stack_imports :
+  AreImported globals "ethereum.byzantium.vm.stack" [ "pop"; "push" ].
 
 Definition sload : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

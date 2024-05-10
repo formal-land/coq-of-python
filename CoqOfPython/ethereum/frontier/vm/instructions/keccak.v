@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.frontier.vm.instructions.keccak".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,43 +17,26 @@ Introduction
 Implementations of the EVM keccak instructions.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Uint" ].
 
-Require ethereum.crypto.hash.
-Axiom ethereum_crypto_hash_keccak256 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "keccak256".
+Axiom ethereum_crypto_hash_imports :
+  AreImported globals "ethereum.crypto.hash" [ "keccak256" ].
 
-Require ethereum.utils.numeric.
-Axiom ethereum_utils_numeric_ceil32 :
-  IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
+Axiom ethereum_utils_numeric_imports :
+  AreImported globals "ethereum.utils.numeric" [ "ceil32" ].
 
-Require ethereum.frontier.vm.__init__.
-Axiom ethereum_frontier_vm___init___Evm :
-  IsGlobalAlias globals ethereum.frontier.vm.__init__.globals "Evm".
+Axiom ethereum_frontier_vm_imports :
+  AreImported globals "ethereum.frontier.vm" [ "Evm" ].
 
-Require ethereum.frontier.vm.gas.
-Axiom ethereum_frontier_vm_gas_GAS_KECCAK256 :
-  IsGlobalAlias globals ethereum.frontier.vm.gas.globals "GAS_KECCAK256".
-Axiom ethereum_frontier_vm_gas_GAS_KECCAK256_WORD :
-  IsGlobalAlias globals ethereum.frontier.vm.gas.globals "GAS_KECCAK256_WORD".
-Axiom ethereum_frontier_vm_gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals ethereum.frontier.vm.gas.globals "calculate_gas_extend_memory".
-Axiom ethereum_frontier_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.frontier.vm.gas.globals "charge_gas".
+Axiom ethereum_frontier_vm_gas_imports :
+  AreImported globals "ethereum.frontier.vm.gas" [ "GAS_KECCAK256"; "GAS_KECCAK256_WORD"; "calculate_gas_extend_memory"; "charge_gas" ].
 
-Require ethereum.frontier.vm.memory.
-Axiom ethereum_frontier_vm_memory_memory_read_bytes :
-  IsGlobalAlias globals ethereum.frontier.vm.memory.globals "memory_read_bytes".
+Axiom ethereum_frontier_vm_memory_imports :
+  AreImported globals "ethereum.frontier.vm.memory" [ "memory_read_bytes" ].
 
-Require ethereum.frontier.vm.stack.
-Axiom ethereum_frontier_vm_stack_pop :
-  IsGlobalAlias globals ethereum.frontier.vm.stack.globals "pop".
-Axiom ethereum_frontier_vm_stack_push :
-  IsGlobalAlias globals ethereum.frontier.vm.stack.globals "push".
+Axiom ethereum_frontier_vm_stack_imports :
+  AreImported globals "ethereum.frontier.vm.stack" [ "pop"; "push" ].
 
 Definition keccak : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

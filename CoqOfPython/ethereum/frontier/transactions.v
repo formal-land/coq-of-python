@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.frontier.transactions".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -9,29 +9,17 @@ submitted to be executed. If Ethereum is viewed as a state machine,
 transactions are the events that move between states.
 ".
 
-Require dataclasses.
-Axiom dataclasses_dataclass :
-  IsGlobalAlias globals dataclasses.globals "dataclass".
+Axiom dataclasses_imports :
+  AreImported globals "dataclasses" [ "dataclass" ].
 
-Require typing.
-Axiom typing_Union :
-  IsGlobalAlias globals typing.globals "Union".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Union" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Bytes0 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes0".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
-Axiom ethereum_base_types_slotted_freezable :
-  IsGlobalAlias globals ethereum.base_types.globals "slotted_freezable".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Bytes0"; "Uint"; "slotted_freezable" ].
 
-Require ethereum.frontier.fork_types.
-Axiom ethereum_frontier_fork_types_Address :
-  IsGlobalAlias globals ethereum.frontier.fork_types.globals "Address".
+Axiom ethereum_frontier_fork_types_imports :
+  AreImported globals "ethereum.frontier.fork_types" [ "Address" ].
 
 Definition TX_BASE_COST : Value.t := M.run ltac:(M.monadic (
   Constant.int 21000

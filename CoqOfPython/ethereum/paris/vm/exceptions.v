@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.paris.vm.exceptions".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,9 +17,8 @@ Introduction
 Exceptions which cause the EVM to halt exceptionally.
 ".
 
-Require ethereum.exceptions.
-Axiom ethereum_exceptions_EthereumException :
-  IsGlobalAlias globals ethereum.exceptions.globals "EthereumException".
+Axiom ethereum_exceptions_imports :
+  AreImported globals "ethereum.exceptions" [ "EthereumException" ].
 
 Definition ExceptionalHalt : Value.t :=
   builtins.make_klass

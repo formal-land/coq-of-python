@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.cancun.vm.precompiled_contracts.blake2f".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,27 +17,20 @@ Introduction
 Implementation of the `Blake2` precompiled contract.
 ".
 
-Require ethereum.crypto.blake2.
-Axiom ethereum_crypto_blake2_Blake2b :
-  IsGlobalAlias globals ethereum.crypto.blake2.globals "Blake2b".
+Axiom ethereum_crypto_blake2_imports :
+  AreImported globals "ethereum.crypto.blake2" [ "Blake2b" ].
 
-Require ethereum.utils.ensure.
-Axiom ethereum_utils_ensure_ensure :
-  IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
+Axiom ethereum_utils_ensure_imports :
+  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
 
-Require ethereum.cancun.vm.__init__.
-Axiom ethereum_cancun_vm___init___Evm :
-  IsGlobalAlias globals ethereum.cancun.vm.__init__.globals "Evm".
+Axiom ethereum_cancun_vm_imports :
+  AreImported globals "ethereum.cancun.vm" [ "Evm" ].
 
-Require ethereum.cancun.vm.gas.
-Axiom ethereum_cancun_vm_gas_GAS_BLAKE2_PER_ROUND :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_BLAKE2_PER_ROUND".
-Axiom ethereum_cancun_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "charge_gas".
+Axiom ethereum_cancun_vm_gas_imports :
+  AreImported globals "ethereum.cancun.vm.gas" [ "GAS_BLAKE2_PER_ROUND"; "charge_gas" ].
 
-Require ethereum.cancun.vm.exceptions.
-Axiom ethereum_cancun_vm_exceptions_InvalidParameter :
-  IsGlobalAlias globals ethereum.cancun.vm.exceptions.globals "InvalidParameter".
+Axiom ethereum_cancun_vm_exceptions_imports :
+  AreImported globals "ethereum.cancun.vm.exceptions" [ "InvalidParameter" ].
 
 Definition blake2f : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -99,7 +92,7 @@ Definition blake2f : Value.t -> Value.t -> M :=
     let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
-      Compare.in (|
+      Compare.in_ (|
         M.get_name (| globals, "f" |),
         make_list [
           Constant.int 0;

@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.homestead.__init__".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -10,9 +10,8 @@ the behavior of contract creation with insufficient gas, delays the
 difficulty bomb, and adds an improved delegate call EVM instruction.
 ".
 
-Require ethereum.fork_criteria.
-Axiom ethereum_fork_criteria_ByBlockNumber :
-  IsGlobalAlias globals ethereum.fork_criteria.globals "ByBlockNumber".
+Axiom ethereum_fork_criteria_imports :
+  AreImported globals "ethereum.fork_criteria" [ "ByBlockNumber" ].
 
 Definition FORK_CRITERIA : Value.t := M.run ltac:(M.monadic (
   M.call (|

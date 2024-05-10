@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.rlp".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -19,61 +19,23 @@ Introduction
 Defines the serialization and deserialization format used throughout Ethereum.
 ".
 
-Require dataclasses.
-Axiom dataclasses_astuple :
-  IsGlobalAlias globals dataclasses.globals "astuple".
-Axiom dataclasses_fields :
-  IsGlobalAlias globals dataclasses.globals "fields".
-Axiom dataclasses_is_dataclass :
-  IsGlobalAlias globals dataclasses.globals "is_dataclass".
+Axiom dataclasses_imports :
+  AreImported globals "dataclasses" [ "astuple"; "fields"; "is_dataclass" ].
 
-Require typing.
-Axiom typing_Any :
-  IsGlobalAlias globals typing.globals "Any".
-Axiom typing_List :
-  IsGlobalAlias globals typing.globals "List".
-Axiom typing_Sequence :
-  IsGlobalAlias globals typing.globals "Sequence".
-Axiom typing_Tuple :
-  IsGlobalAlias globals typing.globals "Tuple".
-Axiom typing_Type_ :
-  IsGlobalAlias globals typing.globals "Type_".
-Axiom typing_TypeVar :
-  IsGlobalAlias globals typing.globals "TypeVar".
-Axiom typing_Union :
-  IsGlobalAlias globals typing.globals "Union".
-Axiom typing_cast :
-  IsGlobalAlias globals typing.globals "cast".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Any"; "List"; "Sequence"; "Tuple"; "Type"; "TypeVar"; "Union"; "cast" ].
 
-Require ethereum.crypto.hash.
-Axiom ethereum_crypto_hash_Hash32 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "Hash32".
-Axiom ethereum_crypto_hash_keccak256 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "keccak256".
+Axiom ethereum_crypto_hash_imports :
+  AreImported globals "ethereum.crypto.hash" [ "Hash32"; "keccak256" ].
 
-Require ethereum.exceptions.
-Axiom ethereum_exceptions_RLPDecodingError :
-  IsGlobalAlias globals ethereum.exceptions.globals "RLPDecodingError".
-Axiom ethereum_exceptions_RLPEncodingError :
-  IsGlobalAlias globals ethereum.exceptions.globals "RLPEncodingError".
+Axiom ethereum_exceptions_imports :
+  AreImported globals "ethereum.exceptions" [ "RLPDecodingError"; "RLPEncodingError" ].
 
-Require ethereum.utils.ensure.
-Axiom ethereum_utils_ensure_ensure :
-  IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
+Axiom ethereum_utils_ensure_imports :
+  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Bytes0 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes0".
-Axiom ethereum_base_types_Bytes20 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes20".
-Axiom ethereum_base_types_FixedBytes :
-  IsGlobalAlias globals ethereum.base_types.globals "FixedBytes".
-Axiom ethereum_base_types_FixedUint :
-  IsGlobalAlias globals ethereum.base_types.globals "FixedUint".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "Bytes"; "Bytes0"; "Bytes20"; "FixedBytes"; "FixedUint"; "Uint" ].
 
 Definition RLP : Value.t := M.run ltac:(M.monadic (
   M.get_name (| globals, "Any" |)
@@ -279,7 +241,7 @@ Definition encode : Value.t -> Value.t -> M :=
                             M.pure Constant.None_
                           (* else *)
                           )), ltac:(M.monadic (
-                            let _ := M.raise (| Some(M.call (|
+                            let _ := M.raise (| Some (M.call (|
                               M.get_name (| globals, "RLPEncodingError" |),
                               make_list [
                                 M.call (|
@@ -352,7 +314,10 @@ Definition encode_bytes : Value.t -> Value.t -> M :=
           |),
           ltac:(M.monadic (
             Compare.lt (|
-              M.get_subscript (| M.get_name (| globals, "raw_bytes" |), Constant.int 0 |),
+              M.get_subscript (|
+                M.get_name (| globals, "raw_bytes" |),
+                Constant.int 0
+              |),
               Constant.int 128
             |)
           ))
@@ -608,7 +573,10 @@ Definition decode : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.lt_e (|
-          M.get_subscript (| M.get_name (| globals, "encoded_data" |), Constant.int 0 |),
+          M.get_subscript (|
+            M.get_name (| globals, "encoded_data" |),
+            Constant.int 0
+          |),
           Constant.int 191
         |),
       (* then *)
@@ -716,7 +684,10 @@ Definition _decode_to : Value.t -> Value.t -> M :=
               M.call (|
                 M.get_name (| globals, "type" |),
                 make_list [
-                  M.get_subscript (| M.get_name (| globals, "Tuple" |), make_tuple [ M.get_name (| globals, "Uint" |); (* At constant: unsupported node type: Constant *) ] |)
+                  M.get_subscript (|
+                    M.get_name (| globals, "Tuple" |),
+                    make_tuple [ M.get_name (| globals, "Uint" |); (* At constant: unsupported node type: Constant *) ]
+                  |)
                 ],
                 make_dict []
               |)
@@ -751,21 +722,31 @@ Definition _decode_to : Value.t -> Value.t -> M :=
           (* if *)
           M.if_then_else (|
             Compare.eq (|
-              M.get_subscript (| M.get_field (| M.get_name (| globals, "cls" |), "__args__" |), Constant.int 1 |),
+              M.get_subscript (|
+                M.get_field (| M.get_name (| globals, "cls" |), "__args__" |),
+                Constant.int 1
+              |),
               (* At constant: unsupported node type: Constant *)
             |),
           (* then *)
           ltac:(M.monadic (
             let args :=
               make_list [] in
-            For M.get_name (| globals, "raw_item" |) in M.get_name (| globals, "raw_rlp" |) do
-              let _ := M.call (|
+            let _ :=
+              M.for_ (|
+                M.get_name (| globals, "raw_item" |),
+                M.get_name (| globals, "raw_rlp" |),
+                ltac:(M.monadic (
+                  let _ := M.call (|
     M.get_field (| M.get_name (| globals, "args" |), "append" |),
     make_list [
       M.call (|
         M.get_name (| globals, "_decode_to" |),
         make_list [
-          M.get_subscript (| M.get_field (| M.get_name (| globals, "cls" |), "__args__" |), Constant.int 0 |);
+          M.get_subscript (|
+            M.get_field (| M.get_name (| globals, "cls" |), "__args__" |),
+            Constant.int 0
+          |);
           M.get_name (| globals, "raw_item" |)
         ],
         make_dict []
@@ -773,7 +754,12 @@ Definition _decode_to : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-            EndFor.
+                  M.pure Constant.None_
+                )),
+                ltac:(M.monadic (
+                  M.pure Constant.None_
+                ))
+            |) in
             let _ := M.return_ (|
               M.call (|
                 M.get_name (| globals, "tuple" |),
@@ -811,15 +797,19 @@ Definition _decode_to : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-            For make_tuple [ M.get_name (| globals, "t" |); M.get_name (| globals, "raw_item" |) ] in M.call (|
-    M.get_name (| globals, "zip" |),
-    make_list [
-      M.get_field (| M.get_name (| globals, "cls" |), "__args__" |);
-      M.get_name (| globals, "raw_rlp" |)
-    ],
-    make_dict []
-  |) do
-              let _ := M.call (|
+            let _ :=
+              M.for_ (|
+                make_tuple [ M.get_name (| globals, "t" |); M.get_name (| globals, "raw_item" |) ],
+                M.call (|
+      M.get_name (| globals, "zip" |),
+      make_list [
+        M.get_field (| M.get_name (| globals, "cls" |), "__args__" |);
+        M.get_name (| globals, "raw_rlp" |)
+      ],
+      make_dict []
+    |),
+                ltac:(M.monadic (
+                  let _ := M.call (|
     M.get_field (| M.get_name (| globals, "args" |), "append" |),
     make_list [
       M.call (|
@@ -833,7 +823,12 @@ Definition _decode_to : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-            EndFor.
+                  M.pure Constant.None_
+                )),
+                ltac:(M.monadic (
+                  M.pure Constant.None_
+                ))
+            |) in
             let _ := M.return_ (|
               M.call (|
                 M.get_name (| globals, "tuple" |),
@@ -853,7 +848,10 @@ Definition _decode_to : Value.t -> Value.t -> M :=
           M.if_then_else (|
             Compare.eq (|
               M.get_name (| globals, "cls" |),
-              M.get_subscript (| M.get_name (| globals, "Union" |), make_tuple [ M.get_name (| globals, "Bytes0" |); M.get_name (| globals, "Bytes20" |) ] |)
+              M.get_subscript (|
+                M.get_name (| globals, "Union" |),
+                make_tuple [ M.get_name (| globals, "Bytes0" |); M.get_name (| globals, "Bytes20" |) ]
+              |)
             |),
           (* then *)
           ltac:(M.monadic (
@@ -924,7 +922,7 @@ Definition _decode_to : Value.t -> Value.t -> M :=
                     M.pure Constant.None_
                   (* else *)
                   )), ltac:(M.monadic (
-                    let _ := M.raise (| Some(M.call (|
+                    let _ := M.raise (| Some (M.call (|
                       M.get_name (| globals, "RLPDecodingError" |),
                       make_list [
                         M.call (|
@@ -961,7 +959,10 @@ Definition _decode_to : Value.t -> Value.t -> M :=
                       M.call (|
                         M.get_name (| globals, "type" |),
                         make_list [
-                          M.get_subscript (| M.get_name (| globals, "List" |), M.get_name (| globals, "Bytes" |) |)
+                          M.get_subscript (|
+                            M.get_name (| globals, "List" |),
+                            M.get_name (| globals, "Bytes" |)
+                          |)
                         ],
                         make_dict []
                       |)
@@ -994,14 +995,21 @@ Definition _decode_to : Value.t -> Value.t -> M :=
   |) in
                 let items :=
                   make_list [] in
-                For M.get_name (| globals, "raw_item" |) in M.get_name (| globals, "raw_rlp" |) do
-                  let _ := M.call (|
+                let _ :=
+                  M.for_ (|
+                    M.get_name (| globals, "raw_item" |),
+                    M.get_name (| globals, "raw_rlp" |),
+                    ltac:(M.monadic (
+                      let _ := M.call (|
     M.get_field (| M.get_name (| globals, "items" |), "append" |),
     make_list [
       M.call (|
         M.get_name (| globals, "_decode_to" |),
         make_list [
-          M.get_subscript (| M.get_field (| M.get_name (| globals, "cls" |), "__args__" |), Constant.int 0 |);
+          M.get_subscript (|
+            M.get_field (| M.get_name (| globals, "cls" |), "__args__" |),
+            Constant.int 0
+          |);
           M.get_name (| globals, "raw_item" |)
         ],
         make_dict []
@@ -1009,7 +1017,12 @@ Definition _decode_to : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-                EndFor.
+                      M.pure Constant.None_
+                    )),
+                    ltac:(M.monadic (
+                      M.pure Constant.None_
+                    ))
+                |) in
                 let _ := M.return_ (|
                   M.get_name (| globals, "items" |)
                 |) in
@@ -1027,7 +1040,13 @@ Definition _decode_to : Value.t -> Value.t -> M :=
                           M.call (|
                             M.get_name (| globals, "type" |),
                             make_list [
-                              M.get_subscript (| M.get_name (| globals, "Union" |), make_tuple [ M.get_name (| globals, "Bytes" |); M.get_subscript (| M.get_name (| globals, "List" |), M.get_name (| globals, "Bytes" |) |) ] |)
+                              M.get_subscript (|
+                                M.get_name (| globals, "Union" |),
+                                make_tuple [ M.get_name (| globals, "Bytes" |); M.get_subscript (|
+                                  M.get_name (| globals, "List" |),
+                                  M.get_name (| globals, "Bytes" |)
+                                |) ]
+                              |)
                             ],
                             make_dict []
                           |)
@@ -1066,7 +1085,7 @@ Definition _decode_to : Value.t -> Value.t -> M :=
                         |),
                       (* then *)
                       ltac:(M.monadic (
-                        let _ := M.raise (| Some(M.call (|
+                        let _ := M.raise (| Some (M.call (|
                           M.get_name (| globals, "RLPDecodingError" |),
                           make_list [
                             M.call (|
@@ -1107,7 +1126,10 @@ Definition _decode_to : Value.t -> Value.t -> M :=
                           (* if *)
                           M.if_then_else (|
                             Compare.eq (|
-                              M.get_subscript (| M.get_field (| M.get_name (| globals, "cls" |), "__args__" |), Constant.int 0 |),
+                              M.get_subscript (|
+                                M.get_field (| M.get_name (| globals, "cls" |), "__args__" |),
+                                Constant.int 0
+                              |),
                               M.get_name (| globals, "Bytes" |)
                             |),
                           (* then *)
@@ -1116,7 +1138,10 @@ Definition _decode_to : Value.t -> Value.t -> M :=
                               M.call (|
                                 M.get_name (| globals, "_decode_to" |),
                                 make_list [
-                                  M.get_subscript (| M.get_field (| M.get_name (| globals, "cls" |), "__args__" |), Constant.int 1 |);
+                                  M.get_subscript (|
+                                    M.get_field (| M.get_name (| globals, "cls" |), "__args__" |),
+                                    Constant.int 1
+                                  |);
                                   M.get_name (| globals, "raw_rlp" |)
                                 ],
                                 make_dict []
@@ -1129,7 +1154,10 @@ Definition _decode_to : Value.t -> Value.t -> M :=
                               M.call (|
                                 M.get_name (| globals, "_decode_to" |),
                                 make_list [
-                                  M.get_subscript (| M.get_field (| M.get_name (| globals, "cls" |), "__args__" |), Constant.int 0 |);
+                                  M.get_subscript (|
+                                    M.get_field (| M.get_name (| globals, "cls" |), "__args__" |),
+                                    Constant.int 0
+                                  |);
                                   M.get_name (| globals, "raw_rlp" |)
                                 ],
                                 make_dict []
@@ -1197,7 +1225,7 @@ Definition _decode_to : Value.t -> Value.t -> M :=
                                 M.pure Constant.None_
                               (* else *)
                               )), ltac:(M.monadic (
-                                let _ := M.raise (| Some(M.call (|
+                                let _ := M.raise (| Some (M.call (|
                                   M.get_name (| globals, "TypeError" |),
                                   make_list [
                                     M.call (|
@@ -1407,21 +1435,25 @@ Definition _decode_to : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-                                        For make_tuple [ M.get_name (| globals, "field" |); M.get_name (| globals, "rlp_item" |) ] in M.call (|
-    M.get_name (| globals, "zip" |),
-    make_list [
-      M.call (|
-        M.get_name (| globals, "fields" |),
-        make_list [
-          M.get_name (| globals, "cls" |)
-        ],
-        make_dict []
-      |);
-      M.get_name (| globals, "raw_rlp" |)
-    ],
-    make_dict []
-  |) do
-                                          let _ := M.call (|
+                                        let _ :=
+                                          M.for_ (|
+                                            make_tuple [ M.get_name (| globals, "field" |); M.get_name (| globals, "rlp_item" |) ],
+                                            M.call (|
+      M.get_name (| globals, "zip" |),
+      make_list [
+        M.call (|
+          M.get_name (| globals, "fields" |),
+          make_list [
+            M.get_name (| globals, "cls" |)
+          ],
+          make_dict []
+        |);
+        M.get_name (| globals, "raw_rlp" |)
+      ],
+      make_dict []
+    |),
+                                            ltac:(M.monadic (
+                                              let _ := M.call (|
     M.get_field (| M.get_name (| globals, "args" |), "append" |),
     make_list [
       M.call (|
@@ -1435,7 +1467,12 @@ Definition _decode_to : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-                                        EndFor.
+                                              M.pure Constant.None_
+                                            )),
+                                            ltac:(M.monadic (
+                                              M.pure Constant.None_
+                                            ))
+                                        |) in
                                         let _ := M.return_ (|
                                           M.call (|
                                             M.get_name (| globals, "cast" |),
@@ -1453,7 +1490,7 @@ Definition _decode_to : Value.t -> Value.t -> M :=
                                         M.pure Constant.None_
                                       (* else *)
                                       )), ltac:(M.monadic (
-                                        let _ := M.raise (| Some(M.call (|
+                                        let _ := M.raise (| Some (M.call (|
                                           M.get_name (| globals, "RLPDecodingError" |),
                                           make_list [
                                             M.call (|
@@ -1519,7 +1556,10 @@ Definition decode_to_bytes : Value.t -> Value.t -> M :=
           |),
           ltac:(M.monadic (
             Compare.lt (|
-              M.get_subscript (| M.get_name (| globals, "encoded_bytes" |), Constant.int 0 |),
+              M.get_subscript (|
+                M.get_name (| globals, "encoded_bytes" |),
+                Constant.int 0
+              |),
               Constant.int 128
             |)
           ))
@@ -1536,14 +1576,20 @@ Definition decode_to_bytes : Value.t -> Value.t -> M :=
           (* if *)
           M.if_then_else (|
             Compare.lt_e (|
-              M.get_subscript (| M.get_name (| globals, "encoded_bytes" |), Constant.int 0 |),
+              M.get_subscript (|
+                M.get_name (| globals, "encoded_bytes" |),
+                Constant.int 0
+              |),
               Constant.int 183
             |),
           (* then *)
           ltac:(M.monadic (
             let len_raw_data :=
               BinOp.sub (|
-                M.get_subscript (| M.get_name (| globals, "encoded_bytes" |), Constant.int 0 |),
+                M.get_subscript (|
+                  M.get_name (| globals, "encoded_bytes" |),
+                  Constant.int 0
+                |),
                 Constant.int 128
               |) in
             let _ := M.call (|
@@ -1564,10 +1610,15 @@ Definition decode_to_bytes : Value.t -> Value.t -> M :=
     make_dict []
   |) in
             let raw_data :=
-              M.get_subscript (| M.get_name (| globals, "encoded_bytes" |), M.slice (| Constant.int 1, BinOp.add (|
+              M.slice (|
+                M.get_name (| globals, "encoded_bytes" |),
                 Constant.int 1,
-                M.get_name (| globals, "len_raw_data" |)
-              |) |) |) in
+                BinOp.add (|
+                  Constant.int 1,
+                  M.get_name (| globals, "len_raw_data" |)
+                |),
+                Constant.None_
+              |) in
             let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
@@ -1578,7 +1629,10 @@ Definition decode_to_bytes : Value.t -> Value.t -> M :=
         |),
         ltac:(M.monadic (
           Compare.lt (|
-            M.get_subscript (| M.get_name (| globals, "raw_data" |), Constant.int 0 |),
+            M.get_subscript (|
+              M.get_name (| globals, "raw_data" |),
+              Constant.int 0
+            |),
             Constant.int 128
           |)
         ))
@@ -1597,7 +1651,10 @@ Definition decode_to_bytes : Value.t -> Value.t -> M :=
               BinOp.sub (|
                 BinOp.add (|
                   Constant.int 1,
-                  M.get_subscript (| M.get_name (| globals, "encoded_bytes" |), Constant.int 0 |)
+                  M.get_subscript (|
+                    M.get_name (| globals, "encoded_bytes" |),
+                    Constant.int 0
+                  |)
                 |),
                 Constant.int 183
               |) in
@@ -1625,7 +1682,10 @@ Definition decode_to_bytes : Value.t -> Value.t -> M :=
     M.get_name (| globals, "ensure" |),
     make_list [
       Compare.not_eq (|
-        M.get_subscript (| M.get_name (| globals, "encoded_bytes" |), Constant.int 1 |),
+        M.get_subscript (|
+          M.get_name (| globals, "encoded_bytes" |),
+          Constant.int 1
+        |),
         Constant.int 0
       |);
       M.get_name (| globals, "RLPDecodingError" |)
@@ -1636,7 +1696,12 @@ Definition decode_to_bytes : Value.t -> Value.t -> M :=
               M.call (|
                 M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
                 make_list [
-                  M.get_subscript (| M.get_name (| globals, "encoded_bytes" |), M.slice (| Constant.int 1, M.get_name (| globals, "decoded_data_start_idx" |) |) |)
+                  M.slice (|
+                    M.get_name (| globals, "encoded_bytes" |),
+                    Constant.int 1,
+                    M.get_name (| globals, "decoded_data_start_idx" |),
+                    Constant.None_
+                  |)
                 ],
                 make_dict []
               |) in
@@ -1677,7 +1742,12 @@ Definition decode_to_bytes : Value.t -> Value.t -> M :=
     make_dict []
   |) in
             let _ := M.return_ (|
-              M.get_subscript (| M.get_name (| globals, "encoded_bytes" |), M.slice (| M.get_name (| globals, "decoded_data_start_idx" |), M.get_name (| globals, "decoded_data_end_idx" |) |) |)
+              M.slice (|
+                M.get_name (| globals, "encoded_bytes" |),
+                M.get_name (| globals, "decoded_data_start_idx" |),
+                M.get_name (| globals, "decoded_data_end_idx" |),
+                Constant.None_
+              |)
             |) in
             M.pure Constant.None_
           )) |) in
@@ -1706,14 +1776,20 @@ Definition decode_to_sequence : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.lt_e (|
-          M.get_subscript (| M.get_name (| globals, "encoded_sequence" |), Constant.int 0 |),
+          M.get_subscript (|
+            M.get_name (| globals, "encoded_sequence" |),
+            Constant.int 0
+          |),
           Constant.int 247
         |),
       (* then *)
       ltac:(M.monadic (
         let len_joined_encodings :=
           BinOp.sub (|
-            M.get_subscript (| M.get_name (| globals, "encoded_sequence" |), Constant.int 0 |),
+            M.get_subscript (|
+              M.get_name (| globals, "encoded_sequence" |),
+              Constant.int 0
+            |),
             Constant.int 192
           |) in
         let _ := M.call (|
@@ -1734,10 +1810,15 @@ Definition decode_to_sequence : Value.t -> Value.t -> M :=
     make_dict []
   |) in
         let joined_encodings :=
-          M.get_subscript (| M.get_name (| globals, "encoded_sequence" |), M.slice (| Constant.int 1, BinOp.add (|
+          M.slice (|
+            M.get_name (| globals, "encoded_sequence" |),
             Constant.int 1,
-            M.get_name (| globals, "len_joined_encodings" |)
-          |) |) |) in
+            BinOp.add (|
+              Constant.int 1,
+              M.get_name (| globals, "len_joined_encodings" |)
+            |),
+            Constant.None_
+          |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
@@ -1745,7 +1826,10 @@ Definition decode_to_sequence : Value.t -> Value.t -> M :=
           BinOp.sub (|
             BinOp.add (|
               Constant.int 1,
-              M.get_subscript (| M.get_name (| globals, "encoded_sequence" |), Constant.int 0 |)
+              M.get_subscript (|
+                M.get_name (| globals, "encoded_sequence" |),
+                Constant.int 0
+              |)
             |),
             Constant.int 247
           |) in
@@ -1773,7 +1857,10 @@ Definition decode_to_sequence : Value.t -> Value.t -> M :=
     M.get_name (| globals, "ensure" |),
     make_list [
       Compare.not_eq (|
-        M.get_subscript (| M.get_name (| globals, "encoded_sequence" |), Constant.int 1 |),
+        M.get_subscript (|
+          M.get_name (| globals, "encoded_sequence" |),
+          Constant.int 1
+        |),
         Constant.int 0
       |);
       M.get_name (| globals, "RLPDecodingError" |)
@@ -1784,7 +1871,12 @@ Definition decode_to_sequence : Value.t -> Value.t -> M :=
           M.call (|
             M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
             make_list [
-              M.get_subscript (| M.get_name (| globals, "encoded_sequence" |), M.slice (| Constant.int 1, M.get_name (| globals, "joined_encodings_start_idx" |) |) |)
+              M.slice (|
+                M.get_name (| globals, "encoded_sequence" |),
+                Constant.int 1,
+                M.get_name (| globals, "joined_encodings_start_idx" |),
+                Constant.None_
+              |)
             ],
             make_dict []
           |) in
@@ -1825,7 +1917,12 @@ Definition decode_to_sequence : Value.t -> Value.t -> M :=
     make_dict []
   |) in
         let joined_encodings :=
-          M.get_subscript (| M.get_name (| globals, "encoded_sequence" |), M.slice (| M.get_name (| globals, "joined_encodings_start_idx" |), M.get_name (| globals, "joined_encodings_end_idx" |) |) |) in
+          M.slice (|
+            M.get_name (| globals, "encoded_sequence" |),
+            M.get_name (| globals, "joined_encodings_start_idx" |),
+            M.get_name (| globals, "joined_encodings_end_idx" |),
+            Constant.None_
+          |) in
         M.pure Constant.None_
       )) |) in
     let _ := M.return_ (|
@@ -1860,25 +1957,33 @@ Definition decode_joined_encodings : Value.t -> Value.t -> M :=
       make_list [] in
     let item_start_idx :=
       Constant.int 0 in
-    While Compare.lt (|
-    M.get_name (| globals, "item_start_idx" |),
-    M.call (|
-      M.get_name (| globals, "len" |),
-      make_list [
-        M.get_name (| globals, "joined_encodings" |)
-      ],
-      make_dict []
-    |)
-  |) do
-      let encoded_item_length :=
-        M.call (|
-          M.get_name (| globals, "decode_item_length" |),
-          make_list [
-            M.get_subscript (| M.get_name (| globals, "joined_encodings" |), M.slice (| M.get_name (| globals, "item_start_idx" |), Constant.None_ |) |)
-          ],
-          make_dict []
-        |) in
-      let _ := M.call (|
+    let _ :=
+      M.while (|
+        Compare.lt (|
+      M.get_name (| globals, "item_start_idx" |),
+      M.call (|
+        M.get_name (| globals, "len" |),
+        make_list [
+          M.get_name (| globals, "joined_encodings" |)
+        ],
+        make_dict []
+      |)
+    |),
+        ltac:(M.monadic (
+          let encoded_item_length :=
+            M.call (|
+              M.get_name (| globals, "decode_item_length" |),
+              make_list [
+                M.slice (|
+                  M.get_name (| globals, "joined_encodings" |),
+                  M.get_name (| globals, "item_start_idx" |),
+                  Constant.None_,
+                  Constant.None_
+                |)
+              ],
+              make_dict []
+            |) in
+          let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
       Compare.lt (|
@@ -1901,12 +2006,17 @@ Definition decode_joined_encodings : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-      let encoded_item :=
-        M.get_subscript (| M.get_name (| globals, "joined_encodings" |), M.slice (| M.get_name (| globals, "item_start_idx" |), BinOp.add (|
-          M.get_name (| globals, "item_start_idx" |),
-          M.get_name (| globals, "encoded_item_length" |)
-        |) |) |) in
-      let _ := M.call (|
+          let encoded_item :=
+            M.slice (|
+              M.get_name (| globals, "joined_encodings" |),
+              M.get_name (| globals, "item_start_idx" |),
+              BinOp.add (|
+                M.get_name (| globals, "item_start_idx" |),
+                M.get_name (| globals, "encoded_item_length" |)
+              |),
+              Constant.None_
+            |) in
+          let _ := M.call (|
     M.get_field (| M.get_name (| globals, "decoded_sequence" |), "append" |),
     make_list [
       M.call (|
@@ -1919,10 +2029,15 @@ Definition decode_joined_encodings : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-      let item_start_idx := BinOp.add
-        M.get_name (| globals, "encoded_item_length" |)
-        M.get_name (| globals, "encoded_item_length" |) in
-    EndWhile.
+          let item_start_idx := BinOp.add
+            M.get_name (| globals, "encoded_item_length" |)
+            M.get_name (| globals, "encoded_item_length" |) in
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let _ := M.return_ (|
       M.get_name (| globals, "decoded_sequence" |)
     |) in
@@ -1971,7 +2086,10 @@ Definition decode_item_length : Value.t -> Value.t -> M :=
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
-          M.get_subscript (| M.get_name (| globals, "encoded_data" |), Constant.int 0 |)
+          M.get_subscript (|
+            M.get_name (| globals, "encoded_data" |),
+            Constant.int 0
+          |)
         ],
         make_dict []
       |) in
@@ -2052,7 +2170,10 @@ Definition decode_item_length : Value.t -> Value.t -> M :=
     M.get_name (| globals, "ensure" |),
     make_list [
       Compare.not_eq (|
-        M.get_subscript (| M.get_name (| globals, "encoded_data" |), Constant.int 1 |),
+        M.get_subscript (|
+          M.get_name (| globals, "encoded_data" |),
+          Constant.int 1
+        |),
         Constant.int 0
       |);
       M.get_name (| globals, "RLPDecodingError" |)
@@ -2063,10 +2184,15 @@ Definition decode_item_length : Value.t -> Value.t -> M :=
                   M.call (|
                     M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
                     make_list [
-                      M.get_subscript (| M.get_name (| globals, "encoded_data" |), M.slice (| Constant.int 1, BinOp.add (|
+                      M.slice (|
+                        M.get_name (| globals, "encoded_data" |),
                         Constant.int 1,
-                        M.get_name (| globals, "length_length" |)
-                      |) |) |)
+                        BinOp.add (|
+                          Constant.int 1,
+                          M.get_name (| globals, "length_length" |)
+                        |),
+                        Constant.None_
+                      |)
                     ],
                     make_dict []
                   |) in
@@ -2125,7 +2251,10 @@ Definition decode_item_length : Value.t -> Value.t -> M :=
     M.get_name (| globals, "ensure" |),
     make_list [
       Compare.not_eq (|
-        M.get_subscript (| M.get_name (| globals, "encoded_data" |), Constant.int 1 |),
+        M.get_subscript (|
+          M.get_name (| globals, "encoded_data" |),
+          Constant.int 1
+        |),
         Constant.int 0
       |);
       M.get_name (| globals, "RLPDecodingError" |)
@@ -2136,10 +2265,15 @@ Definition decode_item_length : Value.t -> Value.t -> M :=
                           M.call (|
                             M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
                             make_list [
-                              M.get_subscript (| M.get_name (| globals, "encoded_data" |), M.slice (| Constant.int 1, BinOp.add (|
+                              M.slice (|
+                                M.get_name (| globals, "encoded_data" |),
                                 Constant.int 1,
-                                M.get_name (| globals, "length_length" |)
-                              |) |) |)
+                                BinOp.add (|
+                                  Constant.int 1,
+                                  M.get_name (| globals, "length_length" |)
+                                |),
+                                Constant.None_
+                              |)
                             ],
                             make_dict []
                           |) in

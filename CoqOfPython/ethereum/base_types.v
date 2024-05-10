@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.base_types".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -24,31 +24,11 @@ sequences containing an exact number of bytes.
 [`Bytes64`]: ref:ethereum.base_types.Bytes64
 ".
 
-Require dataclasses.
-Axiom dataclasses_is_dataclass :
-  IsGlobalAlias globals dataclasses.globals "is_dataclass".
-Axiom dataclasses_replace :
-  IsGlobalAlias globals dataclasses.globals "replace".
+Axiom dataclasses_imports :
+  AreImported globals "dataclasses" [ "is_dataclass"; "replace" ].
 
-Require typing.
-Axiom typing_Any :
-  IsGlobalAlias globals typing.globals "Any".
-Axiom typing_Callable :
-  IsGlobalAlias globals typing.globals "Callable".
-Axiom typing_ClassVar :
-  IsGlobalAlias globals typing.globals "ClassVar".
-Axiom typing_Optional :
-  IsGlobalAlias globals typing.globals "Optional".
-Axiom typing_Protocol :
-  IsGlobalAlias globals typing.globals "Protocol".
-Axiom typing_Tuple :
-  IsGlobalAlias globals typing.globals "Tuple".
-Axiom typing_Type_ :
-  IsGlobalAlias globals typing.globals "Type_".
-Axiom typing_TypeVar :
-  IsGlobalAlias globals typing.globals "TypeVar".
-Axiom typing_runtime_checkable :
-  IsGlobalAlias globals typing.globals "runtime_checkable".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Any"; "Callable"; "ClassVar"; "Optional"; "Protocol"; "Tuple"; "Type"; "TypeVar"; "runtime_checkable" ].
 
 Definition SlottedFreezable : Value.t :=
   builtins.make_klass
@@ -166,7 +146,7 @@ Definition Uint : Value.t :=
               |) |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "TypeError" |),
                 make_list [],
                 make_dict []
@@ -185,7 +165,7 @@ Definition Uint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -246,7 +226,7 @@ Definition Uint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -332,7 +312,7 @@ Definition Uint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -403,7 +383,7 @@ Definition Uint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -481,7 +461,7 @@ Definition Uint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -574,7 +554,7 @@ Definition Uint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -637,7 +617,7 @@ Definition Uint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -715,7 +695,7 @@ Definition Uint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -778,7 +758,7 @@ Definition Uint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -856,7 +836,7 @@ Definition Uint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -880,14 +860,20 @@ Definition Uint : Value.t :=
               M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
               make_list [
                 M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
-                M.get_subscript (| M.get_name (| globals, "result" |), Constant.int 0 |)
+                M.get_subscript (|
+                  M.get_name (| globals, "result" |),
+                  Constant.int 0
+                |)
               ],
               make_dict []
             |); M.call (|
               M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
               make_list [
                 M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
-                M.get_subscript (| M.get_name (| globals, "result" |), Constant.int 1 |)
+                M.get_subscript (|
+                  M.get_name (| globals, "result" |),
+                  Constant.int 1
+                |)
               ],
               make_dict []
             |) ]
@@ -928,7 +914,7 @@ Definition Uint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -952,14 +938,20 @@ Definition Uint : Value.t :=
               M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
               make_list [
                 M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
-                M.get_subscript (| M.get_name (| globals, "result" |), Constant.int 0 |)
+                M.get_subscript (|
+                  M.get_name (| globals, "result" |),
+                  Constant.int 0
+                |)
               ],
               make_dict []
             |); M.call (|
               M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
               make_list [
                 M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
-                M.get_subscript (| M.get_name (| globals, "result" |), Constant.int 1 |)
+                M.get_subscript (|
+                  M.get_name (| globals, "result" |),
+                  Constant.int 1
+                |)
               ],
               make_dict []
             |) ]
@@ -1009,7 +1001,7 @@ Definition Uint : Value.t :=
                   |),
                 (* then *)
                 ltac:(M.monadic (
-                  let _ := M.raise (| Some(M.call (|
+                  let _ := M.raise (| Some (M.call (|
                     M.get_name (| globals, "OverflowError" |),
                     make_list [],
                     make_dict []
@@ -1054,7 +1046,7 @@ Definition Uint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -1127,7 +1119,7 @@ Definition Uint : Value.t :=
                   |),
                 (* then *)
                 ltac:(M.monadic (
-                  let _ := M.raise (| Some(M.call (|
+                  let _ := M.raise (| Some (M.call (|
                     M.get_name (| globals, "OverflowError" |),
                     make_list [],
                     make_dict []
@@ -1172,7 +1164,7 @@ Definition Uint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -1252,7 +1244,7 @@ Definition Uint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -1315,7 +1307,7 @@ Definition Uint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -1503,7 +1495,7 @@ Definition FixedUint : Value.t :=
               |) |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "TypeError" |),
                 make_list [],
                 make_dict []
@@ -1530,7 +1522,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -1608,7 +1600,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -1681,7 +1673,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -1778,7 +1770,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -1858,7 +1850,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -1940,7 +1932,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -2035,7 +2027,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -2108,7 +2100,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -2212,7 +2204,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -2283,7 +2275,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -2369,7 +2361,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -2440,7 +2432,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -2526,7 +2518,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -2556,14 +2548,20 @@ Definition FixedUint : Value.t :=
               M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
               make_list [
                 M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
-                M.get_subscript (| M.get_name (| globals, "result" |), Constant.int 0 |)
+                M.get_subscript (|
+                  M.get_name (| globals, "result" |),
+                  Constant.int 0
+                |)
               ],
               make_dict []
             |); M.call (|
               M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
               make_list [
                 M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
-                M.get_subscript (| M.get_name (| globals, "result" |), Constant.int 1 |)
+                M.get_subscript (|
+                  M.get_name (| globals, "result" |),
+                  Constant.int 1
+                |)
               ],
               make_dict []
             |) ]
@@ -2612,7 +2610,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -2642,14 +2640,20 @@ Definition FixedUint : Value.t :=
               M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
               make_list [
                 M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
-                M.get_subscript (| M.get_name (| globals, "result" |), Constant.int 0 |)
+                M.get_subscript (|
+                  M.get_name (| globals, "result" |),
+                  Constant.int 0
+                |)
               ],
               make_dict []
             |); M.call (|
               M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
               make_list [
                 M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
-                M.get_subscript (| M.get_name (| globals, "result" |), Constant.int 1 |)
+                M.get_subscript (|
+                  M.get_name (| globals, "result" |),
+                  Constant.int 1
+                |)
               ],
               make_dict []
             |) ]
@@ -2707,7 +2711,7 @@ Definition FixedUint : Value.t :=
                   |),
                 (* then *)
                 ltac:(M.monadic (
-                  let _ := M.raise (| Some(M.call (|
+                  let _ := M.raise (| Some (M.call (|
                     M.get_name (| globals, "OverflowError" |),
                     make_list [],
                     make_dict []
@@ -2778,7 +2782,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -2862,7 +2866,7 @@ Definition FixedUint : Value.t :=
                   |),
                 (* then *)
                 ltac:(M.monadic (
-                  let _ := M.raise (| Some(M.call (|
+                  let _ := M.raise (| Some (M.call (|
                     M.get_name (| globals, "OverflowError" |),
                     make_list [],
                     make_dict []
@@ -2915,7 +2919,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -2999,7 +3003,7 @@ Definition FixedUint : Value.t :=
                   |),
                 (* then *)
                 ltac:(M.monadic (
-                  let _ := M.raise (| Some(M.call (|
+                  let _ := M.raise (| Some (M.call (|
                     M.get_name (| globals, "OverflowError" |),
                     make_list [],
                     make_dict []
@@ -3052,7 +3056,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -3140,7 +3144,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -3211,7 +3215,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -3282,7 +3286,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -3353,7 +3357,7 @@ Definition FixedUint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "OverflowError" |),
                 make_list [],
                 make_dict []
@@ -3529,7 +3533,7 @@ Definition U256 : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "ValueError" |),
                 make_list [],
                 make_dict []
@@ -3709,7 +3713,7 @@ Definition U32 : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "ValueError" |),
                 make_list [],
                 make_dict []
@@ -3830,7 +3834,7 @@ Definition U64 : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "ValueError" |),
                 make_list [],
                 make_dict []
@@ -3881,7 +3885,7 @@ Definition U64 : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "ValueError" |),
                 make_list [],
                 make_dict []
@@ -4047,7 +4051,7 @@ Definition FixedBytes : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.call (|
+              let _ := M.raise (| Some (M.call (|
                 M.get_name (| globals, "ValueError" |),
                 make_list [
                   Constant.str "(* At expr: unsupported node type: JoinedStr *)"
@@ -4172,7 +4176,7 @@ Definition _setattr_function : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let _ := M.raise (| Some(M.call (|
+        let _ := M.raise (| Some (M.call (|
           M.get_name (| globals, "Exception" |),
           make_list [
             Constant.str "Mutating frozen dataclasses is not allowed."
@@ -4204,7 +4208,7 @@ Definition _delattr_function : Value.t -> Value.t -> M :=
         M.get_field (| M.get_name (| globals, "self" |), "_frozen" |),
       (* then *)
       ltac:(M.monadic (
-        let _ := M.raise (| Some(M.call (|
+        let _ := M.raise (| Some (M.call (|
           M.get_name (| globals, "Exception" |),
           make_list [
             Constant.str "Mutating frozen dataclasses is not allowed."

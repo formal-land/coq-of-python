@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.frontier.vm.precompiled_contracts.__init__".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -18,9 +18,8 @@ Addresses of precompiled contracts and mappings to their
 implementations.
 ".
 
-Require ethereum.frontier.utils.hexadecimal.
-Axiom ethereum_frontier_utils_hexadecimal_hex_to_address :
-  IsGlobalAlias globals ethereum.frontier.utils.hexadecimal.globals "hex_to_address".
+Axiom ethereum_frontier_utils_hexadecimal_imports :
+  AreImported globals "ethereum.frontier.utils.hexadecimal" [ "hex_to_address" ].
 
 Definition __all__ : Value.t := M.run ltac:(M.monadic (
   make_tuple [ Constant.str "ECRECOVER_ADDRESS"; Constant.str "SHA256_ADDRESS"; Constant.str "RIPEMD160_ADDRESS"; Constant.str "IDENTITY_ADDRESS" ]

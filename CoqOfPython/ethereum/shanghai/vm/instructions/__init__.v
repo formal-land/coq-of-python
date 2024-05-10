@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.shanghai.vm.instructions.__init__".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -20,59 +20,44 @@ implementations.
 
 (* At top_level_stmt: unsupported node type: Import *)
 
-Require typing.
-Axiom typing_Callable :
-  IsGlobalAlias globals typing.globals "Callable".
-Axiom typing_Dict :
-  IsGlobalAlias globals typing.globals "Dict".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Callable"; "Dict" ].
 
-Require ethereum.shanghai.vm.instructions.__init__.
-Axiom ethereum_shanghai_vm_instructions___init___arithmetic :
-  IsGlobalAlias globals ethereum.shanghai.vm.instructions.__init__.globals "arithmetic".
+Axiom ethereum_shanghai_vm_instructions_imports :
+  AreImported globals "ethereum.shanghai.vm.instructions" [ "arithmetic" ].
 
-Require ethereum.shanghai.vm.instructions.__init__.
-Axiom ethereum_shanghai_vm_instructions___init___bitwise :
-  IsGlobalAlias globals ethereum.shanghai.vm.instructions.__init__.globals "bitwise".
+Axiom ethereum_shanghai_vm_instructions_imports :
+  AreImported globals "ethereum.shanghai.vm.instructions" [ "bitwise" ].
 
-Require ethereum.shanghai.vm.instructions.__init__.
-Axiom ethereum_shanghai_vm_instructions___init___block :
-  IsGlobalAlias globals ethereum.shanghai.vm.instructions.__init__.globals "block".
+Axiom ethereum_shanghai_vm_instructions_imports :
+  AreImported globals "ethereum.shanghai.vm.instructions" [ "block" ].
 
-Require ethereum.shanghai.vm.instructions.__init__.
-Axiom ethereum_shanghai_vm_instructions___init___comparison :
-  IsGlobalAlias globals ethereum.shanghai.vm.instructions.__init__.globals "comparison".
+Axiom ethereum_shanghai_vm_instructions_imports :
+  AreImported globals "ethereum.shanghai.vm.instructions" [ "comparison" ].
 
-Require ethereum.shanghai.vm.instructions.__init__.
-Axiom ethereum_shanghai_vm_instructions___init___control_flow :
-  IsGlobalAlias globals ethereum.shanghai.vm.instructions.__init__.globals "control_flow".
+Axiom ethereum_shanghai_vm_instructions_imports :
+  AreImported globals "ethereum.shanghai.vm.instructions" [ "control_flow" ].
 
-Require ethereum.shanghai.vm.instructions.__init__.
-Axiom ethereum_shanghai_vm_instructions___init___environment :
-  IsGlobalAlias globals ethereum.shanghai.vm.instructions.__init__.globals "environment".
+Axiom ethereum_shanghai_vm_instructions_imports :
+  AreImported globals "ethereum.shanghai.vm.instructions" [ "environment" ].
 
-Require ethereum.shanghai.vm.instructions.__init__.
-Axiom ethereum_shanghai_vm_instructions___init___keccak :
-  IsGlobalAlias globals ethereum.shanghai.vm.instructions.__init__.globals "keccak".
+Axiom ethereum_shanghai_vm_instructions_imports :
+  AreImported globals "ethereum.shanghai.vm.instructions" [ "keccak" ].
 
-Require ethereum.shanghai.vm.instructions.__init__.
-Axiom ethereum_shanghai_vm_instructions___init___log :
-  IsGlobalAlias globals ethereum.shanghai.vm.instructions.__init__.globals "log".
+Axiom ethereum_shanghai_vm_instructions_imports :
+  AreImported globals "ethereum.shanghai.vm.instructions" [ "log" ].
 
-Require ethereum.shanghai.vm.instructions.__init__.
-Axiom ethereum_shanghai_vm_instructions___init___memory :
-  IsGlobalAlias globals ethereum.shanghai.vm.instructions.__init__.globals "memory".
+Axiom ethereum_shanghai_vm_instructions_imports :
+  AreImported globals "ethereum.shanghai.vm.instructions" [ "memory" ].
 
-Require ethereum.shanghai.vm.instructions.__init__.
-Axiom ethereum_shanghai_vm_instructions___init___stack :
-  IsGlobalAlias globals ethereum.shanghai.vm.instructions.__init__.globals "stack".
+Axiom ethereum_shanghai_vm_instructions_imports :
+  AreImported globals "ethereum.shanghai.vm.instructions" [ "stack" ].
 
-Require ethereum.shanghai.vm.instructions.__init__.
-Axiom ethereum_shanghai_vm_instructions___init___storage :
-  IsGlobalAlias globals ethereum.shanghai.vm.instructions.__init__.globals "storage".
+Axiom ethereum_shanghai_vm_instructions_imports :
+  AreImported globals "ethereum.shanghai.vm.instructions" [ "storage" ].
 
-Require ethereum.shanghai.vm.instructions.__init__.
-Axiom ethereum_shanghai_vm_instructions___init___system :
-  IsGlobalAlias globals ethereum.shanghai.vm.instructions.__init__.globals "system".
+Axiom ethereum_shanghai_vm_instructions_imports :
+  AreImported globals "ethereum.shanghai.vm.instructions" [ "system" ].
 
 Definition Ops : Value.t :=
   builtins.make_klass

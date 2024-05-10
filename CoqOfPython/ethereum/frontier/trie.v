@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.frontier.trie".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -20,79 +20,35 @@ The state trie is the structure responsible for storing
 
 (* At top_level_stmt: unsupported node type: Import *)
 
-Require dataclasses.
-Axiom dataclasses_dataclass :
-  IsGlobalAlias globals dataclasses.globals "dataclass".
-Axiom dataclasses_field :
-  IsGlobalAlias globals dataclasses.globals "field".
+Axiom dataclasses_imports :
+  AreImported globals "dataclasses" [ "dataclass"; "field" ].
 
-Require typing.
-Axiom typing_Callable :
-  IsGlobalAlias globals typing.globals "Callable".
-Axiom typing_Dict :
-  IsGlobalAlias globals typing.globals "Dict".
-Axiom typing_Generic :
-  IsGlobalAlias globals typing.globals "Generic".
-Axiom typing_List :
-  IsGlobalAlias globals typing.globals "List".
-Axiom typing_Mapping :
-  IsGlobalAlias globals typing.globals "Mapping".
-Axiom typing_MutableMapping :
-  IsGlobalAlias globals typing.globals "MutableMapping".
-Axiom typing_Optional :
-  IsGlobalAlias globals typing.globals "Optional".
-Axiom typing_Sequence :
-  IsGlobalAlias globals typing.globals "Sequence".
-Axiom typing_TypeVar :
-  IsGlobalAlias globals typing.globals "TypeVar".
-Axiom typing_Union :
-  IsGlobalAlias globals typing.globals "Union".
-Axiom typing_cast :
-  IsGlobalAlias globals typing.globals "cast".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Callable"; "Dict"; "Generic"; "List"; "Mapping"; "MutableMapping"; "Optional"; "Sequence"; "TypeVar"; "Union"; "cast" ].
 
-Require ethereum.crypto.hash.
-Axiom ethereum_crypto_hash_keccak256 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "keccak256".
+Axiom ethereum_crypto_hash_imports :
+  AreImported globals "ethereum.crypto.hash" [ "keccak256" ].
 
-Require ethereum.utils.ensure.
-Axiom ethereum_utils_ensure_ensure :
-  IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
+Axiom ethereum_utils_ensure_imports :
+  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
 
-Require ethereum.utils.hexadecimal.
-Axiom ethereum_utils_hexadecimal_hex_to_bytes :
-  IsGlobalAlias globals ethereum.utils.hexadecimal.globals "hex_to_bytes".
+Axiom ethereum_utils_hexadecimal_imports :
+  AreImported globals "ethereum.utils.hexadecimal" [ "hex_to_bytes" ].
 
-Require ethereum.__init__.
-Axiom ethereum___init___rlp :
-  IsGlobalAlias globals ethereum.__init__.globals "rlp".
+Axiom ethereum_imports :
+  AreImported globals "ethereum" [ "rlp" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
-Axiom ethereum_base_types_slotted_freezable :
-  IsGlobalAlias globals ethereum.base_types.globals "slotted_freezable".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Uint"; "slotted_freezable" ].
 
-Require ethereum.frontier.blocks.
-Axiom ethereum_frontier_blocks_Receipt :
-  IsGlobalAlias globals ethereum.frontier.blocks.globals "Receipt".
+Axiom ethereum_frontier_blocks_imports :
+  AreImported globals "ethereum.frontier.blocks" [ "Receipt" ].
 
-Require ethereum.frontier.fork_types.
-Axiom ethereum_frontier_fork_types_Account :
-  IsGlobalAlias globals ethereum.frontier.fork_types.globals "Account".
-Axiom ethereum_frontier_fork_types_Address :
-  IsGlobalAlias globals ethereum.frontier.fork_types.globals "Address".
-Axiom ethereum_frontier_fork_types_Root :
-  IsGlobalAlias globals ethereum.frontier.fork_types.globals "Root".
-Axiom ethereum_frontier_fork_types_encode_account :
-  IsGlobalAlias globals ethereum.frontier.fork_types.globals "encode_account".
+Axiom ethereum_frontier_fork_types_imports :
+  AreImported globals "ethereum.frontier.fork_types" [ "Account"; "Address"; "Root"; "encode_account" ].
 
-Require ethereum.frontier.transactions.
-Axiom ethereum_frontier_transactions_Transaction :
-  IsGlobalAlias globals ethereum.frontier.transactions.globals "Transaction".
+Axiom ethereum_frontier_transactions_imports :
+  AreImported globals "ethereum.frontier.transactions" [ "Transaction" ].
 
 Definition EMPTY_TRIE_ROOT : Value.t := M.run ltac:(M.monadic (
   M.call (|
@@ -111,7 +67,10 @@ Definition EMPTY_TRIE_ROOT : Value.t := M.run ltac:(M.monadic (
 )).
 
 Definition Node : Value.t := M.run ltac:(M.monadic (
-  M.get_subscript (| M.get_name (| globals, "Union" |), make_tuple [ M.get_name (| globals, "Account" |); M.get_name (| globals, "Bytes" |); M.get_name (| globals, "Transaction" |); M.get_name (| globals, "Receipt" |); M.get_name (| globals, "Uint" |); M.get_name (| globals, "U256" |); Constant.None_ ] |)
+  M.get_subscript (|
+    M.get_name (| globals, "Union" |),
+    make_tuple [ M.get_name (| globals, "Account" |); M.get_name (| globals, "Bytes" |); M.get_name (| globals, "Transaction" |); M.get_name (| globals, "Receipt" |); M.get_name (| globals, "Uint" |); M.get_name (| globals, "U256" |); Constant.None_ ]
+  |)
 )).
 
 Definition K : Value.t := M.run ltac:(M.monadic (
@@ -129,11 +88,23 @@ Definition V : Value.t := M.run ltac:(M.monadic (
     M.get_name (| globals, "TypeVar" |),
     make_list [
       Constant.str "V";
-      M.get_subscript (| M.get_name (| globals, "Optional" |), M.get_name (| globals, "Account" |) |);
-      M.get_subscript (| M.get_name (| globals, "Optional" |), M.get_name (| globals, "Bytes" |) |);
+      M.get_subscript (|
+        M.get_name (| globals, "Optional" |),
+        M.get_name (| globals, "Account" |)
+      |);
+      M.get_subscript (|
+        M.get_name (| globals, "Optional" |),
+        M.get_name (| globals, "Bytes" |)
+      |);
       M.get_name (| globals, "Bytes" |);
-      M.get_subscript (| M.get_name (| globals, "Optional" |), M.get_name (| globals, "Transaction" |) |);
-      M.get_subscript (| M.get_name (| globals, "Optional" |), M.get_name (| globals, "Receipt" |) |);
+      M.get_subscript (|
+        M.get_name (| globals, "Optional" |),
+        M.get_name (| globals, "Transaction" |)
+      |);
+      M.get_subscript (|
+        M.get_name (| globals, "Optional" |),
+        M.get_name (| globals, "Receipt" |)
+      |);
       M.get_name (| globals, "Uint" |);
       M.get_name (| globals, "U256" |)
     ],
@@ -172,7 +143,10 @@ Definition BranchNode : Value.t :=
     ].
 
 Definition InternalNode : Value.t := M.run ltac:(M.monadic (
-  M.get_subscript (| M.get_name (| globals, "Union" |), make_tuple [ M.get_name (| globals, "LeafNode" |); M.get_name (| globals, "ExtensionNode" |); M.get_name (| globals, "BranchNode" |) ] |)
+  M.get_subscript (|
+    M.get_name (| globals, "Union" |),
+    make_tuple [ M.get_name (| globals, "LeafNode" |); M.get_name (| globals, "ExtensionNode" |); M.get_name (| globals, "BranchNode" |) ]
+  |)
 )).
 
 Definition encode_internal_node : Value.t -> Value.t -> M :=
@@ -284,7 +258,7 @@ Definition encode_internal_node : Value.t -> Value.t -> M :=
                     M.pure Constant.None_
                   (* else *)
                   )), ltac:(M.monadic (
-                    let _ := M.raise (| Some(M.call (|
+                    let _ := M.raise (| Some (M.call (|
                       M.get_name (| globals, "AssertionError" |),
                       make_list [
                         Constant.str "(* At expr: unsupported node type: JoinedStr *)"
@@ -430,7 +404,7 @@ Definition encode_node : Value.t -> Value.t -> M :=
                 M.pure Constant.None_
               (* else *)
               )), ltac:(M.monadic (
-                let _ := M.raise (| Some(M.call (|
+                let _ := M.raise (| Some (M.call (|
                   M.get_name (| globals, "AssertionError" |),
                   make_list [
                     Constant.str "(* At expr: unsupported node type: JoinedStr *)"
@@ -521,13 +495,16 @@ Definition trie_set : Value.t -> Value.t -> M :=
         let _ :=
           (* if *)
           M.if_then_else (|
-            Compare.in (|
+            Compare.in_ (|
               M.get_name (| globals, "key" |),
               M.get_field (| M.get_name (| globals, "trie" |), "_data" |)
             |),
           (* then *)
           ltac:(M.monadic (
-            let _ := M.delete (| M.get_subscript (| M.get_field (| M.get_name (| globals, "trie" |), "_data" |), M.get_name (| globals, "key" |) |) |) in
+            let _ := M.delete (| M.get_subscript (|
+    M.get_field (| M.get_name (| globals, "trie" |), "_data" |),
+    M.get_name (| globals, "key" |)
+  |) |) in
             M.pure Constant.None_
           (* else *)
           )), ltac:(M.monadic (
@@ -537,7 +514,10 @@ Definition trie_set : Value.t -> Value.t -> M :=
       (* else *)
       )), ltac:(M.monadic (
         let _ := M.assign (|
-          M.get_subscript (| M.get_field (| M.get_name (| globals, "trie" |), "_data" |), M.get_name (| globals, "key" |) |),
+          M.get_subscript (|
+            M.get_field (| M.get_name (| globals, "trie" |), "_data" |),
+            M.get_name (| globals, "key" |)
+          |),
           M.get_name (| globals, "value" |)
         |) in
         M.pure Constant.None_
@@ -582,51 +562,66 @@ Definition common_prefix_length : Value.t -> Value.t -> M :=
     let _ := Constant.str "
     Find the longest common prefix of two sequences.
     " in
-    For M.get_name (| globals, "i" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      M.call (|
-        M.get_name (| globals, "len" |),
-        make_list [
-          M.get_name (| globals, "a" |)
-        ],
-        make_dict []
-      |)
-    ],
-    make_dict []
-  |) do
-      let _ :=
-        (* if *)
-        M.if_then_else (|
-          BoolOp.or (|
-            Compare.gt_e (|
-              M.get_name (| globals, "i" |),
-              M.call (|
-                M.get_name (| globals, "len" |),
-                make_list [
-                  M.get_name (| globals, "b" |)
-                ],
-                make_dict []
-              |)
-            |),
-            ltac:(M.monadic (
-              Compare.not_eq (|
-                M.get_subscript (| M.get_name (| globals, "a" |), M.get_name (| globals, "i" |) |),
-                M.get_subscript (| M.get_name (| globals, "b" |), M.get_name (| globals, "i" |) |)
-              |)
-            ))
-          |),
-        (* then *)
+    let _ :=
+      M.for_ (|
+        M.get_name (| globals, "i" |),
+        M.call (|
+      M.get_name (| globals, "range" |),
+      make_list [
+        M.call (|
+          M.get_name (| globals, "len" |),
+          make_list [
+            M.get_name (| globals, "a" |)
+          ],
+          make_dict []
+        |)
+      ],
+      make_dict []
+    |),
         ltac:(M.monadic (
-          let _ := M.return_ (|
-            M.get_name (| globals, "i" |)
-          |) in
+          let _ :=
+            (* if *)
+            M.if_then_else (|
+              BoolOp.or (|
+                Compare.gt_e (|
+                  M.get_name (| globals, "i" |),
+                  M.call (|
+                    M.get_name (| globals, "len" |),
+                    make_list [
+                      M.get_name (| globals, "b" |)
+                    ],
+                    make_dict []
+                  |)
+                |),
+                ltac:(M.monadic (
+                  Compare.not_eq (|
+                    M.get_subscript (|
+                      M.get_name (| globals, "a" |),
+                      M.get_name (| globals, "i" |)
+                    |),
+                    M.get_subscript (|
+                      M.get_name (| globals, "b" |),
+                      M.get_name (| globals, "i" |)
+                    |)
+                  |)
+                ))
+              |),
+            (* then *)
+            ltac:(M.monadic (
+              let _ := M.return_ (|
+                M.get_name (| globals, "i" |)
+              |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
+              M.pure Constant.None_
+            )) |) in
           M.pure Constant.None_
-        (* else *)
-        )), ltac:(M.monadic (
+        )),
+        ltac:(M.monadic (
           M.pure Constant.None_
-        )) |) in
-    EndFor.
+        ))
+    |) in
     let _ := M.return_ (|
       M.call (|
         M.get_name (| globals, "len" |),
@@ -711,38 +706,53 @@ Definition nibble_list_to_compact : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-        For M.get_name (| globals, "i" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      Constant.int 0;
-      M.call (|
-        M.get_name (| globals, "len" |),
-        make_list [
-          M.get_name (| globals, "x" |)
-        ],
-        make_dict []
-      |);
-      Constant.int 2
-    ],
-    make_dict []
-  |) do
-          let _ := M.call (|
+        let _ :=
+          M.for_ (|
+            M.get_name (| globals, "i" |),
+            M.call (|
+      M.get_name (| globals, "range" |),
+      make_list [
+        Constant.int 0;
+        M.call (|
+          M.get_name (| globals, "len" |),
+          make_list [
+            M.get_name (| globals, "x" |)
+          ],
+          make_dict []
+        |);
+        Constant.int 2
+      ],
+      make_dict []
+    |),
+            ltac:(M.monadic (
+              let _ := M.call (|
     M.get_field (| M.get_name (| globals, "compact" |), "append" |),
     make_list [
       BinOp.add (|
         BinOp.mult (|
           Constant.int 16,
-          M.get_subscript (| M.get_name (| globals, "x" |), M.get_name (| globals, "i" |) |)
+          M.get_subscript (|
+            M.get_name (| globals, "x" |),
+            M.get_name (| globals, "i" |)
+          |)
         |),
-        M.get_subscript (| M.get_name (| globals, "x" |), BinOp.add (|
-          M.get_name (| globals, "i" |),
-          Constant.int 1
-        |) |)
+        M.get_subscript (|
+          M.get_name (| globals, "x" |),
+          BinOp.add (|
+            M.get_name (| globals, "i" |),
+            Constant.int 1
+          |)
+        |)
       |)
     ],
     make_dict []
   |) in
-        EndFor.
+              M.pure Constant.None_
+            )),
+            ltac:(M.monadic (
+              M.pure Constant.None_
+            ))
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
@@ -760,43 +770,61 @@ Definition nibble_list_to_compact : Value.t -> Value.t -> M :=
             Constant.int 1
           |)
         |),
-        M.get_subscript (| M.get_name (| globals, "x" |), Constant.int 0 |)
+        M.get_subscript (|
+          M.get_name (| globals, "x" |),
+          Constant.int 0
+        |)
       |)
     ],
     make_dict []
   |) in
-        For M.get_name (| globals, "i" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      Constant.int 1;
-      M.call (|
-        M.get_name (| globals, "len" |),
-        make_list [
-          M.get_name (| globals, "x" |)
-        ],
-        make_dict []
-      |);
-      Constant.int 2
-    ],
-    make_dict []
-  |) do
-          let _ := M.call (|
+        let _ :=
+          M.for_ (|
+            M.get_name (| globals, "i" |),
+            M.call (|
+      M.get_name (| globals, "range" |),
+      make_list [
+        Constant.int 1;
+        M.call (|
+          M.get_name (| globals, "len" |),
+          make_list [
+            M.get_name (| globals, "x" |)
+          ],
+          make_dict []
+        |);
+        Constant.int 2
+      ],
+      make_dict []
+    |),
+            ltac:(M.monadic (
+              let _ := M.call (|
     M.get_field (| M.get_name (| globals, "compact" |), "append" |),
     make_list [
       BinOp.add (|
         BinOp.mult (|
           Constant.int 16,
-          M.get_subscript (| M.get_name (| globals, "x" |), M.get_name (| globals, "i" |) |)
+          M.get_subscript (|
+            M.get_name (| globals, "x" |),
+            M.get_name (| globals, "i" |)
+          |)
         |),
-        M.get_subscript (| M.get_name (| globals, "x" |), BinOp.add (|
-          M.get_name (| globals, "i" |),
-          Constant.int 1
-        |) |)
+        M.get_subscript (|
+          M.get_name (| globals, "x" |),
+          BinOp.add (|
+            M.get_name (| globals, "i" |),
+            Constant.int 1
+          |)
+        |)
       |)
     ],
     make_dict []
   |) in
-        EndFor.
+              M.pure Constant.None_
+            )),
+            ltac:(M.monadic (
+              M.pure Constant.None_
+            ))
+        |) in
         M.pure Constant.None_
       )) |) in
     let _ := M.return_ (|
@@ -843,40 +871,55 @@ Definition bytes_to_nibble_list : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |) in
-    For make_tuple [ M.get_name (| globals, "byte_index" |); M.get_name (| globals, "byte" |) ] in M.call (|
-    M.get_name (| globals, "enumerate" |),
-    make_list [
-      M.get_name (| globals, "bytes_" |)
-    ],
-    make_dict []
-  |) do
-      let _ := M.assign (|
-        M.get_subscript (| M.get_name (| globals, "nibble_list" |), BinOp.mult (|
-          M.get_name (| globals, "byte_index" |),
-          Constant.int 2
-        |) |),
-        BinOp.r_shift (|
-          BinOp.bit_and (|
-            M.get_name (| globals, "byte" |),
-            Constant.int 240
-          |),
-          Constant.int 4
-        |)
-      |) in
-      let _ := M.assign (|
-        M.get_subscript (| M.get_name (| globals, "nibble_list" |), BinOp.add (|
-          BinOp.mult (|
-            M.get_name (| globals, "byte_index" |),
-            Constant.int 2
-          |),
-          Constant.int 1
-        |) |),
-        BinOp.bit_and (|
-          M.get_name (| globals, "byte" |),
-          Constant.int 15
-        |)
-      |) in
-    EndFor.
+    let _ :=
+      M.for_ (|
+        make_tuple [ M.get_name (| globals, "byte_index" |); M.get_name (| globals, "byte" |) ],
+        M.call (|
+      M.get_name (| globals, "enumerate" |),
+      make_list [
+        M.get_name (| globals, "bytes_" |)
+      ],
+      make_dict []
+    |),
+        ltac:(M.monadic (
+          let _ := M.assign (|
+            M.get_subscript (|
+              M.get_name (| globals, "nibble_list" |),
+              BinOp.mult (|
+                M.get_name (| globals, "byte_index" |),
+                Constant.int 2
+              |)
+            |),
+            BinOp.r_shift (|
+              BinOp.bit_and (|
+                M.get_name (| globals, "byte" |),
+                Constant.int 240
+              |),
+              Constant.int 4
+            |)
+          |) in
+          let _ := M.assign (|
+            M.get_subscript (|
+              M.get_name (| globals, "nibble_list" |),
+              BinOp.add (|
+                BinOp.mult (|
+                  M.get_name (| globals, "byte_index" |),
+                  Constant.int 2
+                |),
+                Constant.int 1
+              |)
+            |),
+            BinOp.bit_and (|
+              M.get_name (| globals, "byte" |),
+              Constant.int 15
+            |)
+          |) in
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let _ := M.return_ (|
       M.call (|
         M.get_name (| globals, "Bytes" |),
@@ -909,65 +952,69 @@ Definition _prepare_trie : Value.t -> Value.t -> M :=
         Object with keys mapped to nibble-byte form.
     " in
 (* At stmt: unsupported node type: AnnAssign *)
-    For make_tuple [ M.get_name (| globals, "preimage" |); M.get_name (| globals, "value" |) ] in M.call (|
-    M.get_field (| M.get_field (| M.get_name (| globals, "trie" |), "_data" |), "items" |),
-    make_list [],
-    make_dict []
-  |) do
-      let _ :=
-        (* if *)
-        M.if_then_else (|
-          M.call (|
-            M.get_name (| globals, "isinstance" |),
-            make_list [
-              M.get_name (| globals, "value" |);
-              M.get_name (| globals, "Account" |)
-            ],
-            make_dict []
-          |),
-        (* then *)
+    let _ :=
+      M.for_ (|
+        make_tuple [ M.get_name (| globals, "preimage" |); M.get_name (| globals, "value" |) ],
+        M.call (|
+      M.get_field (| M.get_field (| M.get_name (| globals, "trie" |), "_data" |), "items" |),
+      make_list [],
+      make_dict []
+    |),
         ltac:(M.monadic (
-          let _ := M.assert (| Compare.is_not (|
+          let _ :=
+            (* if *)
+            M.if_then_else (|
+              M.call (|
+                M.get_name (| globals, "isinstance" |),
+                make_list [
+                  M.get_name (| globals, "value" |);
+                  M.get_name (| globals, "Account" |)
+                ],
+                make_dict []
+              |),
+            (* then *)
+            ltac:(M.monadic (
+              let _ := M.assert (| Compare.is_not (|
     M.get_name (| globals, "get_storage_root" |),
     Constant.None_
   |) |) in
-          let address :=
-            M.call (|
-              M.get_name (| globals, "Address" |),
-              make_list [
-                M.get_name (| globals, "preimage" |)
-              ],
-              make_dict []
-            |) in
-          let encoded_value :=
-            M.call (|
-              M.get_name (| globals, "encode_node" |),
-              make_list [
-                M.get_name (| globals, "value" |);
+              let address :=
                 M.call (|
-                  M.get_name (| globals, "get_storage_root" |),
+                  M.get_name (| globals, "Address" |),
                   make_list [
-                    M.get_name (| globals, "address" |)
+                    M.get_name (| globals, "preimage" |)
                   ],
                   make_dict []
-                |)
-              ],
-              make_dict []
-            |) in
-          M.pure Constant.None_
-        (* else *)
-        )), ltac:(M.monadic (
-          let encoded_value :=
-            M.call (|
-              M.get_name (| globals, "encode_node" |),
-              make_list [
-                M.get_name (| globals, "value" |)
-              ],
-              make_dict []
-            |) in
-          M.pure Constant.None_
-        )) |) in
-      let _ := M.call (|
+                |) in
+              let encoded_value :=
+                M.call (|
+                  M.get_name (| globals, "encode_node" |),
+                  make_list [
+                    M.get_name (| globals, "value" |);
+                    M.call (|
+                      M.get_name (| globals, "get_storage_root" |),
+                      make_list [
+                        M.get_name (| globals, "address" |)
+                      ],
+                      make_dict []
+                    |)
+                  ],
+                  make_dict []
+                |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
+              let encoded_value :=
+                M.call (|
+                  M.get_name (| globals, "encode_node" |),
+                  make_list [
+                    M.get_name (| globals, "value" |)
+                  ],
+                  make_dict []
+                |) in
+              M.pure Constant.None_
+            )) |) in
+          let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
       Compare.not_eq (|
@@ -979,38 +1026,46 @@ Definition _prepare_trie : Value.t -> Value.t -> M :=
     make_dict []
   |) in
 (* At stmt: unsupported node type: AnnAssign *)
-      let _ :=
-        (* if *)
-        M.if_then_else (|
-          M.get_field (| M.get_name (| globals, "trie" |), "secured" |),
-        (* then *)
+          let _ :=
+            (* if *)
+            M.if_then_else (|
+              M.get_field (| M.get_name (| globals, "trie" |), "secured" |),
+            (* then *)
+            ltac:(M.monadic (
+              let key :=
+                M.call (|
+                  M.get_name (| globals, "keccak256" |),
+                  make_list [
+                    M.get_name (| globals, "preimage" |)
+                  ],
+                  make_dict []
+                |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
+              let key :=
+                M.get_name (| globals, "preimage" |) in
+              M.pure Constant.None_
+            )) |) in
+          let _ := M.assign (|
+            M.get_subscript (|
+              M.get_name (| globals, "mapped" |),
+              M.call (|
+                M.get_name (| globals, "bytes_to_nibble_list" |),
+                make_list [
+                  M.get_name (| globals, "key" |)
+                ],
+                make_dict []
+              |)
+            |),
+            M.get_name (| globals, "encoded_value" |)
+          |) in
+          M.pure Constant.None_
+        )),
         ltac:(M.monadic (
-          let key :=
-            M.call (|
-              M.get_name (| globals, "keccak256" |),
-              make_list [
-                M.get_name (| globals, "preimage" |)
-              ],
-              make_dict []
-            |) in
           M.pure Constant.None_
-        (* else *)
-        )), ltac:(M.monadic (
-          let key :=
-            M.get_name (| globals, "preimage" |) in
-          M.pure Constant.None_
-        )) |) in
-      let _ := M.assign (|
-        M.get_subscript (| M.get_name (| globals, "mapped" |), M.call (|
-          M.get_name (| globals, "bytes_to_nibble_list" |),
-          make_list [
-            M.get_name (| globals, "key" |)
-          ],
-          make_dict []
-        |) |),
-        M.get_name (| globals, "encoded_value" |)
-      |) in
-    EndFor.
+        ))
+    |) in
     let _ := M.return_ (|
       M.get_name (| globals, "mapped" |)
     |) in
@@ -1203,8 +1258,16 @@ Definition patricialize : Value.t -> Value.t -> M :=
           M.call (|
             M.get_name (| globals, "LeafNode" |),
             make_list [
-              M.get_subscript (| M.get_name (| globals, "arbitrary_key" |), M.slice (| M.get_name (| globals, "level" |), Constant.None_ |) |);
-              M.get_subscript (| M.get_name (| globals, "obj" |), M.get_name (| globals, "arbitrary_key" |) |)
+              M.slice (|
+                M.get_name (| globals, "arbitrary_key" |),
+                M.get_name (| globals, "level" |),
+                Constant.None_,
+                Constant.None_
+              |);
+              M.get_subscript (|
+                M.get_name (| globals, "obj" |),
+                M.get_name (| globals, "arbitrary_key" |)
+              |)
             ],
             make_dict []
           |) in
@@ -1217,7 +1280,12 @@ Definition patricialize : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
     let substring :=
-      M.get_subscript (| M.get_name (| globals, "arbitrary_key" |), M.slice (| M.get_name (| globals, "level" |), Constant.None_ |) |) in
+      M.slice (|
+        M.get_name (| globals, "arbitrary_key" |),
+        M.get_name (| globals, "level" |),
+        Constant.None_,
+        Constant.None_
+      |) in
     let prefix_length :=
       M.call (|
         M.get_name (| globals, "len" |),
@@ -1226,39 +1294,53 @@ Definition patricialize : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |) in
-    For M.get_name (| globals, "key" |) in M.get_name (| globals, "obj" |) do
-      let prefix_length :=
-        M.call (|
-          M.get_name (| globals, "min" |),
-          make_list [
-            M.get_name (| globals, "prefix_length" |);
+    let _ :=
+      M.for_ (|
+        M.get_name (| globals, "key" |),
+        M.get_name (| globals, "obj" |),
+        ltac:(M.monadic (
+          let prefix_length :=
             M.call (|
-              M.get_name (| globals, "common_prefix_length" |),
+              M.get_name (| globals, "min" |),
               make_list [
-                M.get_name (| globals, "substring" |);
-                M.get_subscript (| M.get_name (| globals, "key" |), M.slice (| M.get_name (| globals, "level" |), Constant.None_ |) |)
+                M.get_name (| globals, "prefix_length" |);
+                M.call (|
+                  M.get_name (| globals, "common_prefix_length" |),
+                  make_list [
+                    M.get_name (| globals, "substring" |);
+                    M.slice (|
+                      M.get_name (| globals, "key" |),
+                      M.get_name (| globals, "level" |),
+                      Constant.None_,
+                      Constant.None_
+                    |)
+                  ],
+                  make_dict []
+                |)
               ],
               make_dict []
-            |)
-          ],
-          make_dict []
-        |) in
-      let _ :=
-        (* if *)
-        M.if_then_else (|
-          Compare.eq (|
-            M.get_name (| globals, "prefix_length" |),
-            Constant.int 0
-          |),
-        (* then *)
+            |) in
+          let _ :=
+            (* if *)
+            M.if_then_else (|
+              Compare.eq (|
+                M.get_name (| globals, "prefix_length" |),
+                Constant.int 0
+              |),
+            (* then *)
+            ltac:(M.monadic (
+              let _ := M.break (| |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
+              M.pure Constant.None_
+            )) |) in
+          M.pure Constant.None_
+        )),
         ltac:(M.monadic (
-          let _ := M.break (| |) in
           M.pure Constant.None_
-        (* else *)
-        )), ltac:(M.monadic (
-          M.pure Constant.None_
-        )) |) in
-    EndFor.
+        ))
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -1269,10 +1351,15 @@ Definition patricialize : Value.t -> Value.t -> M :=
       (* then *)
       ltac:(M.monadic (
         let prefix :=
-          M.get_subscript (| M.get_name (| globals, "arbitrary_key" |), M.slice (| M.get_name (| globals, "level" |), BinOp.add (|
+          M.slice (|
+            M.get_name (| globals, "arbitrary_key" |),
             M.get_name (| globals, "level" |),
-            M.get_name (| globals, "prefix_length" |)
-          |) |) |) in
+            BinOp.add (|
+              M.get_name (| globals, "level" |),
+              M.get_name (| globals, "prefix_length" |)
+            |),
+            Constant.None_
+          |) in
         let _ := M.return_ (|
           M.call (|
             M.get_name (| globals, "ExtensionNode" |),
@@ -1305,70 +1392,106 @@ Definition patricialize : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
 (* At stmt: unsupported node type: AnnAssign *)
-    For M.get_name (| globals, "_" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      Constant.int 16
-    ],
-    make_dict []
-  |) do
-      let _ := M.call (|
+    let _ :=
+      M.for_ (|
+        M.get_name (| globals, "_" |),
+        M.call (|
+      M.get_name (| globals, "range" |),
+      make_list [
+        Constant.int 16
+      ],
+      make_dict []
+    |),
+        ltac:(M.monadic (
+          let _ := M.call (|
     M.get_field (| M.get_name (| globals, "branches" |), "append" |),
     make_list [
       {}
     ],
     make_dict []
   |) in
-    EndFor.
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let value :=
       Constant.bytes "" in
-    For M.get_name (| globals, "key" |) in M.get_name (| globals, "obj" |) do
-      let _ :=
-        (* if *)
-        M.if_then_else (|
-          Compare.eq (|
-            M.call (|
-              M.get_name (| globals, "len" |),
-              make_list [
-                M.get_name (| globals, "key" |)
-              ],
-              make_dict []
-            |),
-            M.get_name (| globals, "level" |)
-          |),
-        (* then *)
+    let _ :=
+      M.for_ (|
+        M.get_name (| globals, "key" |),
+        M.get_name (| globals, "obj" |),
         ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
-              M.call (|
-                M.get_name (| globals, "isinstance" |),
-                make_list [
-                  M.get_subscript (| M.get_name (| globals, "obj" |), M.get_name (| globals, "key" |) |);
-                  make_tuple [ M.get_name (| globals, "Account" |); M.get_name (| globals, "Receipt" |); M.get_name (| globals, "Uint" |) ]
-                ],
-                make_dict []
+              Compare.eq (|
+                M.call (|
+                  M.get_name (| globals, "len" |),
+                  make_list [
+                    M.get_name (| globals, "key" |)
+                  ],
+                  make_dict []
+                |),
+                M.get_name (| globals, "level" |)
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some(M.get_name (| globals, "AssertionError" |)) |) in
+              let _ :=
+                (* if *)
+                M.if_then_else (|
+                  M.call (|
+                    M.get_name (| globals, "isinstance" |),
+                    make_list [
+                      M.get_subscript (|
+                        M.get_name (| globals, "obj" |),
+                        M.get_name (| globals, "key" |)
+                      |);
+                      make_tuple [ M.get_name (| globals, "Account" |); M.get_name (| globals, "Receipt" |); M.get_name (| globals, "Uint" |) ]
+                    ],
+                    make_dict []
+                  |),
+                (* then *)
+                ltac:(M.monadic (
+                  let _ := M.raise (| Some (M.get_name (| globals, "AssertionError" |)) |) in
+                  M.pure Constant.None_
+                (* else *)
+                )), ltac:(M.monadic (
+                  M.pure Constant.None_
+                )) |) in
+              let value :=
+                M.get_subscript (|
+                  M.get_name (| globals, "obj" |),
+                  M.get_name (| globals, "key" |)
+                |) in
               M.pure Constant.None_
             (* else *)
             )), ltac:(M.monadic (
+              let _ := M.assign (|
+                M.get_subscript (|
+                  M.get_subscript (|
+                    M.get_name (| globals, "branches" |),
+                    M.get_subscript (|
+                      M.get_name (| globals, "key" |),
+                      M.get_name (| globals, "level" |)
+                    |)
+                  |),
+                  M.get_name (| globals, "key" |)
+                |),
+                M.get_subscript (|
+                  M.get_name (| globals, "obj" |),
+                  M.get_name (| globals, "key" |)
+                |)
+              |) in
               M.pure Constant.None_
             )) |) in
-          let value :=
-            M.get_subscript (| M.get_name (| globals, "obj" |), M.get_name (| globals, "key" |) |) in
           M.pure Constant.None_
-        (* else *)
-        )), ltac:(M.monadic (
-          let _ := M.assign (|
-            M.get_subscript (| M.get_subscript (| M.get_name (| globals, "branches" |), M.get_subscript (| M.get_name (| globals, "key" |), M.get_name (| globals, "level" |) |) |), M.get_name (| globals, "key" |) |),
-            M.get_subscript (| M.get_name (| globals, "obj" |), M.get_name (| globals, "key" |) |)
-          |) in
+        )),
+        ltac:(M.monadic (
           M.pure Constant.None_
-        )) |) in
-    EndFor.
+        ))
+    |) in
     let _ := M.return_ (|
       M.call (|
         M.get_name (| globals, "BranchNode" |),

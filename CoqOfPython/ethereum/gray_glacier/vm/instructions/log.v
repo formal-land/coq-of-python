@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.gray_glacier.vm.instructions.log".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,49 +17,32 @@ Introduction
 Implementations of the EVM logging instructions.
 ".
 
-Require functools.
-Axiom functools_partial :
-  IsGlobalAlias globals functools.globals "partial".
+Axiom functools_imports :
+  AreImported globals "functools" [ "partial" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256" ].
 
-Require ethereum.utils.ensure.
-Axiom ethereum_utils_ensure_ensure :
-  IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
+Axiom ethereum_utils_ensure_imports :
+  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
 
-Require ethereum.gray_glacier.blocks.
-Axiom ethereum_gray_glacier_blocks_Log :
-  IsGlobalAlias globals ethereum.gray_glacier.blocks.globals "Log".
+Axiom ethereum_gray_glacier_blocks_imports :
+  AreImported globals "ethereum.gray_glacier.blocks" [ "Log" ].
 
-Require ethereum.gray_glacier.vm.__init__.
-Axiom ethereum_gray_glacier_vm___init___Evm :
-  IsGlobalAlias globals ethereum.gray_glacier.vm.__init__.globals "Evm".
+Axiom ethereum_gray_glacier_vm_imports :
+  AreImported globals "ethereum.gray_glacier.vm" [ "Evm" ].
 
-Require ethereum.gray_glacier.vm.exceptions.
-Axiom ethereum_gray_glacier_vm_exceptions_WriteInStaticContext :
-  IsGlobalAlias globals ethereum.gray_glacier.vm.exceptions.globals "WriteInStaticContext".
+Axiom ethereum_gray_glacier_vm_exceptions_imports :
+  AreImported globals "ethereum.gray_glacier.vm.exceptions" [ "WriteInStaticContext" ].
 
-Require ethereum.gray_glacier.vm.gas.
-Axiom ethereum_gray_glacier_vm_gas_GAS_LOG :
-  IsGlobalAlias globals ethereum.gray_glacier.vm.gas.globals "GAS_LOG".
-Axiom ethereum_gray_glacier_vm_gas_GAS_LOG_DATA :
-  IsGlobalAlias globals ethereum.gray_glacier.vm.gas.globals "GAS_LOG_DATA".
-Axiom ethereum_gray_glacier_vm_gas_GAS_LOG_TOPIC :
-  IsGlobalAlias globals ethereum.gray_glacier.vm.gas.globals "GAS_LOG_TOPIC".
-Axiom ethereum_gray_glacier_vm_gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals ethereum.gray_glacier.vm.gas.globals "calculate_gas_extend_memory".
-Axiom ethereum_gray_glacier_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.gray_glacier.vm.gas.globals "charge_gas".
+Axiom ethereum_gray_glacier_vm_gas_imports :
+  AreImported globals "ethereum.gray_glacier.vm.gas" [ "GAS_LOG"; "GAS_LOG_DATA"; "GAS_LOG_TOPIC"; "calculate_gas_extend_memory"; "charge_gas" ].
 
-Require ethereum.gray_glacier.vm.memory.
-Axiom ethereum_gray_glacier_vm_memory_memory_read_bytes :
-  IsGlobalAlias globals ethereum.gray_glacier.vm.memory.globals "memory_read_bytes".
+Axiom ethereum_gray_glacier_vm_memory_imports :
+  AreImported globals "ethereum.gray_glacier.vm.memory" [ "memory_read_bytes" ].
 
-Require ethereum.gray_glacier.vm.stack.
-Axiom ethereum_gray_glacier_vm_stack_pop :
-  IsGlobalAlias globals ethereum.gray_glacier.vm.stack.globals "pop".
+Axiom ethereum_gray_glacier_vm_stack_imports :
+  AreImported globals "ethereum.gray_glacier.vm.stack" [ "pop" ].
 
 Definition log_n : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -96,33 +79,42 @@ Definition log_n : Value.t -> Value.t -> M :=
       |) in
     let topics :=
       make_list [] in
-    For M.get_name (| globals, "_" |) in M.call (|
-    M.get_name (| globals, "range" |),
-    make_list [
-      M.get_name (| globals, "num_topics" |)
-    ],
-    make_dict []
-  |) do
-      let topic :=
+    let _ :=
+      M.for_ (|
+        M.get_name (| globals, "_" |),
         M.call (|
-          M.get_field (| M.call (|
-            M.get_name (| globals, "pop" |),
-            make_list [
-              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
-            ],
-            make_dict []
-          |), "to_be_bytes32" |),
-          make_list [],
-          make_dict []
-        |) in
-      let _ := M.call (|
+      M.get_name (| globals, "range" |),
+      make_list [
+        M.get_name (| globals, "num_topics" |)
+      ],
+      make_dict []
+    |),
+        ltac:(M.monadic (
+          let topic :=
+            M.call (|
+              M.get_field (| M.call (|
+                M.get_name (| globals, "pop" |),
+                make_list [
+                  M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+                ],
+                make_dict []
+              |), "to_be_bytes32" |),
+              make_list [],
+              make_dict []
+            |) in
+          let _ := M.call (|
     M.get_field (| M.get_name (| globals, "topics" |), "append" |),
     make_list [
       M.get_name (| globals, "topic" |)
     ],
     make_dict []
   |) in
-    EndFor.
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let extend_memory :=
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),

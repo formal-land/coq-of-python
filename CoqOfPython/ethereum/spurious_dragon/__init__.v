@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.spurious_dragon.__init__".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -11,9 +11,8 @@ chains, limits the maximum size of contract code, and enables the removal of
 empty accounts.
 ".
 
-Require ethereum.fork_criteria.
-Axiom ethereum_fork_criteria_ByBlockNumber :
-  IsGlobalAlias globals ethereum.fork_criteria.globals "ByBlockNumber".
+Axiom ethereum_fork_criteria_imports :
+  AreImported globals "ethereum.fork_criteria" [ "ByBlockNumber" ].
 
 Definition FORK_CRITERIA : Value.t := M.run ltac:(M.monadic (
   M.call (|

@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.shanghai.state".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -22,67 +22,26 @@ There is a distinction between an account that does not exist and
 `EMPTY_ACCOUNT`.
 ".
 
-Require dataclasses.
-Axiom dataclasses_dataclass :
-  IsGlobalAlias globals dataclasses.globals "dataclass".
-Axiom dataclasses_field :
-  IsGlobalAlias globals dataclasses.globals "field".
+Axiom dataclasses_imports :
+  AreImported globals "dataclasses" [ "dataclass"; "field" ].
 
-Require typing.
-Axiom typing_Callable :
-  IsGlobalAlias globals typing.globals "Callable".
-Axiom typing_Dict :
-  IsGlobalAlias globals typing.globals "Dict".
-Axiom typing_List :
-  IsGlobalAlias globals typing.globals "List".
-Axiom typing_Optional :
-  IsGlobalAlias globals typing.globals "Optional".
-Axiom typing_Set_ :
-  IsGlobalAlias globals typing.globals "Set_".
-Axiom typing_Tuple :
-  IsGlobalAlias globals typing.globals "Tuple".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Callable"; "Dict"; "List"; "Optional"; "Set"; "Tuple" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
-Axiom ethereum_base_types_modify :
-  IsGlobalAlias globals ethereum.base_types.globals "modify".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Uint"; "modify" ].
 
-Require ethereum.utils.ensure.
-Axiom ethereum_utils_ensure_ensure :
-  IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
+Axiom ethereum_utils_ensure_imports :
+  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
 
-Require ethereum.shanghai.blocks.
-Axiom ethereum_shanghai_blocks_Withdrawal :
-  IsGlobalAlias globals ethereum.shanghai.blocks.globals "Withdrawal".
+Axiom ethereum_shanghai_blocks_imports :
+  AreImported globals "ethereum.shanghai.blocks" [ "Withdrawal" ].
 
-Require ethereum.shanghai.fork_types.
-Axiom ethereum_shanghai_fork_types_EMPTY_ACCOUNT :
-  IsGlobalAlias globals ethereum.shanghai.fork_types.globals "EMPTY_ACCOUNT".
-Axiom ethereum_shanghai_fork_types_Account :
-  IsGlobalAlias globals ethereum.shanghai.fork_types.globals "Account".
-Axiom ethereum_shanghai_fork_types_Address :
-  IsGlobalAlias globals ethereum.shanghai.fork_types.globals "Address".
-Axiom ethereum_shanghai_fork_types_Root :
-  IsGlobalAlias globals ethereum.shanghai.fork_types.globals "Root".
+Axiom ethereum_shanghai_fork_types_imports :
+  AreImported globals "ethereum.shanghai.fork_types" [ "EMPTY_ACCOUNT"; "Account"; "Address"; "Root" ].
 
-Require ethereum.shanghai.trie.
-Axiom ethereum_shanghai_trie_EMPTY_TRIE_ROOT :
-  IsGlobalAlias globals ethereum.shanghai.trie.globals "EMPTY_TRIE_ROOT".
-Axiom ethereum_shanghai_trie_Trie :
-  IsGlobalAlias globals ethereum.shanghai.trie.globals "Trie".
-Axiom ethereum_shanghai_trie_copy_trie :
-  IsGlobalAlias globals ethereum.shanghai.trie.globals "copy_trie".
-Axiom ethereum_shanghai_trie_root :
-  IsGlobalAlias globals ethereum.shanghai.trie.globals "root".
-Axiom ethereum_shanghai_trie_trie_get :
-  IsGlobalAlias globals ethereum.shanghai.trie.globals "trie_get".
-Axiom ethereum_shanghai_trie_trie_set :
-  IsGlobalAlias globals ethereum.shanghai.trie.globals "trie_set".
+Axiom ethereum_shanghai_trie_imports :
+  AreImported globals "ethereum.shanghai.trie" [ "EMPTY_TRIE_ROOT"; "Trie"; "copy_trie"; "root"; "trie_get"; "trie_set" ].
 
 Definition State : Value.t :=
   builtins.make_klass
@@ -377,13 +336,16 @@ Definition destroy_storage : Value.t -> Value.t -> M :=
     let _ :=
       (* if *)
       M.if_then_else (|
-        Compare.in (|
+        Compare.in_ (|
           M.get_name (| globals, "address" |),
           M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |)
         |),
       (* then *)
       ltac:(M.monadic (
-        let _ := M.delete (| M.get_subscript (| M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |), M.get_name (| globals, "address" |) |) |) in
+        let _ := M.delete (| M.get_subscript (|
+    M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |),
+    M.get_name (| globals, "address" |)
+  |) |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
@@ -546,7 +508,10 @@ Definition set_storage : Value.t -> Value.t -> M :=
             make_dict []
           |) in
         let _ := M.assign (|
-          M.get_subscript (| M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |), M.get_name (| globals, "address" |) |),
+          M.get_subscript (|
+            M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |),
+            M.get_name (| globals, "address" |)
+          |),
           M.get_name (| globals, "trie" |)
         |) in
         M.pure Constant.None_
@@ -572,7 +537,10 @@ Definition set_storage : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let _ := M.delete (| M.get_subscript (| M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |), M.get_name (| globals, "address" |) |) |) in
+        let _ := M.delete (| M.get_subscript (|
+    M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |),
+    M.get_name (| globals, "address" |)
+  |) |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
@@ -602,7 +570,7 @@ Definition storage_root : Value.t -> Value.t -> M :=
     let _ :=
       (* if *)
       M.if_then_else (|
-        Compare.in (|
+        Compare.in_ (|
           M.get_name (| globals, "address" |),
           M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |)
         |),
@@ -612,7 +580,10 @@ Definition storage_root : Value.t -> Value.t -> M :=
           M.call (|
             M.get_name (| globals, "root" |),
             make_list [
-              M.get_subscript (| M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |), M.get_name (| globals, "address" |) |)
+              M.get_subscript (|
+                M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |),
+                M.get_name (| globals, "address" |)
+              |)
             ],
             make_dict []
           |)
@@ -1162,7 +1133,7 @@ Definition get_storage_original : Value.t -> Value.t -> M :=
     let _ :=
       (* if *)
       M.if_then_else (|
-        Compare.in (|
+        Compare.in_ (|
           M.get_name (| globals, "address" |),
           M.get_field (| M.get_name (| globals, "state" |), "_created_accounts" |)
         |),
@@ -1184,7 +1155,10 @@ Definition get_storage_original : Value.t -> Value.t -> M :=
       )) |) in
     let _ := M.assign (|
       make_tuple [ M.get_name (| globals, "_" |); M.get_name (| globals, "original_trie" |) ],
-      M.get_subscript (| M.get_field (| M.get_name (| globals, "state" |), "_snapshots" |), Constant.int 0 |)
+      M.get_subscript (|
+        M.get_field (| M.get_name (| globals, "state" |), "_snapshots" |),
+        Constant.int 0
+      |)
     |) in
     let original_account_trie :=
       M.call (|

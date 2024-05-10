@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.gray_glacier.vm.precompiled_contracts.modexp".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,25 +17,17 @@ Introduction
 Implementation of the `MODEXP` precompiled contract.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Uint" ].
 
-Require ethereum.gray_glacier.vm.__init__.
-Axiom ethereum_gray_glacier_vm___init___Evm :
-  IsGlobalAlias globals ethereum.gray_glacier.vm.__init__.globals "Evm".
+Axiom ethereum_gray_glacier_vm_imports :
+  AreImported globals "ethereum.gray_glacier.vm" [ "Evm" ].
 
-Require ethereum.gray_glacier.vm.gas.
-Axiom ethereum_gray_glacier_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.gray_glacier.vm.gas.globals "charge_gas".
+Axiom ethereum_gray_glacier_vm_gas_imports :
+  AreImported globals "ethereum.gray_glacier.vm.gas" [ "charge_gas" ].
 
-Require ethereum.gray_glacier.vm.memory.
-Axiom ethereum_gray_glacier_vm_memory_buffer_read :
-  IsGlobalAlias globals ethereum.gray_glacier.vm.memory.globals "buffer_read".
+Axiom ethereum_gray_glacier_vm_memory_imports :
+  AreImported globals "ethereum.gray_glacier.vm.memory" [ "buffer_read" ].
 
 Definition GQUADDIVISOR : Value.t := M.run ltac:(M.monadic (
   Constant.int 3

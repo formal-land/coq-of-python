@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.gray_glacier.blocks".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -14,45 +14,23 @@ history of all state transitions that have happened since the genesis of the
 chain.
 ".
 
-Require dataclasses.
-Axiom dataclasses_dataclass :
-  IsGlobalAlias globals dataclasses.globals "dataclass".
+Axiom dataclasses_imports :
+  AreImported globals "dataclasses" [ "dataclass" ].
 
-Require typing.
-Axiom typing_Tuple :
-  IsGlobalAlias globals typing.globals "Tuple".
-Axiom typing_Union :
-  IsGlobalAlias globals typing.globals "Union".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Tuple"; "Union" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Bytes8 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes8".
-Axiom ethereum_base_types_Bytes32 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes32".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
-Axiom ethereum_base_types_slotted_freezable :
-  IsGlobalAlias globals ethereum.base_types.globals "slotted_freezable".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Bytes8"; "Bytes32"; "Uint"; "slotted_freezable" ].
 
-Require ethereum.crypto.hash.
-Axiom ethereum_crypto_hash_Hash32 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "Hash32".
+Axiom ethereum_crypto_hash_imports :
+  AreImported globals "ethereum.crypto.hash" [ "Hash32" ].
 
-Require ethereum.gray_glacier.fork_types.
-Axiom ethereum_gray_glacier_fork_types_Address :
-  IsGlobalAlias globals ethereum.gray_glacier.fork_types.globals "Address".
-Axiom ethereum_gray_glacier_fork_types_Bloom :
-  IsGlobalAlias globals ethereum.gray_glacier.fork_types.globals "Bloom".
-Axiom ethereum_gray_glacier_fork_types_Root :
-  IsGlobalAlias globals ethereum.gray_glacier.fork_types.globals "Root".
+Axiom ethereum_gray_glacier_fork_types_imports :
+  AreImported globals "ethereum.gray_glacier.fork_types" [ "Address"; "Bloom"; "Root" ].
 
-Require ethereum.gray_glacier.transactions.
-Axiom ethereum_gray_glacier_transactions_LegacyTransaction :
-  IsGlobalAlias globals ethereum.gray_glacier.transactions.globals "LegacyTransaction".
+Axiom ethereum_gray_glacier_transactions_imports :
+  AreImported globals "ethereum.gray_glacier.transactions" [ "LegacyTransaction" ].
 
 Definition Header : Value.t :=
   builtins.make_klass

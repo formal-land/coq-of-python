@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.dao_fork.vm.instructions.storage".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,33 +17,17 @@ Introduction
 Implementations of the EVM storage related instructions.
 ".
 
-Require ethereum.dao_fork.state.
-Axiom ethereum_dao_fork_state_get_storage :
-  IsGlobalAlias globals ethereum.dao_fork.state.globals "get_storage".
-Axiom ethereum_dao_fork_state_set_storage :
-  IsGlobalAlias globals ethereum.dao_fork.state.globals "set_storage".
+Axiom ethereum_dao_fork_state_imports :
+  AreImported globals "ethereum.dao_fork.state" [ "get_storage"; "set_storage" ].
 
-Require ethereum.dao_fork.vm.__init__.
-Axiom ethereum_dao_fork_vm___init___Evm :
-  IsGlobalAlias globals ethereum.dao_fork.vm.__init__.globals "Evm".
+Axiom ethereum_dao_fork_vm_imports :
+  AreImported globals "ethereum.dao_fork.vm" [ "Evm" ].
 
-Require ethereum.dao_fork.vm.gas.
-Axiom ethereum_dao_fork_vm_gas_GAS_SLOAD :
-  IsGlobalAlias globals ethereum.dao_fork.vm.gas.globals "GAS_SLOAD".
-Axiom ethereum_dao_fork_vm_gas_GAS_STORAGE_CLEAR_REFUND :
-  IsGlobalAlias globals ethereum.dao_fork.vm.gas.globals "GAS_STORAGE_CLEAR_REFUND".
-Axiom ethereum_dao_fork_vm_gas_GAS_STORAGE_SET :
-  IsGlobalAlias globals ethereum.dao_fork.vm.gas.globals "GAS_STORAGE_SET".
-Axiom ethereum_dao_fork_vm_gas_GAS_STORAGE_UPDATE :
-  IsGlobalAlias globals ethereum.dao_fork.vm.gas.globals "GAS_STORAGE_UPDATE".
-Axiom ethereum_dao_fork_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.dao_fork.vm.gas.globals "charge_gas".
+Axiom ethereum_dao_fork_vm_gas_imports :
+  AreImported globals "ethereum.dao_fork.vm.gas" [ "GAS_SLOAD"; "GAS_STORAGE_CLEAR_REFUND"; "GAS_STORAGE_SET"; "GAS_STORAGE_UPDATE"; "charge_gas" ].
 
-Require ethereum.dao_fork.vm.stack.
-Axiom ethereum_dao_fork_vm_stack_pop :
-  IsGlobalAlias globals ethereum.dao_fork.vm.stack.globals "pop".
-Axiom ethereum_dao_fork_vm_stack_push :
-  IsGlobalAlias globals ethereum.dao_fork.vm.stack.globals "push".
+Axiom ethereum_dao_fork_vm_stack_imports :
+  AreImported globals "ethereum.dao_fork.vm.stack" [ "pop"; "push" ].
 
 Definition sload : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

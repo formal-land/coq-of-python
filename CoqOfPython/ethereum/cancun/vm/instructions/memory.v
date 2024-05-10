@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.cancun.vm.instructions.memory".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,45 +17,23 @@ Introduction
 Implementations of the EVM Memory instructions.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Uint" ].
 
-Require ethereum.utils.numeric.
-Axiom ethereum_utils_numeric_ceil32 :
-  IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
+Axiom ethereum_utils_numeric_imports :
+  AreImported globals "ethereum.utils.numeric" [ "ceil32" ].
 
-Require ethereum.cancun.vm.__init__.
-Axiom ethereum_cancun_vm___init___Evm :
-  IsGlobalAlias globals ethereum.cancun.vm.__init__.globals "Evm".
+Axiom ethereum_cancun_vm_imports :
+  AreImported globals "ethereum.cancun.vm" [ "Evm" ].
 
-Require ethereum.cancun.vm.gas.
-Axiom ethereum_cancun_vm_gas_GAS_BASE :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_BASE".
-Axiom ethereum_cancun_vm_gas_GAS_COPY :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_COPY".
-Axiom ethereum_cancun_vm_gas_GAS_VERY_LOW :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_VERY_LOW".
-Axiom ethereum_cancun_vm_gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "calculate_gas_extend_memory".
-Axiom ethereum_cancun_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "charge_gas".
+Axiom ethereum_cancun_vm_gas_imports :
+  AreImported globals "ethereum.cancun.vm.gas" [ "GAS_BASE"; "GAS_COPY"; "GAS_VERY_LOW"; "calculate_gas_extend_memory"; "charge_gas" ].
 
-Require ethereum.cancun.vm.memory.
-Axiom ethereum_cancun_vm_memory_memory_read_bytes :
-  IsGlobalAlias globals ethereum.cancun.vm.memory.globals "memory_read_bytes".
-Axiom ethereum_cancun_vm_memory_memory_write :
-  IsGlobalAlias globals ethereum.cancun.vm.memory.globals "memory_write".
+Axiom ethereum_cancun_vm_memory_imports :
+  AreImported globals "ethereum.cancun.vm.memory" [ "memory_read_bytes"; "memory_write" ].
 
-Require ethereum.cancun.vm.stack.
-Axiom ethereum_cancun_vm_stack_pop :
-  IsGlobalAlias globals ethereum.cancun.vm.stack.globals "pop".
-Axiom ethereum_cancun_vm_stack_push :
-  IsGlobalAlias globals ethereum.cancun.vm.stack.globals "push".
+Axiom ethereum_cancun_vm_stack_imports :
+  AreImported globals "ethereum.cancun.vm.stack" [ "pop"; "push" ].
 
 Definition mstore : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

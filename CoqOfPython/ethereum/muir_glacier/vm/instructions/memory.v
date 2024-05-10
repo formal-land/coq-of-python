@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.muir_glacier.vm.instructions.memory".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,37 +17,20 @@ Introduction
 Implementations of the EVM Memory instructions.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes" ].
 
-Require ethereum.muir_glacier.vm.__init__.
-Axiom ethereum_muir_glacier_vm___init___Evm :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.__init__.globals "Evm".
+Axiom ethereum_muir_glacier_vm_imports :
+  AreImported globals "ethereum.muir_glacier.vm" [ "Evm" ].
 
-Require ethereum.muir_glacier.vm.gas.
-Axiom ethereum_muir_glacier_vm_gas_GAS_BASE :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "GAS_BASE".
-Axiom ethereum_muir_glacier_vm_gas_GAS_VERY_LOW :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "GAS_VERY_LOW".
-Axiom ethereum_muir_glacier_vm_gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "calculate_gas_extend_memory".
-Axiom ethereum_muir_glacier_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.gas.globals "charge_gas".
+Axiom ethereum_muir_glacier_vm_gas_imports :
+  AreImported globals "ethereum.muir_glacier.vm.gas" [ "GAS_BASE"; "GAS_VERY_LOW"; "calculate_gas_extend_memory"; "charge_gas" ].
 
-Require ethereum.muir_glacier.vm.memory.
-Axiom ethereum_muir_glacier_vm_memory_memory_read_bytes :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.memory.globals "memory_read_bytes".
-Axiom ethereum_muir_glacier_vm_memory_memory_write :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.memory.globals "memory_write".
+Axiom ethereum_muir_glacier_vm_memory_imports :
+  AreImported globals "ethereum.muir_glacier.vm.memory" [ "memory_read_bytes"; "memory_write" ].
 
-Require ethereum.muir_glacier.vm.stack.
-Axiom ethereum_muir_glacier_vm_stack_pop :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.stack.globals "pop".
-Axiom ethereum_muir_glacier_vm_stack_push :
-  IsGlobalAlias globals ethereum.muir_glacier.vm.stack.globals "push".
+Axiom ethereum_muir_glacier_vm_stack_imports :
+  AreImported globals "ethereum.muir_glacier.vm.stack" [ "pop"; "push" ].
 
 Definition mstore : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

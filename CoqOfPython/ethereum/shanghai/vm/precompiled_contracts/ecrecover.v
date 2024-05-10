@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.shanghai.vm.precompiled_contracts.ecrecover".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,39 +17,26 @@ Introduction
 Implementation of the ECRECOVER precompiled contract.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256" ].
 
-Require ethereum.crypto.elliptic_curve.
-Axiom ethereum_crypto_elliptic_curve_SECP256K1N :
-  IsGlobalAlias globals ethereum.crypto.elliptic_curve.globals "SECP256K1N".
-Axiom ethereum_crypto_elliptic_curve_secp256k1_recover :
-  IsGlobalAlias globals ethereum.crypto.elliptic_curve.globals "secp256k1_recover".
+Axiom ethereum_crypto_elliptic_curve_imports :
+  AreImported globals "ethereum.crypto.elliptic_curve" [ "SECP256K1N"; "secp256k1_recover" ].
 
-Require ethereum.crypto.hash.
-Axiom ethereum_crypto_hash_Hash32 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "Hash32".
-Axiom ethereum_crypto_hash_keccak256 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "keccak256".
+Axiom ethereum_crypto_hash_imports :
+  AreImported globals "ethereum.crypto.hash" [ "Hash32"; "keccak256" ].
 
-Require ethereum.utils.byte.
-Axiom ethereum_utils_byte_left_pad_zero_bytes :
-  IsGlobalAlias globals ethereum.utils.byte.globals "left_pad_zero_bytes".
+Axiom ethereum_utils_byte_imports :
+  AreImported globals "ethereum.utils.byte" [ "left_pad_zero_bytes" ].
 
-Require ethereum.shanghai.vm.__init__.
-Axiom ethereum_shanghai_vm___init___Evm :
-  IsGlobalAlias globals ethereum.shanghai.vm.__init__.globals "Evm".
+Axiom ethereum_shanghai_vm_imports :
+  AreImported globals "ethereum.shanghai.vm" [ "Evm" ].
 
-Require ethereum.shanghai.vm.gas.
-Axiom ethereum_shanghai_vm_gas_GAS_ECRECOVER :
-  IsGlobalAlias globals ethereum.shanghai.vm.gas.globals "GAS_ECRECOVER".
-Axiom ethereum_shanghai_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.shanghai.vm.gas.globals "charge_gas".
+Axiom ethereum_shanghai_vm_gas_imports :
+  AreImported globals "ethereum.shanghai.vm.gas" [ "GAS_ECRECOVER"; "charge_gas" ].
 
-Require ethereum.shanghai.vm.memory.
-Axiom ethereum_shanghai_vm_memory_buffer_read :
-  IsGlobalAlias globals ethereum.shanghai.vm.memory.globals "buffer_read".
+Axiom ethereum_shanghai_vm_memory_imports :
+  AreImported globals "ethereum.shanghai.vm.memory" [ "buffer_read" ].
 
 Definition ecrecover : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -264,13 +251,18 @@ Definition ecrecover : Value.t -> Value.t -> M :=
       )) |) in
 (* At stmt: unsupported node type: Try *)
     let address :=
-      M.get_subscript (| M.call (|
-        M.get_name (| globals, "keccak256" |),
-        make_list [
-          M.get_name (| globals, "public_key" |)
-        ],
-        make_dict []
-      |), M.slice (| Constant.int 12, Constant.int 32 |) |) in
+      M.slice (|
+        M.call (|
+          M.get_name (| globals, "keccak256" |),
+          make_list [
+            M.get_name (| globals, "public_key" |)
+          ],
+          make_dict []
+        |),
+        Constant.int 12,
+        Constant.int 32,
+        Constant.None_
+      |) in
     let padded_address :=
       M.call (|
         M.get_name (| globals, "left_pad_zero_bytes" |),

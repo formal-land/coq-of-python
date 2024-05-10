@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.dao_fork.bloom".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -21,25 +21,20 @@ for efficient searching of logs by address and/or topic, by rapidly
 eliminating blocks and receipts from their search.
 ".
 
-Require typing.
-Axiom typing_Tuple :
-  IsGlobalAlias globals typing.globals "Tuple".
+Axiom typing_imports :
+  AreImported globals "typing" [ "Tuple" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "Uint" ].
 
-Require ethereum.crypto.hash.
-Axiom ethereum_crypto_hash_keccak256 :
-  IsGlobalAlias globals ethereum.crypto.hash.globals "keccak256".
+Axiom ethereum_crypto_hash_imports :
+  AreImported globals "ethereum.crypto.hash" [ "keccak256" ].
 
-Require ethereum.dao_fork.blocks.
-Axiom ethereum_dao_fork_blocks_Log :
-  IsGlobalAlias globals ethereum.dao_fork.blocks.globals "Log".
+Axiom ethereum_dao_fork_blocks_imports :
+  AreImported globals "ethereum.dao_fork.blocks" [ "Log" ].
 
-Require ethereum.dao_fork.fork_types.
-Axiom ethereum_dao_fork_fork_types_Bloom :
-  IsGlobalAlias globals ethereum.dao_fork.fork_types.globals "Bloom".
+Axiom ethereum_dao_fork_fork_types_imports :
+  AreImported globals "ethereum.dao_fork.fork_types" [ "Bloom" ].
 
 Definition add_to_bloom : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -66,50 +61,70 @@ Definition add_to_bloom : Value.t -> Value.t -> M :=
         ],
         make_dict []
       |) in
-    For M.get_name (| globals, "idx" |) in make_tuple [ Constant.int 0; Constant.int 2; Constant.int 4 ] do
-      let bit_to_set :=
-        BinOp.bit_and (|
-          M.call (|
-            M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
-            make_list [
-              M.get_subscript (| M.get_name (| globals, "hash" |), M.slice (| M.get_name (| globals, "idx" |), BinOp.add (|
-                M.get_name (| globals, "idx" |),
-                Constant.int 2
-              |) |) |)
-            ],
-            make_dict []
-          |),
-          Constant.int 2047
-        |) in
-      let bit_index :=
-        BinOp.sub (|
-          Constant.int 2047,
-          M.get_name (| globals, "bit_to_set" |)
-        |) in
-      let byte_index :=
-        BinOp.floor_div (|
-          M.get_name (| globals, "bit_index" |),
-          Constant.int 8
-        |) in
-      let bit_value :=
-        BinOp.l_shift (|
-          Constant.int 1,
-          BinOp.sub (|
-            Constant.int 7,
-            BinOp.mod_ (|
+    let _ :=
+      M.for_ (|
+        M.get_name (| globals, "idx" |),
+        make_tuple [ Constant.int 0; Constant.int 2; Constant.int 4 ],
+        ltac:(M.monadic (
+          let bit_to_set :=
+            BinOp.bit_and (|
+              M.call (|
+                M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
+                make_list [
+                  M.slice (|
+                    M.get_name (| globals, "hash" |),
+                    M.get_name (| globals, "idx" |),
+                    BinOp.add (|
+                      M.get_name (| globals, "idx" |),
+                      Constant.int 2
+                    |),
+                    Constant.None_
+                  |)
+                ],
+                make_dict []
+              |),
+              Constant.int 2047
+            |) in
+          let bit_index :=
+            BinOp.sub (|
+              Constant.int 2047,
+              M.get_name (| globals, "bit_to_set" |)
+            |) in
+          let byte_index :=
+            BinOp.floor_div (|
               M.get_name (| globals, "bit_index" |),
               Constant.int 8
+            |) in
+          let bit_value :=
+            BinOp.l_shift (|
+              Constant.int 1,
+              BinOp.sub (|
+                Constant.int 7,
+                BinOp.mod_ (|
+                  M.get_name (| globals, "bit_index" |),
+                  Constant.int 8
+                |)
+              |)
+            |) in
+          let _ := M.assign (|
+            M.get_subscript (|
+              M.get_name (| globals, "bloom" |),
+              M.get_name (| globals, "byte_index" |)
+            |),
+            BinOp.bit_or (|
+              M.get_subscript (|
+                M.get_name (| globals, "bloom" |),
+                M.get_name (| globals, "byte_index" |)
+              |),
+              M.get_name (| globals, "bit_value" |)
             |)
-          |)
-        |) in
-      let _ := M.assign (|
-        M.get_subscript (| M.get_name (| globals, "bloom" |), M.get_name (| globals, "byte_index" |) |),
-        BinOp.bit_or (|
-          M.get_subscript (| M.get_name (| globals, "bloom" |), M.get_name (| globals, "byte_index" |) |),
-          M.get_name (| globals, "bit_value" |)
-        |)
-      |) in
-    EndFor.
+          |) in
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     M.pure Constant.None_)).
 
 Definition logs_bloom : Value.t -> Value.t -> M :=
@@ -132,8 +147,12 @@ Definition logs_bloom : Value.t -> Value.t -> M :=
         the caller address and the log topics.
     " in
 (* At stmt: unsupported node type: AnnAssign *)
-    For M.get_name (| globals, "log" |) in M.get_name (| globals, "logs" |) do
-      let _ := M.call (|
+    let _ :=
+      M.for_ (|
+        M.get_name (| globals, "log" |),
+        M.get_name (| globals, "logs" |),
+        ltac:(M.monadic (
+          let _ := M.call (|
     M.get_name (| globals, "add_to_bloom" |),
     make_list [
       M.get_name (| globals, "bloom" |);
@@ -141,8 +160,12 @@ Definition logs_bloom : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-      For M.get_name (| globals, "topic" |) in M.get_field (| M.get_name (| globals, "log" |), "topics" |) do
-        let _ := M.call (|
+          let _ :=
+            M.for_ (|
+              M.get_name (| globals, "topic" |),
+              M.get_field (| M.get_name (| globals, "log" |), "topics" |),
+              ltac:(M.monadic (
+                let _ := M.call (|
     M.get_name (| globals, "add_to_bloom" |),
     make_list [
       M.get_name (| globals, "bloom" |);
@@ -150,8 +173,18 @@ Definition logs_bloom : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-      EndFor.
-    EndFor.
+                M.pure Constant.None_
+              )),
+              ltac:(M.monadic (
+                M.pure Constant.None_
+              ))
+          |) in
+          M.pure Constant.None_
+        )),
+        ltac:(M.monadic (
+          M.pure Constant.None_
+        ))
+    |) in
     let _ := M.return_ (|
       M.call (|
         M.get_name (| globals, "Bloom" |),

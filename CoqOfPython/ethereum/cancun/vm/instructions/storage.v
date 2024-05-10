@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.cancun.vm.instructions.storage".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,57 +17,26 @@ Introduction
 Implementations of the EVM storage related instructions.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "Uint" ].
 
-Require ethereum.utils.ensure.
-Axiom ethereum_utils_ensure_ensure :
-  IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
+Axiom ethereum_utils_ensure_imports :
+  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
 
-Require ethereum.cancun.state.
-Axiom ethereum_cancun_state_get_storage :
-  IsGlobalAlias globals ethereum.cancun.state.globals "get_storage".
-Axiom ethereum_cancun_state_get_storage_original :
-  IsGlobalAlias globals ethereum.cancun.state.globals "get_storage_original".
-Axiom ethereum_cancun_state_get_transient_storage :
-  IsGlobalAlias globals ethereum.cancun.state.globals "get_transient_storage".
-Axiom ethereum_cancun_state_set_storage :
-  IsGlobalAlias globals ethereum.cancun.state.globals "set_storage".
-Axiom ethereum_cancun_state_set_transient_storage :
-  IsGlobalAlias globals ethereum.cancun.state.globals "set_transient_storage".
+Axiom ethereum_cancun_state_imports :
+  AreImported globals "ethereum.cancun.state" [ "get_storage"; "get_storage_original"; "get_transient_storage"; "set_storage"; "set_transient_storage" ].
 
-Require ethereum.cancun.vm.__init__.
-Axiom ethereum_cancun_vm___init___Evm :
-  IsGlobalAlias globals ethereum.cancun.vm.__init__.globals "Evm".
+Axiom ethereum_cancun_vm_imports :
+  AreImported globals "ethereum.cancun.vm" [ "Evm" ].
 
-Require ethereum.cancun.vm.exceptions.
-Axiom ethereum_cancun_vm_exceptions_OutOfGasError :
-  IsGlobalAlias globals ethereum.cancun.vm.exceptions.globals "OutOfGasError".
-Axiom ethereum_cancun_vm_exceptions_WriteInStaticContext :
-  IsGlobalAlias globals ethereum.cancun.vm.exceptions.globals "WriteInStaticContext".
+Axiom ethereum_cancun_vm_exceptions_imports :
+  AreImported globals "ethereum.cancun.vm.exceptions" [ "OutOfGasError"; "WriteInStaticContext" ].
 
-Require ethereum.cancun.vm.gas.
-Axiom ethereum_cancun_vm_gas_GAS_CALL_STIPEND :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_CALL_STIPEND".
-Axiom ethereum_cancun_vm_gas_GAS_COLD_SLOAD :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_COLD_SLOAD".
-Axiom ethereum_cancun_vm_gas_GAS_STORAGE_CLEAR_REFUND :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_STORAGE_CLEAR_REFUND".
-Axiom ethereum_cancun_vm_gas_GAS_STORAGE_SET :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_STORAGE_SET".
-Axiom ethereum_cancun_vm_gas_GAS_STORAGE_UPDATE :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_STORAGE_UPDATE".
-Axiom ethereum_cancun_vm_gas_GAS_WARM_ACCESS :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_WARM_ACCESS".
-Axiom ethereum_cancun_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "charge_gas".
+Axiom ethereum_cancun_vm_gas_imports :
+  AreImported globals "ethereum.cancun.vm.gas" [ "GAS_CALL_STIPEND"; "GAS_COLD_SLOAD"; "GAS_STORAGE_CLEAR_REFUND"; "GAS_STORAGE_SET"; "GAS_STORAGE_UPDATE"; "GAS_WARM_ACCESS"; "charge_gas" ].
 
-Require ethereum.cancun.vm.stack.
-Axiom ethereum_cancun_vm_stack_pop :
-  IsGlobalAlias globals ethereum.cancun.vm.stack.globals "pop".
-Axiom ethereum_cancun_vm_stack_push :
-  IsGlobalAlias globals ethereum.cancun.vm.stack.globals "push".
+Axiom ethereum_cancun_vm_stack_imports :
+  AreImported globals "ethereum.cancun.vm.stack" [ "pop"; "push" ].
 
 Definition sload : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -97,7 +66,7 @@ Definition sload : Value.t -> Value.t -> M :=
     let _ :=
       (* if *)
       M.if_then_else (|
-        Compare.in (|
+        Compare.in_ (|
           make_tuple [ M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "current_target" |); M.get_name (| globals, "key" |) ],
           M.get_field (| M.get_name (| globals, "evm" |), "accessed_storage_keys" |)
         |),

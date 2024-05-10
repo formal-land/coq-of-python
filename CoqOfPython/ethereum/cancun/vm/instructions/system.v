@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.cancun.vm.instructions.system".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,109 +17,38 @@ Introduction
 Implementations of the EVM system related instructions.
 ".
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes0 :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes0".
-Axiom ethereum_base_types_Uint :
-  IsGlobalAlias globals ethereum.base_types.globals "Uint".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes0"; "Uint" ].
 
-Require ethereum.utils.ensure.
-Axiom ethereum_utils_ensure_ensure :
-  IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
+Axiom ethereum_utils_ensure_imports :
+  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
 
-Require ethereum.utils.numeric.
-Axiom ethereum_utils_numeric_ceil32 :
-  IsGlobalAlias globals ethereum.utils.numeric.globals "ceil32".
+Axiom ethereum_utils_numeric_imports :
+  AreImported globals "ethereum.utils.numeric" [ "ceil32" ].
 
-Require ethereum.cancun.fork_types.
-Axiom ethereum_cancun_fork_types_Address :
-  IsGlobalAlias globals ethereum.cancun.fork_types.globals "Address".
+Axiom ethereum_cancun_fork_types_imports :
+  AreImported globals "ethereum.cancun.fork_types" [ "Address" ].
 
-Require ethereum.cancun.state.
-Axiom ethereum_cancun_state_account_exists_and_is_empty :
-  IsGlobalAlias globals ethereum.cancun.state.globals "account_exists_and_is_empty".
-Axiom ethereum_cancun_state_account_has_code_or_nonce :
-  IsGlobalAlias globals ethereum.cancun.state.globals "account_has_code_or_nonce".
-Axiom ethereum_cancun_state_get_account :
-  IsGlobalAlias globals ethereum.cancun.state.globals "get_account".
-Axiom ethereum_cancun_state_increment_nonce :
-  IsGlobalAlias globals ethereum.cancun.state.globals "increment_nonce".
-Axiom ethereum_cancun_state_is_account_alive :
-  IsGlobalAlias globals ethereum.cancun.state.globals "is_account_alive".
-Axiom ethereum_cancun_state_move_ether :
-  IsGlobalAlias globals ethereum.cancun.state.globals "move_ether".
-Axiom ethereum_cancun_state_set_account_balance :
-  IsGlobalAlias globals ethereum.cancun.state.globals "set_account_balance".
+Axiom ethereum_cancun_state_imports :
+  AreImported globals "ethereum.cancun.state" [ "account_exists_and_is_empty"; "account_has_code_or_nonce"; "get_account"; "increment_nonce"; "is_account_alive"; "move_ether"; "set_account_balance" ].
 
-Require ethereum.cancun.utils.address.
-Axiom ethereum_cancun_utils_address_compute_contract_address :
-  IsGlobalAlias globals ethereum.cancun.utils.address.globals "compute_contract_address".
-Axiom ethereum_cancun_utils_address_compute_create2_contract_address :
-  IsGlobalAlias globals ethereum.cancun.utils.address.globals "compute_create2_contract_address".
-Axiom ethereum_cancun_utils_address_to_address :
-  IsGlobalAlias globals ethereum.cancun.utils.address.globals "to_address".
+Axiom ethereum_cancun_utils_address_imports :
+  AreImported globals "ethereum.cancun.utils.address" [ "compute_contract_address"; "compute_create2_contract_address"; "to_address" ].
 
-Require ethereum.cancun.vm.__init__.
-Axiom ethereum_cancun_vm___init___Evm :
-  IsGlobalAlias globals ethereum.cancun.vm.__init__.globals "Evm".
-Axiom ethereum_cancun_vm___init___Message :
-  IsGlobalAlias globals ethereum.cancun.vm.__init__.globals "Message".
-Axiom ethereum_cancun_vm___init___incorporate_child_on_error :
-  IsGlobalAlias globals ethereum.cancun.vm.__init__.globals "incorporate_child_on_error".
-Axiom ethereum_cancun_vm___init___incorporate_child_on_success :
-  IsGlobalAlias globals ethereum.cancun.vm.__init__.globals "incorporate_child_on_success".
+Axiom ethereum_cancun_vm_imports :
+  AreImported globals "ethereum.cancun.vm" [ "Evm"; "Message"; "incorporate_child_on_error"; "incorporate_child_on_success" ].
 
-Require ethereum.cancun.vm.exceptions.
-Axiom ethereum_cancun_vm_exceptions_OutOfGasError :
-  IsGlobalAlias globals ethereum.cancun.vm.exceptions.globals "OutOfGasError".
-Axiom ethereum_cancun_vm_exceptions_Revert :
-  IsGlobalAlias globals ethereum.cancun.vm.exceptions.globals "Revert".
-Axiom ethereum_cancun_vm_exceptions_WriteInStaticContext :
-  IsGlobalAlias globals ethereum.cancun.vm.exceptions.globals "WriteInStaticContext".
+Axiom ethereum_cancun_vm_exceptions_imports :
+  AreImported globals "ethereum.cancun.vm.exceptions" [ "OutOfGasError"; "Revert"; "WriteInStaticContext" ].
 
-Require ethereum.cancun.vm.gas.
-Axiom ethereum_cancun_vm_gas_GAS_CALL_VALUE :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_CALL_VALUE".
-Axiom ethereum_cancun_vm_gas_GAS_COLD_ACCOUNT_ACCESS :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_COLD_ACCOUNT_ACCESS".
-Axiom ethereum_cancun_vm_gas_GAS_CREATE :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_CREATE".
-Axiom ethereum_cancun_vm_gas_GAS_KECCAK256_WORD :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_KECCAK256_WORD".
-Axiom ethereum_cancun_vm_gas_GAS_NEW_ACCOUNT :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_NEW_ACCOUNT".
-Axiom ethereum_cancun_vm_gas_GAS_SELF_DESTRUCT :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_SELF_DESTRUCT".
-Axiom ethereum_cancun_vm_gas_GAS_SELF_DESTRUCT_NEW_ACCOUNT :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_SELF_DESTRUCT_NEW_ACCOUNT".
-Axiom ethereum_cancun_vm_gas_GAS_WARM_ACCESS :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_WARM_ACCESS".
-Axiom ethereum_cancun_vm_gas_GAS_ZERO :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_ZERO".
-Axiom ethereum_cancun_vm_gas_calculate_gas_extend_memory :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "calculate_gas_extend_memory".
-Axiom ethereum_cancun_vm_gas_calculate_message_call_gas :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "calculate_message_call_gas".
-Axiom ethereum_cancun_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "charge_gas".
-Axiom ethereum_cancun_vm_gas_init_code_cost :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "init_code_cost".
-Axiom ethereum_cancun_vm_gas_max_message_call_gas :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "max_message_call_gas".
+Axiom ethereum_cancun_vm_gas_imports :
+  AreImported globals "ethereum.cancun.vm.gas" [ "GAS_CALL_VALUE"; "GAS_COLD_ACCOUNT_ACCESS"; "GAS_CREATE"; "GAS_KECCAK256_WORD"; "GAS_NEW_ACCOUNT"; "GAS_SELF_DESTRUCT"; "GAS_SELF_DESTRUCT_NEW_ACCOUNT"; "GAS_WARM_ACCESS"; "GAS_ZERO"; "calculate_gas_extend_memory"; "calculate_message_call_gas"; "charge_gas"; "init_code_cost"; "max_message_call_gas" ].
 
-Require ethereum.cancun.vm.memory.
-Axiom ethereum_cancun_vm_memory_memory_read_bytes :
-  IsGlobalAlias globals ethereum.cancun.vm.memory.globals "memory_read_bytes".
-Axiom ethereum_cancun_vm_memory_memory_write :
-  IsGlobalAlias globals ethereum.cancun.vm.memory.globals "memory_write".
+Axiom ethereum_cancun_vm_memory_imports :
+  AreImported globals "ethereum.cancun.vm.memory" [ "memory_read_bytes"; "memory_write" ].
 
-Require ethereum.cancun.vm.stack.
-Axiom ethereum_cancun_vm_stack_pop :
-  IsGlobalAlias globals ethereum.cancun.vm.stack.globals "pop".
-Axiom ethereum_cancun_vm_stack_push :
-  IsGlobalAlias globals ethereum.cancun.vm.stack.globals "push".
+Axiom ethereum_cancun_vm_stack_imports :
+  AreImported globals "ethereum.cancun.vm.stack" [ "pop"; "push" ].
 
 Definition generic_create : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -928,7 +857,12 @@ Definition generic_call : Value.t -> Value.t -> M :=
     make_list [
       M.get_field (| M.get_name (| globals, "evm" |), "memory" |);
       M.get_name (| globals, "memory_output_start_position" |);
-      M.get_subscript (| M.get_field (| M.get_name (| globals, "child_evm" |), "output" |), M.slice (| Constant.None_, M.get_name (| globals, "actual_output_size" |) |) |)
+      M.slice (|
+        M.get_field (| M.get_name (| globals, "child_evm" |), "output" |),
+        Constant.None_,
+        M.get_name (| globals, "actual_output_size" |),
+        Constant.None_
+      |)
     ],
     make_dict []
   |) in
@@ -1028,7 +962,7 @@ Definition call : Value.t -> Value.t -> M :=
     let _ :=
       (* if *)
       M.if_then_else (|
-        Compare.in (|
+        Compare.in_ (|
           M.get_name (| globals, "to" |),
           M.get_field (| M.get_name (| globals, "evm" |), "accessed_addresses" |)
         |),
@@ -1334,7 +1268,7 @@ Definition callcode : Value.t -> Value.t -> M :=
     let _ :=
       (* if *)
       M.if_then_else (|
-        Compare.in (|
+        Compare.in_ (|
           M.get_name (| globals, "code_address" |),
           M.get_field (| M.get_name (| globals, "evm" |), "accessed_addresses" |)
         |),
@@ -1614,7 +1548,7 @@ Definition selfdestruct : Value.t -> Value.t -> M :=
     let _ :=
       (* if *)
       M.if_then_else (|
-        Compare.in (|
+        Compare.in_ (|
           M.get_name (| globals, "originator" |),
           M.get_field (| M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "state" |), "created_accounts" |)
         |),
@@ -1765,7 +1699,7 @@ Definition delegatecall : Value.t -> Value.t -> M :=
     let _ :=
       (* if *)
       M.if_then_else (|
-        Compare.in (|
+        Compare.in_ (|
           M.get_name (| globals, "code_address" |),
           M.get_field (| M.get_name (| globals, "evm" |), "accessed_addresses" |)
         |),
@@ -1941,7 +1875,7 @@ Definition staticcall : Value.t -> Value.t -> M :=
     let _ :=
       (* if *)
       M.if_then_else (|
-        Compare.in (|
+        Compare.in_ (|
           M.get_name (| globals, "to" |),
           M.get_field (| M.get_name (| globals, "evm" |), "accessed_addresses" |)
         |),
@@ -2111,6 +2045,6 @@ Definition revert : Value.t -> Value.t -> M :=
         make_dict []
       |)
     |) in
-    let _ := M.raise (| Some(M.get_name (| globals, "Revert" |)) |) in
+    let _ := M.raise (| Some (M.get_name (| globals, "Revert" |)) |) in
     let _ := M.pass (| |) in
     M.pure Constant.None_)).

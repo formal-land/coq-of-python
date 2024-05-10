@@ -1,6 +1,6 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Inductive globals : Set :=.
+Definition globals : string := "ethereum.cancun.vm.precompiled_contracts.point_evaluation".
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -17,37 +17,23 @@ Introduction
 Implementation of the POINT EVALUATION precompiled contract.
 ".
 
-Require eth2spec.deneb.mainnet.
-Axiom eth2spec_deneb_mainnet_KZGCommitment :
-  IsGlobalAlias globals eth2spec.deneb.mainnet.globals "KZGCommitment".
-Axiom eth2spec_deneb_mainnet_kzg_commitment_to_versioned_hash :
-  IsGlobalAlias globals eth2spec.deneb.mainnet.globals "kzg_commitment_to_versioned_hash".
-Axiom eth2spec_deneb_mainnet_verify_kzg_proof :
-  IsGlobalAlias globals eth2spec.deneb.mainnet.globals "verify_kzg_proof".
+Axiom eth2spec_deneb_mainnet_imports :
+  AreImported globals "eth2spec.deneb.mainnet" [ "KZGCommitment"; "kzg_commitment_to_versioned_hash"; "verify_kzg_proof" ].
 
-Require ethereum.base_types.
-Axiom ethereum_base_types_U256 :
-  IsGlobalAlias globals ethereum.base_types.globals "U256".
-Axiom ethereum_base_types_Bytes :
-  IsGlobalAlias globals ethereum.base_types.globals "Bytes".
+Axiom ethereum_base_types_imports :
+  AreImported globals "ethereum.base_types" [ "U256"; "Bytes" ].
 
-Require ethereum.utils.ensure.
-Axiom ethereum_utils_ensure_ensure :
-  IsGlobalAlias globals ethereum.utils.ensure.globals "ensure".
+Axiom ethereum_utils_ensure_imports :
+  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
 
-Require ethereum.cancun.vm.__init__.
-Axiom ethereum_cancun_vm___init___Evm :
-  IsGlobalAlias globals ethereum.cancun.vm.__init__.globals "Evm".
+Axiom ethereum_cancun_vm_imports :
+  AreImported globals "ethereum.cancun.vm" [ "Evm" ].
 
-Require ethereum.cancun.vm.exceptions.
-Axiom ethereum_cancun_vm_exceptions_KZGProofError :
-  IsGlobalAlias globals ethereum.cancun.vm.exceptions.globals "KZGProofError".
+Axiom ethereum_cancun_vm_exceptions_imports :
+  AreImported globals "ethereum.cancun.vm.exceptions" [ "KZGProofError" ].
 
-Require ethereum.cancun.vm.gas.
-Axiom ethereum_cancun_vm_gas_GAS_POINT_EVALUATION :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "GAS_POINT_EVALUATION".
-Axiom ethereum_cancun_vm_gas_charge_gas :
-  IsGlobalAlias globals ethereum.cancun.vm.gas.globals "charge_gas".
+Axiom ethereum_cancun_vm_gas_imports :
+  AreImported globals "ethereum.cancun.vm.gas" [ "GAS_POINT_EVALUATION"; "charge_gas" ].
 
 Definition FIELD_ELEMENTS_PER_BLOB : Value.t := M.run ltac:(M.monadic (
   Constant.int 4096
@@ -94,21 +80,46 @@ Definition point_evaluation : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     let versioned_hash :=
-      M.get_subscript (| M.get_name (| globals, "data" |), M.slice (| Constant.None_, Constant.int 32 |) |) in
+      M.slice (|
+        M.get_name (| globals, "data" |),
+        Constant.None_,
+        Constant.int 32,
+        Constant.None_
+      |) in
     let z :=
-      M.get_subscript (| M.get_name (| globals, "data" |), M.slice (| Constant.int 32, Constant.int 64 |) |) in
+      M.slice (|
+        M.get_name (| globals, "data" |),
+        Constant.int 32,
+        Constant.int 64,
+        Constant.None_
+      |) in
     let y :=
-      M.get_subscript (| M.get_name (| globals, "data" |), M.slice (| Constant.int 64, Constant.int 96 |) |) in
+      M.slice (|
+        M.get_name (| globals, "data" |),
+        Constant.int 64,
+        Constant.int 96,
+        Constant.None_
+      |) in
     let commitment :=
       M.call (|
         M.get_name (| globals, "KZGCommitment" |),
         make_list [
-          M.get_subscript (| M.get_name (| globals, "data" |), M.slice (| Constant.int 96, Constant.int 144 |) |)
+          M.slice (|
+            M.get_name (| globals, "data" |),
+            Constant.int 96,
+            Constant.int 144,
+            Constant.None_
+          |)
         ],
         make_dict []
       |) in
     let proof :=
-      M.get_subscript (| M.get_name (| globals, "data" |), M.slice (| Constant.int 144, Constant.int 192 |) |) in
+      M.slice (|
+        M.get_name (| globals, "data" |),
+        Constant.int 144,
+        Constant.int 192,
+        Constant.None_
+      |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
