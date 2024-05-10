@@ -1,0 +1,23 @@
+opam-version: "2.0"
+name: "coq-of-python"
+version: "0.1"
+synopsis: "Coq of Python"
+description: """
+Formal verification for Python by translation to the proof system Coq
+"""
+maintainer: "Guillaume Claret <dev@clarus.me>"
+authors: [
+  "Formal Land <contact@formal.land>"
+]
+license: "MIT"
+homepage: "https://github.com/formal-land/coq-of-python"
+bug-reports: "https://github.com/formal-land/coq-of-python/issues"
+dev-repo: "git+https://github.com/formal-land/coq-of-python.git"
+depends: [
+  "ocaml" {>= "4.08"}
+  "coq" {>= "8.17.1" & < "8.18"}
+  "coq-hammer" {>= "1.3.2+8.17" & < "1.3.2+8.18"}
+]
+build: [
+  [make]
+]
