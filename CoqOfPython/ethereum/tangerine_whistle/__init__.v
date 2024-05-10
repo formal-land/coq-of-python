@@ -10,8 +10,8 @@ EVM instructions, and reduces the state size by removing a number of empty
 accounts.
 ".
 
-Axiom ethereum_fork_criteria_imports :
-  AreImported globals "ethereum.fork_criteria" [ "ByBlockNumber" ].
+Axiom ethereum_fork_criteria_imports_ByBlockNumber :
+  IsImported globals "ethereum.fork_criteria" "ByBlockNumber".
 
 Definition FORK_CRITERIA : Value.t := M.run ltac:(M.monadic (
   M.call (|

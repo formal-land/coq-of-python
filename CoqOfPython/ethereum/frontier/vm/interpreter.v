@@ -17,47 +17,95 @@ Introduction
 A straightforward interpreter that executes EVM code.
 ".
 
-Axiom dataclasses_imports :
-  AreImported globals "dataclasses" [ "dataclass" ].
+Axiom dataclasses_imports_dataclass :
+  IsImported globals "dataclasses" "dataclass".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "Optional"; "Set"; "Tuple" ].
+Axiom typing_imports_Optional :
+  IsImported globals "typing" "Optional".
+Axiom typing_imports_Set :
+  IsImported globals "typing" "Set".
+Axiom typing_imports_Tuple :
+  IsImported globals "typing" "Tuple".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Bytes0"; "Uint" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Bytes0 :
+  IsImported globals "ethereum.base_types" "Bytes0".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_trace_imports :
-  AreImported globals "ethereum.trace" [ "EvmStop"; "OpEnd"; "OpException"; "OpStart"; "PrecompileEnd"; "PrecompileStart"; "TransactionEnd"; "evm_trace" ].
+Axiom ethereum_trace_imports_EvmStop :
+  IsImported globals "ethereum.trace" "EvmStop".
+Axiom ethereum_trace_imports_OpEnd :
+  IsImported globals "ethereum.trace" "OpEnd".
+Axiom ethereum_trace_imports_OpException :
+  IsImported globals "ethereum.trace" "OpException".
+Axiom ethereum_trace_imports_OpStart :
+  IsImported globals "ethereum.trace" "OpStart".
+Axiom ethereum_trace_imports_PrecompileEnd :
+  IsImported globals "ethereum.trace" "PrecompileEnd".
+Axiom ethereum_trace_imports_PrecompileStart :
+  IsImported globals "ethereum.trace" "PrecompileStart".
+Axiom ethereum_trace_imports_TransactionEnd :
+  IsImported globals "ethereum.trace" "TransactionEnd".
+Axiom ethereum_trace_imports_evm_trace :
+  IsImported globals "ethereum.trace" "evm_trace".
 
-Axiom ethereum_frontier_blocks_imports :
-  AreImported globals "ethereum.frontier.blocks" [ "Log" ].
+Axiom ethereum_frontier_blocks_imports_Log :
+  IsImported globals "ethereum.frontier.blocks" "Log".
 
-Axiom ethereum_frontier_fork_types_imports :
-  AreImported globals "ethereum.frontier.fork_types" [ "Address" ].
+Axiom ethereum_frontier_fork_types_imports_Address :
+  IsImported globals "ethereum.frontier.fork_types" "Address".
 
-Axiom ethereum_frontier_state_imports :
-  AreImported globals "ethereum.frontier.state" [ "account_has_code_or_nonce"; "begin_transaction"; "commit_transaction"; "destroy_storage"; "move_ether"; "rollback_transaction"; "set_code"; "touch_account" ].
+Axiom ethereum_frontier_state_imports_account_has_code_or_nonce :
+  IsImported globals "ethereum.frontier.state" "account_has_code_or_nonce".
+Axiom ethereum_frontier_state_imports_begin_transaction :
+  IsImported globals "ethereum.frontier.state" "begin_transaction".
+Axiom ethereum_frontier_state_imports_commit_transaction :
+  IsImported globals "ethereum.frontier.state" "commit_transaction".
+Axiom ethereum_frontier_state_imports_destroy_storage :
+  IsImported globals "ethereum.frontier.state" "destroy_storage".
+Axiom ethereum_frontier_state_imports_move_ether :
+  IsImported globals "ethereum.frontier.state" "move_ether".
+Axiom ethereum_frontier_state_imports_rollback_transaction :
+  IsImported globals "ethereum.frontier.state" "rollback_transaction".
+Axiom ethereum_frontier_state_imports_set_code :
+  IsImported globals "ethereum.frontier.state" "set_code".
+Axiom ethereum_frontier_state_imports_touch_account :
+  IsImported globals "ethereum.frontier.state" "touch_account".
 
-Axiom ethereum_frontier_vm_imports :
-  AreImported globals "ethereum.frontier.vm" [ "Message" ].
+Axiom ethereum_frontier_vm_imports_Message :
+  IsImported globals "ethereum.frontier.vm" "Message".
 
-Axiom ethereum_frontier_vm_gas_imports :
-  AreImported globals "ethereum.frontier.vm.gas" [ "GAS_CODE_DEPOSIT"; "charge_gas" ].
+Axiom ethereum_frontier_vm_gas_imports_GAS_CODE_DEPOSIT :
+  IsImported globals "ethereum.frontier.vm.gas" "GAS_CODE_DEPOSIT".
+Axiom ethereum_frontier_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.frontier.vm.gas" "charge_gas".
 
-Axiom ethereum_frontier_vm_precompiled_contracts_mapping_imports :
-  AreImported globals "ethereum.frontier.vm.precompiled_contracts.mapping" [ "PRE_COMPILED_CONTRACTS" ].
+Axiom ethereum_frontier_vm_precompiled_contracts_mapping_imports_PRE_COMPILED_CONTRACTS :
+  IsImported globals "ethereum.frontier.vm.precompiled_contracts.mapping" "PRE_COMPILED_CONTRACTS".
 
-Axiom ethereum_frontier_vm_imports :
-  AreImported globals "ethereum.frontier.vm" [ "Environment"; "Evm" ].
+Axiom ethereum_frontier_vm_imports_Environment :
+  IsImported globals "ethereum.frontier.vm" "Environment".
+Axiom ethereum_frontier_vm_imports_Evm :
+  IsImported globals "ethereum.frontier.vm" "Evm".
 
-Axiom ethereum_frontier_vm_exceptions_imports :
-  AreImported globals "ethereum.frontier.vm.exceptions" [ "AddressCollision"; "ExceptionalHalt"; "InvalidOpcode"; "StackDepthLimitError" ].
+Axiom ethereum_frontier_vm_exceptions_imports_AddressCollision :
+  IsImported globals "ethereum.frontier.vm.exceptions" "AddressCollision".
+Axiom ethereum_frontier_vm_exceptions_imports_ExceptionalHalt :
+  IsImported globals "ethereum.frontier.vm.exceptions" "ExceptionalHalt".
+Axiom ethereum_frontier_vm_exceptions_imports_InvalidOpcode :
+  IsImported globals "ethereum.frontier.vm.exceptions" "InvalidOpcode".
+Axiom ethereum_frontier_vm_exceptions_imports_StackDepthLimitError :
+  IsImported globals "ethereum.frontier.vm.exceptions" "StackDepthLimitError".
 
-Axiom ethereum_frontier_vm_instructions_imports :
-  AreImported globals "ethereum.frontier.vm.instructions" [ "Ops"; "op_implementation" ].
+Axiom ethereum_frontier_vm_instructions_imports_Ops :
+  IsImported globals "ethereum.frontier.vm.instructions" "Ops".
+Axiom ethereum_frontier_vm_instructions_imports_op_implementation :
+  IsImported globals "ethereum.frontier.vm.instructions" "op_implementation".
 
-Axiom ethereum_frontier_vm_runtime_imports :
-  AreImported globals "ethereum.frontier.vm.runtime" [ "get_valid_jump_destinations" ].
+Axiom ethereum_frontier_vm_runtime_imports_get_valid_jump_destinations :
+  IsImported globals "ethereum.frontier.vm.runtime" "get_valid_jump_destinations".
 
 Definition STACK_DEPTH_LIMIT : Value.t := M.run ltac:(M.monadic (
   M.call (|
@@ -114,7 +162,8 @@ Definition process_message_call : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let is_collision :=
+        let _ := M.assign_local (|
+          "is_collision" ,
           M.call (|
             M.get_name (| globals, "account_has_code_or_nonce" |),
             make_list [
@@ -122,7 +171,8 @@ Definition process_message_call : Value.t -> Value.t -> M :=
               M.get_field (| M.get_name (| globals, "message" |), "current_target" |)
             ],
             make_dict []
-          |) in
+          |)
+        |) in
         let _ :=
           (* if *)
           M.if_then_else (|
@@ -169,7 +219,8 @@ Definition process_message_call : Value.t -> Value.t -> M :=
             M.pure Constant.None_
           (* else *)
           )), ltac:(M.monadic (
-            let evm :=
+            let _ := M.assign_local (|
+              "evm" ,
               M.call (|
                 M.get_name (| globals, "process_create_message" |),
                 make_list [
@@ -177,13 +228,15 @@ Definition process_message_call : Value.t -> Value.t -> M :=
                   M.get_name (| globals, "env" |)
                 ],
                 make_dict []
-              |) in
+              |)
+            |) in
             M.pure Constant.None_
           )) |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
-        let evm :=
+        let _ := M.assign_local (|
+          "evm" ,
           M.call (|
             M.get_name (| globals, "process_message" |),
             make_list [
@@ -191,7 +244,8 @@ Definition process_message_call : Value.t -> Value.t -> M :=
               M.get_name (| globals, "env" |)
             ],
             make_dict []
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       )) |) in
     let _ :=
@@ -201,32 +255,43 @@ Definition process_message_call : Value.t -> Value.t -> M :=
       (* then *)
       ltac:(M.monadic (
 (* At stmt: unsupported node type: AnnAssign *)
-        let accounts_to_delete :=
+        let _ := M.assign_local (|
+          "accounts_to_delete" ,
           M.call (|
             M.get_name (| globals, "set" |),
             make_list [],
             make_dict []
-          |) in
-        let refund_counter :=
+          |)
+        |) in
+        let _ := M.assign_local (|
+          "refund_counter" ,
           M.call (|
             M.get_name (| globals, "U256" |),
             make_list [
               Constant.int 0
             ],
             make_dict []
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
-        let logs :=
-          M.get_field (| M.get_name (| globals, "evm" |), "logs" |) in
-        let accounts_to_delete :=
-          M.get_field (| M.get_name (| globals, "evm" |), "accounts_to_delete" |) in
-        let refund_counter :=
-          M.get_field (| M.get_name (| globals, "evm" |), "refund_counter" |) in
+        let _ := M.assign_local (|
+          "logs" ,
+          M.get_field (| M.get_name (| globals, "evm" |), "logs" |)
+        |) in
+        let _ := M.assign_local (|
+          "accounts_to_delete" ,
+          M.get_field (| M.get_name (| globals, "evm" |), "accounts_to_delete" |)
+        |) in
+        let _ := M.assign_local (|
+          "refund_counter" ,
+          M.get_field (| M.get_name (| globals, "evm" |), "refund_counter" |)
+        |) in
         M.pure Constant.None_
       )) |) in
-    let tx_end :=
+    let _ := M.assign_local (|
+      "tx_end" ,
       M.call (|
         M.get_name (| globals, "TransactionEnd" |),
         make_list [
@@ -238,7 +303,8 @@ Definition process_message_call : Value.t -> Value.t -> M :=
           M.get_field (| M.get_name (| globals, "evm" |), "error" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "evm_trace" |),
     make_list [
@@ -289,7 +355,8 @@ Definition process_create_message : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let evm :=
+    let _ := M.assign_local (|
+      "evm" ,
       M.call (|
         M.get_name (| globals, "process_message" |),
         make_list [
@@ -297,16 +364,20 @@ Definition process_create_message : Value.t -> Value.t -> M :=
           M.get_name (| globals, "env" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
         UnOp.not (| M.get_field (| M.get_name (| globals, "evm" |), "error" |) |),
       (* then *)
       ltac:(M.monadic (
-        let contract_code :=
-          M.get_field (| M.get_name (| globals, "evm" |), "output" |) in
-        let contract_code_gas :=
+        let _ := M.assign_local (|
+          "contract_code" ,
+          M.get_field (| M.get_name (| globals, "evm" |), "output" |)
+        |) in
+        let _ := M.assign_local (|
+          "contract_code_gas" ,
           BinOp.mult (|
             M.call (|
               M.get_name (| globals, "len" |),
@@ -316,7 +387,8 @@ Definition process_create_message : Value.t -> Value.t -> M :=
               make_dict []
             |),
             M.get_name (| globals, "GAS_CODE_DEPOSIT" |)
-          |) in
+          |)
+        |) in
 (* At stmt: unsupported node type: Try *)
         let _ := M.call (|
     M.get_name (| globals, "commit_transaction" |),
@@ -420,7 +492,8 @@ Definition process_message : Value.t -> Value.t -> M :=
       )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
-    let evm :=
+    let _ := M.assign_local (|
+      "evm" ,
       M.call (|
         M.get_name (| globals, "execute_code" |),
         make_list [
@@ -428,7 +501,8 @@ Definition process_message : Value.t -> Value.t -> M :=
           M.get_name (| globals, "env" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -477,22 +551,28 @@ Definition execute_code : Value.t -> Value.t -> M :=
     evm: `ethereum.vm.EVM`
         Items containing execution specific objects
     " in
-    let code :=
-      M.get_field (| M.get_name (| globals, "message" |), "code" |) in
-    let valid_jump_destinations :=
+    let _ := M.assign_local (|
+      "code" ,
+      M.get_field (| M.get_name (| globals, "message" |), "code" |)
+    |) in
+    let _ := M.assign_local (|
+      "valid_jump_destinations" ,
       M.call (|
         M.get_name (| globals, "get_valid_jump_destinations" |),
         make_list [
           M.get_name (| globals, "code" |)
         ],
         make_dict []
-      |) in
-    let evm :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "evm" ,
       M.call (|
         M.get_name (| globals, "Evm" |),
         make_list [],
         make_dict []
-      |) in
+      |)
+    |) in
 (* At stmt: unsupported node type: Try *)
     let _ := M.return_ (|
       M.get_name (| globals, "evm" |)

@@ -19,17 +19,21 @@ Implementation of the `SHA256` precompiled contract.
 
 (* At top_level_stmt: unsupported node type: Import *)
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "Uint" ].
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_utils_numeric_imports :
-  AreImported globals "ethereum.utils.numeric" [ "ceil32" ].
+Axiom ethereum_utils_numeric_imports_ceil32 :
+  IsImported globals "ethereum.utils.numeric" "ceil32".
 
-Axiom ethereum_tangerine_whistle_vm_imports :
-  AreImported globals "ethereum.tangerine_whistle.vm" [ "Evm" ].
+Axiom ethereum_tangerine_whistle_vm_imports_Evm :
+  IsImported globals "ethereum.tangerine_whistle.vm" "Evm".
 
-Axiom ethereum_tangerine_whistle_vm_gas_imports :
-  AreImported globals "ethereum.tangerine_whistle.vm.gas" [ "GAS_SHA256"; "GAS_SHA256_WORD"; "charge_gas" ].
+Axiom ethereum_tangerine_whistle_vm_gas_imports_GAS_SHA256 :
+  IsImported globals "ethereum.tangerine_whistle.vm.gas" "GAS_SHA256".
+Axiom ethereum_tangerine_whistle_vm_gas_imports_GAS_SHA256_WORD :
+  IsImported globals "ethereum.tangerine_whistle.vm.gas" "GAS_SHA256_WORD".
+Axiom ethereum_tangerine_whistle_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.tangerine_whistle.vm.gas" "charge_gas".
 
 Definition sha256 : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -42,9 +46,12 @@ Definition sha256 : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let data :=
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |) in
-    let word_count :=
+    let _ := M.assign_local (|
+      "data" ,
+      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |)
+    |) in
+    let _ := M.assign_local (|
+      "word_count" ,
       BinOp.floor_div (|
         M.call (|
           M.get_name (| globals, "ceil32" |),
@@ -66,7 +73,8 @@ Definition sha256 : Value.t -> Value.t -> M :=
           make_dict []
         |),
         Constant.int 32
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [

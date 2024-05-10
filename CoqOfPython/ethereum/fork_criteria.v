@@ -19,11 +19,15 @@ Classes for specifying criteria for Mainnet forks.
 
 (* At top_level_stmt: unsupported node type: Import *)
 
-Axiom abc_imports :
-  AreImported globals "abc" [ "ABC"; "abstractmethod" ].
+Axiom abc_imports_ABC :
+  IsImported globals "abc" "ABC".
+Axiom abc_imports_abstractmethod :
+  IsImported globals "abc" "abstractmethod".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "Final"; "Tuple" ].
+Axiom typing_imports_Final :
+  IsImported globals "typing" "Final".
+Axiom typing_imports_Tuple :
+  IsImported globals "typing" "Tuple".
 
 Definition ForkCriteria : Value.t :=
   builtins.make_klass

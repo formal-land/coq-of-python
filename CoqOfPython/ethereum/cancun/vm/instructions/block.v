@@ -17,17 +17,23 @@ Introduction
 Implementations of the EVM block instructions.
 ".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
 
-Axiom ethereum_cancun_vm_imports :
-  AreImported globals "ethereum.cancun.vm" [ "Evm" ].
+Axiom ethereum_cancun_vm_imports_Evm :
+  IsImported globals "ethereum.cancun.vm" "Evm".
 
-Axiom ethereum_cancun_vm_gas_imports :
-  AreImported globals "ethereum.cancun.vm.gas" [ "GAS_BASE"; "GAS_BLOCK_HASH"; "charge_gas" ].
+Axiom ethereum_cancun_vm_gas_imports_GAS_BASE :
+  IsImported globals "ethereum.cancun.vm.gas" "GAS_BASE".
+Axiom ethereum_cancun_vm_gas_imports_GAS_BLOCK_HASH :
+  IsImported globals "ethereum.cancun.vm.gas" "GAS_BLOCK_HASH".
+Axiom ethereum_cancun_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.cancun.vm.gas" "charge_gas".
 
-Axiom ethereum_cancun_vm_stack_imports :
-  AreImported globals "ethereum.cancun.vm.stack" [ "pop"; "push" ].
+Axiom ethereum_cancun_vm_stack_imports_pop :
+  IsImported globals "ethereum.cancun.vm.stack" "pop".
+Axiom ethereum_cancun_vm_stack_imports_push :
+  IsImported globals "ethereum.cancun.vm.stack" "push".
 
 Definition block_hash : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -48,14 +54,16 @@ Definition block_hash : Value.t -> Value.t -> M :=
     :py:class:`~ethereum.cancun.vm.exceptions.OutOfGasError`
         If `evm.gas_left` is less than `20`.
     " in
-    let block_number :=
+    let _ := M.assign_local (|
+      "block_number" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -84,19 +92,23 @@ Definition block_hash : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let hash :=
-          Constant.bytes "00" in
+        let _ := M.assign_local (|
+          "hash" ,
+          Constant.bytes "00"
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
-        let hash :=
+        let _ := M.assign_local (|
+          "hash" ,
           M.get_subscript (|
             M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "block_hashes" |),
             UnOp.sub (| BinOp.sub (|
               M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "env" |), "number" |),
               M.get_name (| globals, "block_number" |)
             |) |)
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|

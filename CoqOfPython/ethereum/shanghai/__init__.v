@@ -9,8 +9,8 @@ push-zero EVM instruction, limits the maximum size of initialization
 bytecode, and deprecates the self-destruct EVM instruction.
 ".
 
-Axiom ethereum_fork_criteria_imports :
-  AreImported globals "ethereum.fork_criteria" [ "ByTimestamp" ].
+Axiom ethereum_fork_criteria_imports_ByTimestamp :
+  IsImported globals "ethereum.fork_criteria" "ByTimestamp".
 
 Definition FORK_CRITERIA : Value.t := M.run ltac:(M.monadic (
   M.call (|

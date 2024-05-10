@@ -9,23 +9,37 @@ submitted to be executed. If Ethereum is viewed as a state machine,
 transactions are the events that move between states.
 ".
 
-Axiom dataclasses_imports :
-  AreImported globals "dataclasses" [ "dataclass" ].
+Axiom dataclasses_imports_dataclass :
+  IsImported globals "dataclasses" "dataclass".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "Tuple"; "Union" ].
+Axiom typing_imports_Tuple :
+  IsImported globals "typing" "Tuple".
+Axiom typing_imports_Union :
+  IsImported globals "typing" "Union".
 
-Axiom ethereum_imports :
-  AreImported globals "ethereum" [ "rlp" ].
+Axiom ethereum_imports_rlp :
+  IsImported globals "ethereum" "rlp".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U64"; "U256"; "Bytes"; "Bytes0"; "Bytes32"; "Uint"; "slotted_freezable" ].
+Axiom ethereum_base_types_imports_U64 :
+  IsImported globals "ethereum.base_types" "U64".
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Bytes :
+  IsImported globals "ethereum.base_types" "Bytes".
+Axiom ethereum_base_types_imports_Bytes0 :
+  IsImported globals "ethereum.base_types" "Bytes0".
+Axiom ethereum_base_types_imports_Bytes32 :
+  IsImported globals "ethereum.base_types" "Bytes32".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
+Axiom ethereum_base_types_imports_slotted_freezable :
+  IsImported globals "ethereum.base_types" "slotted_freezable".
 
-Axiom ethereum_exceptions_imports :
-  AreImported globals "ethereum.exceptions" [ "InvalidBlock" ].
+Axiom ethereum_exceptions_imports_InvalidBlock :
+  IsImported globals "ethereum.exceptions" "InvalidBlock".
 
-Axiom ethereum_arrow_glacier_fork_types_imports :
-  AreImported globals "ethereum.arrow_glacier.fork_types" [ "Address" ].
+Axiom ethereum_arrow_glacier_fork_types_imports_Address :
+  IsImported globals "ethereum.arrow_glacier.fork_types" "Address".
 
 Definition TX_BASE_COST : Value.t := M.run ltac:(M.monadic (
   Constant.int 21000

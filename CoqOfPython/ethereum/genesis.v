@@ -22,20 +22,44 @@ different chains.
 
 (* At top_level_stmt: unsupported node type: Import *)
 
-Axiom dataclasses_imports :
-  AreImported globals "dataclasses" [ "dataclass" ].
+Axiom dataclasses_imports_dataclass :
+  IsImported globals "dataclasses" "dataclass".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "Any"; "Dict"; "cast" ].
+Axiom typing_imports_Any :
+  IsImported globals "typing" "Any".
+Axiom typing_imports_Dict :
+  IsImported globals "typing" "Dict".
+Axiom typing_imports_cast :
+  IsImported globals "typing" "cast".
 
-Axiom ethereum_imports :
-  AreImported globals "ethereum" [ "rlp" ].
+Axiom ethereum_imports_rlp :
+  IsImported globals "ethereum" "rlp".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U64"; "U256"; "Bytes"; "Bytes8"; "Bytes20"; "Uint"; "slotted_freezable" ].
+Axiom ethereum_base_types_imports_U64 :
+  IsImported globals "ethereum.base_types" "U64".
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Bytes :
+  IsImported globals "ethereum.base_types" "Bytes".
+Axiom ethereum_base_types_imports_Bytes8 :
+  IsImported globals "ethereum.base_types" "Bytes8".
+Axiom ethereum_base_types_imports_Bytes20 :
+  IsImported globals "ethereum.base_types" "Bytes20".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
+Axiom ethereum_base_types_imports_slotted_freezable :
+  IsImported globals "ethereum.base_types" "slotted_freezable".
 
-Axiom ethereum_utils_hexadecimal_imports :
-  AreImported globals "ethereum.utils.hexadecimal" [ "hex_to_bytes"; "hex_to_bytes8"; "hex_to_bytes32"; "hex_to_u256"; "hex_to_uint" ].
+Axiom ethereum_utils_hexadecimal_imports_hex_to_bytes :
+  IsImported globals "ethereum.utils.hexadecimal" "hex_to_bytes".
+Axiom ethereum_utils_hexadecimal_imports_hex_to_bytes8 :
+  IsImported globals "ethereum.utils.hexadecimal" "hex_to_bytes8".
+Axiom ethereum_utils_hexadecimal_imports_hex_to_bytes32 :
+  IsImported globals "ethereum.utils.hexadecimal" "hex_to_bytes32".
+Axiom ethereum_utils_hexadecimal_imports_hex_to_u256 :
+  IsImported globals "ethereum.utils.hexadecimal" "hex_to_u256".
+Axiom ethereum_utils_hexadecimal_imports_hex_to_uint :
+  IsImported globals "ethereum.utils.hexadecimal" "hex_to_uint".
 
 Definition Address : Value.t := M.run ltac:(M.monadic (
   M.get_name (| globals, "Bytes20" |)
@@ -70,7 +94,8 @@ Definition get_genesis_configuration : Value.t -> Value.t -> M :=
     configuration : `GenesisConfiguration`
         The genesis configuration obtained from the json genesis file.
     " in
-    let genesis_str_data :=
+    let _ := M.assign_local (|
+      "genesis_str_data" ,
       M.call (|
         M.get_field (| M.call (|
           M.get_name (| globals, "cast" |),
@@ -89,15 +114,18 @@ Definition get_genesis_configuration : Value.t -> Value.t -> M :=
         |), "decode" |),
         make_list [],
         make_dict []
-      |) in
-    let genesis_data :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "genesis_data" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "json" |), "loads" |),
         make_list [
           M.get_name (| globals, "genesis_str_data" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.return_ (|
       M.call (|
         M.get_name (| globals, "GenesisConfiguration" |),
@@ -181,12 +209,12 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
     low gas limit made sending transactions impossible in the early stages of
     Frontier.
 
-    The `nonce` field is `0x42` referencing Douglas Adams' """HitchHiker's Guide
-    to the Galaxy""".
+    The `nonce` field is `0x42` referencing Douglas Adams' ""HitchHiker's Guide
+    to the Galaxy"".
 
     The `extra_data` field contains the hash of block `1028201` on
     the pre-launch Olympus testnet. The creation of block `1028201` on Olympus
-    marked the """starting gun""" for Ethereum block creation. Including its hash
+    marked the ""starting gun"" for Ethereum block creation. Including its hash
     in the genesis block ensured a fair launch of the Ethereum mining process.
 
     The remaining fields are set to appropriate default values.
@@ -213,14 +241,16 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
       make_dict []
     |),
         ltac:(M.monadic (
-          let address :=
+          let _ := M.assign_local (|
+            "address" ,
             M.call (|
               M.get_field (| M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "utils" |), "hexadecimal" |), "hex_to_address" |),
               make_list [
                 M.get_name (| globals, "address" |)
               ],
               make_dict []
-            |) in
+            |)
+          |) in
           let _ := M.call (|
     M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "state" |), "set_account" |),
     make_list [
@@ -291,7 +321,7 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
         M.get_field (| M.get_name (| globals, "account" |), "get" |),
         make_list [
           Constant.str "storage";
-          {}
+          Constant.str "(* At expr: unsupported node type: Dict *)"
         ],
         make_dict []
       |), "items" |),
@@ -333,85 +363,10 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
           M.pure Constant.None_
         ))
     |) in
-    let fields :=
-      {Constant.str "parent_hash": M.call (|
-        M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "fork_types" |), "Hash32" |),
-        make_list [
-          BinOp.mult (|
-            Constant.bytes "00",
-            Constant.int 32
-          |)
-        ],
-        make_dict []
-      |), Constant.str "ommers_hash": M.call (|
-        M.get_field (| M.get_name (| globals, "rlp" |), "rlp_hash" |),
-        make_list [
-          make_tuple [  ]
-        ],
-        make_dict []
-      |), Constant.str "coinbase": M.call (|
-        M.get_name (| globals, "Address" |),
-        make_list [
-          BinOp.mult (|
-            Constant.bytes "00",
-            Constant.int 20
-          |)
-        ],
-        make_dict []
-      |), Constant.str "state_root": M.call (|
-        M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "state" |), "state_root" |),
-        make_list [
-          M.get_field (| M.get_name (| globals, "chain" |), "state" |)
-        ],
-        make_dict []
-      |), Constant.str "transactions_root": M.call (|
-        M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "trie" |), "root" |),
-        make_list [
-          M.call (|
-            M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "trie" |), "Trie" |),
-            make_list [
-              Constant.bool false;
-              Constant.None_
-            ],
-            make_dict []
-          |)
-        ],
-        make_dict []
-      |), Constant.str "receipt_root": M.call (|
-        M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "trie" |), "root" |),
-        make_list [
-          M.call (|
-            M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "trie" |), "Trie" |),
-            make_list [
-              Constant.bool false;
-              Constant.None_
-            ],
-            make_dict []
-          |)
-        ],
-        make_dict []
-      |), Constant.str "bloom": M.call (|
-        M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "fork_types" |), "Bloom" |),
-        make_list [
-          BinOp.mult (|
-            Constant.bytes "00",
-            Constant.int 256
-          |)
-        ],
-        make_dict []
-      |), Constant.str "difficulty": M.get_field (| M.get_name (| globals, "genesis" |), "difficulty" |), Constant.str "number": M.call (|
-        M.get_name (| globals, "Uint" |),
-        make_list [
-          Constant.int 0
-        ],
-        make_dict []
-      |), Constant.str "gas_limit": M.get_field (| M.get_name (| globals, "genesis" |), "gas_limit" |), Constant.str "gas_used": M.call (|
-        M.get_name (| globals, "Uint" |),
-        make_list [
-          Constant.int 0
-        ],
-        make_dict []
-      |), Constant.str "timestamp": M.get_field (| M.get_name (| globals, "genesis" |), "timestamp" |), Constant.str "extra_data": M.get_field (| M.get_name (| globals, "genesis" |), "extra_data" |), Constant.str "nonce": M.get_field (| M.get_name (| globals, "genesis" |), "nonce" |)} in
+    let _ := M.assign_local (|
+      "fields" ,
+      Constant.str "(* At expr: unsupported node type: Dict *)"
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -496,18 +451,22 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
       )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
-    let genesis_header :=
+    let _ := M.assign_local (|
+      "genesis_header" ,
       M.call (|
         M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "blocks" |), "Header" |),
         make_list [],
         make_dict []
-      |) in
-    let genesis_block :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "genesis_block" ,
       M.call (|
         M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "blocks" |), "Block" |),
         make_list [],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_field (| M.get_field (| M.get_name (| globals, "chain" |), "blocks" |), "append" |),
     make_list [

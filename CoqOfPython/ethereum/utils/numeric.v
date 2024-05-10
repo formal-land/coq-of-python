@@ -17,11 +17,15 @@ Introduction
 Numeric operations specific utility functions used in this specification.
 ".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "Sequence"; "Tuple" ].
+Axiom typing_imports_Sequence :
+  IsImported globals "typing" "Sequence".
+Axiom typing_imports_Tuple :
+  IsImported globals "typing" "Tuple".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U32"; "Uint" ].
+Axiom ethereum_base_types_imports_U32 :
+  IsImported globals "ethereum.base_types" "U32".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
 Definition get_sign : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -97,19 +101,23 @@ Definition ceil32 : Value.t -> Value.t -> M :=
         else it returns the smallest multiple of 32
         that is greater than `value`.
     " in
-    let ceiling :=
+    let _ := M.assign_local (|
+      "ceiling" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
           Constant.int 32
         ],
         make_dict []
-      |) in
-    let remainder :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "remainder" ,
       BinOp.mod_ (|
         M.get_name (| globals, "value" |),
         M.get_name (| globals, "ceiling" |)
-      |) in
+      |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -190,7 +198,7 @@ Definition is_prime : Value.t -> Value.t -> M :=
             make_list [
               BinOp.pow (|
                 M.get_name (| globals, "number" |),
-                Value.Float 0.5
+                Constant.float "0.5"
               |)
             ],
             make_dict []
@@ -252,8 +260,10 @@ Definition le_bytes_to_uint32_sequence : Value.t -> Value.t -> M :=
         Sequence of U32 numbers obtained from the little endian byte
         stream.
     " in
-    let sequence :=
-      make_list [] in
+    let _ := M.assign_local (|
+      "sequence" ,
+      make_list []
+    |) in
     let _ :=
       M.for_ (|
         M.get_name (| globals, "i" |),
@@ -338,24 +348,24 @@ Definition le_uint32_sequence_to_bytes : Value.t -> Value.t -> M :=
     result : `bytes`
         The byte stream obtained from the little endian U32 stream.
     " in
-    let result_bytes :=
-      Constant.bytes "" in
+    let _ := M.assign_local (|
+      "result_bytes" ,
+      Constant.bytes ""
+    |) in
     let _ :=
       M.for_ (|
         M.get_name (| globals, "item" |),
         M.get_name (| globals, "sequence" |),
         ltac:(M.monadic (
-          let result_bytes := BinOp.add
+          let _ := M.assign_op_local (|
+            BinOp.add,
+            "result_bytes",
             M.call (|
     M.get_field (| M.get_name (| globals, "item" |), "to_le_bytes4" |),
     make_list [],
     make_dict []
   |)
-            M.call (|
-    M.get_field (| M.get_name (| globals, "item" |), "to_le_bytes4" |),
-    make_list [],
-    make_dict []
-  |) in
+          |) in
           M.pure Constant.None_
         )),
         ltac:(M.monadic (
@@ -386,14 +396,16 @@ Definition le_uint32_sequence_to_uint : Value.t -> Value.t -> M :=
         The Uint number obtained from the conversion of the little endian
         U32 stream.
     " in
-    let sequence_as_bytes :=
+    let _ := M.assign_local (|
+      "sequence_as_bytes" ,
       M.call (|
         M.get_name (| globals, "le_uint32_sequence_to_bytes" |),
         make_list [
           M.get_name (| globals, "sequence" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.return_ (|
       M.call (|
         M.get_field (| M.get_name (| globals, "Uint" |), "from_le_bytes" |),
@@ -427,15 +439,21 @@ Definition taylor_exponential : Value.t -> Value.t -> M :=
         The approximation of factor * e ** (numerator / denominator).
 
     " in
-    let i :=
-      Constant.int 1 in
-    let output :=
-      Constant.int 0 in
-    let numerator_accumulated :=
+    let _ := M.assign_local (|
+      "i" ,
+      Constant.int 1
+    |) in
+    let _ := M.assign_local (|
+      "output" ,
+      Constant.int 0
+    |) in
+    let _ := M.assign_local (|
+      "numerator_accumulated" ,
       BinOp.mult (|
         M.get_name (| globals, "factor" |),
         M.get_name (| globals, "denominator" |)
-      |) in
+      |)
+    |) in
     let _ :=
       M.while (|
         Compare.gt (|
@@ -443,10 +461,13 @@ Definition taylor_exponential : Value.t -> Value.t -> M :=
       Constant.int 0
     |),
         ltac:(M.monadic (
-          let output := BinOp.add
+          let _ := M.assign_op_local (|
+            BinOp.add,
+            "output",
             M.get_name (| globals, "numerator_accumulated" |)
-            M.get_name (| globals, "numerator_accumulated" |) in
-          let numerator_accumulated :=
+          |) in
+          let _ := M.assign_local (|
+            "numerator_accumulated" ,
             BinOp.floor_div (|
               BinOp.mult (|
                 M.get_name (| globals, "numerator_accumulated" |),
@@ -456,10 +477,13 @@ Definition taylor_exponential : Value.t -> Value.t -> M :=
                 M.get_name (| globals, "denominator" |),
                 M.get_name (| globals, "i" |)
               |)
-            |) in
-          let i := BinOp.add
+            |)
+          |) in
+          let _ := M.assign_op_local (|
+            BinOp.add,
+            "i",
             Constant.int 1
-            Constant.int 1 in
+          |) in
           M.pure Constant.None_
         )),
         ltac:(M.monadic (

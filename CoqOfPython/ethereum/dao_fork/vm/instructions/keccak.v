@@ -17,26 +17,36 @@ Introduction
 Implementations of the EVM keccak instructions.
 ".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Uint" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_crypto_hash_imports :
-  AreImported globals "ethereum.crypto.hash" [ "keccak256" ].
+Axiom ethereum_crypto_hash_imports_keccak256 :
+  IsImported globals "ethereum.crypto.hash" "keccak256".
 
-Axiom ethereum_utils_numeric_imports :
-  AreImported globals "ethereum.utils.numeric" [ "ceil32" ].
+Axiom ethereum_utils_numeric_imports_ceil32 :
+  IsImported globals "ethereum.utils.numeric" "ceil32".
 
-Axiom ethereum_dao_fork_vm_imports :
-  AreImported globals "ethereum.dao_fork.vm" [ "Evm" ].
+Axiom ethereum_dao_fork_vm_imports_Evm :
+  IsImported globals "ethereum.dao_fork.vm" "Evm".
 
-Axiom ethereum_dao_fork_vm_gas_imports :
-  AreImported globals "ethereum.dao_fork.vm.gas" [ "GAS_KECCAK256"; "GAS_KECCAK256_WORD"; "calculate_gas_extend_memory"; "charge_gas" ].
+Axiom ethereum_dao_fork_vm_gas_imports_GAS_KECCAK256 :
+  IsImported globals "ethereum.dao_fork.vm.gas" "GAS_KECCAK256".
+Axiom ethereum_dao_fork_vm_gas_imports_GAS_KECCAK256_WORD :
+  IsImported globals "ethereum.dao_fork.vm.gas" "GAS_KECCAK256_WORD".
+Axiom ethereum_dao_fork_vm_gas_imports_calculate_gas_extend_memory :
+  IsImported globals "ethereum.dao_fork.vm.gas" "calculate_gas_extend_memory".
+Axiom ethereum_dao_fork_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.dao_fork.vm.gas" "charge_gas".
 
-Axiom ethereum_dao_fork_vm_memory_imports :
-  AreImported globals "ethereum.dao_fork.vm.memory" [ "memory_read_bytes" ].
+Axiom ethereum_dao_fork_vm_memory_imports_memory_read_bytes :
+  IsImported globals "ethereum.dao_fork.vm.memory" "memory_read_bytes".
 
-Axiom ethereum_dao_fork_vm_stack_imports :
-  AreImported globals "ethereum.dao_fork.vm.stack" [ "pop"; "push" ].
+Axiom ethereum_dao_fork_vm_stack_imports_pop :
+  IsImported globals "ethereum.dao_fork.vm.stack" "pop".
+Axiom ethereum_dao_fork_vm_stack_imports_push :
+  IsImported globals "ethereum.dao_fork.vm.stack" "push".
 
 Definition keccak : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -53,23 +63,28 @@ Definition keccak : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let memory_start_index :=
+    let _ := M.assign_local (|
+      "memory_start_index" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "size" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let words :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "words" ,
       BinOp.floor_div (|
         M.call (|
           M.get_name (| globals, "ceil32" |),
@@ -85,13 +100,17 @@ Definition keccak : Value.t -> Value.t -> M :=
           make_dict []
         |),
         Constant.int 32
-      |) in
-    let word_gas_cost :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "word_gas_cost" ,
       BinOp.mult (|
         M.get_name (| globals, "GAS_KECCAK256_WORD" |),
         M.get_name (| globals, "words" |)
-      |) in
-    let extend_memory :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "extend_memory" ,
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),
         make_list [
@@ -101,7 +120,8 @@ Definition keccak : Value.t -> Value.t -> M :=
           ]
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -124,7 +144,8 @@ Definition keccak : Value.t -> Value.t -> M :=
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
-    let data :=
+    let _ := M.assign_local (|
+      "data" ,
       M.call (|
         M.get_name (| globals, "memory_read_bytes" |),
         make_list [
@@ -133,15 +154,18 @@ Definition keccak : Value.t -> Value.t -> M :=
           M.get_name (| globals, "size" |)
         ],
         make_dict []
-      |) in
-    let hash :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "hash" ,
       M.call (|
         M.get_name (| globals, "keccak256" |),
         make_list [
           M.get_name (| globals, "data" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [

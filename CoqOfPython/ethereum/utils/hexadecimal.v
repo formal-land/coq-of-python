@@ -17,11 +17,25 @@ Introduction
 Hexadecimal strings specific utility functions used in this specification.
 ".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U64"; "U256"; "Bytes"; "Bytes8"; "Bytes20"; "Bytes32"; "Bytes256"; "Uint" ].
+Axiom ethereum_base_types_imports_U64 :
+  IsImported globals "ethereum.base_types" "U64".
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Bytes :
+  IsImported globals "ethereum.base_types" "Bytes".
+Axiom ethereum_base_types_imports_Bytes8 :
+  IsImported globals "ethereum.base_types" "Bytes8".
+Axiom ethereum_base_types_imports_Bytes20 :
+  IsImported globals "ethereum.base_types" "Bytes20".
+Axiom ethereum_base_types_imports_Bytes32 :
+  IsImported globals "ethereum.base_types" "Bytes32".
+Axiom ethereum_base_types_imports_Bytes256 :
+  IsImported globals "ethereum.base_types" "Bytes256".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_crypto_hash_imports :
-  AreImported globals "ethereum.crypto.hash" [ "Hash32" ].
+Axiom ethereum_crypto_hash_imports_Hash32 :
+  IsImported globals "ethereum.crypto.hash" "Hash32".
 
 Definition has_hex_prefix : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

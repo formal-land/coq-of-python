@@ -17,26 +17,34 @@ Introduction
 Implementations of the EVM logging instructions.
 ".
 
-Axiom functools_imports :
-  AreImported globals "functools" [ "partial" ].
+Axiom functools_imports_partial :
+  IsImported globals "functools" "partial".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
 
-Axiom ethereum_frontier_blocks_imports :
-  AreImported globals "ethereum.frontier.blocks" [ "Log" ].
+Axiom ethereum_frontier_blocks_imports_Log :
+  IsImported globals "ethereum.frontier.blocks" "Log".
 
-Axiom ethereum_frontier_vm_imports :
-  AreImported globals "ethereum.frontier.vm" [ "Evm" ].
+Axiom ethereum_frontier_vm_imports_Evm :
+  IsImported globals "ethereum.frontier.vm" "Evm".
 
-Axiom ethereum_frontier_vm_gas_imports :
-  AreImported globals "ethereum.frontier.vm.gas" [ "GAS_LOG"; "GAS_LOG_DATA"; "GAS_LOG_TOPIC"; "calculate_gas_extend_memory"; "charge_gas" ].
+Axiom ethereum_frontier_vm_gas_imports_GAS_LOG :
+  IsImported globals "ethereum.frontier.vm.gas" "GAS_LOG".
+Axiom ethereum_frontier_vm_gas_imports_GAS_LOG_DATA :
+  IsImported globals "ethereum.frontier.vm.gas" "GAS_LOG_DATA".
+Axiom ethereum_frontier_vm_gas_imports_GAS_LOG_TOPIC :
+  IsImported globals "ethereum.frontier.vm.gas" "GAS_LOG_TOPIC".
+Axiom ethereum_frontier_vm_gas_imports_calculate_gas_extend_memory :
+  IsImported globals "ethereum.frontier.vm.gas" "calculate_gas_extend_memory".
+Axiom ethereum_frontier_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.frontier.vm.gas" "charge_gas".
 
-Axiom ethereum_frontier_vm_memory_imports :
-  AreImported globals "ethereum.frontier.vm.memory" [ "memory_read_bytes" ].
+Axiom ethereum_frontier_vm_memory_imports_memory_read_bytes :
+  IsImported globals "ethereum.frontier.vm.memory" "memory_read_bytes".
 
-Axiom ethereum_frontier_vm_stack_imports :
-  AreImported globals "ethereum.frontier.vm.stack" [ "pop" ].
+Axiom ethereum_frontier_vm_stack_imports_pop :
+  IsImported globals "ethereum.frontier.vm.stack" "pop".
 
 Definition log_n : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -55,24 +63,30 @@ Definition log_n : Value.t -> Value.t -> M :=
         The number of topics to be included in the log entry.
 
     " in
-    let memory_start_index :=
+    let _ := M.assign_local (|
+      "memory_start_index" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "size" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let topics :=
-      make_list [] in
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "topics" ,
+      make_list []
+    |) in
     let _ :=
       M.for_ (|
         M.get_name (| globals, "_" |),
@@ -84,7 +98,8 @@ Definition log_n : Value.t -> Value.t -> M :=
       make_dict []
     |),
         ltac:(M.monadic (
-          let topic :=
+          let _ := M.assign_local (|
+            "topic" ,
             M.call (|
               M.get_field (| M.call (|
                 M.get_name (| globals, "pop" |),
@@ -95,7 +110,8 @@ Definition log_n : Value.t -> Value.t -> M :=
               |), "to_be_bytes32" |),
               make_list [],
               make_dict []
-            |) in
+            |)
+          |) in
           let _ := M.call (|
     M.get_field (| M.get_name (| globals, "topics" |), "append" |),
     make_list [
@@ -109,7 +125,8 @@ Definition log_n : Value.t -> Value.t -> M :=
           M.pure Constant.None_
         ))
     |) in
-    let extend_memory :=
+    let _ := M.assign_local (|
+      "extend_memory" ,
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),
         make_list [
@@ -119,7 +136,8 @@ Definition log_n : Value.t -> Value.t -> M :=
           ]
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -151,12 +169,14 @@ Definition log_n : Value.t -> Value.t -> M :=
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
-    let log_entry :=
+    let _ := M.assign_local (|
+      "log_entry" ,
       M.call (|
         M.get_name (| globals, "Log" |),
         make_list [],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.assign (|
       M.get_field (| M.get_name (| globals, "evm" |), "logs" |),
       BinOp.add (|

@@ -24,11 +24,29 @@ sequences containing an exact number of bytes.
 [`Bytes64`]: ref:ethereum.base_types.Bytes64
 ".
 
-Axiom dataclasses_imports :
-  AreImported globals "dataclasses" [ "is_dataclass"; "replace" ].
+Axiom dataclasses_imports_is_dataclass :
+  IsImported globals "dataclasses" "is_dataclass".
+Axiom dataclasses_imports_replace :
+  IsImported globals "dataclasses" "replace".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "Any"; "Callable"; "ClassVar"; "Optional"; "Protocol"; "Tuple"; "Type"; "TypeVar"; "runtime_checkable" ].
+Axiom typing_imports_Any :
+  IsImported globals "typing" "Any".
+Axiom typing_imports_Callable :
+  IsImported globals "typing" "Callable".
+Axiom typing_imports_ClassVar :
+  IsImported globals "typing" "ClassVar".
+Axiom typing_imports_Optional :
+  IsImported globals "typing" "Optional".
+Axiom typing_imports_Protocol :
+  IsImported globals "typing" "Protocol".
+Axiom typing_imports_Tuple :
+  IsImported globals "typing" "Tuple".
+Axiom typing_imports_Type :
+  IsImported globals "typing" "Type".
+Axiom typing_imports_TypeVar :
+  IsImported globals "typing" "TypeVar".
+Axiom typing_imports_runtime_checkable :
+  IsImported globals "typing" "runtime_checkable".
 
 Definition SlottedFreezable : Value.t :=
   builtins.make_klass
@@ -846,7 +864,8 @@ Definition Uint : Value.t :=
             )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
-          let result :=
+          let _ := M.assign_local (|
+            "result" ,
             M.call (|
               M.get_field (| M.get_name (| globals, "int" |), "__divmod__" |),
               make_list [
@@ -854,7 +873,8 @@ Definition Uint : Value.t :=
                 M.get_name (| globals, "right" |)
               ],
               make_dict []
-            |) in
+            |)
+          |) in
           let _ := M.return_ (|
             make_tuple [ M.call (|
               M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
@@ -924,7 +944,8 @@ Definition Uint : Value.t :=
             )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
-          let result :=
+          let _ := M.assign_local (|
+            "result" ,
             M.call (|
               M.get_field (| M.get_name (| globals, "int" |), "__rdivmod__" |),
               make_list [
@@ -932,7 +953,8 @@ Definition Uint : Value.t :=
                 M.get_name (| globals, "left" |)
               ],
               make_dict []
-            |) in
+            |)
+          |) in
           let _ := M.return_ (|
             make_tuple [ M.call (|
               M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
@@ -1385,20 +1407,24 @@ Definition Uint : Value.t :=
         Converts this arbitrarily sized unsigned integer into its big endian
         representation, without padding.
         " in
-          let bit_length :=
+          let _ := M.assign_local (|
+            "bit_length" ,
             M.call (|
               M.get_field (| M.get_name (| globals, "self" |), "bit_length" |),
               make_list [],
               make_dict []
-            |) in
-          let byte_length :=
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "byte_length" ,
             BinOp.floor_div (|
               BinOp.add (|
                 M.get_name (| globals, "bit_length" |),
                 Constant.int 7
               |),
               Constant.int 8
-            |) in
+            |)
+          |) in
           let _ := M.return_ (|
             M.call (|
               M.get_field (| M.get_name (| globals, "self" |), "to_bytes" |),
@@ -1428,20 +1454,24 @@ Definition Uint : Value.t :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let bit_length :=
+              let _ := M.assign_local (|
+                "bit_length" ,
                 M.call (|
                   M.get_field (| M.get_name (| globals, "self" |), "bit_length" |),
                   make_list [],
                   make_dict []
-                |) in
-              let number_bytes :=
+                |)
+              |) in
+              let _ := M.assign_local (|
+                "number_bytes" ,
                 BinOp.floor_div (|
                   BinOp.add (|
                     M.get_name (| globals, "bit_length" |),
                     Constant.int 7
                   |),
                   Constant.int 8
-                |) in
+                |)
+              |) in
               M.pure Constant.None_
             (* else *)
             )), ltac:(M.monadic (
@@ -1574,7 +1604,8 @@ Definition FixedUint : Value.t :=
             )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
-          let result :=
+          let _ := M.assign_local (|
+            "result" ,
             M.call (|
               M.get_field (| M.get_name (| globals, "int" |), "__add__" |),
               make_list [
@@ -1582,7 +1613,8 @@ Definition FixedUint : Value.t :=
                 M.get_name (| globals, "right" |)
               ],
               make_dict []
-            |) in
+            |)
+          |) in
           let _ :=
             (* if *)
             M.if_then_else (|
@@ -2001,7 +2033,8 @@ Definition FixedUint : Value.t :=
             )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
-          let result :=
+          let _ := M.assign_local (|
+            "result" ,
             M.call (|
               M.get_field (| M.get_name (| globals, "int" |), "__mul__" |),
               make_list [
@@ -2009,7 +2042,8 @@ Definition FixedUint : Value.t :=
                 M.get_name (| globals, "right" |)
               ],
               make_dict []
-            |) in
+            |)
+          |) in
           let _ :=
             (* if *)
             M.if_then_else (|
@@ -2528,7 +2562,8 @@ Definition FixedUint : Value.t :=
             )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
-          let result :=
+          let _ := M.assign_local (|
+            "result" ,
             M.call (|
               M.get_field (| M.call (|
                 M.get_name (| globals, "super" |),
@@ -2542,7 +2577,8 @@ Definition FixedUint : Value.t :=
                 M.get_name (| globals, "right" |)
               ],
               make_dict []
-            |) in
+            |)
+          |) in
           let _ := M.return_ (|
             make_tuple [ M.call (|
               M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
@@ -2620,7 +2656,8 @@ Definition FixedUint : Value.t :=
             )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
-          let result :=
+          let _ := M.assign_local (|
+            "result" ,
             M.call (|
               M.get_field (| M.call (|
                 M.get_name (| globals, "super" |),
@@ -2634,7 +2671,8 @@ Definition FixedUint : Value.t :=
                 M.get_name (| globals, "left" |)
               ],
               make_dict []
-            |) in
+            |)
+          |) in
           let _ := M.return_ (|
             make_tuple [ M.call (|
               M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
@@ -2747,7 +2785,8 @@ Definition FixedUint : Value.t :=
             )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
-          let result :=
+          let _ := M.assign_local (|
+            "result" ,
             M.call (|
               M.get_field (| M.get_name (| globals, "int" |), "__pow__" |),
               make_list [
@@ -2756,7 +2795,8 @@ Definition FixedUint : Value.t :=
                 M.get_name (| globals, "modulo" |)
               ],
               make_dict []
-            |) in
+            |)
+          |) in
           let _ :=
             (* if *)
             M.if_then_else (|
@@ -3478,20 +3518,24 @@ Definition FixedUint : Value.t :=
         Converts this unsigned integer into its big endian representation,
         omitting leading zero bytes.
         " in
-          let bit_length :=
+          let _ := M.assign_local (|
+            "bit_length" ,
             M.call (|
               M.get_field (| M.get_name (| globals, "self" |), "bit_length" |),
               make_list [],
               make_dict []
-            |) in
-          let byte_length :=
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "byte_length" ,
             BinOp.floor_div (|
               BinOp.add (|
                 M.get_name (| globals, "bit_length" |),
                 Constant.int 7
               |),
               Constant.int 8
-            |) in
+            |)
+          |) in
           let _ := M.return_ (|
             M.call (|
               M.get_field (| M.get_name (| globals, "self" |), "to_bytes" |),
@@ -3777,20 +3821,24 @@ Definition U32 : Value.t :=
         Converts this fixed sized unsigned integer into its little endian
         representation, in the fewest bytes possible.
         " in
-          let bit_length :=
+          let _ := M.assign_local (|
+            "bit_length" ,
             M.call (|
               M.get_field (| M.get_name (| globals, "self" |), "bit_length" |),
               make_list [],
               make_dict []
-            |) in
-          let byte_length :=
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "byte_length" ,
             BinOp.floor_div (|
               BinOp.add (|
                 M.get_name (| globals, "bit_length" |),
                 Constant.int 7
               |),
               Constant.int 8
-            |) in
+            |)
+          |) in
           let _ := M.return_ (|
             M.call (|
               M.get_field (| M.get_name (| globals, "self" |), "to_bytes" |),
@@ -3949,20 +3997,24 @@ Definition U64 : Value.t :=
         Converts this fixed sized unsigned integer into its little endian
         representation, in the fewest bytes possible.
         " in
-          let bit_length :=
+          let _ := M.assign_local (|
+            "bit_length" ,
             M.call (|
               M.get_field (| M.get_name (| globals, "self" |), "bit_length" |),
               make_list [],
               make_dict []
-            |) in
-          let byte_length :=
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "byte_length" ,
             BinOp.floor_div (|
               BinOp.add (|
                 M.get_name (| globals, "bit_length" |),
                 Constant.int 7
               |),
               Constant.int 8
-            |) in
+            |)
+          |) in
           let _ := M.return_ (|
             M.call (|
               M.get_field (| M.get_name (| globals, "self" |), "to_bytes" |),
@@ -4003,22 +4055,8 @@ Definition FixedBytes : Value.t :=
           let _ := Constant.str "
         Create a new instance, ensuring the result has the correct length.
         " in
-          let x :=
-            make_list_concat (| [
-              make_list [
-                Constant.int 1;
-                Constant.int 2
-              ];
-              make_list [
-                Constant.str "x";
-                Constant.str "y";
-                Constant.str "z"
-              ];
-              make_list [
-                Constant.int 3
-              ]
-            ] |) in
-          let result :=
+          let _ := M.assign_local (|
+            "result" ,
             M.call (|
               M.get_field (| M.call (|
                 M.get_name (| globals, "super" |),
@@ -4035,7 +4073,8 @@ Definition FixedBytes : Value.t :=
                 M.get_name (| globals, "args" |)
               ] |),
               make_dict []
-            |) in
+            |)
+          |) in
           let _ :=
             (* if *)
             M.if_then_else (|
@@ -4154,7 +4193,7 @@ Definition Bytes : Value.t := M.run ltac:(M.monadic (
   M.get_name (| globals, "bytes" |)
 )).
 
-Definition expr_926 : Value.t :=
+Definition expr_925 : Value.t :=
   Constant.str "
 Sequence of bytes (octets) of arbitrary length.
 ".
@@ -4339,14 +4378,16 @@ Definition modify : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) |) in
-    let new_obj :=
+    let _ := M.assign_local (|
+      "new_obj" ,
       M.call (|
         M.get_name (| globals, "replace" |),
         make_list [
           M.get_name (| globals, "obj" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "f" |),
     make_list [

@@ -17,17 +17,21 @@ Introduction
 Implementation of the `MODEXP` precompiled contract.
 ".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Uint" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Bytes :
+  IsImported globals "ethereum.base_types" "Bytes".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_constantinople_vm_imports :
-  AreImported globals "ethereum.constantinople.vm" [ "Evm" ].
+Axiom ethereum_constantinople_vm_imports_Evm :
+  IsImported globals "ethereum.constantinople.vm" "Evm".
 
-Axiom ethereum_constantinople_vm_gas_imports :
-  AreImported globals "ethereum.constantinople.vm.gas" [ "charge_gas" ].
+Axiom ethereum_constantinople_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.constantinople.vm.gas" "charge_gas".
 
-Axiom ethereum_constantinople_vm_memory_imports :
-  AreImported globals "ethereum.constantinople.vm.memory" [ "buffer_read" ].
+Axiom ethereum_constantinople_vm_memory_imports_buffer_read :
+  IsImported globals "ethereum.constantinople.vm.memory" "buffer_read".
 
 Definition GQUADDIVISOR : Value.t := M.run ltac:(M.monadic (
   M.call (|
@@ -46,9 +50,12 @@ Definition modexp : Value.t -> Value.t -> M :=
     Calculates `(base**exp) % modulus` for arbitrary sized `base`, `exp` and.
     `modulus`. The return value is the same length as the modulus.
     " in
-    let data :=
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |) in
-    let base_length :=
+    let _ := M.assign_local (|
+      "data" ,
+      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |)
+    |) in
+    let _ := M.assign_local (|
+      "base_length" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
@@ -75,8 +82,10 @@ Definition modexp : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let exp_length :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "exp_length" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
@@ -103,8 +112,10 @@ Definition modexp : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let modulus_length :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "modulus_length" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
@@ -131,8 +142,10 @@ Definition modexp : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let exp_start :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "exp_start" ,
       BinOp.add (|
         M.call (|
           M.get_name (| globals, "U256" |),
@@ -142,8 +155,10 @@ Definition modexp : Value.t -> Value.t -> M :=
           make_dict []
         |),
         M.get_name (| globals, "base_length" |)
-      |) in
-    let exp_head :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "exp_head" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
@@ -171,7 +186,8 @@ Definition modexp : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -181,7 +197,8 @@ Definition modexp : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let adjusted_exp_length :=
+        let _ := M.assign_local (|
+          "adjusted_exp_length" ,
           M.call (|
             M.get_name (| globals, "Uint" |),
             make_list [
@@ -202,11 +219,13 @@ Definition modexp : Value.t -> Value.t -> M :=
               |)
             ],
             make_dict []
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
-        let adjusted_exp_length :=
+        let _ := M.assign_local (|
+          "adjusted_exp_length" ,
           M.call (|
             M.get_name (| globals, "Uint" |),
             make_list [
@@ -242,7 +261,8 @@ Definition modexp : Value.t -> Value.t -> M :=
               |)
             ],
             make_dict []
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
@@ -324,7 +344,8 @@ Definition modexp : Value.t -> Value.t -> M :=
       )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
-    let base :=
+    let _ := M.assign_local (|
+      "base" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
         make_list [
@@ -345,8 +366,10 @@ Definition modexp : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let exp :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "exp" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
         make_list [
@@ -361,13 +384,17 @@ Definition modexp : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let modulus_start :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "modulus_start" ,
       BinOp.add (|
         M.get_name (| globals, "exp_start" |),
         M.get_name (| globals, "exp_length" |)
-      |) in
-    let modulus :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "modulus" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
         make_list [
@@ -382,7 +409,8 @@ Definition modexp : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|

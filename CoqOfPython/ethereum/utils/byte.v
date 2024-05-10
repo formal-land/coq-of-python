@@ -17,8 +17,8 @@ Introduction
 Byte specific utility functions used in this specification.
 ".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "Bytes" ].
+Axiom ethereum_base_types_imports_Bytes :
+  IsImported globals "ethereum.base_types" "Bytes".
 
 Definition left_pad_zero_bytes : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

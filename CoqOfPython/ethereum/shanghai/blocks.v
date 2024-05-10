@@ -14,23 +14,41 @@ history of all state transitions that have happened since the genesis of the
 chain.
 ".
 
-Axiom dataclasses_imports :
-  AreImported globals "dataclasses" [ "dataclass" ].
+Axiom dataclasses_imports_dataclass :
+  IsImported globals "dataclasses" "dataclass".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "Tuple"; "Union" ].
+Axiom typing_imports_Tuple :
+  IsImported globals "typing" "Tuple".
+Axiom typing_imports_Union :
+  IsImported globals "typing" "Union".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U64"; "U256"; "Bytes"; "Bytes8"; "Bytes32"; "Uint"; "slotted_freezable" ].
+Axiom ethereum_base_types_imports_U64 :
+  IsImported globals "ethereum.base_types" "U64".
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Bytes :
+  IsImported globals "ethereum.base_types" "Bytes".
+Axiom ethereum_base_types_imports_Bytes8 :
+  IsImported globals "ethereum.base_types" "Bytes8".
+Axiom ethereum_base_types_imports_Bytes32 :
+  IsImported globals "ethereum.base_types" "Bytes32".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
+Axiom ethereum_base_types_imports_slotted_freezable :
+  IsImported globals "ethereum.base_types" "slotted_freezable".
 
-Axiom ethereum_crypto_hash_imports :
-  AreImported globals "ethereum.crypto.hash" [ "Hash32" ].
+Axiom ethereum_crypto_hash_imports_Hash32 :
+  IsImported globals "ethereum.crypto.hash" "Hash32".
 
-Axiom ethereum_shanghai_fork_types_imports :
-  AreImported globals "ethereum.shanghai.fork_types" [ "Address"; "Bloom"; "Root" ].
+Axiom ethereum_shanghai_fork_types_imports_Address :
+  IsImported globals "ethereum.shanghai.fork_types" "Address".
+Axiom ethereum_shanghai_fork_types_imports_Bloom :
+  IsImported globals "ethereum.shanghai.fork_types" "Bloom".
+Axiom ethereum_shanghai_fork_types_imports_Root :
+  IsImported globals "ethereum.shanghai.fork_types" "Root".
 
-Axiom ethereum_shanghai_transactions_imports :
-  AreImported globals "ethereum.shanghai.transactions" [ "LegacyTransaction" ].
+Axiom ethereum_shanghai_transactions_imports_LegacyTransaction :
+  IsImported globals "ethereum.shanghai.transactions" "LegacyTransaction".
 
 Definition Withdrawal : Value.t :=
   builtins.make_klass

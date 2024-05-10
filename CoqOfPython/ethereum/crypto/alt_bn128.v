@@ -8,8 +8,10 @@ The alt_bn128 curve
 ^^^^^^^^^^^^^^^^^^^
 ".
 
-Axiom ethereum_crypto_imports :
-  AreImported globals "ethereum.crypto" [ "elliptic_curve"; "finite_field" ].
+Axiom ethereum_crypto_imports_elliptic_curve :
+  IsImported globals "ethereum.crypto" "elliptic_curve".
+Axiom ethereum_crypto_imports_finite_field :
+  IsImported globals "ethereum.crypto" "finite_field".
 
 Definition ALT_BN128_PRIME : Value.t := M.run ltac:(M.monadic (
   Constant.int 21888242871839275222246405745257275088696311157297823662689037894645226208583
@@ -96,13 +98,15 @@ Definition BNF12 : Value.t :=
           let _ := Constant.str "
         Multiplication special cased for BNF12.
         " in
-          let mul :=
+          let _ := M.assign_local (|
+            "mul" ,
             BinOp.mult (|
               make_list [
                 Constant.int 0
               ],
               Constant.int 23
-            |) in
+            |)
+          |) in
           let _ :=
             M.for_ (|
               M.get_name (| globals, "i" |),
@@ -403,7 +407,8 @@ Definition linefunc : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let lam :=
+        let _ := M.assign_local (|
+          "lam" ,
           BinOp.div (|
             BinOp.sub (|
               M.get_field (| M.get_name (| globals, "p2" |), "y" |),
@@ -413,7 +418,8 @@ Definition linefunc : Value.t -> Value.t -> M :=
               M.get_field (| M.get_name (| globals, "p2" |), "x" |),
               M.get_field (| M.get_name (| globals, "p1" |), "x" |)
             |)
-          |) in
+          |)
+        |) in
         let _ := M.return_ (|
           BinOp.sub (|
             BinOp.mult (|
@@ -441,7 +447,8 @@ Definition linefunc : Value.t -> Value.t -> M :=
             |),
           (* then *)
           ltac:(M.monadic (
-            let lam :=
+            let _ := M.assign_local (|
+              "lam" ,
               BinOp.div (|
                 BinOp.mult (|
                   M.call (|
@@ -466,7 +473,8 @@ Definition linefunc : Value.t -> Value.t -> M :=
                   |),
                   M.get_field (| M.get_name (| globals, "p1" |), "y" |)
                 |)
-              |) in
+              |)
+            |) in
             let _ := M.return_ (|
               BinOp.sub (|
                 BinOp.mult (|
@@ -542,16 +550,20 @@ Definition miller_loop : Value.t -> Value.t -> M :=
       )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
-    let r :=
-      M.get_name (| globals, "q" |) in
-    let f :=
+    let _ := M.assign_local (|
+      "r" ,
+      M.get_name (| globals, "q" |)
+    |) in
+    let _ := M.assign_local (|
+      "f" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
         make_list [
           Constant.int 1
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       M.for_ (|
         M.get_name (| globals, "i" |),
@@ -565,7 +577,8 @@ Definition miller_loop : Value.t -> Value.t -> M :=
       make_dict []
     |),
         ltac:(M.monadic (
-          let f :=
+          let _ := M.assign_local (|
+            "f" ,
             BinOp.mult (|
               BinOp.mult (|
                 M.get_name (| globals, "f" |),
@@ -580,13 +593,16 @@ Definition miller_loop : Value.t -> Value.t -> M :=
                 ],
                 make_dict []
               |)
-            |) in
-          let r :=
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "r" ,
             M.call (|
               M.get_field (| M.get_name (| globals, "r" |), "double" |),
               make_list [],
               make_dict []
-            |) in
+            |)
+          |) in
           let _ :=
             (* if *)
             M.if_then_else (|
@@ -602,7 +618,8 @@ Definition miller_loop : Value.t -> Value.t -> M :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let f :=
+              let _ := M.assign_local (|
+                "f" ,
                 BinOp.mult (|
                   M.get_name (| globals, "f" |),
                   M.call (|
@@ -614,12 +631,15 @@ Definition miller_loop : Value.t -> Value.t -> M :=
                     ],
                     make_dict []
                   |)
-                |) in
-              let r :=
+                |)
+              |) in
+              let _ := M.assign_local (|
+                "r" ,
                 BinOp.add (|
                   M.get_name (| globals, "r" |),
                   M.get_name (| globals, "q" |)
-                |) in
+                |)
+              |) in
               M.pure Constant.None_
             (* else *)
             )), ltac:(M.monadic (
@@ -644,7 +664,8 @@ Definition miller_loop : Value.t -> Value.t -> M :=
       make_dict []
     |)
   |) |) in
-    let q1 :=
+    let _ := M.assign_local (|
+      "q1" ,
       M.call (|
         M.get_name (| globals, "BNP12" |),
         make_list [
@@ -660,8 +681,10 @@ Definition miller_loop : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let nq2 :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "nq2" ,
       M.call (|
         M.get_name (| globals, "BNP12" |),
         make_list [
@@ -677,8 +700,10 @@ Definition miller_loop : Value.t -> Value.t -> M :=
           |) |)
         ],
         make_dict []
-      |) in
-    let f :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "f" ,
       BinOp.mult (|
         M.get_name (| globals, "f" |),
         M.call (|
@@ -690,13 +715,17 @@ Definition miller_loop : Value.t -> Value.t -> M :=
           ],
           make_dict []
         |)
-      |) in
-    let r :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "r" ,
       BinOp.add (|
         M.get_name (| globals, "r" |),
         M.get_name (| globals, "q1" |)
-      |) in
-    let f :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "f" ,
       BinOp.mult (|
         M.get_name (| globals, "f" |),
         M.call (|
@@ -708,7 +737,8 @@ Definition miller_loop : Value.t -> Value.t -> M :=
           ],
           make_dict []
         |)
-      |) in
+      |)
+    |) in
     let _ := M.return_ (|
       BinOp.pow (|
         M.get_name (| globals, "f" |),

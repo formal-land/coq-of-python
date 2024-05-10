@@ -17,17 +17,21 @@ Introduction
 Implementations of the EVM bitwise instructions.
 ".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
 
-Axiom ethereum_spurious_dragon_vm_imports :
-  AreImported globals "ethereum.spurious_dragon.vm" [ "Evm" ].
+Axiom ethereum_spurious_dragon_vm_imports_Evm :
+  IsImported globals "ethereum.spurious_dragon.vm" "Evm".
 
-Axiom ethereum_spurious_dragon_vm_gas_imports :
-  AreImported globals "ethereum.spurious_dragon.vm.gas" [ "GAS_VERY_LOW"; "charge_gas" ].
+Axiom ethereum_spurious_dragon_vm_gas_imports_GAS_VERY_LOW :
+  IsImported globals "ethereum.spurious_dragon.vm.gas" "GAS_VERY_LOW".
+Axiom ethereum_spurious_dragon_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.spurious_dragon.vm.gas" "charge_gas".
 
-Axiom ethereum_spurious_dragon_vm_stack_imports :
-  AreImported globals "ethereum.spurious_dragon.vm.stack" [ "pop"; "push" ].
+Axiom ethereum_spurious_dragon_vm_stack_imports_pop :
+  IsImported globals "ethereum.spurious_dragon.vm.stack" "pop".
+Axiom ethereum_spurious_dragon_vm_stack_imports_push :
+  IsImported globals "ethereum.spurious_dragon.vm.stack" "push".
 
 Definition bitwise_and : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -42,22 +46,26 @@ Definition bitwise_and : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let x :=
+    let _ := M.assign_local (|
+      "x" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let y :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -97,22 +105,26 @@ Definition bitwise_or : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let x :=
+    let _ := M.assign_local (|
+      "x" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let y :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -152,22 +164,26 @@ Definition bitwise_xor : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let x :=
+    let _ := M.assign_local (|
+      "x" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let y :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -207,14 +223,16 @@ Definition bitwise_not : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let x :=
+    let _ := M.assign_local (|
+      "x" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -252,22 +270,26 @@ Definition get_byte : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let byte_index :=
+    let _ := M.assign_local (|
+      "byte_index" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let word :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "word" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -285,43 +307,53 @@ Definition get_byte : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let result :=
+        let _ := M.assign_local (|
+          "result" ,
           M.call (|
             M.get_name (| globals, "U256" |),
             make_list [
               Constant.int 0
             ],
             make_dict []
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
-        let extra_bytes_to_right :=
+        let _ := M.assign_local (|
+          "extra_bytes_to_right" ,
           BinOp.sub (|
             Constant.int 31,
             M.get_name (| globals, "byte_index" |)
-          |) in
-        let word :=
+          |)
+        |) in
+        let _ := M.assign_local (|
+          "word" ,
           BinOp.r_shift (|
             M.get_name (| globals, "word" |),
             BinOp.mult (|
               M.get_name (| globals, "extra_bytes_to_right" |),
               Constant.int 8
             |)
-          |) in
-        let word :=
+          |)
+        |) in
+        let _ := M.assign_local (|
+          "word" ,
           BinOp.bit_and (|
             M.get_name (| globals, "word" |),
             Constant.int 255
-          |) in
-        let result :=
+          |)
+        |) in
+        let _ := M.assign_local (|
+          "result" ,
           M.call (|
             M.get_name (| globals, "U256" |),
             make_list [
               M.get_name (| globals, "word" |)
             ],
             make_dict []
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|

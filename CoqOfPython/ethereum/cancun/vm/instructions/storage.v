@@ -17,26 +17,50 @@ Introduction
 Implementations of the EVM storage related instructions.
 ".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "Uint" ].
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_utils_ensure_imports :
-  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
+Axiom ethereum_utils_ensure_imports_ensure :
+  IsImported globals "ethereum.utils.ensure" "ensure".
 
-Axiom ethereum_cancun_state_imports :
-  AreImported globals "ethereum.cancun.state" [ "get_storage"; "get_storage_original"; "get_transient_storage"; "set_storage"; "set_transient_storage" ].
+Axiom ethereum_cancun_state_imports_get_storage :
+  IsImported globals "ethereum.cancun.state" "get_storage".
+Axiom ethereum_cancun_state_imports_get_storage_original :
+  IsImported globals "ethereum.cancun.state" "get_storage_original".
+Axiom ethereum_cancun_state_imports_get_transient_storage :
+  IsImported globals "ethereum.cancun.state" "get_transient_storage".
+Axiom ethereum_cancun_state_imports_set_storage :
+  IsImported globals "ethereum.cancun.state" "set_storage".
+Axiom ethereum_cancun_state_imports_set_transient_storage :
+  IsImported globals "ethereum.cancun.state" "set_transient_storage".
 
-Axiom ethereum_cancun_vm_imports :
-  AreImported globals "ethereum.cancun.vm" [ "Evm" ].
+Axiom ethereum_cancun_vm_imports_Evm :
+  IsImported globals "ethereum.cancun.vm" "Evm".
 
-Axiom ethereum_cancun_vm_exceptions_imports :
-  AreImported globals "ethereum.cancun.vm.exceptions" [ "OutOfGasError"; "WriteInStaticContext" ].
+Axiom ethereum_cancun_vm_exceptions_imports_OutOfGasError :
+  IsImported globals "ethereum.cancun.vm.exceptions" "OutOfGasError".
+Axiom ethereum_cancun_vm_exceptions_imports_WriteInStaticContext :
+  IsImported globals "ethereum.cancun.vm.exceptions" "WriteInStaticContext".
 
-Axiom ethereum_cancun_vm_gas_imports :
-  AreImported globals "ethereum.cancun.vm.gas" [ "GAS_CALL_STIPEND"; "GAS_COLD_SLOAD"; "GAS_STORAGE_CLEAR_REFUND"; "GAS_STORAGE_SET"; "GAS_STORAGE_UPDATE"; "GAS_WARM_ACCESS"; "charge_gas" ].
+Axiom ethereum_cancun_vm_gas_imports_GAS_CALL_STIPEND :
+  IsImported globals "ethereum.cancun.vm.gas" "GAS_CALL_STIPEND".
+Axiom ethereum_cancun_vm_gas_imports_GAS_COLD_SLOAD :
+  IsImported globals "ethereum.cancun.vm.gas" "GAS_COLD_SLOAD".
+Axiom ethereum_cancun_vm_gas_imports_GAS_STORAGE_CLEAR_REFUND :
+  IsImported globals "ethereum.cancun.vm.gas" "GAS_STORAGE_CLEAR_REFUND".
+Axiom ethereum_cancun_vm_gas_imports_GAS_STORAGE_SET :
+  IsImported globals "ethereum.cancun.vm.gas" "GAS_STORAGE_SET".
+Axiom ethereum_cancun_vm_gas_imports_GAS_STORAGE_UPDATE :
+  IsImported globals "ethereum.cancun.vm.gas" "GAS_STORAGE_UPDATE".
+Axiom ethereum_cancun_vm_gas_imports_GAS_WARM_ACCESS :
+  IsImported globals "ethereum.cancun.vm.gas" "GAS_WARM_ACCESS".
+Axiom ethereum_cancun_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.cancun.vm.gas" "charge_gas".
 
-Axiom ethereum_cancun_vm_stack_imports :
-  AreImported globals "ethereum.cancun.vm.stack" [ "pop"; "push" ].
+Axiom ethereum_cancun_vm_stack_imports_pop :
+  IsImported globals "ethereum.cancun.vm.stack" "pop".
+Axiom ethereum_cancun_vm_stack_imports_push :
+  IsImported globals "ethereum.cancun.vm.stack" "push".
 
 Definition sload : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -51,7 +75,8 @@ Definition sload : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let key :=
+    let _ := M.assign_local (|
+      "key" ,
       M.call (|
         M.get_field (| M.call (|
           M.get_name (| globals, "pop" |),
@@ -62,7 +87,8 @@ Definition sload : Value.t -> Value.t -> M :=
         |), "to_be_bytes32" |),
         make_list [],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -100,7 +126,8 @@ Definition sload : Value.t -> Value.t -> M :=
   |) in
         M.pure Constant.None_
       )) |) in
-    let value :=
+    let _ := M.assign_local (|
+      "value" ,
       M.call (|
         M.get_name (| globals, "get_storage" |),
         make_list [
@@ -109,7 +136,8 @@ Definition sload : Value.t -> Value.t -> M :=
           M.get_name (| globals, "key" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [
@@ -137,7 +165,8 @@ Definition sstore : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let key :=
+    let _ := M.assign_local (|
+      "key" ,
       M.call (|
         M.get_field (| M.call (|
           M.get_name (| globals, "pop" |),
@@ -148,15 +177,18 @@ Definition sstore : Value.t -> Value.t -> M :=
         |), "to_be_bytes32" |),
         make_list [],
         make_dict []
-      |) in
-    let new_value :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "new_value" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
@@ -168,7 +200,8 @@ Definition sstore : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let original_value :=
+    let _ := M.assign_local (|
+      "original_value" ,
       M.call (|
         M.get_name (| globals, "get_storage_original" |),
         make_list [
@@ -177,8 +210,10 @@ Definition sstore : Value.t -> Value.t -> M :=
           M.get_name (| globals, "key" |)
         ],
         make_dict []
-      |) in
-    let current_value :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "current_value" ,
       M.call (|
         M.get_name (| globals, "get_storage" |),
         make_list [
@@ -187,15 +222,18 @@ Definition sstore : Value.t -> Value.t -> M :=
           M.get_name (| globals, "key" |)
         ],
         make_dict []
-      |) in
-    let gas_cost :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "gas_cost" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
           Constant.int 0
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -212,9 +250,11 @@ Definition sstore : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-        let gas_cost := BinOp.add
+        let _ := M.assign_op_local (|
+          BinOp.add,
+          "gas_cost",
           M.get_name (| globals, "GAS_COLD_SLOAD" |)
-          M.get_name (| globals, "GAS_COLD_SLOAD" |) in
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
@@ -246,29 +286,32 @@ Definition sstore : Value.t -> Value.t -> M :=
             |),
           (* then *)
           ltac:(M.monadic (
-            let gas_cost := BinOp.add
+            let _ := M.assign_op_local (|
+              BinOp.add,
+              "gas_cost",
               M.get_name (| globals, "GAS_STORAGE_SET" |)
-              M.get_name (| globals, "GAS_STORAGE_SET" |) in
+            |) in
             M.pure Constant.None_
           (* else *)
           )), ltac:(M.monadic (
-            let gas_cost := BinOp.add
+            let _ := M.assign_op_local (|
+              BinOp.add,
+              "gas_cost",
               BinOp.sub (|
     M.get_name (| globals, "GAS_STORAGE_UPDATE" |),
     M.get_name (| globals, "GAS_COLD_SLOAD" |)
   |)
-              BinOp.sub (|
-    M.get_name (| globals, "GAS_STORAGE_UPDATE" |),
-    M.get_name (| globals, "GAS_COLD_SLOAD" |)
-  |) in
+            |) in
             M.pure Constant.None_
           )) |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
-        let gas_cost := BinOp.add
+        let _ := M.assign_op_local (|
+          BinOp.add,
+          "gas_cost",
           M.get_name (| globals, "GAS_WARM_ACCESS" |)
-          M.get_name (| globals, "GAS_WARM_ACCESS" |) in
+        |) in
         M.pure Constant.None_
       )) |) in
     let _ :=
@@ -462,7 +505,8 @@ Definition tload : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let key :=
+    let _ := M.assign_local (|
+      "key" ,
       M.call (|
         M.get_field (| M.call (|
           M.get_name (| globals, "pop" |),
@@ -473,7 +517,8 @@ Definition tload : Value.t -> Value.t -> M :=
         |), "to_be_bytes32" |),
         make_list [],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -482,7 +527,8 @@ Definition tload : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let value :=
+    let _ := M.assign_local (|
+      "value" ,
       M.call (|
         M.get_name (| globals, "get_transient_storage" |),
         make_list [
@@ -491,7 +537,8 @@ Definition tload : Value.t -> Value.t -> M :=
           M.get_name (| globals, "key" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [
@@ -517,7 +564,8 @@ Definition tstore : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let key :=
+    let _ := M.assign_local (|
+      "key" ,
       M.call (|
         M.get_field (| M.call (|
           M.get_name (| globals, "pop" |),
@@ -528,15 +576,18 @@ Definition tstore : Value.t -> Value.t -> M :=
         |), "to_be_bytes32" |),
         make_list [],
         make_dict []
-      |) in
-    let new_value :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "new_value" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [

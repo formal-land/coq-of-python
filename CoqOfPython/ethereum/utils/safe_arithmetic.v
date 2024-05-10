@@ -17,11 +17,17 @@ Introduction
 Safe arithmetic utility functions for U256 integer type.
 ".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "Optional"; "Type"; "Union" ].
+Axiom typing_imports_Optional :
+  IsImported globals "typing" "Optional".
+Axiom typing_imports_Type :
+  IsImported globals "typing" "Type".
+Axiom typing_imports_Union :
+  IsImported globals "typing" "Union".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Uint" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
 Definition u256_safe_add : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -82,10 +88,12 @@ Definition u256_safe_multiply : Value.t -> Value.t -> M :=
         one raised by `U256` when `U256.value > U256.MAX_VALUE`
         else `exception_type` is raised.
     " in
-    let result :=
+    let _ := M.assign_local (|
+      "result" ,
       M.get_subscript (|
         M.get_name (| globals, "numbers" |),
         Constant.int 0
-      |) in
+      |)
+    |) in
 (* At stmt: unsupported node type: Try *)
     M.pure Constant.None_)).

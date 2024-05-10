@@ -17,14 +17,14 @@ Introduction
 Runtime related operations used while executing EVM code.
 ".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "Set" ].
+Axiom typing_imports_Set :
+  IsImported globals "typing" "Set".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "Uint" ].
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_dao_fork_vm_instructions_imports :
-  AreImported globals "ethereum.dao_fork.vm.instructions" [ "Ops" ].
+Axiom ethereum_dao_fork_vm_instructions_imports_Ops :
+  IsImported globals "ethereum.dao_fork.vm.instructions" "Ops".
 
 Definition get_valid_jump_destinations : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -50,20 +50,24 @@ Definition get_valid_jump_destinations : Value.t -> Value.t -> M :=
     valid_jump_destinations: `Set[Uint]`
         The set of valid jump destinations in the code.
     " in
-    let valid_jump_destinations :=
+    let _ := M.assign_local (|
+      "valid_jump_destinations" ,
       M.call (|
         M.get_name (| globals, "set" |),
         make_list [],
         make_dict []
-      |) in
-    let pc :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "pc" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
           Constant.int 0
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       M.while (|
         Compare.lt (|
@@ -114,17 +118,21 @@ Definition get_valid_jump_destinations : Value.t -> Value.t -> M :=
                   |),
                 (* then *)
                 ltac:(M.monadic (
-                  let push_data_size :=
+                  let _ := M.assign_local (|
+                    "push_data_size" ,
                     BinOp.add (|
                       BinOp.sub (|
                         M.get_field (| M.get_name (| globals, "current_opcode" |), "value" |),
                         M.get_field (| M.get_field (| M.get_name (| globals, "Ops" |), "PUSH1" |), "value" |)
                       |),
                       Constant.int 1
-                    |) in
-                  let pc := BinOp.add
+                    |)
+                  |) in
+                  let _ := M.assign_op_local (|
+                    BinOp.add,
+                    "pc",
                     M.get_name (| globals, "push_data_size" |)
-                    M.get_name (| globals, "push_data_size" |) in
+                  |) in
                   M.pure Constant.None_
                 (* else *)
                 )), ltac:(M.monadic (
@@ -132,9 +140,11 @@ Definition get_valid_jump_destinations : Value.t -> Value.t -> M :=
                 )) |) in
               M.pure Constant.None_
             )) |) in
-          let pc := BinOp.add
+          let _ := M.assign_op_local (|
+            BinOp.add,
+            "pc",
             Constant.int 1
-            Constant.int 1 in
+          |) in
           M.pure Constant.None_
         )),
         ltac:(M.monadic (

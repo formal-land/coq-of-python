@@ -18,8 +18,8 @@ Addresses of precompiled contracts and mappings to their
 implementations.
 ".
 
-Axiom ethereum_muir_glacier_utils_hexadecimal_imports :
-  AreImported globals "ethereum.muir_glacier.utils.hexadecimal" [ "hex_to_address" ].
+Axiom ethereum_muir_glacier_utils_hexadecimal_imports_hex_to_address :
+  IsImported globals "ethereum.muir_glacier.utils.hexadecimal" "hex_to_address".
 
 Definition __all__ : Value.t := M.run ltac:(M.monadic (
   make_tuple [ Constant.str "ECRECOVER_ADDRESS"; Constant.str "SHA256_ADDRESS"; Constant.str "RIPEMD160_ADDRESS"; Constant.str "IDENTITY_ADDRESS"; Constant.str "MODEXP_ADDRESS"; Constant.str "ALT_BN128_ADD_ADDRESS"; Constant.str "ALT_BN128_MUL_ADDRESS"; Constant.str "ALT_BN128_PAIRING_CHECK_ADDRESS"; Constant.str "BLAKE2F_ADDRESS" ]

@@ -17,41 +17,65 @@ Introduction
 Implementations of the EVM environment related instructions.
 ".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Uint" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_crypto_hash_imports :
-  AreImported globals "ethereum.crypto.hash" [ "keccak256" ].
+Axiom ethereum_crypto_hash_imports_keccak256 :
+  IsImported globals "ethereum.crypto.hash" "keccak256".
 
-Axiom ethereum_utils_ensure_imports :
-  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
+Axiom ethereum_utils_ensure_imports_ensure :
+  IsImported globals "ethereum.utils.ensure" "ensure".
 
-Axiom ethereum_utils_numeric_imports :
-  AreImported globals "ethereum.utils.numeric" [ "ceil32" ].
+Axiom ethereum_utils_numeric_imports_ceil32 :
+  IsImported globals "ethereum.utils.numeric" "ceil32".
 
-Axiom ethereum_muir_glacier_fork_types_imports :
-  AreImported globals "ethereum.muir_glacier.fork_types" [ "EMPTY_ACCOUNT" ].
+Axiom ethereum_muir_glacier_fork_types_imports_EMPTY_ACCOUNT :
+  IsImported globals "ethereum.muir_glacier.fork_types" "EMPTY_ACCOUNT".
 
-Axiom ethereum_muir_glacier_state_imports :
-  AreImported globals "ethereum.muir_glacier.state" [ "get_account" ].
+Axiom ethereum_muir_glacier_state_imports_get_account :
+  IsImported globals "ethereum.muir_glacier.state" "get_account".
 
-Axiom ethereum_muir_glacier_utils_address_imports :
-  AreImported globals "ethereum.muir_glacier.utils.address" [ "to_address" ].
+Axiom ethereum_muir_glacier_utils_address_imports_to_address :
+  IsImported globals "ethereum.muir_glacier.utils.address" "to_address".
 
-Axiom ethereum_muir_glacier_vm_memory_imports :
-  AreImported globals "ethereum.muir_glacier.vm.memory" [ "buffer_read"; "memory_write" ].
+Axiom ethereum_muir_glacier_vm_memory_imports_buffer_read :
+  IsImported globals "ethereum.muir_glacier.vm.memory" "buffer_read".
+Axiom ethereum_muir_glacier_vm_memory_imports_memory_write :
+  IsImported globals "ethereum.muir_glacier.vm.memory" "memory_write".
 
-Axiom ethereum_muir_glacier_vm_imports :
-  AreImported globals "ethereum.muir_glacier.vm" [ "Evm" ].
+Axiom ethereum_muir_glacier_vm_imports_Evm :
+  IsImported globals "ethereum.muir_glacier.vm" "Evm".
 
-Axiom ethereum_muir_glacier_vm_exceptions_imports :
-  AreImported globals "ethereum.muir_glacier.vm.exceptions" [ "OutOfBoundsRead" ].
+Axiom ethereum_muir_glacier_vm_exceptions_imports_OutOfBoundsRead :
+  IsImported globals "ethereum.muir_glacier.vm.exceptions" "OutOfBoundsRead".
 
-Axiom ethereum_muir_glacier_vm_gas_imports :
-  AreImported globals "ethereum.muir_glacier.vm.gas" [ "GAS_BALANCE"; "GAS_BASE"; "GAS_CODE_HASH"; "GAS_COPY"; "GAS_EXTERNAL"; "GAS_FAST_STEP"; "GAS_RETURN_DATA_COPY"; "GAS_VERY_LOW"; "calculate_gas_extend_memory"; "charge_gas" ].
+Axiom ethereum_muir_glacier_vm_gas_imports_GAS_BALANCE :
+  IsImported globals "ethereum.muir_glacier.vm.gas" "GAS_BALANCE".
+Axiom ethereum_muir_glacier_vm_gas_imports_GAS_BASE :
+  IsImported globals "ethereum.muir_glacier.vm.gas" "GAS_BASE".
+Axiom ethereum_muir_glacier_vm_gas_imports_GAS_CODE_HASH :
+  IsImported globals "ethereum.muir_glacier.vm.gas" "GAS_CODE_HASH".
+Axiom ethereum_muir_glacier_vm_gas_imports_GAS_COPY :
+  IsImported globals "ethereum.muir_glacier.vm.gas" "GAS_COPY".
+Axiom ethereum_muir_glacier_vm_gas_imports_GAS_EXTERNAL :
+  IsImported globals "ethereum.muir_glacier.vm.gas" "GAS_EXTERNAL".
+Axiom ethereum_muir_glacier_vm_gas_imports_GAS_FAST_STEP :
+  IsImported globals "ethereum.muir_glacier.vm.gas" "GAS_FAST_STEP".
+Axiom ethereum_muir_glacier_vm_gas_imports_GAS_RETURN_DATA_COPY :
+  IsImported globals "ethereum.muir_glacier.vm.gas" "GAS_RETURN_DATA_COPY".
+Axiom ethereum_muir_glacier_vm_gas_imports_GAS_VERY_LOW :
+  IsImported globals "ethereum.muir_glacier.vm.gas" "GAS_VERY_LOW".
+Axiom ethereum_muir_glacier_vm_gas_imports_calculate_gas_extend_memory :
+  IsImported globals "ethereum.muir_glacier.vm.gas" "calculate_gas_extend_memory".
+Axiom ethereum_muir_glacier_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.muir_glacier.vm.gas" "charge_gas".
 
-Axiom ethereum_muir_glacier_vm_stack_imports :
-  AreImported globals "ethereum.muir_glacier.vm.stack" [ "pop"; "push" ].
+Axiom ethereum_muir_glacier_vm_stack_imports_pop :
+  IsImported globals "ethereum.muir_glacier.vm.stack" "pop".
+Axiom ethereum_muir_glacier_vm_stack_imports_push :
+  IsImported globals "ethereum.muir_glacier.vm.stack" "push".
 
 Definition address : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -107,7 +131,8 @@ Definition balance : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let address :=
+    let _ := M.assign_local (|
+      "address" ,
       M.call (|
         M.get_name (| globals, "to_address" |),
         make_list [
@@ -120,7 +145,8 @@ Definition balance : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -129,7 +155,8 @@ Definition balance : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let balance :=
+    let _ := M.assign_local (|
+      "balance" ,
       M.get_field (| M.call (|
         M.get_name (| globals, "get_account" |),
         make_list [
@@ -137,7 +164,8 @@ Definition balance : Value.t -> Value.t -> M :=
           M.get_name (| globals, "address" |)
         ],
         make_dict []
-      |), "balance" |) in
+      |), "balance" |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [
@@ -287,14 +315,16 @@ Definition calldataload : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let start_index :=
+    let _ := M.assign_local (|
+      "start_index" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -303,7 +333,8 @@ Definition calldataload : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let value :=
+    let _ := M.assign_local (|
+      "value" ,
       M.call (|
         M.get_name (| globals, "buffer_read" |),
         make_list [
@@ -318,7 +349,8 @@ Definition calldataload : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [
@@ -403,31 +435,38 @@ Definition calldatacopy : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let memory_start_index :=
+    let _ := M.assign_local (|
+      "memory_start_index" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let data_start_index :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "data_start_index" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "size" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let words :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "words" ,
       BinOp.floor_div (|
         M.call (|
           M.get_name (| globals, "ceil32" |),
@@ -443,13 +482,17 @@ Definition calldatacopy : Value.t -> Value.t -> M :=
           make_dict []
         |),
         Constant.int 32
-      |) in
-    let copy_gas_cost :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "copy_gas_cost" ,
       BinOp.mult (|
         M.get_name (| globals, "GAS_COPY" |),
         M.get_name (| globals, "words" |)
-      |) in
-    let extend_memory :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "extend_memory" ,
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),
         make_list [
@@ -459,7 +502,8 @@ Definition calldatacopy : Value.t -> Value.t -> M :=
           ]
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -482,7 +526,8 @@ Definition calldatacopy : Value.t -> Value.t -> M :=
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
-    let value :=
+    let _ := M.assign_local (|
+      "value" ,
       M.call (|
         M.get_name (| globals, "buffer_read" |),
         make_list [
@@ -491,7 +536,8 @@ Definition calldatacopy : Value.t -> Value.t -> M :=
           M.get_name (| globals, "size" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "memory_write" |),
     make_list [
@@ -571,31 +617,38 @@ Definition codecopy : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let memory_start_index :=
+    let _ := M.assign_local (|
+      "memory_start_index" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let code_start_index :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "code_start_index" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "size" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let words :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "words" ,
       BinOp.floor_div (|
         M.call (|
           M.get_name (| globals, "ceil32" |),
@@ -611,13 +664,17 @@ Definition codecopy : Value.t -> Value.t -> M :=
           make_dict []
         |),
         Constant.int 32
-      |) in
-    let copy_gas_cost :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "copy_gas_cost" ,
       BinOp.mult (|
         M.get_name (| globals, "GAS_COPY" |),
         M.get_name (| globals, "words" |)
-      |) in
-    let extend_memory :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "extend_memory" ,
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),
         make_list [
@@ -627,7 +684,8 @@ Definition codecopy : Value.t -> Value.t -> M :=
           ]
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -650,7 +708,8 @@ Definition codecopy : Value.t -> Value.t -> M :=
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
-    let value :=
+    let _ := M.assign_local (|
+      "value" ,
       M.call (|
         M.get_name (| globals, "buffer_read" |),
         make_list [
@@ -659,7 +718,8 @@ Definition codecopy : Value.t -> Value.t -> M :=
           M.get_name (| globals, "size" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "memory_write" |),
     make_list [
@@ -730,7 +790,8 @@ Definition extcodesize : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let address :=
+    let _ := M.assign_local (|
+      "address" ,
       M.call (|
         M.get_name (| globals, "to_address" |),
         make_list [
@@ -743,7 +804,8 @@ Definition extcodesize : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -752,7 +814,8 @@ Definition extcodesize : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let codesize :=
+    let _ := M.assign_local (|
+      "codesize" ,
       M.call (|
         M.get_name (| globals, "U256" |),
         make_list [
@@ -772,7 +835,8 @@ Definition extcodesize : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [
@@ -800,7 +864,8 @@ Definition extcodecopy : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let address :=
+    let _ := M.assign_local (|
+      "address" ,
       M.call (|
         M.get_name (| globals, "to_address" |),
         make_list [
@@ -813,32 +878,40 @@ Definition extcodecopy : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let memory_start_index :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_start_index" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let code_start_index :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "code_start_index" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "size" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let words :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "words" ,
       BinOp.floor_div (|
         M.call (|
           M.get_name (| globals, "ceil32" |),
@@ -854,13 +927,17 @@ Definition extcodecopy : Value.t -> Value.t -> M :=
           make_dict []
         |),
         Constant.int 32
-      |) in
-    let copy_gas_cost :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "copy_gas_cost" ,
       BinOp.mult (|
         M.get_name (| globals, "GAS_COPY" |),
         M.get_name (| globals, "words" |)
-      |) in
-    let extend_memory :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "extend_memory" ,
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),
         make_list [
@@ -870,7 +947,8 @@ Definition extcodecopy : Value.t -> Value.t -> M :=
           ]
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -893,7 +971,8 @@ Definition extcodecopy : Value.t -> Value.t -> M :=
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
-    let code :=
+    let _ := M.assign_local (|
+      "code" ,
       M.get_field (| M.call (|
         M.get_name (| globals, "get_account" |),
         make_list [
@@ -901,8 +980,10 @@ Definition extcodecopy : Value.t -> Value.t -> M :=
           M.get_name (| globals, "address" |)
         ],
         make_dict []
-      |), "code" |) in
-    let value :=
+      |), "code" |)
+    |) in
+    let _ := M.assign_local (|
+      "value" ,
       M.call (|
         M.get_name (| globals, "buffer_read" |),
         make_list [
@@ -911,7 +992,8 @@ Definition extcodecopy : Value.t -> Value.t -> M :=
           M.get_name (| globals, "size" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "memory_write" |),
     make_list [
@@ -986,31 +1068,38 @@ Definition returndatacopy : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let memory_start_index :=
+    let _ := M.assign_local (|
+      "memory_start_index" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let return_data_start_position :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "return_data_start_position" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "size" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let words :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "words" ,
       BinOp.floor_div (|
         M.call (|
           M.get_name (| globals, "ceil32" |),
@@ -1026,13 +1115,17 @@ Definition returndatacopy : Value.t -> Value.t -> M :=
           make_dict []
         |),
         Constant.int 32
-      |) in
-    let copy_gas_cost :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "copy_gas_cost" ,
       BinOp.mult (|
         M.get_name (| globals, "GAS_RETURN_DATA_COPY" |),
         M.get_name (| globals, "words" |)
-      |) in
-    let extend_memory :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "extend_memory" ,
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),
         make_list [
@@ -1042,7 +1135,8 @@ Definition returndatacopy : Value.t -> Value.t -> M :=
           ]
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -1097,7 +1191,8 @@ Definition returndatacopy : Value.t -> Value.t -> M :=
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
-    let value :=
+    let _ := M.assign_local (|
+      "value" ,
       M.slice (|
         M.get_field (| M.get_name (| globals, "evm" |), "return_data" |),
         M.get_name (| globals, "return_data_start_position" |),
@@ -1106,7 +1201,8 @@ Definition returndatacopy : Value.t -> Value.t -> M :=
           M.get_name (| globals, "size" |)
         |),
         Constant.None_
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "memory_write" |),
     make_list [
@@ -1133,7 +1229,8 @@ Definition extcodehash : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let address :=
+    let _ := M.assign_local (|
+      "address" ,
       M.call (|
         M.get_name (| globals, "to_address" |),
         make_list [
@@ -1146,7 +1243,8 @@ Definition extcodehash : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -1155,7 +1253,8 @@ Definition extcodehash : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let account :=
+    let _ := M.assign_local (|
+      "account" ,
       M.call (|
         M.get_name (| globals, "get_account" |),
         make_list [
@@ -1163,7 +1262,8 @@ Definition extcodehash : Value.t -> Value.t -> M :=
           M.get_name (| globals, "address" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -1173,18 +1273,21 @@ Definition extcodehash : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let codehash :=
+        let _ := M.assign_local (|
+          "codehash" ,
           M.call (|
             M.get_name (| globals, "U256" |),
             make_list [
               Constant.int 0
             ],
             make_dict []
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
-        let codehash :=
+        let _ := M.assign_local (|
+          "codehash" ,
           M.call (|
             M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
             make_list [
@@ -1197,7 +1300,8 @@ Definition extcodehash : Value.t -> Value.t -> M :=
               |)
             ],
             make_dict []
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
@@ -1236,7 +1340,8 @@ Definition self_balance : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let balance :=
+    let _ := M.assign_local (|
+      "balance" ,
       M.get_field (| M.call (|
         M.get_name (| globals, "get_account" |),
         make_list [
@@ -1244,7 +1349,8 @@ Definition self_balance : Value.t -> Value.t -> M :=
           M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "current_target" |)
         ],
         make_dict []
-      |), "balance" |) in
+      |), "balance" |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [

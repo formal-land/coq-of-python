@@ -17,23 +17,41 @@ Introduction
 Implementations of the EVM storage related instructions.
 ".
 
-Axiom ethereum_utils_ensure_imports :
-  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
+Axiom ethereum_utils_ensure_imports_ensure :
+  IsImported globals "ethereum.utils.ensure" "ensure".
 
-Axiom ethereum_muir_glacier_state_imports :
-  AreImported globals "ethereum.muir_glacier.state" [ "get_storage"; "get_storage_original"; "set_storage" ].
+Axiom ethereum_muir_glacier_state_imports_get_storage :
+  IsImported globals "ethereum.muir_glacier.state" "get_storage".
+Axiom ethereum_muir_glacier_state_imports_get_storage_original :
+  IsImported globals "ethereum.muir_glacier.state" "get_storage_original".
+Axiom ethereum_muir_glacier_state_imports_set_storage :
+  IsImported globals "ethereum.muir_glacier.state" "set_storage".
 
-Axiom ethereum_muir_glacier_vm_imports :
-  AreImported globals "ethereum.muir_glacier.vm" [ "Evm" ].
+Axiom ethereum_muir_glacier_vm_imports_Evm :
+  IsImported globals "ethereum.muir_glacier.vm" "Evm".
 
-Axiom ethereum_muir_glacier_vm_exceptions_imports :
-  AreImported globals "ethereum.muir_glacier.vm.exceptions" [ "OutOfGasError"; "WriteInStaticContext" ].
+Axiom ethereum_muir_glacier_vm_exceptions_imports_OutOfGasError :
+  IsImported globals "ethereum.muir_glacier.vm.exceptions" "OutOfGasError".
+Axiom ethereum_muir_glacier_vm_exceptions_imports_WriteInStaticContext :
+  IsImported globals "ethereum.muir_glacier.vm.exceptions" "WriteInStaticContext".
 
-Axiom ethereum_muir_glacier_vm_gas_imports :
-  AreImported globals "ethereum.muir_glacier.vm.gas" [ "GAS_CALL_STIPEND"; "GAS_SLOAD"; "GAS_STORAGE_CLEAR_REFUND"; "GAS_STORAGE_SET"; "GAS_STORAGE_UPDATE"; "charge_gas" ].
+Axiom ethereum_muir_glacier_vm_gas_imports_GAS_CALL_STIPEND :
+  IsImported globals "ethereum.muir_glacier.vm.gas" "GAS_CALL_STIPEND".
+Axiom ethereum_muir_glacier_vm_gas_imports_GAS_SLOAD :
+  IsImported globals "ethereum.muir_glacier.vm.gas" "GAS_SLOAD".
+Axiom ethereum_muir_glacier_vm_gas_imports_GAS_STORAGE_CLEAR_REFUND :
+  IsImported globals "ethereum.muir_glacier.vm.gas" "GAS_STORAGE_CLEAR_REFUND".
+Axiom ethereum_muir_glacier_vm_gas_imports_GAS_STORAGE_SET :
+  IsImported globals "ethereum.muir_glacier.vm.gas" "GAS_STORAGE_SET".
+Axiom ethereum_muir_glacier_vm_gas_imports_GAS_STORAGE_UPDATE :
+  IsImported globals "ethereum.muir_glacier.vm.gas" "GAS_STORAGE_UPDATE".
+Axiom ethereum_muir_glacier_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.muir_glacier.vm.gas" "charge_gas".
 
-Axiom ethereum_muir_glacier_vm_stack_imports :
-  AreImported globals "ethereum.muir_glacier.vm.stack" [ "pop"; "push" ].
+Axiom ethereum_muir_glacier_vm_stack_imports_pop :
+  IsImported globals "ethereum.muir_glacier.vm.stack" "pop".
+Axiom ethereum_muir_glacier_vm_stack_imports_push :
+  IsImported globals "ethereum.muir_glacier.vm.stack" "push".
 
 Definition sload : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -48,7 +66,8 @@ Definition sload : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let key :=
+    let _ := M.assign_local (|
+      "key" ,
       M.call (|
         M.get_field (| M.call (|
           M.get_name (| globals, "pop" |),
@@ -59,7 +78,8 @@ Definition sload : Value.t -> Value.t -> M :=
         |), "to_be_bytes32" |),
         make_list [],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -68,7 +88,8 @@ Definition sload : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let value :=
+    let _ := M.assign_local (|
+      "value" ,
       M.call (|
         M.get_name (| globals, "get_storage" |),
         make_list [
@@ -77,7 +98,8 @@ Definition sload : Value.t -> Value.t -> M :=
           M.get_name (| globals, "key" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [
@@ -105,7 +127,8 @@ Definition sstore : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let key :=
+    let _ := M.assign_local (|
+      "key" ,
       M.call (|
         M.get_field (| M.call (|
           M.get_name (| globals, "pop" |),
@@ -116,15 +139,18 @@ Definition sstore : Value.t -> Value.t -> M :=
         |), "to_be_bytes32" |),
         make_list [],
         make_dict []
-      |) in
-    let new_value :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "new_value" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
@@ -136,7 +162,8 @@ Definition sstore : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let original_value :=
+    let _ := M.assign_local (|
+      "original_value" ,
       M.call (|
         M.get_name (| globals, "get_storage_original" |),
         make_list [
@@ -145,8 +172,10 @@ Definition sstore : Value.t -> Value.t -> M :=
           M.get_name (| globals, "key" |)
         ],
         make_dict []
-      |) in
-    let current_value :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "current_value" ,
       M.call (|
         M.get_name (| globals, "get_storage" |),
         make_list [
@@ -155,7 +184,8 @@ Definition sstore : Value.t -> Value.t -> M :=
           M.get_name (| globals, "key" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -182,20 +212,26 @@ Definition sstore : Value.t -> Value.t -> M :=
             |),
           (* then *)
           ltac:(M.monadic (
-            let gas_cost :=
-              M.get_name (| globals, "GAS_STORAGE_SET" |) in
+            let _ := M.assign_local (|
+              "gas_cost" ,
+              M.get_name (| globals, "GAS_STORAGE_SET" |)
+            |) in
             M.pure Constant.None_
           (* else *)
           )), ltac:(M.monadic (
-            let gas_cost :=
-              M.get_name (| globals, "GAS_STORAGE_UPDATE" |) in
+            let _ := M.assign_local (|
+              "gas_cost" ,
+              M.get_name (| globals, "GAS_STORAGE_UPDATE" |)
+            |) in
             M.pure Constant.None_
           )) |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
-        let gas_cost :=
-          M.get_name (| globals, "GAS_SLOAD" |) in
+        let _ := M.assign_local (|
+          "gas_cost" ,
+          M.get_name (| globals, "GAS_SLOAD" |)
+        |) in
         M.pure Constant.None_
       )) |) in
     let _ :=

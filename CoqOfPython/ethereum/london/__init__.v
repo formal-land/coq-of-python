@@ -8,8 +8,8 @@ The London fork overhauls the transaction fee market, changes gas refunds,
 reserves a contract prefix for future use, and delays the difficulty bomb.
 ".
 
-Axiom ethereum_fork_criteria_imports :
-  AreImported globals "ethereum.fork_criteria" [ "ByBlockNumber" ].
+Axiom ethereum_fork_criteria_imports_ByBlockNumber :
+  IsImported globals "ethereum.fork_criteria" "ByBlockNumber".
 
 Definition FORK_CRITERIA : Value.t := M.run ltac:(M.monadic (
   M.call (|

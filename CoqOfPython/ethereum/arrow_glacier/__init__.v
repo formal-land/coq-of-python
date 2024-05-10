@@ -8,8 +8,8 @@ The Arrow Glacier fork delays the difficulty bomb. There are no other changes
 in this fork.
 ".
 
-Axiom ethereum_fork_criteria_imports :
-  AreImported globals "ethereum.fork_criteria" [ "ByBlockNumber" ].
+Axiom ethereum_fork_criteria_imports_ByBlockNumber :
+  IsImported globals "ethereum.fork_criteria" "ByBlockNumber".
 
 Definition FORK_CRITERIA : Value.t := M.run ltac:(M.monadic (
   M.call (|

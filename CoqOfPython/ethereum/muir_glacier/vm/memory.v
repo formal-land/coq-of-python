@@ -17,11 +17,15 @@ Introduction
 EVM memory operations.
 ".
 
-Axiom ethereum_utils_byte_imports :
-  AreImported globals "ethereum.utils.byte" [ "right_pad_zero_bytes" ].
+Axiom ethereum_utils_byte_imports_right_pad_zero_bytes :
+  IsImported globals "ethereum.utils.byte" "right_pad_zero_bytes".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Uint" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Bytes :
+  IsImported globals "ethereum.base_types" "Bytes".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
 Definition memory_write : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

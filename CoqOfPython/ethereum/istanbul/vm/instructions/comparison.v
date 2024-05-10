@@ -17,17 +17,21 @@ Introduction
 Implementations of the EVM Comparison instructions.
 ".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
 
-Axiom ethereum_istanbul_vm_imports :
-  AreImported globals "ethereum.istanbul.vm" [ "Evm" ].
+Axiom ethereum_istanbul_vm_imports_Evm :
+  IsImported globals "ethereum.istanbul.vm" "Evm".
 
-Axiom ethereum_istanbul_vm_gas_imports :
-  AreImported globals "ethereum.istanbul.vm.gas" [ "GAS_VERY_LOW"; "charge_gas" ].
+Axiom ethereum_istanbul_vm_gas_imports_GAS_VERY_LOW :
+  IsImported globals "ethereum.istanbul.vm.gas" "GAS_VERY_LOW".
+Axiom ethereum_istanbul_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.istanbul.vm.gas" "charge_gas".
 
-Axiom ethereum_istanbul_vm_stack_imports :
-  AreImported globals "ethereum.istanbul.vm.stack" [ "pop"; "push" ].
+Axiom ethereum_istanbul_vm_stack_imports_pop :
+  IsImported globals "ethereum.istanbul.vm.stack" "pop".
+Axiom ethereum_istanbul_vm_stack_imports_push :
+  IsImported globals "ethereum.istanbul.vm.stack" "push".
 
 Definition less_than : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -42,22 +46,26 @@ Definition less_than : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let left :=
+    let _ := M.assign_local (|
+      "left" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let right :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "right" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -66,7 +74,8 @@ Definition less_than : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let result :=
+    let _ := M.assign_local (|
+      "result" ,
       M.call (|
         M.get_name (| globals, "U256" |),
         make_list [
@@ -76,7 +85,8 @@ Definition less_than : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [
@@ -104,7 +114,8 @@ Definition signed_less_than : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let left :=
+    let _ := M.assign_local (|
+      "left" ,
       M.call (|
         M.get_field (| M.call (|
           M.get_name (| globals, "pop" |),
@@ -115,8 +126,10 @@ Definition signed_less_than : Value.t -> Value.t -> M :=
         |), "to_signed" |),
         make_list [],
         make_dict []
-      |) in
-    let right :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "right" ,
       M.call (|
         M.get_field (| M.call (|
           M.get_name (| globals, "pop" |),
@@ -127,7 +140,8 @@ Definition signed_less_than : Value.t -> Value.t -> M :=
         |), "to_signed" |),
         make_list [],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -136,7 +150,8 @@ Definition signed_less_than : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let result :=
+    let _ := M.assign_local (|
+      "result" ,
       M.call (|
         M.get_name (| globals, "U256" |),
         make_list [
@@ -146,7 +161,8 @@ Definition signed_less_than : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [
@@ -175,22 +191,26 @@ Definition greater_than : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let left :=
+    let _ := M.assign_local (|
+      "left" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let right :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "right" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -199,7 +219,8 @@ Definition greater_than : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let result :=
+    let _ := M.assign_local (|
+      "result" ,
       M.call (|
         M.get_name (| globals, "U256" |),
         make_list [
@@ -209,7 +230,8 @@ Definition greater_than : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [
@@ -237,7 +259,8 @@ Definition signed_greater_than : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let left :=
+    let _ := M.assign_local (|
+      "left" ,
       M.call (|
         M.get_field (| M.call (|
           M.get_name (| globals, "pop" |),
@@ -248,8 +271,10 @@ Definition signed_greater_than : Value.t -> Value.t -> M :=
         |), "to_signed" |),
         make_list [],
         make_dict []
-      |) in
-    let right :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "right" ,
       M.call (|
         M.get_field (| M.call (|
           M.get_name (| globals, "pop" |),
@@ -260,7 +285,8 @@ Definition signed_greater_than : Value.t -> Value.t -> M :=
         |), "to_signed" |),
         make_list [],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -269,7 +295,8 @@ Definition signed_greater_than : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let result :=
+    let _ := M.assign_local (|
+      "result" ,
       M.call (|
         M.get_name (| globals, "U256" |),
         make_list [
@@ -279,7 +306,8 @@ Definition signed_greater_than : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [
@@ -308,22 +336,26 @@ Definition equal : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let left :=
+    let _ := M.assign_local (|
+      "left" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let right :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "right" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -332,7 +364,8 @@ Definition equal : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let result :=
+    let _ := M.assign_local (|
+      "result" ,
       M.call (|
         M.get_name (| globals, "U256" |),
         make_list [
@@ -342,7 +375,8 @@ Definition equal : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [
@@ -371,14 +405,16 @@ Definition is_zero : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let x :=
+    let _ := M.assign_local (|
+      "x" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -387,7 +423,8 @@ Definition is_zero : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let result :=
+    let _ := M.assign_local (|
+      "result" ,
       M.call (|
         M.get_name (| globals, "U256" |),
         make_list [
@@ -397,7 +434,8 @@ Definition is_zero : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [

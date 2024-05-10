@@ -18,29 +18,45 @@ The abstract computer which runs the code stored in an
 `.fork_types.Account`.
 ".
 
-Axiom dataclasses_imports :
-  AreImported globals "dataclasses" [ "dataclass" ].
+Axiom dataclasses_imports_dataclass :
+  IsImported globals "dataclasses" "dataclass".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "List"; "Optional"; "Set"; "Tuple"; "Union" ].
+Axiom typing_imports_List :
+  IsImported globals "typing" "List".
+Axiom typing_imports_Optional :
+  IsImported globals "typing" "Optional".
+Axiom typing_imports_Set :
+  IsImported globals "typing" "Set".
+Axiom typing_imports_Tuple :
+  IsImported globals "typing" "Tuple".
+Axiom typing_imports_Union :
+  IsImported globals "typing" "Union".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Bytes0"; "Uint" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Bytes :
+  IsImported globals "ethereum.base_types" "Bytes".
+Axiom ethereum_base_types_imports_Bytes0 :
+  IsImported globals "ethereum.base_types" "Bytes0".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_crypto_hash_imports :
-  AreImported globals "ethereum.crypto.hash" [ "Hash32" ].
+Axiom ethereum_crypto_hash_imports_Hash32 :
+  IsImported globals "ethereum.crypto.hash" "Hash32".
 
-Axiom ethereum_spurious_dragon_blocks_imports :
-  AreImported globals "ethereum.spurious_dragon.blocks" [ "Log" ].
+Axiom ethereum_spurious_dragon_blocks_imports_Log :
+  IsImported globals "ethereum.spurious_dragon.blocks" "Log".
 
-Axiom ethereum_spurious_dragon_fork_types_imports :
-  AreImported globals "ethereum.spurious_dragon.fork_types" [ "Address" ].
+Axiom ethereum_spurious_dragon_fork_types_imports_Address :
+  IsImported globals "ethereum.spurious_dragon.fork_types" "Address".
 
-Axiom ethereum_spurious_dragon_state_imports :
-  AreImported globals "ethereum.spurious_dragon.state" [ "State"; "account_exists_and_is_empty" ].
+Axiom ethereum_spurious_dragon_state_imports_State :
+  IsImported globals "ethereum.spurious_dragon.state" "State".
+Axiom ethereum_spurious_dragon_state_imports_account_exists_and_is_empty :
+  IsImported globals "ethereum.spurious_dragon.state" "account_exists_and_is_empty".
 
-Axiom ethereum_spurious_dragon_vm_precompiled_contracts_imports :
-  AreImported globals "ethereum.spurious_dragon.vm.precompiled_contracts" [ "RIPEMD160_ADDRESS" ].
+Axiom ethereum_spurious_dragon_vm_precompiled_contracts_imports_RIPEMD160_ADDRESS :
+  IsImported globals "ethereum.spurious_dragon.vm.precompiled_contracts" "RIPEMD160_ADDRESS".
 
 Definition __all__ : Value.t := M.run ltac:(M.monadic (
   make_tuple [ Constant.str "Environment"; Constant.str "Evm"; Constant.str "Message" ]

@@ -18,11 +18,15 @@ Hexadecimal utility functions used in this specification, specific to
 Muir Glacier types.
 ".
 
-Axiom ethereum_utils_hexadecimal_imports :
-  AreImported globals "ethereum.utils.hexadecimal" [ "remove_hex_prefix" ].
+Axiom ethereum_utils_hexadecimal_imports_remove_hex_prefix :
+  IsImported globals "ethereum.utils.hexadecimal" "remove_hex_prefix".
 
-Axiom ethereum_muir_glacier_fork_types_imports :
-  AreImported globals "ethereum.muir_glacier.fork_types" [ "Address"; "Bloom"; "Root" ].
+Axiom ethereum_muir_glacier_fork_types_imports_Address :
+  IsImported globals "ethereum.muir_glacier.fork_types" "Address".
+Axiom ethereum_muir_glacier_fork_types_imports_Bloom :
+  IsImported globals "ethereum.muir_glacier.fork_types" "Bloom".
+Axiom ethereum_muir_glacier_fork_types_imports_Root :
+  IsImported globals "ethereum.muir_glacier.fork_types" "Root".
 
 Definition hex_to_root : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

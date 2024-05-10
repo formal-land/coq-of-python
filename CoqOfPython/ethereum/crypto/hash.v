@@ -17,11 +17,15 @@ Introduction
 Cryptographic hashing functions.
 ".
 
-Axiom Crypto_Hash_imports :
-  AreImported globals "Crypto.Hash" [ "keccak" ].
+Axiom Crypto_Hash_imports_keccak :
+  IsImported globals "Crypto.Hash" "keccak".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "Bytes"; "Bytes32"; "Bytes64" ].
+Axiom ethereum_base_types_imports_Bytes :
+  IsImported globals "ethereum.base_types" "Bytes".
+Axiom ethereum_base_types_imports_Bytes32 :
+  IsImported globals "ethereum.base_types" "Bytes32".
+Axiom ethereum_base_types_imports_Bytes64 :
+  IsImported globals "ethereum.base_types" "Bytes64".
 
 Definition Hash32 : Value.t := M.run ltac:(M.monadic (
   M.get_name (| globals, "Bytes32" |)
@@ -47,12 +51,14 @@ Definition keccak256 : Value.t -> Value.t -> M :=
     hash : `ethereum.base_types.Hash32`
         Output of the hash function.
     " in
-    let k :=
+    let _ := M.assign_local (|
+      "k" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "keccak" |), "new" |),
         make_list [],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.return_ (|
       M.call (|
         M.get_name (| globals, "Hash32" |),
@@ -90,12 +96,14 @@ Definition keccak512 : Value.t -> Value.t -> M :=
     hash : `ethereum.base_types.Hash32`
         Output of the hash function.
     " in
-    let k :=
+    let _ := M.assign_local (|
+      "k" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "keccak" |), "new" |),
         make_list [],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.return_ (|
       M.call (|
         M.get_name (| globals, "Hash64" |),

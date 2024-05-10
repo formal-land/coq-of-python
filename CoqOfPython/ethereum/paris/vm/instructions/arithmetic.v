@@ -17,20 +17,38 @@ Introduction
 Implementations of the EVM Arithmetic instructions.
 ".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U255_CEIL_VALUE"; "U256"; "U256_CEIL_VALUE"; "Uint" ].
+Axiom ethereum_base_types_imports_U255_CEIL_VALUE :
+  IsImported globals "ethereum.base_types" "U255_CEIL_VALUE".
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_U256_CEIL_VALUE :
+  IsImported globals "ethereum.base_types" "U256_CEIL_VALUE".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_utils_numeric_imports :
-  AreImported globals "ethereum.utils.numeric" [ "get_sign" ].
+Axiom ethereum_utils_numeric_imports_get_sign :
+  IsImported globals "ethereum.utils.numeric" "get_sign".
 
-Axiom ethereum_paris_vm_imports :
-  AreImported globals "ethereum.paris.vm" [ "Evm" ].
+Axiom ethereum_paris_vm_imports_Evm :
+  IsImported globals "ethereum.paris.vm" "Evm".
 
-Axiom ethereum_paris_vm_gas_imports :
-  AreImported globals "ethereum.paris.vm.gas" [ "GAS_EXPONENTIATION"; "GAS_EXPONENTIATION_PER_BYTE"; "GAS_LOW"; "GAS_MID"; "GAS_VERY_LOW"; "charge_gas" ].
+Axiom ethereum_paris_vm_gas_imports_GAS_EXPONENTIATION :
+  IsImported globals "ethereum.paris.vm.gas" "GAS_EXPONENTIATION".
+Axiom ethereum_paris_vm_gas_imports_GAS_EXPONENTIATION_PER_BYTE :
+  IsImported globals "ethereum.paris.vm.gas" "GAS_EXPONENTIATION_PER_BYTE".
+Axiom ethereum_paris_vm_gas_imports_GAS_LOW :
+  IsImported globals "ethereum.paris.vm.gas" "GAS_LOW".
+Axiom ethereum_paris_vm_gas_imports_GAS_MID :
+  IsImported globals "ethereum.paris.vm.gas" "GAS_MID".
+Axiom ethereum_paris_vm_gas_imports_GAS_VERY_LOW :
+  IsImported globals "ethereum.paris.vm.gas" "GAS_VERY_LOW".
+Axiom ethereum_paris_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.paris.vm.gas" "charge_gas".
 
-Axiom ethereum_paris_vm_stack_imports :
-  AreImported globals "ethereum.paris.vm.stack" [ "pop"; "push" ].
+Axiom ethereum_paris_vm_stack_imports_pop :
+  IsImported globals "ethereum.paris.vm.stack" "pop".
+Axiom ethereum_paris_vm_stack_imports_push :
+  IsImported globals "ethereum.paris.vm.stack" "push".
 
 Definition add : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -45,22 +63,26 @@ Definition add : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let x :=
+    let _ := M.assign_local (|
+      "x" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let y :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -69,14 +91,16 @@ Definition add : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let result :=
+    let _ := M.assign_local (|
+      "result" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "x" |), "wrapping_add" |),
         make_list [
           M.get_name (| globals, "y" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [
@@ -105,22 +129,26 @@ Definition sub : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let x :=
+    let _ := M.assign_local (|
+      "x" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let y :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -129,14 +157,16 @@ Definition sub : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let result :=
+    let _ := M.assign_local (|
+      "result" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "x" |), "wrapping_sub" |),
         make_list [
           M.get_name (| globals, "y" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [
@@ -165,22 +195,26 @@ Definition mul : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let x :=
+    let _ := M.assign_local (|
+      "x" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let y :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -189,14 +223,16 @@ Definition mul : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let result :=
+    let _ := M.assign_local (|
+      "result" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "x" |), "wrapping_mul" |),
         make_list [
           M.get_name (| globals, "y" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [
@@ -225,22 +261,26 @@ Definition div : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let dividend :=
+    let _ := M.assign_local (|
+      "dividend" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let divisor :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "divisor" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -258,22 +298,26 @@ Definition div : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let quotient :=
+        let _ := M.assign_local (|
+          "quotient" ,
           M.call (|
             M.get_name (| globals, "U256" |),
             make_list [
               Constant.int 0
             ],
             make_dict []
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
-        let quotient :=
+        let _ := M.assign_local (|
+          "quotient" ,
           BinOp.floor_div (|
             M.get_name (| globals, "dividend" |),
             M.get_name (| globals, "divisor" |)
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
@@ -304,7 +348,8 @@ Definition sdiv : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let dividend :=
+    let _ := M.assign_local (|
+      "dividend" ,
       M.call (|
         M.get_field (| M.call (|
           M.get_name (| globals, "pop" |),
@@ -315,8 +360,10 @@ Definition sdiv : Value.t -> Value.t -> M :=
         |), "to_signed" |),
         make_list [],
         make_dict []
-      |) in
-    let divisor :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "divisor" ,
       M.call (|
         M.get_field (| M.call (|
           M.get_name (| globals, "pop" |),
@@ -327,7 +374,8 @@ Definition sdiv : Value.t -> Value.t -> M :=
         |), "to_signed" |),
         make_list [],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -345,8 +393,10 @@ Definition sdiv : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let quotient :=
-          Constant.int 0 in
+        let _ := M.assign_local (|
+          "quotient" ,
+          Constant.int 0
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
@@ -367,12 +417,15 @@ Definition sdiv : Value.t -> Value.t -> M :=
             |),
           (* then *)
           ltac:(M.monadic (
-            let quotient :=
-              UnOp.sub (| M.get_name (| globals, "U255_CEIL_VALUE" |) |) in
+            let _ := M.assign_local (|
+              "quotient" ,
+              UnOp.sub (| M.get_name (| globals, "U255_CEIL_VALUE" |) |)
+            |) in
             M.pure Constant.None_
           (* else *)
           )), ltac:(M.monadic (
-            let sign :=
+            let _ := M.assign_local (|
+              "sign" ,
               M.call (|
                 M.get_name (| globals, "get_sign" |),
                 make_list [
@@ -382,8 +435,10 @@ Definition sdiv : Value.t -> Value.t -> M :=
                   |)
                 ],
                 make_dict []
-              |) in
-            let quotient :=
+              |)
+            |) in
+            let _ := M.assign_local (|
+              "quotient" ,
               BinOp.mult (|
                 M.get_name (| globals, "sign" |),
                 BinOp.floor_div (|
@@ -402,7 +457,8 @@ Definition sdiv : Value.t -> Value.t -> M :=
                     make_dict []
                   |)
                 |)
-              |) in
+              |)
+            |) in
             M.pure Constant.None_
           )) |) in
         M.pure Constant.None_
@@ -428,7 +484,7 @@ Definition sdiv : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
-Definition mod : Value.t -> Value.t -> M :=
+Definition mod_ : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
     let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
     let _ := Constant.str "
@@ -441,22 +497,26 @@ Definition mod : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let x :=
+    let _ := M.assign_local (|
+      "x" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let y :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -474,22 +534,26 @@ Definition mod : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let remainder :=
+        let _ := M.assign_local (|
+          "remainder" ,
           M.call (|
             M.get_name (| globals, "U256" |),
             make_list [
               Constant.int 0
             ],
             make_dict []
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
-        let remainder :=
+        let _ := M.assign_local (|
+          "remainder" ,
           BinOp.mod_ (|
             M.get_name (| globals, "x" |),
             M.get_name (| globals, "y" |)
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
@@ -520,7 +584,8 @@ Definition smod : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let x :=
+    let _ := M.assign_local (|
+      "x" ,
       M.call (|
         M.get_field (| M.call (|
           M.get_name (| globals, "pop" |),
@@ -531,8 +596,10 @@ Definition smod : Value.t -> Value.t -> M :=
         |), "to_signed" |),
         make_list [],
         make_dict []
-      |) in
-    let y :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y" ,
       M.call (|
         M.get_field (| M.call (|
           M.get_name (| globals, "pop" |),
@@ -543,7 +610,8 @@ Definition smod : Value.t -> Value.t -> M :=
         |), "to_signed" |),
         make_list [],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -561,12 +629,15 @@ Definition smod : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let remainder :=
-          Constant.int 0 in
+        let _ := M.assign_local (|
+          "remainder" ,
+          Constant.int 0
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
-        let remainder :=
+        let _ := M.assign_local (|
+          "remainder" ,
           BinOp.mult (|
             M.call (|
               M.get_name (| globals, "get_sign" |),
@@ -591,7 +662,8 @@ Definition smod : Value.t -> Value.t -> M :=
                 make_dict []
               |)
             |)
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
@@ -628,7 +700,8 @@ Definition addmod : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let x :=
+    let _ := M.assign_local (|
+      "x" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
@@ -641,8 +714,10 @@ Definition addmod : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let y :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
@@ -655,8 +730,10 @@ Definition addmod : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let z :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "z" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
@@ -669,7 +746,8 @@ Definition addmod : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -687,18 +765,21 @@ Definition addmod : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let result :=
+        let _ := M.assign_local (|
+          "result" ,
           M.call (|
             M.get_name (| globals, "U256" |),
             make_list [
               Constant.int 0
             ],
             make_dict []
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
-        let result :=
+        let _ := M.assign_local (|
+          "result" ,
           M.call (|
             M.get_name (| globals, "U256" |),
             make_list [
@@ -711,7 +792,8 @@ Definition addmod : Value.t -> Value.t -> M :=
               |)
             ],
             make_dict []
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
@@ -742,7 +824,8 @@ Definition mulmod : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let x :=
+    let _ := M.assign_local (|
+      "x" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
@@ -755,8 +838,10 @@ Definition mulmod : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let y :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
@@ -769,8 +854,10 @@ Definition mulmod : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let z :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "z" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
@@ -783,7 +870,8 @@ Definition mulmod : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -801,18 +889,21 @@ Definition mulmod : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let result :=
+        let _ := M.assign_local (|
+          "result" ,
           M.call (|
             M.get_name (| globals, "U256" |),
             make_list [
               Constant.int 0
             ],
             make_dict []
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
-        let result :=
+        let _ := M.assign_local (|
+          "result" ,
           M.call (|
             M.get_name (| globals, "U256" |),
             make_list [
@@ -825,7 +916,8 @@ Definition mulmod : Value.t -> Value.t -> M :=
               |)
             ],
             make_dict []
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
@@ -856,7 +948,8 @@ Definition exp : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let base :=
+    let _ := M.assign_local (|
+      "base" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
@@ -869,8 +962,10 @@ Definition exp : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let exponent :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "exponent" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
@@ -883,21 +978,26 @@ Definition exp : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let exponent_bits :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "exponent_bits" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "exponent" |), "bit_length" |),
         make_list [],
         make_dict []
-      |) in
-    let exponent_bytes :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "exponent_bytes" ,
       BinOp.floor_div (|
         BinOp.add (|
           M.get_name (| globals, "exponent_bits" |),
           Constant.int 7
         |),
         Constant.int 8
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -912,7 +1012,8 @@ Definition exp : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let result :=
+    let _ := M.assign_local (|
+      "result" ,
       M.call (|
         M.get_name (| globals, "U256" |),
         make_list [
@@ -927,7 +1028,8 @@ Definition exp : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [
@@ -956,22 +1058,26 @@ Definition signextend : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let byte_num :=
+    let _ := M.assign_local (|
+      "byte_num" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let value :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "value" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -989,12 +1095,15 @@ Definition signextend : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let result :=
-          M.get_name (| globals, "value" |) in
+        let _ := M.assign_local (|
+          "result" ,
+          M.get_name (| globals, "value" |)
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
-        let value_bytes :=
+        let _ := M.assign_local (|
+          "value_bytes" ,
           M.call (|
             M.get_name (| globals, "bytes" |),
             make_list [
@@ -1005,8 +1114,10 @@ Definition signextend : Value.t -> Value.t -> M :=
               |)
             ],
             make_dict []
-          |) in
-        let value_bytes :=
+          |)
+        |) in
+        let _ := M.assign_local (|
+          "value_bytes" ,
           M.slice (|
             M.get_name (| globals, "value_bytes" |),
             BinOp.sub (|
@@ -1021,15 +1132,18 @@ Definition signextend : Value.t -> Value.t -> M :=
             |),
             Constant.None_,
             Constant.None_
-          |) in
-        let sign_bit :=
+          |)
+        |) in
+        let _ := M.assign_local (|
+          "sign_bit" ,
           BinOp.r_shift (|
             M.get_subscript (|
               M.get_name (| globals, "value_bytes" |),
               Constant.int 0
             |),
             Constant.int 7
-          |) in
+          |)
+        |) in
         let _ :=
           (* if *)
           M.if_then_else (|
@@ -1039,26 +1153,31 @@ Definition signextend : Value.t -> Value.t -> M :=
             |),
           (* then *)
           ltac:(M.monadic (
-            let result :=
+            let _ := M.assign_local (|
+              "result" ,
               M.call (|
                 M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
                 make_list [
                   M.get_name (| globals, "value_bytes" |)
                 ],
                 make_dict []
-              |) in
+              |)
+            |) in
             M.pure Constant.None_
           (* else *)
           )), ltac:(M.monadic (
-            let num_bytes_prepend :=
+            let _ := M.assign_local (|
+              "num_bytes_prepend" ,
               BinOp.sub (|
                 Constant.int 32,
                 BinOp.add (|
                   M.get_name (| globals, "byte_num" |),
                   Constant.int 1
                 |)
-              |) in
-            let result :=
+              |)
+            |) in
+            let _ := M.assign_local (|
+              "result" ,
               M.call (|
                 M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
                 make_list [
@@ -1079,7 +1198,8 @@ Definition signextend : Value.t -> Value.t -> M :=
                   |)
                 ],
                 make_dict []
-              |) in
+              |)
+            |) in
             M.pure Constant.None_
           )) |) in
         M.pure Constant.None_

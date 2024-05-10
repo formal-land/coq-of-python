@@ -17,23 +17,31 @@ Introduction
 Implementation of the POINT EVALUATION precompiled contract.
 ".
 
-Axiom eth2spec_deneb_mainnet_imports :
-  AreImported globals "eth2spec.deneb.mainnet" [ "KZGCommitment"; "kzg_commitment_to_versioned_hash"; "verify_kzg_proof" ].
+Axiom eth2spec_deneb_mainnet_imports_KZGCommitment :
+  IsImported globals "eth2spec.deneb.mainnet" "KZGCommitment".
+Axiom eth2spec_deneb_mainnet_imports_kzg_commitment_to_versioned_hash :
+  IsImported globals "eth2spec.deneb.mainnet" "kzg_commitment_to_versioned_hash".
+Axiom eth2spec_deneb_mainnet_imports_verify_kzg_proof :
+  IsImported globals "eth2spec.deneb.mainnet" "verify_kzg_proof".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Bytes" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Bytes :
+  IsImported globals "ethereum.base_types" "Bytes".
 
-Axiom ethereum_utils_ensure_imports :
-  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
+Axiom ethereum_utils_ensure_imports_ensure :
+  IsImported globals "ethereum.utils.ensure" "ensure".
 
-Axiom ethereum_cancun_vm_imports :
-  AreImported globals "ethereum.cancun.vm" [ "Evm" ].
+Axiom ethereum_cancun_vm_imports_Evm :
+  IsImported globals "ethereum.cancun.vm" "Evm".
 
-Axiom ethereum_cancun_vm_exceptions_imports :
-  AreImported globals "ethereum.cancun.vm.exceptions" [ "KZGProofError" ].
+Axiom ethereum_cancun_vm_exceptions_imports_KZGProofError :
+  IsImported globals "ethereum.cancun.vm.exceptions" "KZGProofError".
 
-Axiom ethereum_cancun_vm_gas_imports :
-  AreImported globals "ethereum.cancun.vm.gas" [ "GAS_POINT_EVALUATION"; "charge_gas" ].
+Axiom ethereum_cancun_vm_gas_imports_GAS_POINT_EVALUATION :
+  IsImported globals "ethereum.cancun.vm.gas" "GAS_POINT_EVALUATION".
+Axiom ethereum_cancun_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.cancun.vm.gas" "charge_gas".
 
 Definition FIELD_ELEMENTS_PER_BLOB : Value.t := M.run ltac:(M.monadic (
   Constant.int 4096
@@ -60,8 +68,10 @@ Definition point_evaluation : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let data :=
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |) in
+    let _ := M.assign_local (|
+      "data" ,
+      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
@@ -79,28 +89,35 @@ Definition point_evaluation : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let versioned_hash :=
+    let _ := M.assign_local (|
+      "versioned_hash" ,
       M.slice (|
         M.get_name (| globals, "data" |),
         Constant.None_,
         Constant.int 32,
         Constant.None_
-      |) in
-    let z :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "z" ,
       M.slice (|
         M.get_name (| globals, "data" |),
         Constant.int 32,
         Constant.int 64,
         Constant.None_
-      |) in
-    let y :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y" ,
       M.slice (|
         M.get_name (| globals, "data" |),
         Constant.int 64,
         Constant.int 96,
         Constant.None_
-      |) in
-    let commitment :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "commitment" ,
       M.call (|
         M.get_name (| globals, "KZGCommitment" |),
         make_list [
@@ -112,14 +129,17 @@ Definition point_evaluation : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let proof :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "proof" ,
       M.slice (|
         M.get_name (| globals, "data" |),
         Constant.int 144,
         Constant.int 192,
         Constant.None_
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [

@@ -17,23 +17,25 @@ Introduction
 Address specific functions used in this homestead version of specification.
 ".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "Union" ].
+Axiom typing_imports_Union :
+  IsImported globals "typing" "Union".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Uint" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_crypto_hash_imports :
-  AreImported globals "ethereum.crypto.hash" [ "keccak256" ].
+Axiom ethereum_crypto_hash_imports_keccak256 :
+  IsImported globals "ethereum.crypto.hash" "keccak256".
 
-Axiom ethereum_utils_byte_imports :
-  AreImported globals "ethereum.utils.byte" [ "left_pad_zero_bytes" ].
+Axiom ethereum_utils_byte_imports_left_pad_zero_bytes :
+  IsImported globals "ethereum.utils.byte" "left_pad_zero_bytes".
 
-Axiom ethereum_imports :
-  AreImported globals "ethereum" [ "rlp" ].
+Axiom ethereum_imports_rlp :
+  IsImported globals "ethereum" "rlp".
 
-Axiom ethereum_homestead_fork_types_imports :
-  AreImported globals "ethereum.homestead.fork_types" [ "Address" ].
+Axiom ethereum_homestead_fork_types_imports_Address :
+  IsImported globals "ethereum.homestead.fork_types" "Address".
 
 Definition to_address : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -90,7 +92,8 @@ Definition compute_contract_address : Value.t -> Value.t -> M :=
     address: `ethereum.homestead.fork_types.Address`
         The computed address of the new account.
     " in
-    let computed_address :=
+    let _ := M.assign_local (|
+      "computed_address" ,
       M.call (|
         M.get_name (| globals, "keccak256" |),
         make_list [
@@ -106,15 +109,19 @@ Definition compute_contract_address : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let canonical_address :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "canonical_address" ,
       M.slice (|
         M.get_name (| globals, "computed_address" |),
         UnOp.sub (| Constant.int 20 |),
         Constant.None_,
         Constant.None_
-      |) in
-    let padded_address :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "padded_address" ,
       M.call (|
         M.get_name (| globals, "left_pad_zero_bytes" |),
         make_list [
@@ -122,7 +129,8 @@ Definition compute_contract_address : Value.t -> Value.t -> M :=
           Constant.int 20
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.return_ (|
       M.call (|
         M.get_name (| globals, "Address" |),

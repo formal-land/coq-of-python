@@ -17,26 +17,32 @@ Introduction
 EVM gas constants and calculators.
 ".
 
-Axiom dataclasses_imports :
-  AreImported globals "dataclasses" [ "dataclass" ].
+Axiom dataclasses_imports_dataclass :
+  IsImported globals "dataclasses" "dataclass".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "List"; "Tuple" ].
+Axiom typing_imports_List :
+  IsImported globals "typing" "List".
+Axiom typing_imports_Tuple :
+  IsImported globals "typing" "Tuple".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Uint" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_trace_imports :
-  AreImported globals "ethereum.trace" [ "GasAndRefund"; "evm_trace" ].
+Axiom ethereum_trace_imports_GasAndRefund :
+  IsImported globals "ethereum.trace" "GasAndRefund".
+Axiom ethereum_trace_imports_evm_trace :
+  IsImported globals "ethereum.trace" "evm_trace".
 
-Axiom ethereum_utils_numeric_imports :
-  AreImported globals "ethereum.utils.numeric" [ "ceil32" ].
+Axiom ethereum_utils_numeric_imports_ceil32 :
+  IsImported globals "ethereum.utils.numeric" "ceil32".
 
-Axiom ethereum_shanghai_vm_imports :
-  AreImported globals "ethereum.shanghai.vm" [ "Evm" ].
+Axiom ethereum_shanghai_vm_imports_Evm :
+  IsImported globals "ethereum.shanghai.vm" "Evm".
 
-Axiom ethereum_shanghai_vm_exceptions_imports :
-  AreImported globals "ethereum.shanghai.vm.exceptions" [ "OutOfGasError" ].
+Axiom ethereum_shanghai_vm_exceptions_imports_OutOfGasError :
+  IsImported globals "ethereum.shanghai.vm.exceptions" "OutOfGasError".
 
 Definition GAS_JUMPDEST : Value.t := M.run ltac:(M.monadic (
   M.call (|
@@ -536,7 +542,8 @@ Definition calculate_memory_gas_cost : Value.t -> Value.t -> M :=
     total_gas_cost : `ethereum.base_types.Uint`
         The gas cost for storing data in memory.
     " in
-    let size_in_words :=
+    let _ := M.assign_local (|
+      "size_in_words" ,
       BinOp.floor_div (|
         M.call (|
           M.get_name (| globals, "ceil32" |),
@@ -546,25 +553,32 @@ Definition calculate_memory_gas_cost : Value.t -> Value.t -> M :=
           make_dict []
         |),
         Constant.int 32
-      |) in
-    let linear_cost :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "linear_cost" ,
       BinOp.mult (|
         M.get_name (| globals, "size_in_words" |),
         M.get_name (| globals, "GAS_MEMORY" |)
-      |) in
-    let quadratic_cost :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "quadratic_cost" ,
       BinOp.floor_div (|
         BinOp.pow (|
           M.get_name (| globals, "size_in_words" |),
           Constant.int 2
         |),
         Constant.int 512
-      |) in
-    let total_gas_cost :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "total_gas_cost" ,
       BinOp.add (|
         M.get_name (| globals, "linear_cost" |),
         M.get_name (| globals, "quadratic_cost" |)
-      |) in
+      |)
+    |) in
 (* At stmt: unsupported node type: Try *)
     M.pure Constant.None_)).
 
@@ -586,23 +600,28 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
     -------
     extend_memory: `ExtendMemory`
     " in
-    let size_to_extend :=
+    let _ := M.assign_local (|
+      "size_to_extend" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
           Constant.int 0
         ],
         make_dict []
-      |) in
-    let to_be_paid :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "to_be_paid" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
           Constant.int 0
         ],
         make_dict []
-      |) in
-    let current_size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "current_size" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
@@ -615,7 +634,8 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       M.for_ (|
         make_tuple [ M.get_name (| globals, "start_position" |); M.get_name (| globals, "size" |) ],
@@ -636,15 +656,18 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
             )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
-          let before_size :=
+          let _ := M.assign_local (|
+            "before_size" ,
             M.call (|
               M.get_name (| globals, "ceil32" |),
               make_list [
                 M.get_name (| globals, "current_size" |)
               ],
               make_dict []
-            |) in
-          let after_size :=
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "after_size" ,
             M.call (|
               M.get_name (| globals, "ceil32" |),
               make_list [
@@ -666,7 +689,8 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
                 |)
               ],
               make_dict []
-            |) in
+            |)
+          |) in
           let _ :=
             (* if *)
             M.if_then_else (|
@@ -682,42 +706,46 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
             )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
-          let size_to_extend := BinOp.add
+          let _ := M.assign_op_local (|
+            BinOp.add,
+            "size_to_extend",
             BinOp.sub (|
     M.get_name (| globals, "after_size" |),
     M.get_name (| globals, "before_size" |)
   |)
-            BinOp.sub (|
-    M.get_name (| globals, "after_size" |),
-    M.get_name (| globals, "before_size" |)
-  |) in
-          let already_paid :=
+          |) in
+          let _ := M.assign_local (|
+            "already_paid" ,
             M.call (|
               M.get_name (| globals, "calculate_memory_gas_cost" |),
               make_list [
                 M.get_name (| globals, "before_size" |)
               ],
               make_dict []
-            |) in
-          let total_cost :=
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "total_cost" ,
             M.call (|
               M.get_name (| globals, "calculate_memory_gas_cost" |),
               make_list [
                 M.get_name (| globals, "after_size" |)
               ],
               make_dict []
-            |) in
-          let to_be_paid := BinOp.add
+            |)
+          |) in
+          let _ := M.assign_op_local (|
+            BinOp.add,
+            "to_be_paid",
             BinOp.sub (|
     M.get_name (| globals, "total_cost" |),
     M.get_name (| globals, "already_paid" |)
   |)
-            BinOp.sub (|
-    M.get_name (| globals, "total_cost" |),
-    M.get_name (| globals, "already_paid" |)
-  |) in
-          let current_size :=
-            M.get_name (| globals, "after_size" |) in
+          |) in
+          let _ := M.assign_local (|
+            "current_size" ,
+            M.get_name (| globals, "after_size" |)
+          |) in
           M.pure Constant.None_
         )),
         ltac:(M.monadic (
@@ -764,7 +792,8 @@ Definition calculate_message_call_gas : Value.t -> Value.t -> M :=
     -------
     message_call_gas: `MessageCallGas`
     " in
-    let call_stipend :=
+    let _ := M.assign_local (|
+      "call_stipend" ,
             (* if *)
       M.if_then_else (|
         Compare.eq (|
@@ -783,7 +812,8 @@ M.call (|
       (* else *)
       )), ltac:(M.monadic (
 M.get_name (| globals, "call_stipend" |)
-      )) |) in
+      )) |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -817,7 +847,8 @@ M.get_name (| globals, "call_stipend" |)
       )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
-    let gas :=
+    let _ := M.assign_local (|
+      "gas" ,
       M.call (|
         M.get_name (| globals, "min" |),
         make_list [
@@ -837,7 +868,8 @@ M.get_name (| globals, "call_stipend" |)
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.return_ (|
       M.call (|
         M.get_name (| globals, "MessageCallGas" |),

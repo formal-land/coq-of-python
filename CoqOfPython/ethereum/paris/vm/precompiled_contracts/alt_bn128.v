@@ -17,26 +17,42 @@ Introduction
 Implementation of the ALT_BN128 precompiled contracts.
 ".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Uint" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_crypto_alt_bn128_imports :
-  AreImported globals "ethereum.crypto.alt_bn128" [ "ALT_BN128_CURVE_ORDER"; "ALT_BN128_PRIME"; "BNF"; "BNF2"; "BNF12"; "BNP"; "BNP2"; "pairing" ].
+Axiom ethereum_crypto_alt_bn128_imports_ALT_BN128_CURVE_ORDER :
+  IsImported globals "ethereum.crypto.alt_bn128" "ALT_BN128_CURVE_ORDER".
+Axiom ethereum_crypto_alt_bn128_imports_ALT_BN128_PRIME :
+  IsImported globals "ethereum.crypto.alt_bn128" "ALT_BN128_PRIME".
+Axiom ethereum_crypto_alt_bn128_imports_BNF :
+  IsImported globals "ethereum.crypto.alt_bn128" "BNF".
+Axiom ethereum_crypto_alt_bn128_imports_BNF2 :
+  IsImported globals "ethereum.crypto.alt_bn128" "BNF2".
+Axiom ethereum_crypto_alt_bn128_imports_BNF12 :
+  IsImported globals "ethereum.crypto.alt_bn128" "BNF12".
+Axiom ethereum_crypto_alt_bn128_imports_BNP :
+  IsImported globals "ethereum.crypto.alt_bn128" "BNP".
+Axiom ethereum_crypto_alt_bn128_imports_BNP2 :
+  IsImported globals "ethereum.crypto.alt_bn128" "BNP2".
+Axiom ethereum_crypto_alt_bn128_imports_pairing :
+  IsImported globals "ethereum.crypto.alt_bn128" "pairing".
 
-Axiom ethereum_utils_ensure_imports :
-  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
+Axiom ethereum_utils_ensure_imports_ensure :
+  IsImported globals "ethereum.utils.ensure" "ensure".
 
-Axiom ethereum_paris_vm_imports :
-  AreImported globals "ethereum.paris.vm" [ "Evm" ].
+Axiom ethereum_paris_vm_imports_Evm :
+  IsImported globals "ethereum.paris.vm" "Evm".
 
-Axiom ethereum_paris_vm_gas_imports :
-  AreImported globals "ethereum.paris.vm.gas" [ "charge_gas" ].
+Axiom ethereum_paris_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.paris.vm.gas" "charge_gas".
 
-Axiom ethereum_paris_vm_memory_imports :
-  AreImported globals "ethereum.paris.vm.memory" [ "buffer_read" ].
+Axiom ethereum_paris_vm_memory_imports_buffer_read :
+  IsImported globals "ethereum.paris.vm.memory" "buffer_read".
 
-Axiom ethereum_paris_vm_exceptions_imports :
-  AreImported globals "ethereum.paris.vm.exceptions" [ "OutOfGasError" ].
+Axiom ethereum_paris_vm_exceptions_imports_OutOfGasError :
+  IsImported globals "ethereum.paris.vm.exceptions" "OutOfGasError".
 
 Definition alt_bn128_add : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -49,8 +65,10 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let data :=
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |) in
+    let _ := M.assign_local (|
+      "data" ,
+      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -65,7 +83,8 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let x0_bytes :=
+    let _ := M.assign_local (|
+      "x0_bytes" ,
       M.call (|
         M.get_name (| globals, "buffer_read" |),
         make_list [
@@ -86,16 +105,20 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let x0_value :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "x0_value" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
           M.get_name (| globals, "x0_bytes" |)
         ],
         make_dict []
-      |) in
-    let y0_bytes :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y0_bytes" ,
       M.call (|
         M.get_name (| globals, "buffer_read" |),
         make_list [
@@ -116,16 +139,20 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let y0_value :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y0_value" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
           M.get_name (| globals, "y0_bytes" |)
         ],
         make_dict []
-      |) in
-    let x1_bytes :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "x1_bytes" ,
       M.call (|
         M.get_name (| globals, "buffer_read" |),
         make_list [
@@ -146,16 +173,20 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let x1_value :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "x1_value" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
           M.get_name (| globals, "x1_bytes" |)
         ],
         make_dict []
-      |) in
-    let y1_bytes :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y1_bytes" ,
       M.call (|
         M.get_name (| globals, "buffer_read" |),
         make_list [
@@ -176,15 +207,18 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let y1_value :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y1_value" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
           M.get_name (| globals, "y1_bytes" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       M.for_ (|
         M.get_name (| globals, "i" |),
@@ -212,11 +246,13 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
         ))
     |) in
 (* At stmt: unsupported node type: Try *)
-    let p :=
+    let _ := M.assign_local (|
+      "p" ,
       BinOp.add (|
         M.get_name (| globals, "p0" |),
         M.get_name (| globals, "p1" |)
-      |) in
+      |)
+    |) in
     let _ := M.assign (|
       M.get_field (| M.get_name (| globals, "evm" |), "output" |),
       BinOp.add (|
@@ -245,8 +281,10 @@ Definition alt_bn128_mul : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let data :=
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |) in
+    let _ := M.assign_local (|
+      "data" ,
+      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -261,7 +299,8 @@ Definition alt_bn128_mul : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let x0_bytes :=
+    let _ := M.assign_local (|
+      "x0_bytes" ,
       M.call (|
         M.get_name (| globals, "buffer_read" |),
         make_list [
@@ -282,16 +321,20 @@ Definition alt_bn128_mul : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let x0_value :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "x0_value" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
           M.get_name (| globals, "x0_bytes" |)
         ],
         make_dict []
-      |) in
-    let y0_bytes :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y0_bytes" ,
       M.call (|
         M.get_name (| globals, "buffer_read" |),
         make_list [
@@ -312,16 +355,20 @@ Definition alt_bn128_mul : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let y0_value :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "y0_value" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
           M.get_name (| globals, "y0_bytes" |)
         ],
         make_dict []
-      |) in
-    let n :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "n" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
@@ -348,7 +395,8 @@ Definition alt_bn128_mul : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       M.for_ (|
         M.get_name (| globals, "i" |),
@@ -376,14 +424,16 @@ Definition alt_bn128_mul : Value.t -> Value.t -> M :=
         ))
     |) in
 (* At stmt: unsupported node type: Try *)
-    let p :=
+    let _ := M.assign_local (|
+      "p" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "p0" |), "mul_by" |),
         make_list [
           M.get_name (| globals, "n" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.assign (|
       M.get_field (| M.get_name (| globals, "evm" |), "output" |),
       BinOp.add (|
@@ -412,8 +462,10 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let data :=
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |) in
+    let _ := M.assign_local (|
+      "data" ,
+      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -467,14 +519,16 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
       )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
-    let result :=
+    let _ := M.assign_local (|
+      "result" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
         make_list [
           Constant.int 1
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       M.for_ (|
         M.get_name (| globals, "i" |),
@@ -495,8 +549,10 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
       make_dict []
     |),
         ltac:(M.monadic (
-          let values :=
-            make_list [] in
+          let _ := M.assign_local (|
+            "values" ,
+            make_list []
+          |) in
           let _ :=
             M.for_ (|
               M.get_name (| globals, "j" |),
@@ -508,7 +564,8 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
       make_dict []
     |),
               ltac:(M.monadic (
-                let value :=
+                let _ := M.assign_local (|
+                  "value" ,
                   M.call (|
                     M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
                     make_list [
@@ -541,7 +598,8 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
                       |)
                     ],
                     make_dict []
-                  |) in
+                  |)
+                |) in
                 let _ :=
                   (* if *)
                   M.if_then_else (|
@@ -644,7 +702,8 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
               |),
             (* then *)
             ltac:(M.monadic (
-              let result :=
+              let _ := M.assign_local (|
+                "result" ,
                 BinOp.mult (|
                   M.get_name (| globals, "result" |),
                   M.call (|
@@ -655,7 +714,8 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
                     ],
                     make_dict []
                   |)
-                |) in
+                |)
+              |) in
               M.pure Constant.None_
             (* else *)
             )), ltac:(M.monadic (

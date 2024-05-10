@@ -9,8 +9,8 @@ lets contracts make non-state-changing calls to other contracts, and adds
 cryptographic primitives for layer 2 scaling.
 ".
 
-Axiom ethereum_fork_criteria_imports :
-  AreImported globals "ethereum.fork_criteria" [ "ByBlockNumber" ].
+Axiom ethereum_fork_criteria_imports_ByBlockNumber :
+  IsImported globals "ethereum.fork_criteria" "ByBlockNumber".
 
 Definition FORK_CRITERIA : Value.t := M.run ltac:(M.monadic (
   M.call (|

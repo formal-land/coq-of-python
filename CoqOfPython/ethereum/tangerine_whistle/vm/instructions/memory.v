@@ -17,20 +17,32 @@ Introduction
 Implementations of the EVM Memory instructions.
 ".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Bytes" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Bytes :
+  IsImported globals "ethereum.base_types" "Bytes".
 
-Axiom ethereum_tangerine_whistle_vm_imports :
-  AreImported globals "ethereum.tangerine_whistle.vm" [ "Evm" ].
+Axiom ethereum_tangerine_whistle_vm_imports_Evm :
+  IsImported globals "ethereum.tangerine_whistle.vm" "Evm".
 
-Axiom ethereum_tangerine_whistle_vm_gas_imports :
-  AreImported globals "ethereum.tangerine_whistle.vm.gas" [ "GAS_BASE"; "GAS_VERY_LOW"; "calculate_gas_extend_memory"; "charge_gas" ].
+Axiom ethereum_tangerine_whistle_vm_gas_imports_GAS_BASE :
+  IsImported globals "ethereum.tangerine_whistle.vm.gas" "GAS_BASE".
+Axiom ethereum_tangerine_whistle_vm_gas_imports_GAS_VERY_LOW :
+  IsImported globals "ethereum.tangerine_whistle.vm.gas" "GAS_VERY_LOW".
+Axiom ethereum_tangerine_whistle_vm_gas_imports_calculate_gas_extend_memory :
+  IsImported globals "ethereum.tangerine_whistle.vm.gas" "calculate_gas_extend_memory".
+Axiom ethereum_tangerine_whistle_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.tangerine_whistle.vm.gas" "charge_gas".
 
-Axiom ethereum_tangerine_whistle_vm_memory_imports :
-  AreImported globals "ethereum.tangerine_whistle.vm.memory" [ "memory_read_bytes"; "memory_write" ].
+Axiom ethereum_tangerine_whistle_vm_memory_imports_memory_read_bytes :
+  IsImported globals "ethereum.tangerine_whistle.vm.memory" "memory_read_bytes".
+Axiom ethereum_tangerine_whistle_vm_memory_imports_memory_write :
+  IsImported globals "ethereum.tangerine_whistle.vm.memory" "memory_write".
 
-Axiom ethereum_tangerine_whistle_vm_stack_imports :
-  AreImported globals "ethereum.tangerine_whistle.vm.stack" [ "pop"; "push" ].
+Axiom ethereum_tangerine_whistle_vm_stack_imports_pop :
+  IsImported globals "ethereum.tangerine_whistle.vm.stack" "pop".
+Axiom ethereum_tangerine_whistle_vm_stack_imports_push :
+  IsImported globals "ethereum.tangerine_whistle.vm.stack" "push".
 
 Definition mstore : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -46,15 +58,18 @@ Definition mstore : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let start_position :=
+    let _ := M.assign_local (|
+      "start_position" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let value :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "value" ,
       M.call (|
         M.get_field (| M.call (|
           M.get_name (| globals, "pop" |),
@@ -65,8 +80,10 @@ Definition mstore : Value.t -> Value.t -> M :=
         |), "to_be_bytes32" |),
         make_list [],
         make_dict []
-      |) in
-    let extend_memory :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "extend_memory" ,
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),
         make_list [
@@ -88,7 +105,8 @@ Definition mstore : Value.t -> Value.t -> M :=
           ]
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -138,23 +156,28 @@ Definition mstore8 : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let start_position :=
+    let _ := M.assign_local (|
+      "start_position" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let value :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "value" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let extend_memory :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "extend_memory" ,
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),
         make_list [
@@ -170,7 +193,8 @@ Definition mstore8 : Value.t -> Value.t -> M :=
           ]
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -190,7 +214,8 @@ Definition mstore8 : Value.t -> Value.t -> M :=
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
-    let normalized_bytes_value :=
+    let _ := M.assign_local (|
+      "normalized_bytes_value" ,
       M.call (|
         M.get_name (| globals, "Bytes" |),
         make_list [
@@ -202,7 +227,8 @@ Definition mstore8 : Value.t -> Value.t -> M :=
           ]
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "memory_write" |),
     make_list [
@@ -231,15 +257,18 @@ Definition mload : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let start_position :=
+    let _ := M.assign_local (|
+      "start_position" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let extend_memory :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "extend_memory" ,
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),
         make_list [
@@ -255,7 +284,8 @@ Definition mload : Value.t -> Value.t -> M :=
           ]
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -275,7 +305,8 @@ Definition mload : Value.t -> Value.t -> M :=
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
-    let value :=
+    let _ := M.assign_local (|
+      "value" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
@@ -296,7 +327,8 @@ Definition mload : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "push" |),
     make_list [

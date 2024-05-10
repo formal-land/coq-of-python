@@ -8,19 +8,25 @@ Elliptic Curves
 ^^^^^^^^^^^^^^^
 ".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "Generic"; "Type"; "TypeVar" ].
+Axiom typing_imports_Generic :
+  IsImported globals "typing" "Generic".
+Axiom typing_imports_Type :
+  IsImported globals "typing" "Type".
+Axiom typing_imports_TypeVar :
+  IsImported globals "typing" "TypeVar".
 
 (* At top_level_stmt: unsupported node type: Import *)
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Bytes" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Bytes :
+  IsImported globals "ethereum.base_types" "Bytes".
 
-Axiom ethereum_crypto_finite_field_imports :
-  AreImported globals "ethereum.crypto.finite_field" [ "Field" ].
+Axiom ethereum_crypto_finite_field_imports_Field :
+  IsImported globals "ethereum.crypto.finite_field" "Field".
 
-Axiom ethereum_crypto_hash_imports :
-  AreImported globals "ethereum.crypto.hash" [ "Hash32" ].
+Axiom ethereum_crypto_hash_imports_Hash32 :
+  IsImported globals "ethereum.crypto.hash" "Hash32".
 
 Definition SECP256K1N : Value.t := M.run ltac:(M.monadic (
   Constant.int 115792089237316195423570985008687907852837564279074904382605163141518161494337
@@ -68,19 +74,24 @@ Definition secp256k1_recover : Value.t -> Value.t -> M :=
     public_key : `ethereum.base_types.Bytes`
         Recovered public key.
     " in
-    let r_bytes :=
+    let _ := M.assign_local (|
+      "r_bytes" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "r" |), "to_be_bytes32" |),
         make_list [],
         make_dict []
-      |) in
-    let s_bytes :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "s_bytes" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "s" |), "to_be_bytes32" |),
         make_list [],
         make_dict []
-      |) in
-    let signature :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "signature" ,
       M.call (|
         M.get_name (| globals, "bytearray" |),
         make_list [
@@ -92,7 +103,8 @@ Definition secp256k1_recover : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.assign (|
       M.slice (|
         M.get_name (| globals, "signature" |),
@@ -136,7 +148,8 @@ Definition secp256k1_recover : Value.t -> Value.t -> M :=
       |),
       M.get_name (| globals, "v" |)
     |) in
-    let public_key :=
+    let _ := M.assign_local (|
+      "public_key" ,
       M.call (|
         M.get_field (| M.get_field (| M.get_name (| globals, "coincurve" |), "PublicKey" |), "from_signature_and_message" |),
         make_list [
@@ -150,8 +163,10 @@ Definition secp256k1_recover : Value.t -> Value.t -> M :=
           M.get_name (| globals, "msg_hash" |)
         ],
         make_dict []
-      |) in
-    let public_key :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "public_key" ,
       M.slice (|
         M.call (|
           M.get_field (| M.get_name (| globals, "public_key" |), "format" |),
@@ -161,7 +176,8 @@ Definition secp256k1_recover : Value.t -> Value.t -> M :=
         Constant.int 1,
         Constant.None_,
         Constant.None_
-      |) in
+      |)
+    |) in
     let _ := M.return_ (|
       M.get_name (| globals, "public_key" |)
     |) in
@@ -213,14 +229,16 @@ Definition EllipticCurve : Value.t :=
         Make new point on the curve. The point is not checked to see if it is
         on the curve.
         " in
-          let res :=
+          let _ := M.assign_local (|
+            "res" ,
             M.call (|
               M.get_field (| M.get_name (| globals, "object" |), "__new__" |),
               make_list [
                 M.get_name (| globals, "cls" |)
               ],
               make_dict []
-            |) in
+            |)
+          |) in
           let _ := M.assign (|
             M.get_field (| M.get_name (| globals, "res" |), "x" |),
             M.get_name (| globals, "x" |)
@@ -415,7 +433,8 @@ Definition EllipticCurve : Value.t :=
             )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
-          let lam :=
+          let _ := M.assign_local (|
+            "lam" ,
             BinOp.div (|
               BinOp.add (|
                 BinOp.mult (|
@@ -443,8 +462,10 @@ Definition EllipticCurve : Value.t :=
                 |),
                 M.get_name (| globals, "y" |)
               |)
-            |) in
-          let new_x :=
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "new_x" ,
             BinOp.sub (|
               BinOp.sub (|
                 BinOp.pow (|
@@ -454,8 +475,10 @@ Definition EllipticCurve : Value.t :=
                 M.get_name (| globals, "x" |)
               |),
               M.get_name (| globals, "x" |)
-            |) in
-          let new_y :=
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "new_y" ,
             BinOp.sub (|
               BinOp.mult (|
                 M.get_name (| globals, "lam" |),
@@ -465,7 +488,8 @@ Definition EllipticCurve : Value.t :=
                 |)
               |),
               M.get_name (| globals, "y" |)
-            |) in
+            |)
+          |) in
           let _ := M.return_ (|
             M.call (|
               M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
@@ -492,12 +516,14 @@ Definition EllipticCurve : Value.t :=
           let _ := Constant.str "
         Add two points together.
         " in
-          let ZERO :=
+          let _ := M.assign_local (|
+            "ZERO" ,
             M.call (|
               M.get_field (| M.get_field (| M.get_name (| globals, "self" |), "FIELD" |), "zero" |),
               make_list [],
               make_dict []
-            |) in
+            |)
+          |) in
           let _ := M.assign (|
             make_tuple [ M.get_name (| globals, "self_x" |); M.get_name (| globals, "self_y" |); M.get_name (| globals, "other_x" |); M.get_name (| globals, "other_y" |) ],
             make_tuple [ M.get_field (| M.get_name (| globals, "self" |), "x" |); M.get_field (| M.get_name (| globals, "self" |), "y" |); M.get_field (| M.get_name (| globals, "other" |), "x" |); M.get_field (| M.get_name (| globals, "other" |), "y" |) ]
@@ -594,7 +620,8 @@ Definition EllipticCurve : Value.t :=
             )), ltac:(M.monadic (
               M.pure Constant.None_
             )) |) in
-          let lam :=
+          let _ := M.assign_local (|
+            "lam" ,
             BinOp.div (|
               BinOp.sub (|
                 M.get_name (| globals, "other_y" |),
@@ -604,8 +631,10 @@ Definition EllipticCurve : Value.t :=
                 M.get_name (| globals, "other_x" |),
                 M.get_name (| globals, "self_x" |)
               |)
-            |) in
-          let x :=
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "x" ,
             BinOp.sub (|
               BinOp.sub (|
                 BinOp.pow (|
@@ -615,8 +644,10 @@ Definition EllipticCurve : Value.t :=
                 M.get_name (| globals, "self_x" |)
               |),
               M.get_name (| globals, "other_x" |)
-            |) in
-          let y :=
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "y" ,
             BinOp.sub (|
               BinOp.mult (|
                 M.get_name (| globals, "lam" |),
@@ -626,7 +657,8 @@ Definition EllipticCurve : Value.t :=
                 |)
               |),
               M.get_name (| globals, "self_y" |)
-            |) in
+            |)
+          |) in
           let _ := M.return_ (|
             M.call (|
               M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
@@ -653,7 +685,8 @@ Definition EllipticCurve : Value.t :=
           let _ := Constant.str "
         Multiply `self` by `n` using the double and add algorithm.
         " in
-          let res :=
+          let _ := M.assign_local (|
+            "res" ,
             M.call (|
               M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
               make_list [
@@ -676,9 +709,12 @@ Definition EllipticCurve : Value.t :=
                 |)
               ],
               make_dict []
-            |) in
-          let s :=
-            M.get_name (| globals, "self" |) in
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "s" ,
+            M.get_name (| globals, "self" |)
+          |) in
           let _ :=
             M.while (|
               Compare.not_eq (|
@@ -698,24 +734,30 @@ Definition EllipticCurve : Value.t :=
                     |),
                   (* then *)
                   ltac:(M.monadic (
-                    let res :=
+                    let _ := M.assign_local (|
+                      "res" ,
                       BinOp.add (|
                         M.get_name (| globals, "res" |),
                         M.get_name (| globals, "s" |)
-                      |) in
+                      |)
+                    |) in
                     M.pure Constant.None_
                   (* else *)
                   )), ltac:(M.monadic (
                     M.pure Constant.None_
                   )) |) in
-                let s :=
+                let _ := M.assign_local (|
+                  "s" ,
                   BinOp.add (|
                     M.get_name (| globals, "s" |),
                     M.get_name (| globals, "s" |)
-                  |) in
-                let n := BinOp.floor_div
+                  |)
+                |) in
+                let _ := M.assign_op_local (|
+                  BinOp.floor_div,
+                  "n",
                   Constant.int 2
-                  Constant.int 2 in
+                |) in
                 M.pure Constant.None_
               )),
               ltac:(M.monadic (

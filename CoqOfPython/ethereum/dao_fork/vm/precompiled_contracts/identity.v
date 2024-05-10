@@ -17,17 +17,21 @@ Introduction
 Implementation of the `IDENTITY` precompiled contract.
 ".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "Uint" ].
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_utils_numeric_imports :
-  AreImported globals "ethereum.utils.numeric" [ "ceil32" ].
+Axiom ethereum_utils_numeric_imports_ceil32 :
+  IsImported globals "ethereum.utils.numeric" "ceil32".
 
-Axiom ethereum_dao_fork_vm_imports :
-  AreImported globals "ethereum.dao_fork.vm" [ "Evm" ].
+Axiom ethereum_dao_fork_vm_imports_Evm :
+  IsImported globals "ethereum.dao_fork.vm" "Evm".
 
-Axiom ethereum_dao_fork_vm_gas_imports :
-  AreImported globals "ethereum.dao_fork.vm.gas" [ "GAS_IDENTITY"; "GAS_IDENTITY_WORD"; "charge_gas" ].
+Axiom ethereum_dao_fork_vm_gas_imports_GAS_IDENTITY :
+  IsImported globals "ethereum.dao_fork.vm.gas" "GAS_IDENTITY".
+Axiom ethereum_dao_fork_vm_gas_imports_GAS_IDENTITY_WORD :
+  IsImported globals "ethereum.dao_fork.vm.gas" "GAS_IDENTITY_WORD".
+Axiom ethereum_dao_fork_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.dao_fork.vm.gas" "charge_gas".
 
 Definition identity : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -40,9 +44,12 @@ Definition identity : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let data :=
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |) in
-    let word_count :=
+    let _ := M.assign_local (|
+      "data" ,
+      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |)
+    |) in
+    let _ := M.assign_local (|
+      "word_count" ,
       BinOp.floor_div (|
         M.call (|
           M.get_name (| globals, "ceil32" |),
@@ -64,7 +71,8 @@ Definition identity : Value.t -> Value.t -> M :=
           make_dict []
         |),
         Constant.int 32
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [

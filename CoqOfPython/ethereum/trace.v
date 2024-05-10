@@ -21,11 +21,13 @@ Defines the functions required for creating evm traces during execution.
 
 (* At top_level_stmt: unsupported node type: Import *)
 
-Axiom dataclasses_imports :
-  AreImported globals "dataclasses" [ "dataclass" ].
+Axiom dataclasses_imports_dataclass :
+  IsImported globals "dataclasses" "dataclass".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "Optional"; "Union" ].
+Axiom typing_imports_Optional :
+  IsImported globals "typing" "Optional".
+Axiom typing_imports_Union :
+  IsImported globals "typing" "Union".
 
 Definition TransactionStart : Value.t :=
   builtins.make_klass

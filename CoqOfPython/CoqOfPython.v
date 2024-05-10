@@ -20,8 +20,10 @@ Module Data.
       internally to represent integers, closures, ... that can be made accessible in a special
       field of objects. *)
   Inductive t (Value : Set) : Set :=
+  | Ellipsis
   | Bool (b : bool)
   | Integer (z : Z)
+  | Float (f : string)
   | String (s : string)
   | Tuple (items : list Value)
   (** Lists and tuples are very similar. The distinction between the two is conventional. We use
@@ -34,8 +36,10 @@ Module Data.
     (bases : list (string * string))
     (class_methods : list (string * (Value -> Value -> M)))
     (methods : list (string * (Value -> Value -> M))).
+  Arguments Ellipsis {_}.
   Arguments Bool {_}.
   Arguments Integer {_}.
+  Arguments Float {_}.
   Arguments String {_}.
   Arguments Tuple {_}.
   Arguments List {_}.
@@ -78,7 +82,7 @@ Parameter M : Set.
 
 Parameter IsInGlobals : string -> Value.t -> string -> Prop.
 
-Parameter AreImported : string -> string -> list string -> Prop.
+Parameter IsImported : string -> string -> string -> Prop.
 
 Module M.
   Parameter pure : Value.t -> M.
@@ -100,7 +104,11 @@ Module M.
 
   Parameter assign : Value.t -> Value.t -> M.
 
+  Parameter assign_local : string -> Value.t -> M.
+
   Parameter assign_op : (Value.t -> Value.t -> M) -> Value.t -> Value.t -> M.
+
+  Parameter assign_op_local : (Value.t -> Value.t -> M) -> string -> Value.t -> M.
 
   Parameter delete : Value.t -> M.
 
@@ -282,11 +290,17 @@ Module Constant.
       Object.fields := [];
     |}).
 
+  Definition ellipsis : Value.t :=
+    Value.Make builtins.globals "ellipsis" (Pointer.Imm (Object.wrapper Data.Ellipsis)).
+
   Definition bool (b : bool) : Value.t :=
     Value.Make builtins.globals "bool" (Pointer.Imm (Object.wrapper (Data.Bool b))).
 
   Definition int (z : Z) : Value.t :=
     Value.Make builtins.globals "int" (Pointer.Imm (Object.wrapper (Data.Integer z))).
+
+  Definition float (f : string) : Value.t :=
+    Value.Make builtins.globals "float" (Pointer.Imm (Object.wrapper (Data.Float f))).
 
   Definition str (s : string) : Value.t :=
     Value.Make builtins.globals "str" (Pointer.Imm (Object.wrapper (Data.String s))).

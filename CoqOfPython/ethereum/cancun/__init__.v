@@ -10,8 +10,8 @@ instruction, limits self-destruct to only work for contracts created in the
 same transaction, and adds an instruction to read the blob base fee.
 ".
 
-Axiom ethereum_fork_criteria_imports :
-  AreImported globals "ethereum.fork_criteria" [ "ByTimestamp" ].
+Axiom ethereum_fork_criteria_imports_ByTimestamp :
+  IsImported globals "ethereum.fork_criteria" "ByTimestamp".
 
 Definition FORK_CRITERIA : Value.t := M.run ltac:(M.monadic (
   M.call (|

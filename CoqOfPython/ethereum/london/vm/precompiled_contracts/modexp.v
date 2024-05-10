@@ -17,17 +17,21 @@ Introduction
 Implementation of the `MODEXP` precompiled contract.
 ".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Uint" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Bytes :
+  IsImported globals "ethereum.base_types" "Bytes".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_london_vm_imports :
-  AreImported globals "ethereum.london.vm" [ "Evm" ].
+Axiom ethereum_london_vm_imports_Evm :
+  IsImported globals "ethereum.london.vm" "Evm".
 
-Axiom ethereum_london_vm_gas_imports :
-  AreImported globals "ethereum.london.vm.gas" [ "charge_gas" ].
+Axiom ethereum_london_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.london.vm.gas" "charge_gas".
 
-Axiom ethereum_london_vm_memory_imports :
-  AreImported globals "ethereum.london.vm.memory" [ "buffer_read" ].
+Axiom ethereum_london_vm_memory_imports_buffer_read :
+  IsImported globals "ethereum.london.vm.memory" "buffer_read".
 
 Definition GQUADDIVISOR : Value.t := M.run ltac:(M.monadic (
   Constant.int 3
@@ -40,9 +44,12 @@ Definition modexp : Value.t -> Value.t -> M :=
     Calculates `(base**exp) % modulus` for arbitrary sized `base`, `exp` and.
     `modulus`. The return value is the same length as the modulus.
     " in
-    let data :=
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |) in
-    let base_length :=
+    let _ := M.assign_local (|
+      "data" ,
+      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |)
+    |) in
+    let _ := M.assign_local (|
+      "base_length" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
@@ -69,8 +76,10 @@ Definition modexp : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let exp_length :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "exp_length" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
@@ -97,8 +106,10 @@ Definition modexp : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let modulus_length :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "modulus_length" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
@@ -125,8 +136,10 @@ Definition modexp : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let exp_start :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "exp_start" ,
       BinOp.add (|
         M.call (|
           M.get_name (| globals, "U256" |),
@@ -136,8 +149,10 @@ Definition modexp : Value.t -> Value.t -> M :=
           make_dict []
         |),
         M.get_name (| globals, "base_length" |)
-      |) in
-    let exp_head :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "exp_head" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
         make_list [
@@ -165,7 +180,8 @@ Definition modexp : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -216,7 +232,8 @@ Definition modexp : Value.t -> Value.t -> M :=
       )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
-    let base :=
+    let _ := M.assign_local (|
+      "base" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
         make_list [
@@ -237,8 +254,10 @@ Definition modexp : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let exp :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "exp" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
         make_list [
@@ -253,13 +272,17 @@ Definition modexp : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let modulus_start :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "modulus_start" ,
       BinOp.add (|
         M.get_name (| globals, "exp_start" |),
         M.get_name (| globals, "exp_length" |)
-      |) in
-    let modulus :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "modulus" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
         make_list [
@@ -274,7 +297,8 @@ Definition modexp : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -350,7 +374,8 @@ Definition complexity : Value.t -> Value.t -> M :=
     complexity : `Uint`
         Complexity of performing the operation.
     " in
-    let max_length :=
+    let _ := M.assign_local (|
+      "max_length" ,
       M.call (|
         M.get_name (| globals, "max" |),
         make_list [
@@ -370,15 +395,18 @@ Definition complexity : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let words :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "words" ,
       BinOp.floor_div (|
         BinOp.add (|
           M.get_name (| globals, "max_length" |),
           Constant.int 7
         |),
         Constant.int 8
-      |) in
+      |)
+    |) in
     let _ := M.return_ (|
       BinOp.pow (|
         M.get_name (| globals, "words" |),
@@ -427,14 +455,16 @@ Definition iterations : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let count :=
+        let _ := M.assign_local (|
+          "count" ,
           M.call (|
             M.get_name (| globals, "Uint" |),
             make_list [
               Constant.int 0
             ],
             make_dict []
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
@@ -447,7 +477,8 @@ Definition iterations : Value.t -> Value.t -> M :=
             |),
           (* then *)
           ltac:(M.monadic (
-            let bit_length :=
+            let _ := M.assign_local (|
+              "bit_length" ,
               M.call (|
                 M.get_name (| globals, "Uint" |),
                 make_list [
@@ -458,7 +489,8 @@ Definition iterations : Value.t -> Value.t -> M :=
                   |)
                 ],
                 make_dict []
-              |) in
+              |)
+            |) in
             let _ :=
               (* if *)
               M.if_then_else (|
@@ -468,20 +500,25 @@ Definition iterations : Value.t -> Value.t -> M :=
                 |),
               (* then *)
               ltac:(M.monadic (
-                let bit_length := BinOp.sub
+                let _ := M.assign_op_local (|
+                  BinOp.sub,
+                  "bit_length",
                   Constant.int 1
-                  Constant.int 1 in
+                |) in
                 M.pure Constant.None_
               (* else *)
               )), ltac:(M.monadic (
                 M.pure Constant.None_
               )) |) in
-            let count :=
-              M.get_name (| globals, "bit_length" |) in
+            let _ := M.assign_local (|
+              "count" ,
+              M.get_name (| globals, "bit_length" |)
+            |) in
             M.pure Constant.None_
           (* else *)
           )), ltac:(M.monadic (
-            let length_part :=
+            let _ := M.assign_local (|
+              "length_part" ,
               BinOp.mult (|
                 Constant.int 8,
                 BinOp.sub (|
@@ -494,8 +531,10 @@ Definition iterations : Value.t -> Value.t -> M :=
                   |),
                   Constant.int 32
                 |)
-              |) in
-            let bits_part :=
+              |)
+            |) in
+            let _ := M.assign_local (|
+              "bits_part" ,
               M.call (|
                 M.get_name (| globals, "Uint" |),
                 make_list [
@@ -506,7 +545,8 @@ Definition iterations : Value.t -> Value.t -> M :=
                   |)
                 ],
                 make_dict []
-              |) in
+              |)
+            |) in
             let _ :=
               (* if *)
               M.if_then_else (|
@@ -516,19 +556,23 @@ Definition iterations : Value.t -> Value.t -> M :=
                 |),
               (* then *)
               ltac:(M.monadic (
-                let bits_part := BinOp.sub
+                let _ := M.assign_op_local (|
+                  BinOp.sub,
+                  "bits_part",
                   Constant.int 1
-                  Constant.int 1 in
+                |) in
                 M.pure Constant.None_
               (* else *)
               )), ltac:(M.monadic (
                 M.pure Constant.None_
               )) |) in
-            let count :=
+            let _ := M.assign_local (|
+              "count" ,
               BinOp.add (|
                 M.get_name (| globals, "length_part" |),
                 M.get_name (| globals, "bits_part" |)
-              |) in
+              |)
+            |) in
             M.pure Constant.None_
           )) |) in
         M.pure Constant.None_
@@ -579,7 +623,8 @@ Definition gas_cost : Value.t -> Value.t -> M :=
     gas_cost : `Uint`
         Gas required for performing the operation.
     " in
-    let multiplication_complexity :=
+    let _ := M.assign_local (|
+      "multiplication_complexity" ,
       M.call (|
         M.get_name (| globals, "complexity" |),
         make_list [
@@ -587,8 +632,10 @@ Definition gas_cost : Value.t -> Value.t -> M :=
           M.get_name (| globals, "modulus_length" |)
         ],
         make_dict []
-      |) in
-    let iteration_count :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "iteration_count" ,
       M.call (|
         M.get_name (| globals, "iterations" |),
         make_list [
@@ -596,15 +643,20 @@ Definition gas_cost : Value.t -> Value.t -> M :=
           M.get_name (| globals, "exponent_head" |)
         ],
         make_dict []
-      |) in
-    let cost :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "cost" ,
       BinOp.mult (|
         M.get_name (| globals, "multiplication_complexity" |),
         M.get_name (| globals, "iteration_count" |)
-      |) in
-    let cost := BinOp.floor_div
+      |)
+    |) in
+    let _ := M.assign_op_local (|
+      BinOp.floor_div,
+      "cost",
       M.get_name (| globals, "GQUADDIVISOR" |)
-      M.get_name (| globals, "GQUADDIVISOR" |) in
+    |) in
     let _ := M.return_ (|
       M.call (|
         M.get_name (| globals, "max" |),

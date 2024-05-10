@@ -17,8 +17,8 @@ Introduction
 Exceptions which cause the EVM to halt exceptionally.
 ".
 
-Axiom ethereum_exceptions_imports :
-  AreImported globals "ethereum.exceptions" [ "EthereumException" ].
+Axiom ethereum_exceptions_imports_EthereumException :
+  IsImported globals "ethereum.exceptions" "EthereumException".
 
 Definition ExceptionalHalt : Value.t :=
   builtins.make_klass

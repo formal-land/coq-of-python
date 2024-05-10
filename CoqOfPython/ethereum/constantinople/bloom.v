@@ -21,20 +21,20 @@ for efficient searching of logs by address and/or topic, by rapidly
 eliminating blocks and receipts from their search.
 ".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "Tuple" ].
+Axiom typing_imports_Tuple :
+  IsImported globals "typing" "Tuple".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "Uint" ].
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_crypto_hash_imports :
-  AreImported globals "ethereum.crypto.hash" [ "keccak256" ].
+Axiom ethereum_crypto_hash_imports_keccak256 :
+  IsImported globals "ethereum.crypto.hash" "keccak256".
 
-Axiom ethereum_constantinople_blocks_imports :
-  AreImported globals "ethereum.constantinople.blocks" [ "Log" ].
+Axiom ethereum_constantinople_blocks_imports_Log :
+  IsImported globals "ethereum.constantinople.blocks" "Log".
 
-Axiom ethereum_constantinople_fork_types_imports :
-  AreImported globals "ethereum.constantinople.fork_types" [ "Bloom" ].
+Axiom ethereum_constantinople_fork_types_imports_Bloom :
+  IsImported globals "ethereum.constantinople.fork_types" "Bloom".
 
 Definition add_to_bloom : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -53,20 +53,23 @@ Definition add_to_bloom : Value.t -> Value.t -> M :=
     bloom_entry :
         An entry which is to be added to bloom filter.
     " in
-    let hash :=
+    let _ := M.assign_local (|
+      "hash" ,
       M.call (|
         M.get_name (| globals, "keccak256" |),
         make_list [
           M.get_name (| globals, "bloom_entry" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       M.for_ (|
         M.get_name (| globals, "idx" |),
         make_tuple [ Constant.int 0; Constant.int 2; Constant.int 4 ],
         ltac:(M.monadic (
-          let bit_to_set :=
+          let _ := M.assign_local (|
+            "bit_to_set" ,
             BinOp.bit_and (|
               M.call (|
                 M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
@@ -84,18 +87,24 @@ Definition add_to_bloom : Value.t -> Value.t -> M :=
                 make_dict []
               |),
               Constant.int 2047
-            |) in
-          let bit_index :=
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "bit_index" ,
             BinOp.sub (|
               Constant.int 2047,
               M.get_name (| globals, "bit_to_set" |)
-            |) in
-          let byte_index :=
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "byte_index" ,
             BinOp.floor_div (|
               M.get_name (| globals, "bit_index" |),
               Constant.int 8
-            |) in
-          let bit_value :=
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "bit_value" ,
             BinOp.l_shift (|
               Constant.int 1,
               BinOp.sub (|
@@ -105,7 +114,8 @@ Definition add_to_bloom : Value.t -> Value.t -> M :=
                   Constant.int 8
                 |)
               |)
-            |) in
+            |)
+          |) in
           let _ := M.assign (|
             M.get_subscript (|
               M.get_name (| globals, "bloom" |),

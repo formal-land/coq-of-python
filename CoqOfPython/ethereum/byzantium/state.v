@@ -22,23 +22,55 @@ There is a distinction between an account that does not exist and
 `EMPTY_ACCOUNT`.
 ".
 
-Axiom dataclasses_imports :
-  AreImported globals "dataclasses" [ "dataclass"; "field" ].
+Axiom dataclasses_imports_dataclass :
+  IsImported globals "dataclasses" "dataclass".
+Axiom dataclasses_imports_field :
+  IsImported globals "dataclasses" "field".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "Callable"; "Dict"; "List"; "Optional"; "Tuple" ].
+Axiom typing_imports_Callable :
+  IsImported globals "typing" "Callable".
+Axiom typing_imports_Dict :
+  IsImported globals "typing" "Dict".
+Axiom typing_imports_List :
+  IsImported globals "typing" "List".
+Axiom typing_imports_Optional :
+  IsImported globals "typing" "Optional".
+Axiom typing_imports_Tuple :
+  IsImported globals "typing" "Tuple".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Uint"; "modify" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Bytes :
+  IsImported globals "ethereum.base_types" "Bytes".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
+Axiom ethereum_base_types_imports_modify :
+  IsImported globals "ethereum.base_types" "modify".
 
-Axiom ethereum_utils_ensure_imports :
-  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
+Axiom ethereum_utils_ensure_imports_ensure :
+  IsImported globals "ethereum.utils.ensure" "ensure".
 
-Axiom ethereum_byzantium_fork_types_imports :
-  AreImported globals "ethereum.byzantium.fork_types" [ "EMPTY_ACCOUNT"; "Account"; "Address"; "Root" ].
+Axiom ethereum_byzantium_fork_types_imports_EMPTY_ACCOUNT :
+  IsImported globals "ethereum.byzantium.fork_types" "EMPTY_ACCOUNT".
+Axiom ethereum_byzantium_fork_types_imports_Account :
+  IsImported globals "ethereum.byzantium.fork_types" "Account".
+Axiom ethereum_byzantium_fork_types_imports_Address :
+  IsImported globals "ethereum.byzantium.fork_types" "Address".
+Axiom ethereum_byzantium_fork_types_imports_Root :
+  IsImported globals "ethereum.byzantium.fork_types" "Root".
 
-Axiom ethereum_byzantium_trie_imports :
-  AreImported globals "ethereum.byzantium.trie" [ "EMPTY_TRIE_ROOT"; "Trie"; "copy_trie"; "root"; "trie_get"; "trie_set" ].
+Axiom ethereum_byzantium_trie_imports_EMPTY_TRIE_ROOT :
+  IsImported globals "ethereum.byzantium.trie" "EMPTY_TRIE_ROOT".
+Axiom ethereum_byzantium_trie_imports_Trie :
+  IsImported globals "ethereum.byzantium.trie" "Trie".
+Axiom ethereum_byzantium_trie_imports_copy_trie :
+  IsImported globals "ethereum.byzantium.trie" "copy_trie".
+Axiom ethereum_byzantium_trie_imports_root :
+  IsImported globals "ethereum.byzantium.trie" "root".
+Axiom ethereum_byzantium_trie_imports_trie_get :
+  IsImported globals "ethereum.byzantium.trie" "trie_get".
+Axiom ethereum_byzantium_trie_imports_trie_set :
+  IsImported globals "ethereum.byzantium.trie" "trie_set".
 
 Definition State : Value.t :=
   builtins.make_klass
@@ -153,7 +185,8 @@ Definition get_account : Value.t -> Value.t -> M :=
     account : `Account`
         Account at address.
     " in
-    let account :=
+    let _ := M.assign_local (|
+      "account" ,
       M.call (|
         M.get_name (| globals, "get_account_optional" |),
         make_list [
@@ -161,7 +194,8 @@ Definition get_account : Value.t -> Value.t -> M :=
           M.get_name (| globals, "address" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -207,7 +241,8 @@ Definition get_account_optional : Value.t -> Value.t -> M :=
     account : `Account`
         Account at address.
     " in
-    let account :=
+    let _ := M.assign_local (|
+      "account" ,
       M.call (|
         M.get_name (| globals, "trie_get" |),
         make_list [
@@ -215,7 +250,8 @@ Definition get_account_optional : Value.t -> Value.t -> M :=
           M.get_name (| globals, "address" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.return_ (|
       M.get_name (| globals, "account" |)
     |) in
@@ -338,14 +374,16 @@ Definition get_storage : Value.t -> Value.t -> M :=
     value : `U256`
         Value at the key.
     " in
-    let trie :=
+    let _ := M.assign_local (|
+      "trie" ,
       M.call (|
         M.get_field (| M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |), "get" |),
         make_list [
           M.get_name (| globals, "address" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -369,7 +407,8 @@ Definition get_storage : Value.t -> Value.t -> M :=
       )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
-    let value :=
+    let _ := M.assign_local (|
+      "value" ,
       M.call (|
         M.get_name (| globals, "trie_get" |),
         make_list [
@@ -377,7 +416,8 @@ Definition get_storage : Value.t -> Value.t -> M :=
           M.get_name (| globals, "key" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.assert (| M.call (|
     M.get_name (| globals, "isinstance" |),
     make_list [
@@ -420,14 +460,16 @@ Definition set_storage : Value.t -> Value.t -> M :=
     |),
     Constant.None_
   |) |) in
-    let trie :=
+    let _ := M.assign_local (|
+      "trie" ,
       M.call (|
         M.get_field (| M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |), "get" |),
         make_list [
           M.get_name (| globals, "address" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -437,12 +479,14 @@ Definition set_storage : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let trie :=
+        let _ := M.assign_local (|
+          "trie" ,
           M.call (|
             M.get_name (| globals, "Trie" |),
             make_list [],
             make_dict []
-          |) in
+          |)
+        |) in
         let _ := M.assign (|
           M.get_subscript (|
             M.get_field (| M.get_name (| globals, "state" |), "_storage_tries" |),
@@ -469,7 +513,7 @@ Definition set_storage : Value.t -> Value.t -> M :=
       M.if_then_else (|
         Compare.eq (|
           M.get_field (| M.get_name (| globals, "trie" |), "_data" |),
-          {}
+          Constant.str "(* At expr: unsupported node type: Dict *)"
         |),
       (* then *)
       ltac:(M.monadic (
@@ -615,7 +659,8 @@ Definition account_has_code_or_nonce : Value.t -> Value.t -> M :=
         True if if an account has non zero nonce or non empty code,
         False otherwise.
     " in
-    let account :=
+    let _ := M.assign_local (|
+      "account" ,
       M.call (|
         M.get_name (| globals, "get_account" |),
         make_list [
@@ -623,7 +668,8 @@ Definition account_has_code_or_nonce : Value.t -> Value.t -> M :=
           M.get_name (| globals, "address" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.return_ (|
       BoolOp.or (|
         Compare.not_eq (|
@@ -665,7 +711,8 @@ Definition is_account_empty : Value.t -> Value.t -> M :=
         True if if an account has zero nonce, empty code and zero balance,
         False otherwise.
     " in
-    let account :=
+    let _ := M.assign_local (|
+      "account" ,
       M.call (|
         M.get_name (| globals, "get_account" |),
         make_list [
@@ -673,7 +720,8 @@ Definition is_account_empty : Value.t -> Value.t -> M :=
           M.get_name (| globals, "address" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.return_ (|
       BoolOp.and (|
         Compare.eq (|
@@ -724,7 +772,8 @@ Definition account_exists_and_is_empty : Value.t -> Value.t -> M :=
         True if an account exists and has zero nonce, empty code and zero
         balance, False otherwise.
     " in
-    let account :=
+    let _ := M.assign_local (|
+      "account" ,
       M.call (|
         M.get_name (| globals, "get_account_optional" |),
         make_list [
@@ -732,7 +781,8 @@ Definition account_exists_and_is_empty : Value.t -> Value.t -> M :=
           M.get_name (| globals, "address" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.return_ (|
       BoolOp.and (|
         Compare.is_not (|
@@ -789,7 +839,8 @@ Definition is_account_alive : Value.t -> Value.t -> M :=
     is_alive : `bool`
         True if the account is alive.
     " in
-    let account :=
+    let _ := M.assign_local (|
+      "account" ,
       M.call (|
         M.get_name (| globals, "get_account_optional" |),
         make_list [
@@ -797,7 +848,8 @@ Definition is_account_alive : Value.t -> Value.t -> M :=
           M.get_name (| globals, "address" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|

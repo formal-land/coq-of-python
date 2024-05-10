@@ -17,17 +17,29 @@ Introduction
 Types re-used throughout the specification, which are specific to Ethereum.
 ".
 
-Axiom dataclasses_imports :
-  AreImported globals "dataclasses" [ "dataclass" ].
+Axiom dataclasses_imports_dataclass :
+  IsImported globals "dataclasses" "dataclass".
 
-Axiom ethereum_imports :
-  AreImported globals "ethereum" [ "rlp" ].
+Axiom ethereum_imports_rlp :
+  IsImported globals "ethereum" "rlp".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Bytes20"; "Bytes256"; "Uint"; "slotted_freezable" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Bytes :
+  IsImported globals "ethereum.base_types" "Bytes".
+Axiom ethereum_base_types_imports_Bytes20 :
+  IsImported globals "ethereum.base_types" "Bytes20".
+Axiom ethereum_base_types_imports_Bytes256 :
+  IsImported globals "ethereum.base_types" "Bytes256".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
+Axiom ethereum_base_types_imports_slotted_freezable :
+  IsImported globals "ethereum.base_types" "slotted_freezable".
 
-Axiom ethereum_crypto_hash_imports :
-  AreImported globals "ethereum.crypto.hash" [ "Hash32"; "keccak256" ].
+Axiom ethereum_crypto_hash_imports_Hash32 :
+  IsImported globals "ethereum.crypto.hash" "Hash32".
+Axiom ethereum_crypto_hash_imports_keccak256 :
+  IsImported globals "ethereum.crypto.hash" "keccak256".
 
 Definition Address : Value.t := M.run ltac:(M.monadic (
   M.get_name (| globals, "Bytes20" |)

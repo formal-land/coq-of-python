@@ -17,8 +17,10 @@ Introduction
 Functions that simplify checking assertions and raising exceptions.
 ".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "Type"; "Union" ].
+Axiom typing_imports_Type :
+  IsImported globals "typing" "Type".
+Axiom typing_imports_Union :
+  IsImported globals "typing" "Union".
 
 Definition ensure : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

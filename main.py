@@ -58,13 +58,15 @@ def generate_constant(node, value):
     elif isinstance(value, int):
         return f"Constant.int {str(value)}"
     elif isinstance(value, float):
-        return f"Value.Float {str(value)}"
+        return f"Constant.float \"{str(value)}\""
     elif isinstance(value, str):
-        return "Constant.str \"" + value.replace("\"", "\"\"\"") + "\""
+        return "Constant.str \"" + value.replace("\"", "\"\"") + "\""
     elif isinstance(value, bytes):
         return "Constant.bytes \"" + value.hex() + "\""
+    elif value == ...:
+        return "Constant.ellipsis"
     else:
-        return generate_error("constant", node)
+        return generate_error(f"constant {type(value)}", node)
 
 
 def generate_mod(node: ast.mod):
@@ -99,7 +101,7 @@ def get_globals_of_import(node: ast.ImportFrom) -> str:
 
 def generate_top_level_stmt(node: ast.stmt):
     if isinstance(node, ast.FunctionDef):
-        return f"Definition {node.name} : Value.t -> Value.t -> M :=\n" + \
+        return f"Definition {generate_name(node.name)} : Value.t -> Value.t -> M :=\n" + \
             generate_indent(1) + generate_function_def_body(1, node) + "."
     elif isinstance(node, ast.AsyncFunctionDef):
         return generate_error("top_level_stmt", node)
@@ -174,10 +176,12 @@ def generate_top_level_stmt(node: ast.stmt):
         module = get_globals_of_import(node)
         snake_module = module.replace(".", "_")
 
-        return f"Axiom {snake_module}_imports :\n" + \
-            generate_indent(1) + \
-            f"AreImported globals \"{module}\" [ " + \
-            "; ".join(f"\"{alias.name}\"" for alias in node.names) + " ]."
+        return "\n".join(
+            f"Axiom {snake_module}_imports_{alias.name} :\n" +
+            generate_indent(1) +
+            f"IsImported globals \"{module}\" \"{alias.name}\"."
+            for alias in node.names
+        )
     elif isinstance(node, ast.Global):
         return generate_error("top_level_stmt", node)
     elif isinstance(node, ast.Nonlocal):
@@ -258,9 +262,12 @@ def generate_stmt(indent, node: ast.stmt):
         target = node.targets[0]
 
         if isinstance(target, ast.Name):
-            return generate_indent(indent) + "let " + target.id + " :=\n" + \
+            return generate_indent(indent) + "let _ := M.assign_local (|\n" + \
                 generate_indent(indent + 1) + \
-                generate_expr(indent + 1, False, node.value) + " in"
+                "\"" + target.id + "\" ,\n" + \
+                generate_indent(indent + 1) + \
+                generate_expr(indent + 1, False, node.value) + "\n" + \
+                generate_indent(indent) + "|) in"
 
         return generate_indent(indent) + "let _ := M.assign (|\n" + \
             generate_indent(indent + 1) + \
@@ -272,11 +279,11 @@ def generate_stmt(indent, node: ast.stmt):
     #     return generate_error("stmt", node)
     elif isinstance(node, ast.AugAssign):
         if isinstance(node.target, ast.Name):
-            return generate_indent(indent) + "let " + node.target.id + " := " + \
-                generate_operator(node.op) + "\n" + \
-                generate_indent(indent + 1) + generate_expr(1, False, node.value) + "\n" + \
-                generate_indent(indent + 1) + \
-                generate_expr(1, False, node.value) + " in"
+            return generate_indent(indent) + "let _ := M.assign_op_local (|\n" + \
+                generate_indent(indent + 1) + generate_operator(node.op) + ",\n" + \
+                generate_indent(indent + 1) + "\"" + node.target.id + "\",\n" + \
+                generate_indent(indent + 1) + generate_expr(1, False, node.value) + "\n" +\
+                generate_indent(indent) + "|) in"
 
         return generate_indent(indent) + "let _ := M.assign_op (|\n" + \
             generate_indent(indent + 1) + generate_operator(node.op) + ",\n" + \
@@ -497,17 +504,9 @@ def generate_expr(indent, is_with_paren, node: ast.expr):
             generate_if_then_else(indent, node.test, node.body, node.orelse)
         )
     elif isinstance(node, ast.Dict):
-        return "{" + \
-            ", ".join(
-                (generate_expr(indent, False, key)
-                 if key is not None
-                 else "?") +
-                ": " + generate_expr(indent, False, value)
-                for key, value in zip(node.keys, node.values)
-            ) + \
-            "}"
+        return generate_error("expr", node)
     elif isinstance(node, ast.Set):
-        return "{" + ", ".join(generate_expr(indent, False, elt) for elt in node.elts) + "}"
+        return generate_error("expr", node)
     elif isinstance(node, ast.ListComp):
         return generate_error("expr", node)
     elif isinstance(node, ast.SetComp):

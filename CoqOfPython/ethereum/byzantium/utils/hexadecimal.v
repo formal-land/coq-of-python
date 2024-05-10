@@ -18,11 +18,15 @@ Hexadecimal utility functions used in this specification, specific to
 Byzantium types.
 ".
 
-Axiom ethereum_utils_hexadecimal_imports :
-  AreImported globals "ethereum.utils.hexadecimal" [ "remove_hex_prefix" ].
+Axiom ethereum_utils_hexadecimal_imports_remove_hex_prefix :
+  IsImported globals "ethereum.utils.hexadecimal" "remove_hex_prefix".
 
-Axiom ethereum_byzantium_fork_types_imports :
-  AreImported globals "ethereum.byzantium.fork_types" [ "Address"; "Bloom"; "Root" ].
+Axiom ethereum_byzantium_fork_types_imports_Address :
+  IsImported globals "ethereum.byzantium.fork_types" "Address".
+Axiom ethereum_byzantium_fork_types_imports_Bloom :
+  IsImported globals "ethereum.byzantium.fork_types" "Bloom".
+Axiom ethereum_byzantium_fork_types_imports_Root :
+  IsImported globals "ethereum.byzantium.fork_types" "Root".
 
 Definition hex_to_root : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

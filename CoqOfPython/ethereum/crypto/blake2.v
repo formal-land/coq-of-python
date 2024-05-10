@@ -10,14 +10,16 @@ The Blake2 Implementation
 
 (* At top_level_stmt: unsupported node type: Import *)
 
-Axiom dataclasses_imports :
-  AreImported globals "dataclasses" [ "dataclass" ].
+Axiom dataclasses_imports_dataclass :
+  IsImported globals "dataclasses" "dataclass".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "List"; "Tuple" ].
+Axiom typing_imports_List :
+  IsImported globals "typing" "List".
+Axiom typing_imports_Tuple :
+  IsImported globals "typing" "Tuple".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "Uint" ].
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
 Definition spit_le_to_uint : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -34,8 +36,10 @@ Definition spit_le_to_uint : Value.t -> Value.t -> M :=
     num_words:
         The number of words to be extracted
     " in
-    let words :=
-      make_list [] in
+    let _ := M.assign_local (|
+      "words" ,
+      make_list []
+    |) in
     let _ :=
       M.for_ (|
         M.get_name (| globals, "i" |),
@@ -47,14 +51,16 @@ Definition spit_le_to_uint : Value.t -> Value.t -> M :=
       make_dict []
     |),
         ltac:(M.monadic (
-          let start_position :=
+          let _ := M.assign_local (|
+            "start_position" ,
             BinOp.add (|
               M.get_name (| globals, "start" |),
               BinOp.mult (|
                 M.get_name (| globals, "i" |),
                 Constant.int 8
               |)
-            |) in
+            |)
+          |) in
           let _ := M.call (|
     M.get_field (| M.get_name (| globals, "words" |), "append" |),
     make_list [
@@ -107,7 +113,8 @@ Definition Blake2 : Value.t :=
         data :
             The bytes data that has been passed in the message.
         " in
-          let rounds :=
+          let _ := M.assign_local (|
+            "rounds" ,
             M.call (|
               M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
               make_list [
@@ -119,8 +126,10 @@ Definition Blake2 : Value.t :=
                 |)
               ],
               make_dict []
-            |) in
-          let h :=
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "h" ,
             M.call (|
               M.get_name (| globals, "spit_le_to_uint" |),
               make_list [
@@ -129,8 +138,10 @@ Definition Blake2 : Value.t :=
                 Constant.int 8
               ],
               make_dict []
-            |) in
-          let m :=
+            |)
+          |) in
+          let _ := M.assign_local (|
+            "m" ,
             M.call (|
               M.get_name (| globals, "spit_le_to_uint" |),
               make_list [
@@ -139,7 +150,8 @@ Definition Blake2 : Value.t :=
                 Constant.int 16
               ],
               make_dict []
-            |) in
+            |)
+          |) in
           let _ := M.assign (|
             make_tuple [ M.get_name (| globals, "t_0" |); M.get_name (| globals, "t_1" |) ],
             M.call (|
@@ -152,7 +164,8 @@ Definition Blake2 : Value.t :=
               make_dict []
             |)
           |) in
-          let f :=
+          let _ := M.assign_local (|
+            "f" ,
             M.call (|
               M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
               make_list [
@@ -164,7 +177,8 @@ Definition Blake2 : Value.t :=
                 |)
               ],
               make_dict []
-            |) in
+            |)
+          |) in
           let _ := M.return_ (|
             make_tuple [ M.get_name (| globals, "rounds" |); M.get_name (| globals, "h" |); M.get_name (| globals, "m" |); M.get_name (| globals, "t_0" |); M.get_name (| globals, "t_1" |); M.get_name (| globals, "f" |) ]
           |) in
@@ -443,13 +457,15 @@ Definition Blake2 : Value.t :=
         f:
             The final block indicator flag. An 8-bit word
         " in
-          let v :=
+          let _ := M.assign_local (|
+            "v" ,
             BinOp.mult (|
               make_list [
                 Constant.int 0
               ],
               Constant.int 16
-            |) in
+            |)
+          |) in
           let _ := M.assign (|
             M.slice (|
               M.get_name (| globals, "v" |),
@@ -529,15 +545,18 @@ Definition Blake2 : Value.t :=
       make_dict []
     |),
               ltac:(M.monadic (
-                let s :=
+                let _ := M.assign_local (|
+                  "s" ,
                   M.get_subscript (|
                     M.get_field (| M.get_name (| globals, "self" |), "sigma" |),
                     BinOp.mod_ (|
                       M.get_name (| globals, "r" |),
                       M.get_field (| M.get_name (| globals, "self" |), "sigma_len" |)
                     |)
-                  |) in
-                let v :=
+                  |)
+                |) in
+                let _ := M.assign_local (|
+                  "v" ,
                   M.call (|
                     M.get_field (| M.get_name (| globals, "self" |), "G" |),
                     make_list [
@@ -562,8 +581,10 @@ Definition Blake2 : Value.t :=
                       |)
                     ],
                     make_dict []
-                  |) in
-                let v :=
+                  |)
+                |) in
+                let _ := M.assign_local (|
+                  "v" ,
                   M.call (|
                     M.get_field (| M.get_name (| globals, "self" |), "G" |),
                     make_list [
@@ -588,8 +609,10 @@ Definition Blake2 : Value.t :=
                       |)
                     ],
                     make_dict []
-                  |) in
-                let v :=
+                  |)
+                |) in
+                let _ := M.assign_local (|
+                  "v" ,
                   M.call (|
                     M.get_field (| M.get_name (| globals, "self" |), "G" |),
                     make_list [
@@ -614,8 +637,10 @@ Definition Blake2 : Value.t :=
                       |)
                     ],
                     make_dict []
-                  |) in
-                let v :=
+                  |)
+                |) in
+                let _ := M.assign_local (|
+                  "v" ,
                   M.call (|
                     M.get_field (| M.get_name (| globals, "self" |), "G" |),
                     make_list [
@@ -640,8 +665,10 @@ Definition Blake2 : Value.t :=
                       |)
                     ],
                     make_dict []
-                  |) in
-                let v :=
+                  |)
+                |) in
+                let _ := M.assign_local (|
+                  "v" ,
                   M.call (|
                     M.get_field (| M.get_name (| globals, "self" |), "G" |),
                     make_list [
@@ -666,8 +693,10 @@ Definition Blake2 : Value.t :=
                       |)
                     ],
                     make_dict []
-                  |) in
-                let v :=
+                  |)
+                |) in
+                let _ := M.assign_local (|
+                  "v" ,
                   M.call (|
                     M.get_field (| M.get_name (| globals, "self" |), "G" |),
                     make_list [
@@ -692,8 +721,10 @@ Definition Blake2 : Value.t :=
                       |)
                     ],
                     make_dict []
-                  |) in
-                let v :=
+                  |)
+                |) in
+                let _ := M.assign_local (|
+                  "v" ,
                   M.call (|
                     M.get_field (| M.get_name (| globals, "self" |), "G" |),
                     make_list [
@@ -718,8 +749,10 @@ Definition Blake2 : Value.t :=
                       |)
                     ],
                     make_dict []
-                  |) in
-                let v :=
+                  |)
+                |) in
+                let _ := M.assign_local (|
+                  "v" ,
                   M.call (|
                     M.get_field (| M.get_name (| globals, "self" |), "G" |),
                     make_list [
@@ -744,15 +777,18 @@ Definition Blake2 : Value.t :=
                       |)
                     ],
                     make_dict []
-                  |) in
+                  |)
+                |) in
                 M.pure Constant.None_
               )),
               ltac:(M.monadic (
                 M.pure Constant.None_
               ))
           |) in
-          let result_message_words :=
-            Constant.str "(* At expr: unsupported node type: GeneratorExp *)" in
+          let _ := M.assign_local (|
+            "result_message_words" ,
+            Constant.str "(* At expr: unsupported node type: GeneratorExp *)"
+          |) in
           let _ := M.return_ (|
             M.call (|
               M.get_field (| M.get_name (| globals, "struct" |), "pack" |),

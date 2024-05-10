@@ -20,11 +20,15 @@ collection of accounts (The Dao and all its children) to a recovery contract.
 The recovery contract was previously created using normal contract deployment.
 ".
 
-Axiom ethereum_dao_fork_state_imports :
-  AreImported globals "ethereum.dao_fork.state" [ "State"; "get_account"; "move_ether" ].
+Axiom ethereum_dao_fork_state_imports_State :
+  IsImported globals "ethereum.dao_fork.state" "State".
+Axiom ethereum_dao_fork_state_imports_get_account :
+  IsImported globals "ethereum.dao_fork.state" "get_account".
+Axiom ethereum_dao_fork_state_imports_move_ether :
+  IsImported globals "ethereum.dao_fork.state" "move_ether".
 
-Axiom ethereum_dao_fork_utils_hexadecimal_imports :
-  AreImported globals "ethereum.dao_fork.utils.hexadecimal" [ "hex_to_address" ].
+Axiom ethereum_dao_fork_utils_hexadecimal_imports_hex_to_address :
+  IsImported globals "ethereum.dao_fork.utils.hexadecimal" "hex_to_address".
 
 Definition DAO_ACCOUNTS : Value.t := M.run ltac:(M.monadic (
   Constant.str "(* At expr: unsupported node type: ListComp *)"
@@ -56,7 +60,8 @@ Definition apply_dao : Value.t -> Value.t -> M :=
         M.get_name (| globals, "address" |),
         M.get_name (| globals, "DAO_ACCOUNTS" |),
         ltac:(M.monadic (
-          let balance :=
+          let _ := M.assign_local (|
+            "balance" ,
             M.get_field (| M.call (|
               M.get_name (| globals, "get_account" |),
               make_list [
@@ -64,7 +69,8 @@ Definition apply_dao : Value.t -> Value.t -> M :=
                 M.get_name (| globals, "address" |)
               ],
               make_dict []
-            |), "balance" |) in
+            |), "balance" |)
+          |) in
           let _ := M.call (|
     M.get_name (| globals, "move_ether" |),
     make_list [

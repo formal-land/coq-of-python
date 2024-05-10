@@ -18,26 +18,42 @@ Message specific functions used in this berlin version of
 specification.
 ".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "FrozenSet"; "Optional"; "Tuple"; "Union" ].
+Axiom typing_imports_FrozenSet :
+  IsImported globals "typing" "FrozenSet".
+Axiom typing_imports_Optional :
+  IsImported globals "typing" "Optional".
+Axiom typing_imports_Tuple :
+  IsImported globals "typing" "Tuple".
+Axiom typing_imports_Union :
+  IsImported globals "typing" "Union".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Bytes0"; "Bytes32"; "Uint" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Bytes :
+  IsImported globals "ethereum.base_types" "Bytes".
+Axiom ethereum_base_types_imports_Bytes0 :
+  IsImported globals "ethereum.base_types" "Bytes0".
+Axiom ethereum_base_types_imports_Bytes32 :
+  IsImported globals "ethereum.base_types" "Bytes32".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_berlin_fork_types_imports :
-  AreImported globals "ethereum.berlin.fork_types" [ "Address" ].
+Axiom ethereum_berlin_fork_types_imports_Address :
+  IsImported globals "ethereum.berlin.fork_types" "Address".
 
-Axiom ethereum_berlin_state_imports :
-  AreImported globals "ethereum.berlin.state" [ "get_account" ].
+Axiom ethereum_berlin_state_imports_get_account :
+  IsImported globals "ethereum.berlin.state" "get_account".
 
-Axiom ethereum_berlin_vm_imports :
-  AreImported globals "ethereum.berlin.vm" [ "Environment"; "Message" ].
+Axiom ethereum_berlin_vm_imports_Environment :
+  IsImported globals "ethereum.berlin.vm" "Environment".
+Axiom ethereum_berlin_vm_imports_Message :
+  IsImported globals "ethereum.berlin.vm" "Message".
 
-Axiom ethereum_berlin_vm_precompiled_contracts_mapping_imports :
-  AreImported globals "ethereum.berlin.vm.precompiled_contracts.mapping" [ "PRE_COMPILED_CONTRACTS" ].
+Axiom ethereum_berlin_vm_precompiled_contracts_mapping_imports_PRE_COMPILED_CONTRACTS :
+  IsImported globals "ethereum.berlin.vm.precompiled_contracts.mapping" "PRE_COMPILED_CONTRACTS".
 
-Axiom ethereum_berlin_utils_address_imports :
-  AreImported globals "ethereum.berlin.utils.address" [ "compute_contract_address" ].
+Axiom ethereum_berlin_utils_address_imports_compute_contract_address :
+  IsImported globals "ethereum.berlin.utils.address" "compute_contract_address".
 
 Definition prepare_message : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -92,7 +108,8 @@ Definition prepare_message : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let current_target :=
+        let _ := M.assign_local (|
+          "current_target" ,
           M.call (|
             M.get_name (| globals, "compute_contract_address" |),
             make_list [
@@ -116,17 +133,22 @@ Definition prepare_message : Value.t -> Value.t -> M :=
               |)
             ],
             make_dict []
-          |) in
-        let msg_data :=
+          |)
+        |) in
+        let _ := M.assign_local (|
+          "msg_data" ,
           M.call (|
             M.get_name (| globals, "Bytes" |),
             make_list [
               Constant.bytes ""
             ],
             make_dict []
-          |) in
-        let code :=
-          M.get_name (| globals, "data" |) in
+          |)
+        |) in
+        let _ := M.assign_local (|
+          "code" ,
+          M.get_name (| globals, "data" |)
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
@@ -143,11 +165,16 @@ Definition prepare_message : Value.t -> Value.t -> M :=
             |),
           (* then *)
           ltac:(M.monadic (
-            let current_target :=
-              M.get_name (| globals, "target" |) in
-            let msg_data :=
-              M.get_name (| globals, "data" |) in
-            let code :=
+            let _ := M.assign_local (|
+              "current_target" ,
+              M.get_name (| globals, "target" |)
+            |) in
+            let _ := M.assign_local (|
+              "msg_data" ,
+              M.get_name (| globals, "data" |)
+            |) in
+            let _ := M.assign_local (|
+              "code" ,
               M.get_field (| M.call (|
                 M.get_name (| globals, "get_account" |),
                 make_list [
@@ -155,7 +182,8 @@ Definition prepare_message : Value.t -> Value.t -> M :=
                   M.get_name (| globals, "target" |)
                 ],
                 make_dict []
-              |), "code" |) in
+              |), "code" |)
+            |) in
             let _ :=
               (* if *)
               M.if_then_else (|
@@ -165,8 +193,10 @@ Definition prepare_message : Value.t -> Value.t -> M :=
                 |),
               (* then *)
               ltac:(M.monadic (
-                let code_address :=
-                  M.get_name (| globals, "target" |) in
+                let _ := M.assign_local (|
+                  "code_address" ,
+                  M.get_name (| globals, "target" |)
+                |) in
                 M.pure Constant.None_
               (* else *)
               )), ltac:(M.monadic (
@@ -186,12 +216,14 @@ Definition prepare_message : Value.t -> Value.t -> M :=
           )) |) in
         M.pure Constant.None_
       )) |) in
-    let accessed_addresses :=
+    let _ := M.assign_local (|
+      "accessed_addresses" ,
       M.call (|
         M.get_name (| globals, "set" |),
         make_list [],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_field (| M.get_name (| globals, "accessed_addresses" |), "add" |),
     make_list [

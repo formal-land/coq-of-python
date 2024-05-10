@@ -17,20 +17,32 @@ Introduction
 Implementations of the EVM control flow instructions.
 ".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Uint" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_berlin_vm_gas_imports :
-  AreImported globals "ethereum.berlin.vm.gas" [ "GAS_BASE"; "GAS_HIGH"; "GAS_JUMPDEST"; "GAS_MID"; "charge_gas" ].
+Axiom ethereum_berlin_vm_gas_imports_GAS_BASE :
+  IsImported globals "ethereum.berlin.vm.gas" "GAS_BASE".
+Axiom ethereum_berlin_vm_gas_imports_GAS_HIGH :
+  IsImported globals "ethereum.berlin.vm.gas" "GAS_HIGH".
+Axiom ethereum_berlin_vm_gas_imports_GAS_JUMPDEST :
+  IsImported globals "ethereum.berlin.vm.gas" "GAS_JUMPDEST".
+Axiom ethereum_berlin_vm_gas_imports_GAS_MID :
+  IsImported globals "ethereum.berlin.vm.gas" "GAS_MID".
+Axiom ethereum_berlin_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.berlin.vm.gas" "charge_gas".
 
-Axiom ethereum_berlin_vm_imports :
-  AreImported globals "ethereum.berlin.vm" [ "Evm" ].
+Axiom ethereum_berlin_vm_imports_Evm :
+  IsImported globals "ethereum.berlin.vm" "Evm".
 
-Axiom ethereum_berlin_vm_exceptions_imports :
-  AreImported globals "ethereum.berlin.vm.exceptions" [ "InvalidJumpDestError" ].
+Axiom ethereum_berlin_vm_exceptions_imports_InvalidJumpDestError :
+  IsImported globals "ethereum.berlin.vm.exceptions" "InvalidJumpDestError".
 
-Axiom ethereum_berlin_vm_stack_imports :
-  AreImported globals "ethereum.berlin.vm.stack" [ "pop"; "push" ].
+Axiom ethereum_berlin_vm_stack_imports_pop :
+  IsImported globals "ethereum.berlin.vm.stack" "pop".
+Axiom ethereum_berlin_vm_stack_imports_push :
+  IsImported globals "ethereum.berlin.vm.stack" "push".
 
 Definition stop : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -69,7 +81,8 @@ Definition jump : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let jump_dest :=
+    let _ := M.assign_local (|
+      "jump_dest" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
@@ -82,7 +95,8 @@ Definition jump : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -132,7 +146,8 @@ Definition jumpi : Value.t -> Value.t -> M :=
         The current EVM frame.
 
     " in
-    let jump_dest :=
+    let _ := M.assign_local (|
+      "jump_dest" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
@@ -145,15 +160,18 @@ Definition jumpi : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let conditional_value :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "conditional_value" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -171,11 +189,13 @@ Definition jumpi : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let destination :=
+        let _ := M.assign_local (|
+          "destination" ,
           BinOp.add (|
             M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
             Constant.int 1
-          |) in
+          |)
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
@@ -192,8 +212,10 @@ Definition jumpi : Value.t -> Value.t -> M :=
             M.pure Constant.None_
           (* else *)
           )), ltac:(M.monadic (
-            let destination :=
-              M.get_name (| globals, "jump_dest" |) in
+            let _ := M.assign_local (|
+              "destination" ,
+              M.get_name (| globals, "jump_dest" |)
+            |) in
             M.pure Constant.None_
           )) |) in
         M.pure Constant.None_

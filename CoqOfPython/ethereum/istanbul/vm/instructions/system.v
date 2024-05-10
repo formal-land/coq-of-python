@@ -17,38 +17,92 @@ Introduction
 Implementations of the EVM system related instructions.
 ".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Bytes0"; "Uint" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Bytes0 :
+  IsImported globals "ethereum.base_types" "Bytes0".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_utils_ensure_imports :
-  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
+Axiom ethereum_utils_ensure_imports_ensure :
+  IsImported globals "ethereum.utils.ensure" "ensure".
 
-Axiom ethereum_utils_numeric_imports :
-  AreImported globals "ethereum.utils.numeric" [ "ceil32" ].
+Axiom ethereum_utils_numeric_imports_ceil32 :
+  IsImported globals "ethereum.utils.numeric" "ceil32".
 
-Axiom ethereum_istanbul_fork_types_imports :
-  AreImported globals "ethereum.istanbul.fork_types" [ "Address" ].
+Axiom ethereum_istanbul_fork_types_imports_Address :
+  IsImported globals "ethereum.istanbul.fork_types" "Address".
 
-Axiom ethereum_istanbul_state_imports :
-  AreImported globals "ethereum.istanbul.state" [ "account_exists_and_is_empty"; "account_has_code_or_nonce"; "get_account"; "increment_nonce"; "is_account_alive"; "set_account_balance" ].
+Axiom ethereum_istanbul_state_imports_account_exists_and_is_empty :
+  IsImported globals "ethereum.istanbul.state" "account_exists_and_is_empty".
+Axiom ethereum_istanbul_state_imports_account_has_code_or_nonce :
+  IsImported globals "ethereum.istanbul.state" "account_has_code_or_nonce".
+Axiom ethereum_istanbul_state_imports_get_account :
+  IsImported globals "ethereum.istanbul.state" "get_account".
+Axiom ethereum_istanbul_state_imports_increment_nonce :
+  IsImported globals "ethereum.istanbul.state" "increment_nonce".
+Axiom ethereum_istanbul_state_imports_is_account_alive :
+  IsImported globals "ethereum.istanbul.state" "is_account_alive".
+Axiom ethereum_istanbul_state_imports_set_account_balance :
+  IsImported globals "ethereum.istanbul.state" "set_account_balance".
 
-Axiom ethereum_istanbul_utils_address_imports :
-  AreImported globals "ethereum.istanbul.utils.address" [ "compute_contract_address"; "compute_create2_contract_address"; "to_address" ].
+Axiom ethereum_istanbul_utils_address_imports_compute_contract_address :
+  IsImported globals "ethereum.istanbul.utils.address" "compute_contract_address".
+Axiom ethereum_istanbul_utils_address_imports_compute_create2_contract_address :
+  IsImported globals "ethereum.istanbul.utils.address" "compute_create2_contract_address".
+Axiom ethereum_istanbul_utils_address_imports_to_address :
+  IsImported globals "ethereum.istanbul.utils.address" "to_address".
 
-Axiom ethereum_istanbul_vm_imports :
-  AreImported globals "ethereum.istanbul.vm" [ "Evm"; "Message"; "incorporate_child_on_error"; "incorporate_child_on_success" ].
+Axiom ethereum_istanbul_vm_imports_Evm :
+  IsImported globals "ethereum.istanbul.vm" "Evm".
+Axiom ethereum_istanbul_vm_imports_Message :
+  IsImported globals "ethereum.istanbul.vm" "Message".
+Axiom ethereum_istanbul_vm_imports_incorporate_child_on_error :
+  IsImported globals "ethereum.istanbul.vm" "incorporate_child_on_error".
+Axiom ethereum_istanbul_vm_imports_incorporate_child_on_success :
+  IsImported globals "ethereum.istanbul.vm" "incorporate_child_on_success".
 
-Axiom ethereum_istanbul_vm_exceptions_imports :
-  AreImported globals "ethereum.istanbul.vm.exceptions" [ "Revert"; "WriteInStaticContext" ].
+Axiom ethereum_istanbul_vm_exceptions_imports_Revert :
+  IsImported globals "ethereum.istanbul.vm.exceptions" "Revert".
+Axiom ethereum_istanbul_vm_exceptions_imports_WriteInStaticContext :
+  IsImported globals "ethereum.istanbul.vm.exceptions" "WriteInStaticContext".
 
-Axiom ethereum_istanbul_vm_gas_imports :
-  AreImported globals "ethereum.istanbul.vm.gas" [ "GAS_CALL"; "GAS_CALL_VALUE"; "GAS_CREATE"; "GAS_KECCAK256_WORD"; "GAS_NEW_ACCOUNT"; "GAS_SELF_DESTRUCT"; "GAS_SELF_DESTRUCT_NEW_ACCOUNT"; "GAS_ZERO"; "REFUND_SELF_DESTRUCT"; "calculate_gas_extend_memory"; "calculate_message_call_gas"; "charge_gas"; "max_message_call_gas" ].
+Axiom ethereum_istanbul_vm_gas_imports_GAS_CALL :
+  IsImported globals "ethereum.istanbul.vm.gas" "GAS_CALL".
+Axiom ethereum_istanbul_vm_gas_imports_GAS_CALL_VALUE :
+  IsImported globals "ethereum.istanbul.vm.gas" "GAS_CALL_VALUE".
+Axiom ethereum_istanbul_vm_gas_imports_GAS_CREATE :
+  IsImported globals "ethereum.istanbul.vm.gas" "GAS_CREATE".
+Axiom ethereum_istanbul_vm_gas_imports_GAS_KECCAK256_WORD :
+  IsImported globals "ethereum.istanbul.vm.gas" "GAS_KECCAK256_WORD".
+Axiom ethereum_istanbul_vm_gas_imports_GAS_NEW_ACCOUNT :
+  IsImported globals "ethereum.istanbul.vm.gas" "GAS_NEW_ACCOUNT".
+Axiom ethereum_istanbul_vm_gas_imports_GAS_SELF_DESTRUCT :
+  IsImported globals "ethereum.istanbul.vm.gas" "GAS_SELF_DESTRUCT".
+Axiom ethereum_istanbul_vm_gas_imports_GAS_SELF_DESTRUCT_NEW_ACCOUNT :
+  IsImported globals "ethereum.istanbul.vm.gas" "GAS_SELF_DESTRUCT_NEW_ACCOUNT".
+Axiom ethereum_istanbul_vm_gas_imports_GAS_ZERO :
+  IsImported globals "ethereum.istanbul.vm.gas" "GAS_ZERO".
+Axiom ethereum_istanbul_vm_gas_imports_REFUND_SELF_DESTRUCT :
+  IsImported globals "ethereum.istanbul.vm.gas" "REFUND_SELF_DESTRUCT".
+Axiom ethereum_istanbul_vm_gas_imports_calculate_gas_extend_memory :
+  IsImported globals "ethereum.istanbul.vm.gas" "calculate_gas_extend_memory".
+Axiom ethereum_istanbul_vm_gas_imports_calculate_message_call_gas :
+  IsImported globals "ethereum.istanbul.vm.gas" "calculate_message_call_gas".
+Axiom ethereum_istanbul_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.istanbul.vm.gas" "charge_gas".
+Axiom ethereum_istanbul_vm_gas_imports_max_message_call_gas :
+  IsImported globals "ethereum.istanbul.vm.gas" "max_message_call_gas".
 
-Axiom ethereum_istanbul_vm_memory_imports :
-  AreImported globals "ethereum.istanbul.vm.memory" [ "memory_read_bytes"; "memory_write" ].
+Axiom ethereum_istanbul_vm_memory_imports_memory_read_bytes :
+  IsImported globals "ethereum.istanbul.vm.memory" "memory_read_bytes".
+Axiom ethereum_istanbul_vm_memory_imports_memory_write :
+  IsImported globals "ethereum.istanbul.vm.memory" "memory_write".
 
-Axiom ethereum_istanbul_vm_stack_imports :
-  AreImported globals "ethereum.istanbul.vm.stack" [ "pop"; "push" ].
+Axiom ethereum_istanbul_vm_stack_imports_pop :
+  IsImported globals "ethereum.istanbul.vm.stack" "pop".
+Axiom ethereum_istanbul_vm_stack_imports_push :
+  IsImported globals "ethereum.istanbul.vm.stack" "push".
 
 Definition generic_create : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -57,7 +111,8 @@ Definition generic_create : Value.t -> Value.t -> M :=
     Core logic used by the `CREATE*` family of opcodes.
     " in
 (* At stmt: unsupported node type: ImportFrom *)
-    let create_message_gas :=
+    let _ := M.assign_local (|
+      "create_message_gas" ,
       M.call (|
         M.get_name (| globals, "max_message_call_gas" |),
         make_list [
@@ -70,7 +125,8 @@ Definition generic_create : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.assign_op (|
       BinOp.sub,
       M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |),
@@ -88,9 +144,12 @@ Definition generic_create : Value.t -> Value.t -> M :=
       M.get_field (| M.get_name (| globals, "evm" |), "return_data" |),
       Constant.bytes ""
     |) in
-    let sender_address :=
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "current_target" |) in
-    let sender :=
+    let _ := M.assign_local (|
+      "sender_address" ,
+      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "current_target" |)
+    |) in
+    let _ := M.assign_local (|
+      "sender" ,
       M.call (|
         M.get_name (| globals, "get_account" |),
         make_list [
@@ -98,7 +157,8 @@ Definition generic_create : Value.t -> Value.t -> M :=
           M.get_name (| globals, "sender_address" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -209,7 +269,8 @@ Definition generic_create : Value.t -> Value.t -> M :=
       )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
-    let call_data :=
+    let _ := M.assign_local (|
+      "call_data" ,
       M.call (|
         M.get_name (| globals, "memory_read_bytes" |),
         make_list [
@@ -218,7 +279,8 @@ Definition generic_create : Value.t -> Value.t -> M :=
           M.get_name (| globals, "memory_size" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "increment_nonce" |),
     make_list [
@@ -227,13 +289,16 @@ Definition generic_create : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let child_message :=
+    let _ := M.assign_local (|
+      "child_message" ,
       M.call (|
         M.get_name (| globals, "Message" |),
         make_list [],
         make_dict []
-      |) in
-    let child_evm :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "child_evm" ,
       M.call (|
         M.get_name (| globals, "process_create_message" |),
         make_list [
@@ -241,7 +306,8 @@ Definition generic_create : Value.t -> Value.t -> M :=
           M.get_field (| M.get_name (| globals, "evm" |), "env" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -318,31 +384,38 @@ Definition create : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let endowment :=
+    let _ := M.assign_local (|
+      "endowment" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_start_position :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_start_position" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_size" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let extend_memory :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "extend_memory" ,
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),
         make_list [
@@ -352,7 +425,8 @@ Definition create : Value.t -> Value.t -> M :=
           ]
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -372,7 +446,8 @@ Definition create : Value.t -> Value.t -> M :=
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
-    let contract_address :=
+    let _ := M.assign_local (|
+      "contract_address" ,
       M.call (|
         M.get_name (| globals, "compute_contract_address" |),
         make_list [
@@ -387,7 +462,8 @@ Definition create : Value.t -> Value.t -> M :=
           |), "nonce" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "generic_create" |),
     make_list [
@@ -420,31 +496,38 @@ Definition create2 : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let endowment :=
+    let _ := M.assign_local (|
+      "endowment" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_start_position :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_start_position" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_size" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let salt :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "salt" ,
       M.call (|
         M.get_field (| M.call (|
           M.get_name (| globals, "pop" |),
@@ -455,8 +538,10 @@ Definition create2 : Value.t -> Value.t -> M :=
         |), "to_be_bytes32" |),
         make_list [],
         make_dict []
-      |) in
-    let extend_memory :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "extend_memory" ,
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),
         make_list [
@@ -466,8 +551,10 @@ Definition create2 : Value.t -> Value.t -> M :=
           ]
         ],
         make_dict []
-      |) in
-    let call_data_words :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "call_data_words" ,
       BinOp.floor_div (|
         M.call (|
           M.get_name (| globals, "ceil32" |),
@@ -483,7 +570,8 @@ Definition create2 : Value.t -> Value.t -> M :=
           make_dict []
         |),
         Constant.int 32
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -509,7 +597,8 @@ Definition create2 : Value.t -> Value.t -> M :=
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
-    let contract_address :=
+    let _ := M.assign_local (|
+      "contract_address" ,
       M.call (|
         M.get_name (| globals, "compute_create2_contract_address" |),
         make_list [
@@ -526,7 +615,8 @@ Definition create2 : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "generic_create" |),
     make_list [
@@ -556,23 +646,28 @@ Definition return_ : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let memory_start_position :=
+    let _ := M.assign_local (|
+      "memory_start_position" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_size" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let extend_memory :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "extend_memory" ,
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),
         make_list [
@@ -582,7 +677,8 @@ Definition return_ : Value.t -> Value.t -> M :=
           ]
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -671,7 +767,8 @@ Definition generic_call : Value.t -> Value.t -> M :=
       )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
-    let call_data :=
+    let _ := M.assign_local (|
+      "call_data" ,
       M.call (|
         M.get_name (| globals, "memory_read_bytes" |),
         make_list [
@@ -680,8 +777,10 @@ Definition generic_call : Value.t -> Value.t -> M :=
           M.get_name (| globals, "memory_input_size" |)
         ],
         make_dict []
-      |) in
-    let code :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "code" ,
       M.get_field (| M.call (|
         M.get_name (| globals, "get_account" |),
         make_list [
@@ -689,14 +788,18 @@ Definition generic_call : Value.t -> Value.t -> M :=
           M.get_name (| globals, "code_address" |)
         ],
         make_dict []
-      |), "code" |) in
-    let child_message :=
+      |), "code" |)
+    |) in
+    let _ := M.assign_local (|
+      "child_message" ,
       M.call (|
         M.get_name (| globals, "Message" |),
         make_list [],
         make_dict []
-      |) in
-    let child_evm :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "child_evm" ,
       M.call (|
         M.get_name (| globals, "process_message" |),
         make_list [
@@ -704,7 +807,8 @@ Definition generic_call : Value.t -> Value.t -> M :=
           M.get_field (| M.get_name (| globals, "evm" |), "env" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -768,7 +872,8 @@ Definition generic_call : Value.t -> Value.t -> M :=
   |) in
         M.pure Constant.None_
       )) |) in
-    let actual_output_size :=
+    let _ := M.assign_local (|
+      "actual_output_size" ,
       M.call (|
         M.get_name (| globals, "min" |),
         make_list [
@@ -788,7 +893,8 @@ Definition generic_call : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "memory_write" |),
     make_list [
@@ -816,7 +922,8 @@ Definition call : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let gas :=
+    let _ := M.assign_local (|
+      "gas" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
@@ -829,8 +936,10 @@ Definition call : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let to :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "to" ,
       M.call (|
         M.get_name (| globals, "to_address" |),
         make_list [
@@ -843,48 +952,60 @@ Definition call : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let value :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "value" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_input_start_position :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_input_start_position" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_input_size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_input_size" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_output_start_position :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_output_start_position" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_output_size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_output_size" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let extend_memory :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "extend_memory" ,
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),
         make_list [
@@ -895,8 +1016,10 @@ Definition call : Value.t -> Value.t -> M :=
           ]
         ],
         make_dict []
-      |) in
-    let create_gas_cost :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "create_gas_cost" ,
             (* if *)
       M.if_then_else (|
         BoolOp.or (|
@@ -927,8 +1050,10 @@ M.call (|
       (* else *)
       )), ltac:(M.monadic (
 M.get_name (| globals, "GAS_NEW_ACCOUNT" |)
-      )) |) in
-    let transfer_gas_cost :=
+      )) |)
+    |) in
+    let _ := M.assign_local (|
+      "transfer_gas_cost" ,
             (* if *)
       M.if_then_else (|
         Compare.eq (|
@@ -947,8 +1072,10 @@ M.call (|
       (* else *)
       )), ltac:(M.monadic (
 M.get_name (| globals, "GAS_CALL_VALUE" |)
-      )) |) in
-    let message_call_gas :=
+      )) |)
+    |) in
+    let _ := M.assign_local (|
+      "message_call_gas" ,
       M.call (|
         M.get_name (| globals, "calculate_message_call_gas" |),
         make_list [
@@ -971,7 +1098,8 @@ M.get_name (| globals, "GAS_CALL_VALUE" |)
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -1013,7 +1141,8 @@ M.get_name (| globals, "GAS_CALL_VALUE" |)
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
-    let sender_balance :=
+    let _ := M.assign_local (|
+      "sender_balance" ,
       M.get_field (| M.call (|
         M.get_name (| globals, "get_account" |),
         make_list [
@@ -1021,7 +1150,8 @@ M.get_name (| globals, "GAS_CALL_VALUE" |)
           M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "current_target" |)
         ],
         make_dict []
-      |), "balance" |) in
+      |), "balance" |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -1095,7 +1225,8 @@ Definition callcode : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let gas :=
+    let _ := M.assign_local (|
+      "gas" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
@@ -1108,8 +1239,10 @@ Definition callcode : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let code_address :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "code_address" ,
       M.call (|
         M.get_name (| globals, "to_address" |),
         make_list [
@@ -1122,50 +1255,64 @@ Definition callcode : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let value :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "value" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_input_start_position :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_input_start_position" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_input_size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_input_size" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_output_start_position :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_output_start_position" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_output_size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_output_size" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let to :=
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "current_target" |) in
-    let extend_memory :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "to" ,
+      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "current_target" |)
+    |) in
+    let _ := M.assign_local (|
+      "extend_memory" ,
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),
         make_list [
@@ -1176,8 +1323,10 @@ Definition callcode : Value.t -> Value.t -> M :=
           ]
         ],
         make_dict []
-      |) in
-    let transfer_gas_cost :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "transfer_gas_cost" ,
             (* if *)
       M.if_then_else (|
         Compare.eq (|
@@ -1196,8 +1345,10 @@ M.call (|
       (* else *)
       )), ltac:(M.monadic (
 M.get_name (| globals, "GAS_CALL_VALUE" |)
-      )) |) in
-    let message_call_gas :=
+      )) |)
+    |) in
+    let _ := M.assign_local (|
+      "message_call_gas" ,
       M.call (|
         M.get_name (| globals, "calculate_message_call_gas" |),
         make_list [
@@ -1217,7 +1368,8 @@ M.get_name (| globals, "GAS_CALL_VALUE" |)
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -1237,7 +1389,8 @@ M.get_name (| globals, "GAS_CALL_VALUE" |)
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
-    let sender_balance :=
+    let _ := M.assign_local (|
+      "sender_balance" ,
       M.get_field (| M.call (|
         M.get_name (| globals, "get_account" |),
         make_list [
@@ -1245,7 +1398,8 @@ M.get_name (| globals, "GAS_CALL_VALUE" |)
           M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "current_target" |)
         ],
         make_dict []
-      |), "balance" |) in
+      |), "balance" |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -1319,7 +1473,8 @@ Definition selfdestruct : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let beneficiary :=
+    let _ := M.assign_local (|
+      "beneficiary" ,
       M.call (|
         M.get_name (| globals, "to_address" |),
         make_list [
@@ -1332,9 +1487,12 @@ Definition selfdestruct : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let gas_cost :=
-      M.get_name (| globals, "GAS_SELF_DESTRUCT" |) in
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "gas_cost" ,
+      M.get_name (| globals, "GAS_SELF_DESTRUCT" |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -1363,20 +1521,28 @@ Definition selfdestruct : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let gas_cost := BinOp.add
+        let _ := M.assign_op_local (|
+          BinOp.add,
+          "gas_cost",
           M.get_name (| globals, "GAS_SELF_DESTRUCT_NEW_ACCOUNT" |)
-          M.get_name (| globals, "GAS_SELF_DESTRUCT_NEW_ACCOUNT" |) in
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
-    let originator :=
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "current_target" |) in
-    let refunded_accounts :=
-      M.get_field (| M.get_name (| globals, "evm" |), "accounts_to_delete" |) in
-    let parent_evm :=
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "parent_evm" |) in
+    let _ := M.assign_local (|
+      "originator" ,
+      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "current_target" |)
+    |) in
+    let _ := M.assign_local (|
+      "refunded_accounts" ,
+      M.get_field (| M.get_name (| globals, "evm" |), "accounts_to_delete" |)
+    |) in
+    let _ := M.assign_local (|
+      "parent_evm" ,
+      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "parent_evm" |)
+    |) in
     let _ :=
       M.while (|
         Compare.is_not (|
@@ -1391,8 +1557,10 @@ Definition selfdestruct : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-          let parent_evm :=
-            M.get_field (| M.get_field (| M.get_name (| globals, "parent_evm" |), "message" |), "parent_evm" |) in
+          let _ := M.assign_local (|
+            "parent_evm" ,
+            M.get_field (| M.get_field (| M.get_name (| globals, "parent_evm" |), "message" |), "parent_evm" |)
+          |) in
           M.pure Constant.None_
         )),
         ltac:(M.monadic (
@@ -1434,7 +1602,8 @@ Definition selfdestruct : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let beneficiary_balance :=
+    let _ := M.assign_local (|
+      "beneficiary_balance" ,
       M.get_field (| M.call (|
         M.get_name (| globals, "get_account" |),
         make_list [
@@ -1442,8 +1611,10 @@ Definition selfdestruct : Value.t -> Value.t -> M :=
           M.get_name (| globals, "beneficiary" |)
         ],
         make_dict []
-      |), "balance" |) in
-    let originator_balance :=
+      |), "balance" |)
+    |) in
+    let _ := M.assign_local (|
+      "originator_balance" ,
       M.get_field (| M.call (|
         M.get_name (| globals, "get_account" |),
         make_list [
@@ -1451,7 +1622,8 @@ Definition selfdestruct : Value.t -> Value.t -> M :=
           M.get_name (| globals, "originator" |)
         ],
         make_dict []
-      |), "balance" |) in
+      |), "balance" |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "set_account_balance" |),
     make_list [
@@ -1529,7 +1701,8 @@ Definition delegatecall : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let gas :=
+    let _ := M.assign_local (|
+      "gas" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
@@ -1542,8 +1715,10 @@ Definition delegatecall : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let code_address :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "code_address" ,
       M.call (|
         M.get_name (| globals, "to_address" |),
         make_list [
@@ -1556,40 +1731,50 @@ Definition delegatecall : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let memory_input_start_position :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_input_start_position" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_input_size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_input_size" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_output_start_position :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_output_start_position" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_output_size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_output_size" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let extend_memory :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "extend_memory" ,
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),
         make_list [
@@ -1600,8 +1785,10 @@ Definition delegatecall : Value.t -> Value.t -> M :=
           ]
         ],
         make_dict []
-      |) in
-    let message_call_gas :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "message_call_gas" ,
       M.call (|
         M.get_name (| globals, "calculate_message_call_gas" |),
         make_list [
@@ -1624,7 +1811,8 @@ Definition delegatecall : Value.t -> Value.t -> M :=
           M.get_name (| globals, "GAS_CALL" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -1680,7 +1868,8 @@ Definition staticcall : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let gas :=
+    let _ := M.assign_local (|
+      "gas" ,
       M.call (|
         M.get_name (| globals, "Uint" |),
         make_list [
@@ -1693,8 +1882,10 @@ Definition staticcall : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let to :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "to" ,
       M.call (|
         M.get_name (| globals, "to_address" |),
         make_list [
@@ -1707,40 +1898,50 @@ Definition staticcall : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let memory_input_start_position :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_input_start_position" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_input_size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_input_size" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_output_start_position :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_output_start_position" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let memory_output_size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "memory_output_size" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let extend_memory :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "extend_memory" ,
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),
         make_list [
@@ -1751,8 +1952,10 @@ Definition staticcall : Value.t -> Value.t -> M :=
           ]
         ],
         make_dict []
-      |) in
-    let message_call_gas :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "message_call_gas" ,
       M.call (|
         M.get_name (| globals, "calculate_message_call_gas" |),
         make_list [
@@ -1775,7 +1978,8 @@ Definition staticcall : Value.t -> Value.t -> M :=
           M.get_name (| globals, "GAS_CALL" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -1837,23 +2041,28 @@ Definition revert : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let memory_start_index :=
+    let _ := M.assign_local (|
+      "memory_start_index" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let size :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "size" ,
       M.call (|
         M.get_name (| globals, "pop" |),
         make_list [
           M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
         ],
         make_dict []
-      |) in
-    let extend_memory :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "extend_memory" ,
       M.call (|
         M.get_name (| globals, "calculate_gas_extend_memory" |),
         make_list [
@@ -1863,7 +2072,8 @@ Definition revert : Value.t -> Value.t -> M :=
           ]
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -1880,7 +2090,8 @@ Definition revert : Value.t -> Value.t -> M :=
     M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
   |)
     |) in
-    let output :=
+    let _ := M.assign_local (|
+      "output" ,
       M.call (|
         M.get_name (| globals, "memory_read_bytes" |),
         make_list [
@@ -1889,7 +2100,8 @@ Definition revert : Value.t -> Value.t -> M :=
           M.get_name (| globals, "size" |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.assign (|
       M.get_field (| M.get_name (| globals, "evm" |), "output" |),
       M.call (|

@@ -17,26 +17,32 @@ Introduction
 Implementations of the EVM stack related instructions.
 ".
 
-Axiom functools_imports :
-  AreImported globals "functools" [ "partial" ].
+Axiom functools_imports_partial :
+  IsImported globals "functools" "partial".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
 
-Axiom ethereum_utils_ensure_imports :
-  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
+Axiom ethereum_utils_ensure_imports_ensure :
+  IsImported globals "ethereum.utils.ensure" "ensure".
 
-Axiom ethereum_gray_glacier_vm_imports :
-  AreImported globals "ethereum.gray_glacier.vm" [ "Evm"; "stack" ].
+Axiom ethereum_gray_glacier_vm_imports_Evm :
+  IsImported globals "ethereum.gray_glacier.vm" "Evm".
+Axiom ethereum_gray_glacier_vm_imports_stack :
+  IsImported globals "ethereum.gray_glacier.vm" "stack".
 
-Axiom ethereum_gray_glacier_vm_exceptions_imports :
-  AreImported globals "ethereum.gray_glacier.vm.exceptions" [ "StackUnderflowError" ].
+Axiom ethereum_gray_glacier_vm_exceptions_imports_StackUnderflowError :
+  IsImported globals "ethereum.gray_glacier.vm.exceptions" "StackUnderflowError".
 
-Axiom ethereum_gray_glacier_vm_gas_imports :
-  AreImported globals "ethereum.gray_glacier.vm.gas" [ "GAS_BASE"; "GAS_VERY_LOW"; "charge_gas" ].
+Axiom ethereum_gray_glacier_vm_gas_imports_GAS_BASE :
+  IsImported globals "ethereum.gray_glacier.vm.gas" "GAS_BASE".
+Axiom ethereum_gray_glacier_vm_gas_imports_GAS_VERY_LOW :
+  IsImported globals "ethereum.gray_glacier.vm.gas" "GAS_VERY_LOW".
+Axiom ethereum_gray_glacier_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.gray_glacier.vm.gas" "charge_gas".
 
-Axiom ethereum_gray_glacier_vm_memory_imports :
-  AreImported globals "ethereum.gray_glacier.vm.memory" [ "buffer_read" ].
+Axiom ethereum_gray_glacier_vm_memory_imports_buffer_read :
+  IsImported globals "ethereum.gray_glacier.vm.memory" "buffer_read".
 
 Definition pop : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -98,7 +104,8 @@ Definition push_n : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let data_to_push :=
+    let _ := M.assign_local (|
+      "data_to_push" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
@@ -128,7 +135,8 @@ Definition push_n : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_field (| M.get_name (| globals, "stack" |), "push" |),
     make_list [
@@ -189,7 +197,8 @@ Definition dup_n : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let data_to_duplicate :=
+    let _ := M.assign_local (|
+      "data_to_duplicate" ,
       M.get_subscript (|
         M.get_field (| M.get_name (| globals, "evm" |), "stack" |),
         BinOp.sub (|
@@ -205,7 +214,8 @@ Definition dup_n : Value.t -> Value.t -> M :=
           |),
           M.get_name (| globals, "item_number" |)
         |)
-      |) in
+      |)
+    |) in
     let _ := M.call (|
     M.get_field (| M.get_name (| globals, "stack" |), "push" |),
     make_list [

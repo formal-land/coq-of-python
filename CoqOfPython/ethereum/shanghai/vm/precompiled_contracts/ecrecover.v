@@ -17,26 +17,32 @@ Introduction
 Implementation of the ECRECOVER precompiled contract.
 ".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
 
-Axiom ethereum_crypto_elliptic_curve_imports :
-  AreImported globals "ethereum.crypto.elliptic_curve" [ "SECP256K1N"; "secp256k1_recover" ].
+Axiom ethereum_crypto_elliptic_curve_imports_SECP256K1N :
+  IsImported globals "ethereum.crypto.elliptic_curve" "SECP256K1N".
+Axiom ethereum_crypto_elliptic_curve_imports_secp256k1_recover :
+  IsImported globals "ethereum.crypto.elliptic_curve" "secp256k1_recover".
 
-Axiom ethereum_crypto_hash_imports :
-  AreImported globals "ethereum.crypto.hash" [ "Hash32"; "keccak256" ].
+Axiom ethereum_crypto_hash_imports_Hash32 :
+  IsImported globals "ethereum.crypto.hash" "Hash32".
+Axiom ethereum_crypto_hash_imports_keccak256 :
+  IsImported globals "ethereum.crypto.hash" "keccak256".
 
-Axiom ethereum_utils_byte_imports :
-  AreImported globals "ethereum.utils.byte" [ "left_pad_zero_bytes" ].
+Axiom ethereum_utils_byte_imports_left_pad_zero_bytes :
+  IsImported globals "ethereum.utils.byte" "left_pad_zero_bytes".
 
-Axiom ethereum_shanghai_vm_imports :
-  AreImported globals "ethereum.shanghai.vm" [ "Evm" ].
+Axiom ethereum_shanghai_vm_imports_Evm :
+  IsImported globals "ethereum.shanghai.vm" "Evm".
 
-Axiom ethereum_shanghai_vm_gas_imports :
-  AreImported globals "ethereum.shanghai.vm.gas" [ "GAS_ECRECOVER"; "charge_gas" ].
+Axiom ethereum_shanghai_vm_gas_imports_GAS_ECRECOVER :
+  IsImported globals "ethereum.shanghai.vm.gas" "GAS_ECRECOVER".
+Axiom ethereum_shanghai_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.shanghai.vm.gas" "charge_gas".
 
-Axiom ethereum_shanghai_vm_memory_imports :
-  AreImported globals "ethereum.shanghai.vm.memory" [ "buffer_read" ].
+Axiom ethereum_shanghai_vm_memory_imports_buffer_read :
+  IsImported globals "ethereum.shanghai.vm.memory" "buffer_read".
 
 Definition ecrecover : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -50,8 +56,10 @@ Definition ecrecover : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let data :=
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |) in
+    let _ := M.assign_local (|
+      "data" ,
+      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "charge_gas" |),
     make_list [
@@ -60,7 +68,8 @@ Definition ecrecover : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let message_hash_bytes :=
+    let _ := M.assign_local (|
+      "message_hash_bytes" ,
       M.call (|
         M.get_name (| globals, "buffer_read" |),
         make_list [
@@ -81,16 +90,20 @@ Definition ecrecover : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let message_hash :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "message_hash" ,
       M.call (|
         M.get_name (| globals, "Hash32" |),
         make_list [
           M.get_name (| globals, "message_hash_bytes" |)
         ],
         make_dict []
-      |) in
-    let v :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "v" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
@@ -117,8 +130,10 @@ Definition ecrecover : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let r :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "r" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
@@ -145,8 +160,10 @@ Definition ecrecover : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
-    let s :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "s" ,
       M.call (|
         M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
         make_list [
@@ -173,7 +190,8 @@ Definition ecrecover : Value.t -> Value.t -> M :=
           |)
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -250,7 +268,8 @@ Definition ecrecover : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
 (* At stmt: unsupported node type: Try *)
-    let address :=
+    let _ := M.assign_local (|
+      "address" ,
       M.slice (|
         M.call (|
           M.get_name (| globals, "keccak256" |),
@@ -262,8 +281,10 @@ Definition ecrecover : Value.t -> Value.t -> M :=
         Constant.int 12,
         Constant.int 32,
         Constant.None_
-      |) in
-    let padded_address :=
+      |)
+    |) in
+    let _ := M.assign_local (|
+      "padded_address" ,
       M.call (|
         M.get_name (| globals, "left_pad_zero_bytes" |),
         make_list [
@@ -271,7 +292,8 @@ Definition ecrecover : Value.t -> Value.t -> M :=
           Constant.int 32
         ],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.assign (|
       M.get_field (| M.get_name (| globals, "evm" |), "output" |),
       M.get_name (| globals, "padded_address" |)

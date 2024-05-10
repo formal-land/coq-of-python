@@ -17,14 +17,16 @@ Introduction
 Implementation of the stack operators for the EVM.
 ".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "List" ].
+Axiom typing_imports_List :
+  IsImported globals "typing" "List".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
 
-Axiom ethereum_muir_glacier_vm_exceptions_imports :
-  AreImported globals "ethereum.muir_glacier.vm.exceptions" [ "StackOverflowError"; "StackUnderflowError" ].
+Axiom ethereum_muir_glacier_vm_exceptions_imports_StackOverflowError :
+  IsImported globals "ethereum.muir_glacier.vm.exceptions" "StackOverflowError".
+Axiom ethereum_muir_glacier_vm_exceptions_imports_StackUnderflowError :
+  IsImported globals "ethereum.muir_glacier.vm.exceptions" "StackUnderflowError".
 
 Definition pop : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (

@@ -17,20 +17,22 @@ Introduction
 Implementation of the `Blake2` precompiled contract.
 ".
 
-Axiom ethereum_crypto_blake2_imports :
-  AreImported globals "ethereum.crypto.blake2" [ "Blake2b" ].
+Axiom ethereum_crypto_blake2_imports_Blake2b :
+  IsImported globals "ethereum.crypto.blake2" "Blake2b".
 
-Axiom ethereum_utils_ensure_imports :
-  AreImported globals "ethereum.utils.ensure" [ "ensure" ].
+Axiom ethereum_utils_ensure_imports_ensure :
+  IsImported globals "ethereum.utils.ensure" "ensure".
 
-Axiom ethereum_shanghai_vm_imports :
-  AreImported globals "ethereum.shanghai.vm" [ "Evm" ].
+Axiom ethereum_shanghai_vm_imports_Evm :
+  IsImported globals "ethereum.shanghai.vm" "Evm".
 
-Axiom ethereum_shanghai_vm_gas_imports :
-  AreImported globals "ethereum.shanghai.vm.gas" [ "GAS_BLAKE2_PER_ROUND"; "charge_gas" ].
+Axiom ethereum_shanghai_vm_gas_imports_GAS_BLAKE2_PER_ROUND :
+  IsImported globals "ethereum.shanghai.vm.gas" "GAS_BLAKE2_PER_ROUND".
+Axiom ethereum_shanghai_vm_gas_imports_charge_gas :
+  IsImported globals "ethereum.shanghai.vm.gas" "charge_gas".
 
-Axiom ethereum_shanghai_vm_exceptions_imports :
-  AreImported globals "ethereum.shanghai.vm.exceptions" [ "InvalidParameter" ].
+Axiom ethereum_shanghai_vm_exceptions_imports_InvalidParameter :
+  IsImported globals "ethereum.shanghai.vm.exceptions" "InvalidParameter".
 
 Definition blake2f : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -43,8 +45,10 @@ Definition blake2f : Value.t -> Value.t -> M :=
     evm :
         The current EVM frame.
     " in
-    let data :=
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |) in
+    let _ := M.assign_local (|
+      "data" ,
+      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |)
+    |) in
     let _ := M.call (|
     M.get_name (| globals, "ensure" |),
     make_list [
@@ -62,12 +66,14 @@ Definition blake2f : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let blake2b :=
+    let _ := M.assign_local (|
+      "blake2b" ,
       M.call (|
         M.get_name (| globals, "Blake2b" |),
         make_list [],
         make_dict []
-      |) in
+      |)
+    |) in
     let _ := M.assign (|
       make_tuple [ M.get_name (| globals, "rounds" |); M.get_name (| globals, "h" |); M.get_name (| globals, "m" |); M.get_name (| globals, "t_0" |); M.get_name (| globals, "t_1" |); M.get_name (| globals, "f" |) ],
       M.call (|

@@ -18,23 +18,33 @@ Message specific functions used in this byzantium version of
 specification.
 ".
 
-Axiom typing_imports :
-  AreImported globals "typing" [ "Optional"; "Union" ].
+Axiom typing_imports_Optional :
+  IsImported globals "typing" "Optional".
+Axiom typing_imports_Union :
+  IsImported globals "typing" "Union".
 
-Axiom ethereum_base_types_imports :
-  AreImported globals "ethereum.base_types" [ "U256"; "Bytes"; "Bytes0"; "Uint" ].
+Axiom ethereum_base_types_imports_U256 :
+  IsImported globals "ethereum.base_types" "U256".
+Axiom ethereum_base_types_imports_Bytes :
+  IsImported globals "ethereum.base_types" "Bytes".
+Axiom ethereum_base_types_imports_Bytes0 :
+  IsImported globals "ethereum.base_types" "Bytes0".
+Axiom ethereum_base_types_imports_Uint :
+  IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_byzantium_fork_types_imports :
-  AreImported globals "ethereum.byzantium.fork_types" [ "Address" ].
+Axiom ethereum_byzantium_fork_types_imports_Address :
+  IsImported globals "ethereum.byzantium.fork_types" "Address".
 
-Axiom ethereum_byzantium_state_imports :
-  AreImported globals "ethereum.byzantium.state" [ "get_account" ].
+Axiom ethereum_byzantium_state_imports_get_account :
+  IsImported globals "ethereum.byzantium.state" "get_account".
 
-Axiom ethereum_byzantium_vm_imports :
-  AreImported globals "ethereum.byzantium.vm" [ "Environment"; "Message" ].
+Axiom ethereum_byzantium_vm_imports_Environment :
+  IsImported globals "ethereum.byzantium.vm" "Environment".
+Axiom ethereum_byzantium_vm_imports_Message :
+  IsImported globals "ethereum.byzantium.vm" "Message".
 
-Axiom ethereum_byzantium_utils_address_imports :
-  AreImported globals "ethereum.byzantium.utils.address" [ "compute_contract_address" ].
+Axiom ethereum_byzantium_utils_address_imports_compute_contract_address :
+  IsImported globals "ethereum.byzantium.utils.address" "compute_contract_address".
 
 Definition prepare_message : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) => ltac:(M.monadic (
@@ -84,7 +94,8 @@ Definition prepare_message : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let current_target :=
+        let _ := M.assign_local (|
+          "current_target" ,
           M.call (|
             M.get_name (| globals, "compute_contract_address" |),
             make_list [
@@ -108,17 +119,22 @@ Definition prepare_message : Value.t -> Value.t -> M :=
               |)
             ],
             make_dict []
-          |) in
-        let msg_data :=
+          |)
+        |) in
+        let _ := M.assign_local (|
+          "msg_data" ,
           M.call (|
             M.get_name (| globals, "Bytes" |),
             make_list [
               Constant.bytes ""
             ],
             make_dict []
-          |) in
-        let code :=
-          M.get_name (| globals, "data" |) in
+          |)
+        |) in
+        let _ := M.assign_local (|
+          "code" ,
+          M.get_name (| globals, "data" |)
+        |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
@@ -135,11 +151,16 @@ Definition prepare_message : Value.t -> Value.t -> M :=
             |),
           (* then *)
           ltac:(M.monadic (
-            let current_target :=
-              M.get_name (| globals, "target" |) in
-            let msg_data :=
-              M.get_name (| globals, "data" |) in
-            let code :=
+            let _ := M.assign_local (|
+              "current_target" ,
+              M.get_name (| globals, "target" |)
+            |) in
+            let _ := M.assign_local (|
+              "msg_data" ,
+              M.get_name (| globals, "data" |)
+            |) in
+            let _ := M.assign_local (|
+              "code" ,
               M.get_field (| M.call (|
                 M.get_name (| globals, "get_account" |),
                 make_list [
@@ -147,7 +168,8 @@ Definition prepare_message : Value.t -> Value.t -> M :=
                   M.get_name (| globals, "target" |)
                 ],
                 make_dict []
-              |), "code" |) in
+              |), "code" |)
+            |) in
             let _ :=
               (* if *)
               M.if_then_else (|
@@ -157,8 +179,10 @@ Definition prepare_message : Value.t -> Value.t -> M :=
                 |),
               (* then *)
               ltac:(M.monadic (
-                let code_address :=
-                  M.get_name (| globals, "target" |) in
+                let _ := M.assign_local (|
+                  "code_address" ,
+                  M.get_name (| globals, "target" |)
+                |) in
                 M.pure Constant.None_
               (* else *)
               )), ltac:(M.monadic (
