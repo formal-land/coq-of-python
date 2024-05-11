@@ -66,11 +66,17 @@ Module Object.
 End Object.
 
 Module Pointer.
+  Module Mutable.
+    Inductive t (Value : Set) : Set :=
+    | Make {Address A : Set} (address : Address) (to_object : A -> Object.t Value).
+    Arguments Make {_ _ _}.
+  End Mutable.
+
   Inductive t (Value : Set) : Set :=
   | Imm (data : Object.t Value)
-  | Mutable {Address A : Set} (address : Address) (to_data : A -> Object.t Value).
+  | Mutable (mutable : Mutable.t Value).
   Arguments Imm {_}.
-  Arguments Mutable {_ _ _}.
+  Arguments Mutable {_}.
 End Pointer.
 
 Module Value.
@@ -78,18 +84,95 @@ Module Value.
   | Make (globals : string) (klass : string) (value : Pointer.t t).
 End Value.
 
-Parameter M : Set.
+Module Primitive.
+  Inductive t : Set -> Set :=
+  | StateAlloc (value : Value.t) : t unit
+  | StateRead (mutable : Pointer.Mutable.t Value.t) : t (Object.t Value.t)
+  | StateWrite (mutable : Pointer.Mutable.t Value.t) (update : Value.t) : t unit.
+End Primitive.
+
+Module LowM.
+  Inductive t (A : Set) : Set :=
+  | Pure (a : A)
+  | CallPrimitive {B : Set} (primitive : Primitive.t B) (k : B -> t A)
+  | CallClosure (closure : Value.t) (args kwargs : Value.t) (k : A -> t A)
+  | Impossible.
+  Arguments Pure {_}.
+  Arguments CallPrimitive {_ _}.
+  Arguments CallClosure {_}.
+  Arguments Impossible {_}.
+
+  Fixpoint bind {A : Set} (e1 : t A) (e2 : A -> t A) : t A :=
+    match e1 with
+    | Pure a => e2 a
+    | CallPrimitive primitive k => CallPrimitive primitive (fun v => bind (k v) e2)
+    | CallClosure closure args kwargs k => CallClosure closure args kwargs (fun a => bind (k a) e2)
+    | Impossible => Impossible
+    end.
+End LowM.
+
+Module Exception.
+  Inductive t : Set :=
+  | Return (value : Value.t)
+  | Continue
+  | Break
+  | Raise (value : option Value.t).
+End Exception.
+
+Definition M : Set :=
+  LowM.t (Value.t + Exception.t).
 
 Parameter IsInGlobals : string -> Value.t -> string -> Prop.
 
 Parameter IsImported : string -> string -> string -> Prop.
 
 Module M.
-  Parameter pure : Value.t -> M.
+  Definition pure (v : Value.t) : M :=
+    LowM.Pure (inl v).
 
-  Parameter let_ : M -> (Value.t -> M) -> M.
+  Definition bind (e1 : M) (e2 : Value.t -> M) : M :=
+    LowM.bind e1 (fun v => match v with
+    | inl v => e2 v
+    | inr e => LowM.Pure (inr e)
+    end).
 
-  Parameter call : Value.t -> Value.t -> Value.t -> M.
+  (** This axiom is only used as a marker for the [monadic] tactic below, and should not appear in
+      the final code of the definitions once the tactic is applied. *)
+  Parameter run : M -> Value.t.
+
+  Module Notations.
+    Notation "'let-' a := b 'in' c" :=
+      (LowM.bind b (fun a => c))
+        (at level 200, b at level 100, a name).
+  
+    Notation "'let*' a := b 'in' c" :=
+      (bind b (fun a => c))
+        (at level 200, b at level 100, a name).
+  
+    Notation "'let*' ' a ':=' b 'in' c" :=
+      (bind b (fun a => c))
+      (at level 200, a pattern, b at level 100, c at level 200).
+
+    Notation "e (| e1 , .. , en |)" :=
+      (run ((.. (e e1) ..) en))
+      (at level 100).
+
+    Notation "e (| |)" :=
+      (run e)
+      (at level 100).
+  End Notations.
+
+  Definition call (f : Value.t) (args kwargs : Value.t) : M :=
+    LowM.CallClosure f args kwargs LowM.Pure.
+
+  Definition get_object (value : Value.t) : LowM.t (Object.t Value.t) :=
+    let 'Value.Make _ _ pointer := value in
+    match pointer with
+    | Pointer.Imm obj =>
+      LowM.Pure obj
+    | Pointer.Mutable mutable =>
+      LowM.CallPrimitive (Primitive.StateRead mutable) LowM.Pure
+    end.
 
   Parameter get_field : Value.t -> string -> M.
 
@@ -131,18 +214,6 @@ Module M.
   Parameter for_ : Value.t -> Value.t -> M -> M -> M.
 
   Parameter while : Value.t -> M -> M -> M.
-
-  Parameter run : M -> Value.t.
-
-  Module Notations.
-    Notation "e (| e1 , .. , en |)" :=
-      (run ((.. (e e1) ..) en))
-      (at level 100).
-
-    Notation "e (| |)" :=
-      (run e)
-      (at level 100).
-  End Notations.
 
   (** A tactic that replaces all [M.run] markers with a bind operation.
       This allows to represent Rust programs without introducing

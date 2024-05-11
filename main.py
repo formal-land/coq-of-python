@@ -715,7 +715,7 @@ def generate_arg(node):
 
 
 input_file_name = sys.argv[1]
-output_file_name = "../../translate-ethereum-specs/CoqOfPython/" + \
+output_file_name = "../../coq-of-python/CoqOfPython/" + \
     input_file_name.replace(".py", ".v")
 
 file_content = open(input_file_name).read()
