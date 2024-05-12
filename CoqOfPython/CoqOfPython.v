@@ -8,12 +8,25 @@ From Hammer Require Export Tactics.
 
 Global Set Primitive Projections.
 Global Set Printing Projections.
-Global Open Scope list_scope.
 Global Open Scope string_scope.
-Global Open Scope Z_scope.
+Global Open Scope list_scope.
 Global Open Scope type_scope.
+Global Open Scope Z_scope.
 
 Export List.ListNotations.
+
+Inductive sigS {A : Type} (P : A -> Set) : Set :=
+| existS : forall (x : A), P x -> sigS P.
+Arguments existS {_ _}.
+
+Reserved Notation "{ x @ P }" (at level 0, x at level 99).
+Reserved Notation "{ x : A @ P }" (at level 0, x at level 99).
+Reserved Notation "{ ' pat : A @ P }"
+  (at level 0, pat strict pattern, format "{ ' pat : A @ P }").
+
+Notation "{ x @ P }" := (sigS (fun x => P)) : type_scope.
+Notation "{ x : A @ P }" := (sigS (A := A) (fun x => P)) : type_scope.
+Notation "{ ' pat : A @ P }" := (sigS (A := A) (fun pat => P)) : type_scope.
 
 Module Dict.
   Definition t (Value : Set) : Set :=
@@ -70,6 +83,21 @@ Module Object.
   Arguments t : clear implicits.
   Arguments Build_t {_}.
 
+  Fixpoint fields_of_optional_dict {Value : Set} (optional_dict : list (string * option Value)) :
+      Dict.t Value :=
+    match optional_dict with
+    | [] => []
+    | (name, Some value) :: optional_dict =>
+      Dict.write (fields_of_optional_dict optional_dict) name value
+    | (_, None) :: optional_dict => fields_of_optional_dict optional_dict
+    end.
+
+  Definition make {Value : Set} (optional_dict : list (string * option Value)) : t Value :=
+    {|
+      internal := None;
+      fields := fields_of_optional_dict optional_dict;
+    |}.
+
   (** When an object is just a wrapper around the [Data.t] type. *)
   Definition wrapper {Value : Set} (data : Data.t Value) : t Value :=
     {|
@@ -81,8 +109,10 @@ End Object.
 Module Pointer.
   Module Mutable.
     Inductive t (Value : Set) : Set :=
-    | Make {Address A : Set} (address : Address) (to_object : A -> Object.t Value).
-    Arguments Make {_ _ _}.
+    | Stack {A : Set} (index : nat) (to_object : A -> Object.t Value)
+    | Heap {Address A : Set} (address : Address) (to_object : A -> Object.t Value).
+    Arguments Stack {_ _}.
+    Arguments Heap {_ _ _}.
   End Mutable.
 
   Inductive t (Value : Set) : Set :=

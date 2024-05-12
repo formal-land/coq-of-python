@@ -4,6 +4,8 @@ Require Import simulations.builtins.
 
 Import simulations.CoqOfPython.Notations.
 
+Definition globals : Globals.t := "ethereum.base_types".
+
 Definition U255_CEIL_VALUE : Z := 2^255.
 
 Definition U256_CEIL_VALUE : Z := 2^256.
@@ -56,9 +58,14 @@ Module U256.
     |}.
 
   Definition get (value : t) : FixedUint.t :=
-    match value with
-    | Make value => value
-    end.
+    let 'Make value := value in
+    value.
+
+  Definition to_Z (value : t) : Z :=
+    FixedUint.value (get value).
+
+  Definition to_value (value : t) : Value.t :=
+    Value.Make globals "U256" (Pointer.Imm (Object.wrapper (Data.Integer (to_Z value)))).
 
   Definition __add__ (self right_ : t) : M? Exception.t t :=
     let? result := FixedUint.__add__ (get self) (get right_) in
