@@ -98,7 +98,7 @@ Module Value.
 End Value.
 
 Module Locals.
-  Definition t : Set := Pointer.Mutable.t Value.t.
+  Definition t : Set := Pointer.t Value.t.
 End Locals.
 
 (** ** Constants *)
@@ -144,7 +144,7 @@ Definition make_dict (dict : list (string * Value.t)) : Value.t :=
 
 Module Primitive.
   Inductive t : Set -> Set :=
-  | StateAlloc (object : Object.t Value.t) : t (Pointer.Mutable.t Value.t)
+  | StateAlloc (object : Object.t Value.t) : t (Pointer.t Value.t)
   | StateRead (mutable : Pointer.Mutable.t Value.t) : t (Object.t Value.t)
   | StateWrite (mutable : Pointer.Mutable.t Value.t) (update : Object.t Value.t) : t unit
   | GetInGlobals (globals : Globals.t) (name : string) : t Value.t.
@@ -154,7 +154,7 @@ Module LowM.
   Inductive t (A : Set) : Set :=
   | Pure (a : A)
   | CallPrimitive {B : Set} (primitive : Primitive.t B) (k : B -> t A)
-  | CallClosure {B : Set} (closure : Value.t) (args kwargs : Value.t) (k : B -> t A)
+  | CallClosure {B : Set} (closure : Data.t Value.t) (args kwargs : Value.t) (k : B -> t A)
   | Impossible.
   Arguments Pure {_}.
   Arguments CallPrimitive {_ _}.
@@ -228,15 +228,19 @@ Module M.
   Definition call_primitive {A : Set} (primitive : Primitive.t A) : LowM.t A :=
     LowM.CallPrimitive primitive LowM.Pure.
 
-  Definition call (f : Value.t) (args kwargs : Value.t) : M :=
-    LowM.CallClosure f args kwargs LowM.Pure.
-
   Definition get_object (value : Value.t) : LowM.t (Object.t Value.t) :=
     let 'Value.Make _ _ pointer := value in
     match pointer with
     | Pointer.Imm obj =>
       LowM.Pure obj
     | Pointer.Mutable mutable => call_primitive (Primitive.StateRead mutable)
+    end.
+
+  Definition call (f : Value.t) (args kwargs : Value.t) : M :=
+    let- f_object := get_object f in
+    match f_object.(Object.internal) with
+    | Some f => LowM.CallClosure f args kwargs LowM.Pure
+    | None => LowM.Impossible
     end.
 
   Definition get_field (value : Value.t) (field : string) : M :=
@@ -253,6 +257,12 @@ Module M.
 
   Parameter slice : Value.t -> Value.t -> Value.t -> Value.t -> M.
 
+  Definition read (pointer : Pointer.t Value.t) : LowM.t (Object.t Value.t) :=
+    match pointer with
+    | Pointer.Imm object => LowM.Pure object
+    | Pointer.Mutable mutable => call_primitive (Primitive.StateRead mutable)
+    end.
+
   Fixpoint get_name_in_locals_stack
       (locals_stack : list Locals.t)
       (name : string) :
@@ -260,7 +270,7 @@ Module M.
     match locals_stack with
     | [] => LowM.Pure None
     | locals :: locals_stack =>
-      let- locals_object := call_primitive (Primitive.StateRead locals) in
+      let- locals_object := read locals in
       match Dict.read locals_object.(Object.fields) name with
       | Some value => LowM.Pure (Some value)
       | None => get_name_in_locals_stack locals_stack name

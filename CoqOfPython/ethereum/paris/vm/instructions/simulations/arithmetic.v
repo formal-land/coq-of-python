@@ -39,6 +39,7 @@ Definition add : MS? Evm.t Exception.t unit :=
   letS? _ := StateError.lift_lens Evm.Lens.stack (push result) in
 
   (* PROGRAM COUNTER *)
-  letS? _ := StateError.lift_lens Evm.Lens.pc (fun pc => (inl tt, Uint.__add__ pc (Uint.Make 1))) in
+  letS? _ := StateError.lift_lens Evm.Lens.pc (fun pc =>
+    (inl tt, Uint.__add__ pc (Uint.Make 1))) in
 
   returnS? tt.
