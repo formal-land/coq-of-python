@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.homestead.vm.runtime".
+Definition globals : Globals.t := "ethereum.homestead.vm.runtime".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -27,8 +29,9 @@ Axiom ethereum_homestead_vm_instructions_imports_Ops :
   IsImported globals "ethereum.homestead.vm.instructions" "Ops".
 
 Definition get_valid_jump_destinations : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "code" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "code" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Analyze the evm code to obtain the set of valid jump destinations.
 
@@ -53,7 +56,7 @@ Definition get_valid_jump_destinations : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "valid_jump_destinations" ,
       M.call (|
-        M.get_name (| globals, "set" |),
+        M.get_name (| globals, locals_stack, "set" |),
         make_list [],
         make_dict []
       |)
@@ -61,7 +64,7 @@ Definition get_valid_jump_destinations : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "pc" ,
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
           Constant.int 0
         ],
@@ -71,11 +74,11 @@ Definition get_valid_jump_destinations : Value.t -> Value.t -> M :=
     let _ :=
       M.while (|
         Compare.lt (|
-      M.get_name (| globals, "pc" |),
+      M.get_name (| globals, locals_stack, "pc" |),
       M.call (|
-        M.get_name (| globals, "len" |),
+        M.get_name (| globals, locals_stack, "len" |),
         make_list [
-          M.get_name (| globals, "code" |)
+          M.get_name (| globals, locals_stack, "code" |)
         ],
         make_dict []
       |)
@@ -86,15 +89,15 @@ Definition get_valid_jump_destinations : Value.t -> Value.t -> M :=
             (* if *)
             M.if_then_else (|
               Compare.eq (|
-                M.get_name (| globals, "current_opcode" |),
-                M.get_field (| M.get_name (| globals, "Ops" |), "JUMPDEST" |)
+                M.get_name (| globals, locals_stack, "current_opcode" |),
+                M.get_field (| M.get_name (| globals, locals_stack, "Ops" |), "JUMPDEST" |)
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.call (|
-    M.get_field (| M.get_name (| globals, "valid_jump_destinations" |), "add" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "valid_jump_destinations" |), "add" |),
     make_list [
-      M.get_name (| globals, "pc" |)
+      M.get_name (| globals, locals_stack, "pc" |)
     ],
     make_dict []
   |) in
@@ -106,13 +109,13 @@ Definition get_valid_jump_destinations : Value.t -> Value.t -> M :=
                 M.if_then_else (|
                   BoolOp.and (|
                     Compare.lt_e (|
-                      M.get_field (| M.get_field (| M.get_name (| globals, "Ops" |), "PUSH1" |), "value" |),
-                      M.get_field (| M.get_name (| globals, "current_opcode" |), "value" |)
+                      M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "Ops" |), "PUSH1" |), "value" |),
+                      M.get_field (| M.get_name (| globals, locals_stack, "current_opcode" |), "value" |)
                     |),
                     ltac:(M.monadic (
                       Compare.lt_e (|
-                        M.get_field (| M.get_name (| globals, "current_opcode" |), "value" |),
-                        M.get_field (| M.get_field (| M.get_name (| globals, "Ops" |), "PUSH32" |), "value" |)
+                        M.get_field (| M.get_name (| globals, locals_stack, "current_opcode" |), "value" |),
+                        M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "Ops" |), "PUSH32" |), "value" |)
                       |)
                     ))
                   |),
@@ -122,8 +125,8 @@ Definition get_valid_jump_destinations : Value.t -> Value.t -> M :=
                     "push_data_size" ,
                     BinOp.add (|
                       BinOp.sub (|
-                        M.get_field (| M.get_name (| globals, "current_opcode" |), "value" |),
-                        M.get_field (| M.get_field (| M.get_name (| globals, "Ops" |), "PUSH1" |), "value" |)
+                        M.get_field (| M.get_name (| globals, locals_stack, "current_opcode" |), "value" |),
+                        M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "Ops" |), "PUSH1" |), "value" |)
                       |),
                       Constant.int 1
                     |)
@@ -131,7 +134,7 @@ Definition get_valid_jump_destinations : Value.t -> Value.t -> M :=
                   let _ := M.assign_op_local (|
                     BinOp.add,
                     "pc",
-                    M.get_name (| globals, "push_data_size" |)
+                    M.get_name (| globals, locals_stack, "push_data_size" |)
                   |) in
                   M.pure Constant.None_
                 (* else *)
@@ -152,6 +155,6 @@ Definition get_valid_jump_destinations : Value.t -> Value.t -> M :=
         ))
     |) in
     let _ := M.return_ (|
-      M.get_name (| globals, "valid_jump_destinations" |)
+      M.get_name (| globals, locals_stack, "valid_jump_destinations" |)
     |) in
     M.pure Constant.None_)).

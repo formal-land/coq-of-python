@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.byzantium.vm.memory".
+Definition globals : Globals.t := "ethereum.byzantium.vm.memory".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -28,8 +30,9 @@ Axiom ethereum_base_types_imports_Uint :
   IsImported globals "ethereum.base_types" "Uint".
 
 Definition memory_write : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "memory"; "start_position"; "value" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "memory"; "start_position"; "value" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Writes to memory.
 
@@ -44,33 +47,34 @@ Definition memory_write : Value.t -> Value.t -> M :=
     " in
     let _ := M.assign (|
       M.slice (|
-        M.get_name (| globals, "memory" |),
-        M.get_name (| globals, "start_position" |),
+        M.get_name (| globals, locals_stack, "memory" |),
+        M.get_name (| globals, locals_stack, "start_position" |),
         BinOp.add (|
           M.call (|
-            M.get_name (| globals, "Uint" |),
+            M.get_name (| globals, locals_stack, "Uint" |),
             make_list [
-              M.get_name (| globals, "start_position" |)
+              M.get_name (| globals, locals_stack, "start_position" |)
             ],
             make_dict []
           |),
           M.call (|
-            M.get_name (| globals, "len" |),
+            M.get_name (| globals, locals_stack, "len" |),
             make_list [
-              M.get_name (| globals, "value" |)
+              M.get_name (| globals, locals_stack, "value" |)
             ],
             make_dict []
           |)
         |),
         Constant.None_
       |),
-      M.get_name (| globals, "value" |)
+      M.get_name (| globals, locals_stack, "value" |)
     |) in
     M.pure Constant.None_)).
 
 Definition memory_read_bytes : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "memory"; "start_position"; "size" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "memory"; "start_position"; "size" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Read bytes from memory.
 
@@ -90,20 +94,20 @@ Definition memory_read_bytes : Value.t -> Value.t -> M :=
     " in
     let _ := M.return_ (|
       M.slice (|
-        M.get_name (| globals, "memory" |),
-        M.get_name (| globals, "start_position" |),
+        M.get_name (| globals, locals_stack, "memory" |),
+        M.get_name (| globals, locals_stack, "start_position" |),
         BinOp.add (|
           M.call (|
-            M.get_name (| globals, "Uint" |),
+            M.get_name (| globals, locals_stack, "Uint" |),
             make_list [
-              M.get_name (| globals, "start_position" |)
+              M.get_name (| globals, locals_stack, "start_position" |)
             ],
             make_dict []
           |),
           M.call (|
-            M.get_name (| globals, "Uint" |),
+            M.get_name (| globals, locals_stack, "Uint" |),
             make_list [
-              M.get_name (| globals, "size" |)
+              M.get_name (| globals, locals_stack, "size" |)
             ],
             make_dict []
           |)
@@ -114,8 +118,9 @@ Definition memory_read_bytes : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition buffer_read : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "buffer"; "start_position"; "size" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "buffer"; "start_position"; "size" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Read bytes from a buffer. Padding with zeros if necessary.
 
@@ -135,30 +140,30 @@ Definition buffer_read : Value.t -> Value.t -> M :=
     " in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "right_pad_zero_bytes" |),
+        M.get_name (| globals, locals_stack, "right_pad_zero_bytes" |),
         make_list [
           M.slice (|
-            M.get_name (| globals, "buffer" |),
-            M.get_name (| globals, "start_position" |),
+            M.get_name (| globals, locals_stack, "buffer" |),
+            M.get_name (| globals, locals_stack, "start_position" |),
             BinOp.add (|
               M.call (|
-                M.get_name (| globals, "Uint" |),
+                M.get_name (| globals, locals_stack, "Uint" |),
                 make_list [
-                  M.get_name (| globals, "start_position" |)
+                  M.get_name (| globals, locals_stack, "start_position" |)
                 ],
                 make_dict []
               |),
               M.call (|
-                M.get_name (| globals, "Uint" |),
+                M.get_name (| globals, locals_stack, "Uint" |),
                 make_list [
-                  M.get_name (| globals, "size" |)
+                  M.get_name (| globals, locals_stack, "size" |)
                 ],
                 make_dict []
               |)
             |),
             Constant.None_
           |);
-          M.get_name (| globals, "size" |)
+          M.get_name (| globals, locals_stack, "size" |)
         ],
         make_dict []
       |)

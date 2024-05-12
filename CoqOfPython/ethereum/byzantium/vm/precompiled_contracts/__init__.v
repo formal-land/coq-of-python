@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.byzantium.vm.precompiled_contracts.__init__".
+Definition globals : Globals.t := "ethereum.byzantium.vm.precompiled_contracts.__init__".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -27,7 +29,7 @@ Definition __all__ : Value.t := M.run ltac:(M.monadic (
 
 Definition ECRECOVER_ADDRESS : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "hex_to_address" |),
+    M.get_name (| globals, locals_stack, "hex_to_address" |),
     make_list [
       Constant.str "0x01"
     ],
@@ -37,7 +39,7 @@ Definition ECRECOVER_ADDRESS : Value.t := M.run ltac:(M.monadic (
 
 Definition SHA256_ADDRESS : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "hex_to_address" |),
+    M.get_name (| globals, locals_stack, "hex_to_address" |),
     make_list [
       Constant.str "0x02"
     ],
@@ -47,7 +49,7 @@ Definition SHA256_ADDRESS : Value.t := M.run ltac:(M.monadic (
 
 Definition RIPEMD160_ADDRESS : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "hex_to_address" |),
+    M.get_name (| globals, locals_stack, "hex_to_address" |),
     make_list [
       Constant.str "0x03"
     ],
@@ -57,7 +59,7 @@ Definition RIPEMD160_ADDRESS : Value.t := M.run ltac:(M.monadic (
 
 Definition IDENTITY_ADDRESS : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "hex_to_address" |),
+    M.get_name (| globals, locals_stack, "hex_to_address" |),
     make_list [
       Constant.str "0x04"
     ],
@@ -67,7 +69,7 @@ Definition IDENTITY_ADDRESS : Value.t := M.run ltac:(M.monadic (
 
 Definition MODEXP_ADDRESS : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "hex_to_address" |),
+    M.get_name (| globals, locals_stack, "hex_to_address" |),
     make_list [
       Constant.str "0x05"
     ],
@@ -77,7 +79,7 @@ Definition MODEXP_ADDRESS : Value.t := M.run ltac:(M.monadic (
 
 Definition ALT_BN128_ADD_ADDRESS : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "hex_to_address" |),
+    M.get_name (| globals, locals_stack, "hex_to_address" |),
     make_list [
       Constant.str "0x06"
     ],
@@ -87,7 +89,7 @@ Definition ALT_BN128_ADD_ADDRESS : Value.t := M.run ltac:(M.monadic (
 
 Definition ALT_BN128_MUL_ADDRESS : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "hex_to_address" |),
+    M.get_name (| globals, locals_stack, "hex_to_address" |),
     make_list [
       Constant.str "0x07"
     ],
@@ -97,7 +99,7 @@ Definition ALT_BN128_MUL_ADDRESS : Value.t := M.run ltac:(M.monadic (
 
 Definition ALT_BN128_PAIRING_CHECK_ADDRESS : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "hex_to_address" |),
+    M.get_name (| globals, locals_stack, "hex_to_address" |),
     make_list [
       Constant.str "0x08"
     ],

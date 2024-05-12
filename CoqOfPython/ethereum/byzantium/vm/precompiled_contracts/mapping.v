@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.byzantium.vm.precompiled_contracts.mapping".
+Definition globals : Globals.t := "ethereum.byzantium.vm.precompiled_contracts.mapping".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "

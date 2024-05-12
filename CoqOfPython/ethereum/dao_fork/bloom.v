@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.dao_fork.bloom".
+Definition globals : Globals.t := "ethereum.dao_fork.bloom".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -37,8 +39,9 @@ Axiom ethereum_dao_fork_fork_types_imports_Bloom :
   IsImported globals "ethereum.dao_fork.fork_types" "Bloom".
 
 Definition add_to_bloom : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "bloom"; "bloom_entry" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "bloom"; "bloom_entry" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Add a bloom entry to the bloom filter (`bloom`).
 
@@ -56,29 +59,29 @@ Definition add_to_bloom : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "hash" ,
       M.call (|
-        M.get_name (| globals, "keccak256" |),
+        M.get_name (| globals, locals_stack, "keccak256" |),
         make_list [
-          M.get_name (| globals, "bloom_entry" |)
+          M.get_name (| globals, locals_stack, "bloom_entry" |)
         ],
         make_dict []
       |)
     |) in
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "idx" |),
+        M.get_name (| globals, locals_stack, "idx" |),
         make_tuple [ Constant.int 0; Constant.int 2; Constant.int 4 ],
         ltac:(M.monadic (
           let _ := M.assign_local (|
             "bit_to_set" ,
             BinOp.bit_and (|
               M.call (|
-                M.get_field (| M.get_name (| globals, "Uint" |), "from_be_bytes" |),
+                M.get_field (| M.get_name (| globals, locals_stack, "Uint" |), "from_be_bytes" |),
                 make_list [
                   M.slice (|
-                    M.get_name (| globals, "hash" |),
-                    M.get_name (| globals, "idx" |),
+                    M.get_name (| globals, locals_stack, "hash" |),
+                    M.get_name (| globals, locals_stack, "idx" |),
                     BinOp.add (|
-                      M.get_name (| globals, "idx" |),
+                      M.get_name (| globals, locals_stack, "idx" |),
                       Constant.int 2
                     |),
                     Constant.None_
@@ -93,13 +96,13 @@ Definition add_to_bloom : Value.t -> Value.t -> M :=
             "bit_index" ,
             BinOp.sub (|
               Constant.int 2047,
-              M.get_name (| globals, "bit_to_set" |)
+              M.get_name (| globals, locals_stack, "bit_to_set" |)
             |)
           |) in
           let _ := M.assign_local (|
             "byte_index" ,
             BinOp.floor_div (|
-              M.get_name (| globals, "bit_index" |),
+              M.get_name (| globals, locals_stack, "bit_index" |),
               Constant.int 8
             |)
           |) in
@@ -110,7 +113,7 @@ Definition add_to_bloom : Value.t -> Value.t -> M :=
               BinOp.sub (|
                 Constant.int 7,
                 BinOp.mod_ (|
-                  M.get_name (| globals, "bit_index" |),
+                  M.get_name (| globals, locals_stack, "bit_index" |),
                   Constant.int 8
                 |)
               |)
@@ -118,15 +121,15 @@ Definition add_to_bloom : Value.t -> Value.t -> M :=
           |) in
           let _ := M.assign (|
             M.get_subscript (|
-              M.get_name (| globals, "bloom" |),
-              M.get_name (| globals, "byte_index" |)
+              M.get_name (| globals, locals_stack, "bloom" |),
+              M.get_name (| globals, locals_stack, "byte_index" |)
             |),
             BinOp.bit_or (|
               M.get_subscript (|
-                M.get_name (| globals, "bloom" |),
-                M.get_name (| globals, "byte_index" |)
+                M.get_name (| globals, locals_stack, "bloom" |),
+                M.get_name (| globals, locals_stack, "byte_index" |)
               |),
-              M.get_name (| globals, "bit_value" |)
+              M.get_name (| globals, locals_stack, "bit_value" |)
             |)
           |) in
           M.pure Constant.None_
@@ -138,8 +141,9 @@ Definition add_to_bloom : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition logs_bloom : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "logs" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "logs" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Obtain the logs bloom from a list of log entries.
 
@@ -159,27 +163,27 @@ Definition logs_bloom : Value.t -> Value.t -> M :=
 (* At stmt: unsupported node type: AnnAssign *)
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "log" |),
-        M.get_name (| globals, "logs" |),
+        M.get_name (| globals, locals_stack, "log" |),
+        M.get_name (| globals, locals_stack, "logs" |),
         ltac:(M.monadic (
           let _ := M.call (|
-    M.get_name (| globals, "add_to_bloom" |),
+    M.get_name (| globals, locals_stack, "add_to_bloom" |),
     make_list [
-      M.get_name (| globals, "bloom" |);
-      M.get_field (| M.get_name (| globals, "log" |), "address" |)
+      M.get_name (| globals, locals_stack, "bloom" |);
+      M.get_field (| M.get_name (| globals, locals_stack, "log" |), "address" |)
     ],
     make_dict []
   |) in
           let _ :=
             M.for_ (|
-              M.get_name (| globals, "topic" |),
-              M.get_field (| M.get_name (| globals, "log" |), "topics" |),
+              M.get_name (| globals, locals_stack, "topic" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "log" |), "topics" |),
               ltac:(M.monadic (
                 let _ := M.call (|
-    M.get_name (| globals, "add_to_bloom" |),
+    M.get_name (| globals, locals_stack, "add_to_bloom" |),
     make_list [
-      M.get_name (| globals, "bloom" |);
-      M.get_name (| globals, "topic" |)
+      M.get_name (| globals, locals_stack, "bloom" |);
+      M.get_name (| globals, locals_stack, "topic" |)
     ],
     make_dict []
   |) in
@@ -197,9 +201,9 @@ Definition logs_bloom : Value.t -> Value.t -> M :=
     |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "Bloom" |),
+        M.get_name (| globals, locals_stack, "Bloom" |),
         make_list [
-          M.get_name (| globals, "bloom" |)
+          M.get_name (| globals, locals_stack, "bloom" |)
         ],
         make_dict []
       |)

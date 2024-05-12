@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.dao_fork.dao".
+Definition globals : Globals.t := "ethereum.dao_fork.dao".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -36,7 +38,7 @@ Definition DAO_ACCOUNTS : Value.t := M.run ltac:(M.monadic (
 
 Definition DAO_RECOVERY : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "hex_to_address" |),
+    M.get_name (| globals, locals_stack, "hex_to_address" |),
     make_list [
       Constant.str "0xbf4ed7b27f1d666546e30d74d50d173d20bca754"
     ],
@@ -45,8 +47,9 @@ Definition DAO_RECOVERY : Value.t := M.run ltac:(M.monadic (
 )).
 
 Definition apply_dao : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "state" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "state" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Apply the dao fork to the state.
 
@@ -57,27 +60,27 @@ Definition apply_dao : Value.t -> Value.t -> M :=
     " in
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "address" |),
-        M.get_name (| globals, "DAO_ACCOUNTS" |),
+        M.get_name (| globals, locals_stack, "address" |),
+        M.get_name (| globals, locals_stack, "DAO_ACCOUNTS" |),
         ltac:(M.monadic (
           let _ := M.assign_local (|
             "balance" ,
             M.get_field (| M.call (|
-              M.get_name (| globals, "get_account" |),
+              M.get_name (| globals, locals_stack, "get_account" |),
               make_list [
-                M.get_name (| globals, "state" |);
-                M.get_name (| globals, "address" |)
+                M.get_name (| globals, locals_stack, "state" |);
+                M.get_name (| globals, locals_stack, "address" |)
               ],
               make_dict []
             |), "balance" |)
           |) in
           let _ := M.call (|
-    M.get_name (| globals, "move_ether" |),
+    M.get_name (| globals, locals_stack, "move_ether" |),
     make_list [
-      M.get_name (| globals, "state" |);
-      M.get_name (| globals, "address" |);
-      M.get_name (| globals, "DAO_RECOVERY" |);
-      M.get_name (| globals, "balance" |)
+      M.get_name (| globals, locals_stack, "state" |);
+      M.get_name (| globals, locals_stack, "address" |);
+      M.get_name (| globals, locals_stack, "DAO_RECOVERY" |);
+      M.get_name (| globals, locals_stack, "balance" |)
     ],
     make_dict []
   |) in

@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.berlin.transactions".
+Definition globals : Globals.t := "ethereum.berlin.transactions".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -90,14 +92,15 @@ Definition AccessListTransaction : Value.t :=
 
 Definition Transaction : Value.t := M.run ltac:(M.monadic (
   M.get_subscript (|
-    M.get_name (| globals, "Union" |),
-    make_tuple [ M.get_name (| globals, "LegacyTransaction" |); M.get_name (| globals, "AccessListTransaction" |) ]
+    M.get_name (| globals, locals_stack, "Union" |),
+    make_tuple [ M.get_name (| globals, locals_stack, "LegacyTransaction" |); M.get_name (| globals, locals_stack, "AccessListTransaction" |) ]
   |)
 )).
 
 Definition encode_transaction : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "tx" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "tx" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Encode a transaction. Needed because non-legacy transactions aren't RLP.
     " in
@@ -105,17 +108,17 @@ Definition encode_transaction : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         M.call (|
-          M.get_name (| globals, "isinstance" |),
+          M.get_name (| globals, locals_stack, "isinstance" |),
           make_list [
-            M.get_name (| globals, "tx" |);
-            M.get_name (| globals, "LegacyTransaction" |)
+            M.get_name (| globals, locals_stack, "tx" |);
+            M.get_name (| globals, locals_stack, "LegacyTransaction" |)
           ],
           make_dict []
         |),
       (* then *)
       ltac:(M.monadic (
         let _ := M.return_ (|
-          M.get_name (| globals, "tx" |)
+          M.get_name (| globals, locals_stack, "tx" |)
         |) in
         M.pure Constant.None_
       (* else *)
@@ -124,10 +127,10 @@ Definition encode_transaction : Value.t -> Value.t -> M :=
           (* if *)
           M.if_then_else (|
             M.call (|
-              M.get_name (| globals, "isinstance" |),
+              M.get_name (| globals, locals_stack, "isinstance" |),
               make_list [
-                M.get_name (| globals, "tx" |);
-                M.get_name (| globals, "AccessListTransaction" |)
+                M.get_name (| globals, locals_stack, "tx" |);
+                M.get_name (| globals, locals_stack, "AccessListTransaction" |)
               ],
               make_dict []
             |),
@@ -137,9 +140,9 @@ Definition encode_transaction : Value.t -> Value.t -> M :=
               BinOp.add (|
                 Constant.bytes "01",
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "rlp" |), "encode" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "rlp" |), "encode" |),
                   make_list [
-                    M.get_name (| globals, "tx" |)
+                    M.get_name (| globals, locals_stack, "tx" |)
                   ],
                   make_dict []
                 |)
@@ -149,7 +152,7 @@ Definition encode_transaction : Value.t -> Value.t -> M :=
           (* else *)
           )), ltac:(M.monadic (
             let _ := M.raise (| Some (M.call (|
-              M.get_name (| globals, "Exception" |),
+              M.get_name (| globals, locals_stack, "Exception" |),
               make_list [
                 Constant.str "(* At expr: unsupported node type: JoinedStr *)"
               ],
@@ -162,8 +165,9 @@ Definition encode_transaction : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition decode_transaction : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "tx" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "tx" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Decode a transaction. Needed because non-legacy transactions aren't RLP.
     " in
@@ -171,36 +175,36 @@ Definition decode_transaction : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         M.call (|
-          M.get_name (| globals, "isinstance" |),
+          M.get_name (| globals, locals_stack, "isinstance" |),
           make_list [
-            M.get_name (| globals, "tx" |);
-            M.get_name (| globals, "Bytes" |)
+            M.get_name (| globals, locals_stack, "tx" |);
+            M.get_name (| globals, locals_stack, "Bytes" |)
           ],
           make_dict []
         |),
       (* then *)
       ltac:(M.monadic (
         let _ := M.call (|
-    M.get_name (| globals, "ensure" |),
+    M.get_name (| globals, locals_stack, "ensure" |),
     make_list [
       Compare.eq (|
         M.get_subscript (|
-          M.get_name (| globals, "tx" |),
+          M.get_name (| globals, locals_stack, "tx" |),
           Constant.int 0
         |),
         Constant.int 1
       |);
-      M.get_name (| globals, "InvalidBlock" |)
+      M.get_name (| globals, locals_stack, "InvalidBlock" |)
     ],
     make_dict []
   |) in
         let _ := M.return_ (|
           M.call (|
-            M.get_field (| M.get_name (| globals, "rlp" |), "decode_to" |),
+            M.get_field (| M.get_name (| globals, locals_stack, "rlp" |), "decode_to" |),
             make_list [
-              M.get_name (| globals, "AccessListTransaction" |);
+              M.get_name (| globals, locals_stack, "AccessListTransaction" |);
               M.slice (|
-                M.get_name (| globals, "tx" |),
+                M.get_name (| globals, locals_stack, "tx" |),
                 Constant.int 1,
                 Constant.None_,
                 Constant.None_
@@ -213,7 +217,7 @@ Definition decode_transaction : Value.t -> Value.t -> M :=
       (* else *)
       )), ltac:(M.monadic (
         let _ := M.return_ (|
-          M.get_name (| globals, "tx" |)
+          M.get_name (| globals, locals_stack, "tx" |)
         |) in
         M.pure Constant.None_
       )) |) in

@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.arrow_glacier.vm.stack".
+Definition globals : Globals.t := "ethereum.arrow_glacier.vm.stack".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -29,8 +31,9 @@ Axiom ethereum_arrow_glacier_vm_exceptions_imports_StackUnderflowError :
   IsImported globals "ethereum.arrow_glacier.vm.exceptions" "StackUnderflowError".
 
 Definition pop : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "stack" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "stack" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Pops the top item off of `stack`.
 
@@ -50,9 +53,9 @@ Definition pop : Value.t -> Value.t -> M :=
       M.if_then_else (|
         Compare.eq (|
           M.call (|
-            M.get_name (| globals, "len" |),
+            M.get_name (| globals, locals_stack, "len" |),
             make_list [
-              M.get_name (| globals, "stack" |)
+              M.get_name (| globals, locals_stack, "stack" |)
             ],
             make_dict []
           |),
@@ -60,7 +63,7 @@ Definition pop : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let _ := M.raise (| Some (M.get_name (| globals, "StackUnderflowError" |)) |) in
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "StackUnderflowError" |)) |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
@@ -68,7 +71,7 @@ Definition pop : Value.t -> Value.t -> M :=
       )) |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_field (| M.get_name (| globals, "stack" |), "pop" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "stack" |), "pop" |),
         make_list [],
         make_dict []
       |)
@@ -76,8 +79,9 @@ Definition pop : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition push : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "stack"; "value" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "stack"; "value" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Pushes `value` onto `stack`.
 
@@ -95,9 +99,9 @@ Definition push : Value.t -> Value.t -> M :=
       M.if_then_else (|
         Compare.eq (|
           M.call (|
-            M.get_name (| globals, "len" |),
+            M.get_name (| globals, locals_stack, "len" |),
             make_list [
-              M.get_name (| globals, "stack" |)
+              M.get_name (| globals, locals_stack, "stack" |)
             ],
             make_dict []
           |),
@@ -105,7 +109,7 @@ Definition push : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let _ := M.raise (| Some (M.get_name (| globals, "StackOverflowError" |)) |) in
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "StackOverflowError" |)) |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
@@ -113,9 +117,9 @@ Definition push : Value.t -> Value.t -> M :=
       )) |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_field (| M.get_name (| globals, "stack" |), "append" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "stack" |), "append" |),
         make_list [
-          M.get_name (| globals, "value" |)
+          M.get_name (| globals, locals_stack, "value" |)
         ],
         make_dict []
       |)

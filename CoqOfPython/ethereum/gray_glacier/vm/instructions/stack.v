@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.gray_glacier.vm.instructions.stack".
+Definition globals : Globals.t := "ethereum.gray_glacier.vm.instructions.stack".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -45,8 +47,9 @@ Axiom ethereum_gray_glacier_vm_memory_imports_buffer_read :
   IsImported globals "ethereum.gray_glacier.vm.memory" "buffer_read".
 
 Definition pop : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Remove item from stack.
 
@@ -57,31 +60,32 @@ Definition pop : Value.t -> Value.t -> M :=
 
     " in
     let _ := M.call (|
-    M.get_field (| M.get_name (| globals, "stack" |), "pop" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "stack" |), "pop" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
     ],
     make_dict []
   |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_BASE" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_BASE" |)
     ],
     make_dict []
   |) in
     let _ := M.pass (| |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition push_n : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm"; "num_bytes" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm"; "num_bytes" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Pushes a N-byte immediate onto the stack.
 
@@ -97,36 +101,36 @@ Definition push_n : Value.t -> Value.t -> M :=
     " in
     let _ := M.pass (| |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_VERY_LOW" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_VERY_LOW" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_local (|
       "data_to_push" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "U256" |), "from_be_bytes" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "buffer_read" |),
+            M.get_name (| globals, locals_stack, "buffer_read" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "evm" |), "code" |);
+              M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "code" |);
               M.call (|
-                M.get_name (| globals, "U256" |),
+                M.get_name (| globals, locals_stack, "U256" |),
                 make_list [
                   BinOp.add (|
-                    M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
                     Constant.int 1
                   |)
                 ],
                 make_dict []
               |);
               M.call (|
-                M.get_name (| globals, "U256" |),
+                M.get_name (| globals, locals_stack, "U256" |),
                 make_list [
-                  M.get_name (| globals, "num_bytes" |)
+                  M.get_name (| globals, locals_stack, "num_bytes" |)
                 ],
                 make_dict []
               |)
@@ -138,26 +142,27 @@ Definition push_n : Value.t -> Value.t -> M :=
       |)
     |) in
     let _ := M.call (|
-    M.get_field (| M.get_name (| globals, "stack" |), "push" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "stack" |), "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.get_name (| globals, "data_to_push" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
+      M.get_name (| globals, locals_stack, "data_to_push" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       BinOp.add (|
     Constant.int 1,
-    M.get_name (| globals, "num_bytes" |)
+    M.get_name (| globals, locals_stack, "num_bytes" |)
   |)
     |) in
     M.pure Constant.None_)).
 
 Definition dup_n : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm"; "item_number" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm"; "item_number" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Duplicate the Nth stack item (from top of the stack) to the top of stack.
 
@@ -173,67 +178,68 @@ Definition dup_n : Value.t -> Value.t -> M :=
     " in
     let _ := M.pass (| |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_VERY_LOW" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_VERY_LOW" |)
     ],
     make_dict []
   |) in
     let _ := M.call (|
-    M.get_name (| globals, "ensure" |),
+    M.get_name (| globals, locals_stack, "ensure" |),
     make_list [
       Compare.lt (|
-        M.get_name (| globals, "item_number" |),
+        M.get_name (| globals, locals_stack, "item_number" |),
         M.call (|
-          M.get_name (| globals, "len" |),
+          M.get_name (| globals, locals_stack, "len" |),
           make_list [
-            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
           ],
           make_dict []
         |)
       |);
-      M.get_name (| globals, "StackUnderflowError" |)
+      M.get_name (| globals, locals_stack, "StackUnderflowError" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_local (|
       "data_to_duplicate" ,
       M.get_subscript (|
-        M.get_field (| M.get_name (| globals, "evm" |), "stack" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |),
         BinOp.sub (|
           BinOp.sub (|
             M.call (|
-              M.get_name (| globals, "len" |),
+              M.get_name (| globals, locals_stack, "len" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+                M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
               ],
               make_dict []
             |),
             Constant.int 1
           |),
-          M.get_name (| globals, "item_number" |)
+          M.get_name (| globals, locals_stack, "item_number" |)
         |)
       |)
     |) in
     let _ := M.call (|
-    M.get_field (| M.get_name (| globals, "stack" |), "push" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "stack" |), "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.get_name (| globals, "data_to_duplicate" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
+      M.get_name (| globals, locals_stack, "data_to_duplicate" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition swap_n : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm"; "item_number" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm"; "item_number" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Swap the top and the `item_number` element of the stack, where
     the top of the stack is position zero.
@@ -253,64 +259,64 @@ Definition swap_n : Value.t -> Value.t -> M :=
     " in
     let _ := M.pass (| |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_VERY_LOW" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_VERY_LOW" |)
     ],
     make_dict []
   |) in
     let _ := M.call (|
-    M.get_name (| globals, "ensure" |),
+    M.get_name (| globals, locals_stack, "ensure" |),
     make_list [
       Compare.lt (|
-        M.get_name (| globals, "item_number" |),
+        M.get_name (| globals, locals_stack, "item_number" |),
         M.call (|
-          M.get_name (| globals, "len" |),
+          M.get_name (| globals, locals_stack, "len" |),
           make_list [
-            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
           ],
           make_dict []
         |)
       |);
-      M.get_name (| globals, "StackUnderflowError" |)
+      M.get_name (| globals, locals_stack, "StackUnderflowError" |)
     ],
     make_dict []
   |) in
     let _ := M.assign (|
       make_tuple [ M.get_subscript (|
-        M.get_field (| M.get_name (| globals, "evm" |), "stack" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |),
         UnOp.sub (| Constant.int 1 |)
       |); M.get_subscript (|
-        M.get_field (| M.get_name (| globals, "evm" |), "stack" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |),
         BinOp.sub (|
           UnOp.sub (| Constant.int 1 |),
-          M.get_name (| globals, "item_number" |)
+          M.get_name (| globals, locals_stack, "item_number" |)
         |)
       |) ],
       make_tuple [ M.get_subscript (|
-        M.get_field (| M.get_name (| globals, "evm" |), "stack" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |),
         BinOp.sub (|
           UnOp.sub (| Constant.int 1 |),
-          M.get_name (| globals, "item_number" |)
+          M.get_name (| globals, locals_stack, "item_number" |)
         |)
       |); M.get_subscript (|
-        M.get_field (| M.get_name (| globals, "evm" |), "stack" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |),
         UnOp.sub (| Constant.int 1 |)
       |) ]
     |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition push1 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -318,9 +324,9 @@ Definition push1 : Value.t := M.run ltac:(M.monadic (
 
 Definition push2 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -328,9 +334,9 @@ Definition push2 : Value.t := M.run ltac:(M.monadic (
 
 Definition push3 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -338,9 +344,9 @@ Definition push3 : Value.t := M.run ltac:(M.monadic (
 
 Definition push4 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -348,9 +354,9 @@ Definition push4 : Value.t := M.run ltac:(M.monadic (
 
 Definition push5 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -358,9 +364,9 @@ Definition push5 : Value.t := M.run ltac:(M.monadic (
 
 Definition push6 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -368,9 +374,9 @@ Definition push6 : Value.t := M.run ltac:(M.monadic (
 
 Definition push7 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -378,9 +384,9 @@ Definition push7 : Value.t := M.run ltac:(M.monadic (
 
 Definition push8 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -388,9 +394,9 @@ Definition push8 : Value.t := M.run ltac:(M.monadic (
 
 Definition push9 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -398,9 +404,9 @@ Definition push9 : Value.t := M.run ltac:(M.monadic (
 
 Definition push10 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -408,9 +414,9 @@ Definition push10 : Value.t := M.run ltac:(M.monadic (
 
 Definition push11 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -418,9 +424,9 @@ Definition push11 : Value.t := M.run ltac:(M.monadic (
 
 Definition push12 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -428,9 +434,9 @@ Definition push12 : Value.t := M.run ltac:(M.monadic (
 
 Definition push13 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -438,9 +444,9 @@ Definition push13 : Value.t := M.run ltac:(M.monadic (
 
 Definition push14 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -448,9 +454,9 @@ Definition push14 : Value.t := M.run ltac:(M.monadic (
 
 Definition push15 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -458,9 +464,9 @@ Definition push15 : Value.t := M.run ltac:(M.monadic (
 
 Definition push16 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -468,9 +474,9 @@ Definition push16 : Value.t := M.run ltac:(M.monadic (
 
 Definition push17 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -478,9 +484,9 @@ Definition push17 : Value.t := M.run ltac:(M.monadic (
 
 Definition push18 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -488,9 +494,9 @@ Definition push18 : Value.t := M.run ltac:(M.monadic (
 
 Definition push19 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -498,9 +504,9 @@ Definition push19 : Value.t := M.run ltac:(M.monadic (
 
 Definition push20 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -508,9 +514,9 @@ Definition push20 : Value.t := M.run ltac:(M.monadic (
 
 Definition push21 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -518,9 +524,9 @@ Definition push21 : Value.t := M.run ltac:(M.monadic (
 
 Definition push22 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -528,9 +534,9 @@ Definition push22 : Value.t := M.run ltac:(M.monadic (
 
 Definition push23 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -538,9 +544,9 @@ Definition push23 : Value.t := M.run ltac:(M.monadic (
 
 Definition push24 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -548,9 +554,9 @@ Definition push24 : Value.t := M.run ltac:(M.monadic (
 
 Definition push25 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -558,9 +564,9 @@ Definition push25 : Value.t := M.run ltac:(M.monadic (
 
 Definition push26 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -568,9 +574,9 @@ Definition push26 : Value.t := M.run ltac:(M.monadic (
 
 Definition push27 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -578,9 +584,9 @@ Definition push27 : Value.t := M.run ltac:(M.monadic (
 
 Definition push28 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -588,9 +594,9 @@ Definition push28 : Value.t := M.run ltac:(M.monadic (
 
 Definition push29 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -598,9 +604,9 @@ Definition push29 : Value.t := M.run ltac:(M.monadic (
 
 Definition push30 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -608,9 +614,9 @@ Definition push30 : Value.t := M.run ltac:(M.monadic (
 
 Definition push31 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -618,9 +624,9 @@ Definition push31 : Value.t := M.run ltac:(M.monadic (
 
 Definition push32 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "push_n" |)
+      M.get_name (| globals, locals_stack, "push_n" |)
     ],
     make_dict []
   |)
@@ -628,9 +634,9 @@ Definition push32 : Value.t := M.run ltac:(M.monadic (
 
 Definition dup1 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "dup_n" |)
+      M.get_name (| globals, locals_stack, "dup_n" |)
     ],
     make_dict []
   |)
@@ -638,9 +644,9 @@ Definition dup1 : Value.t := M.run ltac:(M.monadic (
 
 Definition dup2 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "dup_n" |)
+      M.get_name (| globals, locals_stack, "dup_n" |)
     ],
     make_dict []
   |)
@@ -648,9 +654,9 @@ Definition dup2 : Value.t := M.run ltac:(M.monadic (
 
 Definition dup3 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "dup_n" |)
+      M.get_name (| globals, locals_stack, "dup_n" |)
     ],
     make_dict []
   |)
@@ -658,9 +664,9 @@ Definition dup3 : Value.t := M.run ltac:(M.monadic (
 
 Definition dup4 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "dup_n" |)
+      M.get_name (| globals, locals_stack, "dup_n" |)
     ],
     make_dict []
   |)
@@ -668,9 +674,9 @@ Definition dup4 : Value.t := M.run ltac:(M.monadic (
 
 Definition dup5 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "dup_n" |)
+      M.get_name (| globals, locals_stack, "dup_n" |)
     ],
     make_dict []
   |)
@@ -678,9 +684,9 @@ Definition dup5 : Value.t := M.run ltac:(M.monadic (
 
 Definition dup6 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "dup_n" |)
+      M.get_name (| globals, locals_stack, "dup_n" |)
     ],
     make_dict []
   |)
@@ -688,9 +694,9 @@ Definition dup6 : Value.t := M.run ltac:(M.monadic (
 
 Definition dup7 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "dup_n" |)
+      M.get_name (| globals, locals_stack, "dup_n" |)
     ],
     make_dict []
   |)
@@ -698,9 +704,9 @@ Definition dup7 : Value.t := M.run ltac:(M.monadic (
 
 Definition dup8 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "dup_n" |)
+      M.get_name (| globals, locals_stack, "dup_n" |)
     ],
     make_dict []
   |)
@@ -708,9 +714,9 @@ Definition dup8 : Value.t := M.run ltac:(M.monadic (
 
 Definition dup9 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "dup_n" |)
+      M.get_name (| globals, locals_stack, "dup_n" |)
     ],
     make_dict []
   |)
@@ -718,9 +724,9 @@ Definition dup9 : Value.t := M.run ltac:(M.monadic (
 
 Definition dup10 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "dup_n" |)
+      M.get_name (| globals, locals_stack, "dup_n" |)
     ],
     make_dict []
   |)
@@ -728,9 +734,9 @@ Definition dup10 : Value.t := M.run ltac:(M.monadic (
 
 Definition dup11 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "dup_n" |)
+      M.get_name (| globals, locals_stack, "dup_n" |)
     ],
     make_dict []
   |)
@@ -738,9 +744,9 @@ Definition dup11 : Value.t := M.run ltac:(M.monadic (
 
 Definition dup12 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "dup_n" |)
+      M.get_name (| globals, locals_stack, "dup_n" |)
     ],
     make_dict []
   |)
@@ -748,9 +754,9 @@ Definition dup12 : Value.t := M.run ltac:(M.monadic (
 
 Definition dup13 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "dup_n" |)
+      M.get_name (| globals, locals_stack, "dup_n" |)
     ],
     make_dict []
   |)
@@ -758,9 +764,9 @@ Definition dup13 : Value.t := M.run ltac:(M.monadic (
 
 Definition dup14 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "dup_n" |)
+      M.get_name (| globals, locals_stack, "dup_n" |)
     ],
     make_dict []
   |)
@@ -768,9 +774,9 @@ Definition dup14 : Value.t := M.run ltac:(M.monadic (
 
 Definition dup15 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "dup_n" |)
+      M.get_name (| globals, locals_stack, "dup_n" |)
     ],
     make_dict []
   |)
@@ -778,9 +784,9 @@ Definition dup15 : Value.t := M.run ltac:(M.monadic (
 
 Definition dup16 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "dup_n" |)
+      M.get_name (| globals, locals_stack, "dup_n" |)
     ],
     make_dict []
   |)
@@ -788,9 +794,9 @@ Definition dup16 : Value.t := M.run ltac:(M.monadic (
 
 Definition swap1 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "swap_n" |)
+      M.get_name (| globals, locals_stack, "swap_n" |)
     ],
     make_dict []
   |)
@@ -798,9 +804,9 @@ Definition swap1 : Value.t := M.run ltac:(M.monadic (
 
 Definition swap2 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "swap_n" |)
+      M.get_name (| globals, locals_stack, "swap_n" |)
     ],
     make_dict []
   |)
@@ -808,9 +814,9 @@ Definition swap2 : Value.t := M.run ltac:(M.monadic (
 
 Definition swap3 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "swap_n" |)
+      M.get_name (| globals, locals_stack, "swap_n" |)
     ],
     make_dict []
   |)
@@ -818,9 +824,9 @@ Definition swap3 : Value.t := M.run ltac:(M.monadic (
 
 Definition swap4 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "swap_n" |)
+      M.get_name (| globals, locals_stack, "swap_n" |)
     ],
     make_dict []
   |)
@@ -828,9 +834,9 @@ Definition swap4 : Value.t := M.run ltac:(M.monadic (
 
 Definition swap5 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "swap_n" |)
+      M.get_name (| globals, locals_stack, "swap_n" |)
     ],
     make_dict []
   |)
@@ -838,9 +844,9 @@ Definition swap5 : Value.t := M.run ltac:(M.monadic (
 
 Definition swap6 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "swap_n" |)
+      M.get_name (| globals, locals_stack, "swap_n" |)
     ],
     make_dict []
   |)
@@ -848,9 +854,9 @@ Definition swap6 : Value.t := M.run ltac:(M.monadic (
 
 Definition swap7 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "swap_n" |)
+      M.get_name (| globals, locals_stack, "swap_n" |)
     ],
     make_dict []
   |)
@@ -858,9 +864,9 @@ Definition swap7 : Value.t := M.run ltac:(M.monadic (
 
 Definition swap8 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "swap_n" |)
+      M.get_name (| globals, locals_stack, "swap_n" |)
     ],
     make_dict []
   |)
@@ -868,9 +874,9 @@ Definition swap8 : Value.t := M.run ltac:(M.monadic (
 
 Definition swap9 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "swap_n" |)
+      M.get_name (| globals, locals_stack, "swap_n" |)
     ],
     make_dict []
   |)
@@ -878,9 +884,9 @@ Definition swap9 : Value.t := M.run ltac:(M.monadic (
 
 Definition swap10 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "swap_n" |)
+      M.get_name (| globals, locals_stack, "swap_n" |)
     ],
     make_dict []
   |)
@@ -888,9 +894,9 @@ Definition swap10 : Value.t := M.run ltac:(M.monadic (
 
 Definition swap11 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "swap_n" |)
+      M.get_name (| globals, locals_stack, "swap_n" |)
     ],
     make_dict []
   |)
@@ -898,9 +904,9 @@ Definition swap11 : Value.t := M.run ltac:(M.monadic (
 
 Definition swap12 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "swap_n" |)
+      M.get_name (| globals, locals_stack, "swap_n" |)
     ],
     make_dict []
   |)
@@ -908,9 +914,9 @@ Definition swap12 : Value.t := M.run ltac:(M.monadic (
 
 Definition swap13 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "swap_n" |)
+      M.get_name (| globals, locals_stack, "swap_n" |)
     ],
     make_dict []
   |)
@@ -918,9 +924,9 @@ Definition swap13 : Value.t := M.run ltac:(M.monadic (
 
 Definition swap14 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "swap_n" |)
+      M.get_name (| globals, locals_stack, "swap_n" |)
     ],
     make_dict []
   |)
@@ -928,9 +934,9 @@ Definition swap14 : Value.t := M.run ltac:(M.monadic (
 
 Definition swap15 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "swap_n" |)
+      M.get_name (| globals, locals_stack, "swap_n" |)
     ],
     make_dict []
   |)
@@ -938,9 +944,9 @@ Definition swap15 : Value.t := M.run ltac:(M.monadic (
 
 Definition swap16 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "swap_n" |)
+      M.get_name (| globals, locals_stack, "swap_n" |)
     ],
     make_dict []
   |)

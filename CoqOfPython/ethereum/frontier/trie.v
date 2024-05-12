@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.frontier.trie".
+Definition globals : Globals.t := "ethereum.frontier.trie".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -86,10 +88,10 @@ Axiom ethereum_frontier_transactions_imports_Transaction :
 
 Definition EMPTY_TRIE_ROOT : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Root" |),
+    M.get_name (| globals, locals_stack, "Root" |),
     make_list [
       M.call (|
-        M.get_name (| globals, "hex_to_bytes" |),
+        M.get_name (| globals, locals_stack, "hex_to_bytes" |),
         make_list [
           Constant.str "56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"
         ],
@@ -102,14 +104,14 @@ Definition EMPTY_TRIE_ROOT : Value.t := M.run ltac:(M.monadic (
 
 Definition Node : Value.t := M.run ltac:(M.monadic (
   M.get_subscript (|
-    M.get_name (| globals, "Union" |),
-    make_tuple [ M.get_name (| globals, "Account" |); M.get_name (| globals, "Bytes" |); M.get_name (| globals, "Transaction" |); M.get_name (| globals, "Receipt" |); M.get_name (| globals, "Uint" |); M.get_name (| globals, "U256" |); Constant.None_ ]
+    M.get_name (| globals, locals_stack, "Union" |),
+    make_tuple [ M.get_name (| globals, locals_stack, "Account" |); M.get_name (| globals, locals_stack, "Bytes" |); M.get_name (| globals, locals_stack, "Transaction" |); M.get_name (| globals, locals_stack, "Receipt" |); M.get_name (| globals, locals_stack, "Uint" |); M.get_name (| globals, locals_stack, "U256" |); Constant.None_ ]
   |)
 )).
 
 Definition K : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "TypeVar" |),
+    M.get_name (| globals, locals_stack, "TypeVar" |),
     make_list [
       Constant.str "K"
     ],
@@ -119,28 +121,28 @@ Definition K : Value.t := M.run ltac:(M.monadic (
 
 Definition V : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "TypeVar" |),
+    M.get_name (| globals, locals_stack, "TypeVar" |),
     make_list [
       Constant.str "V";
       M.get_subscript (|
-        M.get_name (| globals, "Optional" |),
-        M.get_name (| globals, "Account" |)
+        M.get_name (| globals, locals_stack, "Optional" |),
+        M.get_name (| globals, locals_stack, "Account" |)
       |);
       M.get_subscript (|
-        M.get_name (| globals, "Optional" |),
-        M.get_name (| globals, "Bytes" |)
+        M.get_name (| globals, locals_stack, "Optional" |),
+        M.get_name (| globals, locals_stack, "Bytes" |)
       |);
-      M.get_name (| globals, "Bytes" |);
+      M.get_name (| globals, locals_stack, "Bytes" |);
       M.get_subscript (|
-        M.get_name (| globals, "Optional" |),
-        M.get_name (| globals, "Transaction" |)
+        M.get_name (| globals, locals_stack, "Optional" |),
+        M.get_name (| globals, locals_stack, "Transaction" |)
       |);
       M.get_subscript (|
-        M.get_name (| globals, "Optional" |),
-        M.get_name (| globals, "Receipt" |)
+        M.get_name (| globals, locals_stack, "Optional" |),
+        M.get_name (| globals, locals_stack, "Receipt" |)
       |);
-      M.get_name (| globals, "Uint" |);
-      M.get_name (| globals, "U256" |)
+      M.get_name (| globals, locals_stack, "Uint" |);
+      M.get_name (| globals, locals_stack, "U256" |)
     ],
     make_dict []
   |)
@@ -178,14 +180,15 @@ Definition BranchNode : Value.t :=
 
 Definition InternalNode : Value.t := M.run ltac:(M.monadic (
   M.get_subscript (|
-    M.get_name (| globals, "Union" |),
-    make_tuple [ M.get_name (| globals, "LeafNode" |); M.get_name (| globals, "ExtensionNode" |); M.get_name (| globals, "BranchNode" |) ]
+    M.get_name (| globals, locals_stack, "Union" |),
+    make_tuple [ M.get_name (| globals, locals_stack, "LeafNode" |); M.get_name (| globals, locals_stack, "ExtensionNode" |); M.get_name (| globals, locals_stack, "BranchNode" |) ]
   |)
 )).
 
 Definition encode_internal_node : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "node" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "node" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Encodes a Merkle Trie node into its RLP form. The RLP will then be
     serialized into a `Bytes` and hashed unless it is less that 32 bytes
@@ -209,7 +212,7 @@ Definition encode_internal_node : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.is (|
-          M.get_name (| globals, "node" |),
+          M.get_name (| globals, locals_stack, "node" |),
           Constant.None_
         |),
       (* then *)
@@ -225,10 +228,10 @@ Definition encode_internal_node : Value.t -> Value.t -> M :=
           (* if *)
           M.if_then_else (|
             M.call (|
-              M.get_name (| globals, "isinstance" |),
+              M.get_name (| globals, locals_stack, "isinstance" |),
               make_list [
-                M.get_name (| globals, "node" |);
-                M.get_name (| globals, "LeafNode" |)
+                M.get_name (| globals, locals_stack, "node" |);
+                M.get_name (| globals, locals_stack, "LeafNode" |)
               ],
               make_dict []
             |),
@@ -237,13 +240,13 @@ Definition encode_internal_node : Value.t -> Value.t -> M :=
             let _ := M.assign_local (|
               "unencoded" ,
               make_tuple [ M.call (|
-                M.get_name (| globals, "nibble_list_to_compact" |),
+                M.get_name (| globals, locals_stack, "nibble_list_to_compact" |),
                 make_list [
-                  M.get_field (| M.get_name (| globals, "node" |), "rest_of_key" |);
+                  M.get_field (| M.get_name (| globals, locals_stack, "node" |), "rest_of_key" |);
                   Constant.bool true
                 ],
                 make_dict []
-              |); M.get_field (| M.get_name (| globals, "node" |), "value" |) ]
+              |); M.get_field (| M.get_name (| globals, locals_stack, "node" |), "value" |) ]
             |) in
             M.pure Constant.None_
           (* else *)
@@ -252,10 +255,10 @@ Definition encode_internal_node : Value.t -> Value.t -> M :=
               (* if *)
               M.if_then_else (|
                 M.call (|
-                  M.get_name (| globals, "isinstance" |),
+                  M.get_name (| globals, locals_stack, "isinstance" |),
                   make_list [
-                    M.get_name (| globals, "node" |);
-                    M.get_name (| globals, "ExtensionNode" |)
+                    M.get_name (| globals, locals_stack, "node" |);
+                    M.get_name (| globals, locals_stack, "ExtensionNode" |)
                   ],
                   make_dict []
                 |),
@@ -264,13 +267,13 @@ Definition encode_internal_node : Value.t -> Value.t -> M :=
                 let _ := M.assign_local (|
                   "unencoded" ,
                   make_tuple [ M.call (|
-                    M.get_name (| globals, "nibble_list_to_compact" |),
+                    M.get_name (| globals, locals_stack, "nibble_list_to_compact" |),
                     make_list [
-                      M.get_field (| M.get_name (| globals, "node" |), "key_segment" |);
+                      M.get_field (| M.get_name (| globals, locals_stack, "node" |), "key_segment" |);
                       Constant.bool false
                     ],
                     make_dict []
-                  |); M.get_field (| M.get_name (| globals, "node" |), "subnode" |) ]
+                  |); M.get_field (| M.get_name (| globals, locals_stack, "node" |), "subnode" |) ]
                 |) in
                 M.pure Constant.None_
               (* else *)
@@ -279,10 +282,10 @@ Definition encode_internal_node : Value.t -> Value.t -> M :=
                   (* if *)
                   M.if_then_else (|
                     M.call (|
-                      M.get_name (| globals, "isinstance" |),
+                      M.get_name (| globals, locals_stack, "isinstance" |),
                       make_list [
-                        M.get_name (| globals, "node" |);
-                        M.get_name (| globals, "BranchNode" |)
+                        M.get_name (| globals, locals_stack, "node" |);
+                        M.get_name (| globals, locals_stack, "BranchNode" |)
                       ],
                       make_dict []
                     |),
@@ -291,9 +294,9 @@ Definition encode_internal_node : Value.t -> Value.t -> M :=
                     let _ := M.assign_local (|
                       "unencoded" ,
                       BinOp.add (|
-                        M.get_field (| M.get_name (| globals, "node" |), "subnodes" |),
+                        M.get_field (| M.get_name (| globals, locals_stack, "node" |), "subnodes" |),
                         make_list [
-                          M.get_field (| M.get_name (| globals, "node" |), "value" |)
+                          M.get_field (| M.get_name (| globals, locals_stack, "node" |), "value" |)
                         ]
                       |)
                     |) in
@@ -301,7 +304,7 @@ Definition encode_internal_node : Value.t -> Value.t -> M :=
                   (* else *)
                   )), ltac:(M.monadic (
                     let _ := M.raise (| Some (M.call (|
-                      M.get_name (| globals, "AssertionError" |),
+                      M.get_name (| globals, locals_stack, "AssertionError" |),
                       make_list [
                         Constant.str "(* At expr: unsupported node type: JoinedStr *)"
                       ],
@@ -318,9 +321,9 @@ Definition encode_internal_node : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "encoded" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "rlp" |), "encode" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "rlp" |), "encode" |),
         make_list [
-          M.get_name (| globals, "unencoded" |)
+          M.get_name (| globals, locals_stack, "unencoded" |)
         ],
         make_dict []
       |)
@@ -330,9 +333,9 @@ Definition encode_internal_node : Value.t -> Value.t -> M :=
       M.if_then_else (|
         Compare.lt (|
           M.call (|
-            M.get_name (| globals, "len" |),
+            M.get_name (| globals, locals_stack, "len" |),
             make_list [
-              M.get_name (| globals, "encoded" |)
+              M.get_name (| globals, locals_stack, "encoded" |)
             ],
             make_dict []
           |),
@@ -341,16 +344,16 @@ Definition encode_internal_node : Value.t -> Value.t -> M :=
       (* then *)
       ltac:(M.monadic (
         let _ := M.return_ (|
-          M.get_name (| globals, "unencoded" |)
+          M.get_name (| globals, locals_stack, "unencoded" |)
         |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
         let _ := M.return_ (|
           M.call (|
-            M.get_name (| globals, "keccak256" |),
+            M.get_name (| globals, locals_stack, "keccak256" |),
             make_list [
-              M.get_name (| globals, "encoded" |)
+              M.get_name (| globals, locals_stack, "encoded" |)
             ],
             make_dict []
           |)
@@ -360,8 +363,9 @@ Definition encode_internal_node : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition encode_node : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "node"; "storage_root" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "node"; "storage_root" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Encode a Node for storage in the Merkle Trie.
 
@@ -371,25 +375,25 @@ Definition encode_node : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         M.call (|
-          M.get_name (| globals, "isinstance" |),
+          M.get_name (| globals, locals_stack, "isinstance" |),
           make_list [
-            M.get_name (| globals, "node" |);
-            M.get_name (| globals, "Account" |)
+            M.get_name (| globals, locals_stack, "node" |);
+            M.get_name (| globals, locals_stack, "Account" |)
           ],
           make_dict []
         |),
       (* then *)
       ltac:(M.monadic (
         let _ := M.assert (| Compare.is_not (|
-    M.get_name (| globals, "storage_root" |),
+    M.get_name (| globals, locals_stack, "storage_root" |),
     Constant.None_
   |) |) in
         let _ := M.return_ (|
           M.call (|
-            M.get_name (| globals, "encode_account" |),
+            M.get_name (| globals, locals_stack, "encode_account" |),
             make_list [
-              M.get_name (| globals, "node" |);
-              M.get_name (| globals, "storage_root" |)
+              M.get_name (| globals, locals_stack, "node" |);
+              M.get_name (| globals, locals_stack, "storage_root" |)
             ],
             make_dict []
           |)
@@ -401,10 +405,10 @@ Definition encode_node : Value.t -> Value.t -> M :=
           (* if *)
           M.if_then_else (|
             M.call (|
-              M.get_name (| globals, "isinstance" |),
+              M.get_name (| globals, locals_stack, "isinstance" |),
               make_list [
-                M.get_name (| globals, "node" |);
-                make_tuple [ M.get_name (| globals, "Transaction" |); M.get_name (| globals, "Receipt" |); M.get_name (| globals, "U256" |) ]
+                M.get_name (| globals, locals_stack, "node" |);
+                make_tuple [ M.get_name (| globals, locals_stack, "Transaction" |); M.get_name (| globals, locals_stack, "Receipt" |); M.get_name (| globals, locals_stack, "U256" |) ]
               ],
               make_dict []
             |),
@@ -412,13 +416,13 @@ Definition encode_node : Value.t -> Value.t -> M :=
           ltac:(M.monadic (
             let _ := M.return_ (|
               M.call (|
-                M.get_field (| M.get_name (| globals, "rlp" |), "encode" |),
+                M.get_field (| M.get_name (| globals, locals_stack, "rlp" |), "encode" |),
                 make_list [
                   M.call (|
-                    M.get_name (| globals, "cast" |),
+                    M.get_name (| globals, locals_stack, "cast" |),
                     make_list [
-                      M.get_field (| M.get_name (| globals, "rlp" |), "RLP" |);
-                      M.get_name (| globals, "node" |)
+                      M.get_field (| M.get_name (| globals, locals_stack, "rlp" |), "RLP" |);
+                      M.get_name (| globals, locals_stack, "node" |)
                     ],
                     make_dict []
                   |)
@@ -433,23 +437,23 @@ Definition encode_node : Value.t -> Value.t -> M :=
               (* if *)
               M.if_then_else (|
                 M.call (|
-                  M.get_name (| globals, "isinstance" |),
+                  M.get_name (| globals, locals_stack, "isinstance" |),
                   make_list [
-                    M.get_name (| globals, "node" |);
-                    M.get_name (| globals, "Bytes" |)
+                    M.get_name (| globals, locals_stack, "node" |);
+                    M.get_name (| globals, locals_stack, "Bytes" |)
                   ],
                   make_dict []
                 |),
               (* then *)
               ltac:(M.monadic (
                 let _ := M.return_ (|
-                  M.get_name (| globals, "node" |)
+                  M.get_name (| globals, locals_stack, "node" |)
                 |) in
                 M.pure Constant.None_
               (* else *)
               )), ltac:(M.monadic (
                 let _ := M.raise (| Some (M.call (|
-                  M.get_name (| globals, "AssertionError" |),
+                  M.get_name (| globals, locals_stack, "AssertionError" |),
                   make_list [
                     Constant.str "(* At expr: unsupported node type: JoinedStr *)"
                   ],
@@ -474,8 +478,9 @@ Definition Trie : Value.t :=
     ].
 
 Definition copy_trie : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "trie" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "trie" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Create a copy of `trie`. Since only frozen objects may be stored in tries,
     the contents are reused.
@@ -492,14 +497,14 @@ Definition copy_trie : Value.t -> Value.t -> M :=
     " in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "Trie" |),
+        M.get_name (| globals, locals_stack, "Trie" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "trie" |), "secured" |);
-          M.get_field (| M.get_name (| globals, "trie" |), "default" |);
+          M.get_field (| M.get_name (| globals, locals_stack, "trie" |), "secured" |);
+          M.get_field (| M.get_name (| globals, locals_stack, "trie" |), "default" |);
           M.call (|
-            M.get_field (| M.get_name (| globals, "copy" |), "copy" |),
+            M.get_field (| M.get_name (| globals, locals_stack, "copy" |), "copy" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "trie" |), "_data" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "trie" |), "_data" |)
             ],
             make_dict []
           |)
@@ -510,8 +515,9 @@ Definition copy_trie : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition trie_set : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "trie"; "key"; "value" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "trie"; "key"; "value" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Stores an item in a Merkle Trie.
 
@@ -531,8 +537,8 @@ Definition trie_set : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.eq (|
-          M.get_name (| globals, "value" |),
-          M.get_field (| M.get_name (| globals, "trie" |), "default" |)
+          M.get_name (| globals, locals_stack, "value" |),
+          M.get_field (| M.get_name (| globals, locals_stack, "trie" |), "default" |)
         |),
       (* then *)
       ltac:(M.monadic (
@@ -540,14 +546,14 @@ Definition trie_set : Value.t -> Value.t -> M :=
           (* if *)
           M.if_then_else (|
             Compare.in_ (|
-              M.get_name (| globals, "key" |),
-              M.get_field (| M.get_name (| globals, "trie" |), "_data" |)
+              M.get_name (| globals, locals_stack, "key" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "trie" |), "_data" |)
             |),
           (* then *)
           ltac:(M.monadic (
             let _ := M.delete (| M.get_subscript (|
-    M.get_field (| M.get_name (| globals, "trie" |), "_data" |),
-    M.get_name (| globals, "key" |)
+    M.get_field (| M.get_name (| globals, locals_stack, "trie" |), "_data" |),
+    M.get_name (| globals, locals_stack, "key" |)
   |) |) in
             M.pure Constant.None_
           (* else *)
@@ -559,18 +565,19 @@ Definition trie_set : Value.t -> Value.t -> M :=
       )), ltac:(M.monadic (
         let _ := M.assign (|
           M.get_subscript (|
-            M.get_field (| M.get_name (| globals, "trie" |), "_data" |),
-            M.get_name (| globals, "key" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "trie" |), "_data" |),
+            M.get_name (| globals, locals_stack, "key" |)
           |),
-          M.get_name (| globals, "value" |)
+          M.get_name (| globals, locals_stack, "value" |)
         |) in
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
 
 Definition trie_get : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "trie"; "key" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "trie"; "key" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Gets an item from the Merkle Trie.
 
@@ -590,10 +597,10 @@ Definition trie_get : Value.t -> Value.t -> M :=
     " in
     let _ := M.return_ (|
       M.call (|
-        M.get_field (| M.get_field (| M.get_name (| globals, "trie" |), "_data" |), "get" |),
+        M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "trie" |), "_data" |), "get" |),
         make_list [
-          M.get_name (| globals, "key" |);
-          M.get_field (| M.get_name (| globals, "trie" |), "default" |)
+          M.get_name (| globals, locals_stack, "key" |);
+          M.get_field (| M.get_name (| globals, locals_stack, "trie" |), "default" |)
         ],
         make_dict []
       |)
@@ -601,21 +608,22 @@ Definition trie_get : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition common_prefix_length : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "a"; "b" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "a"; "b" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Find the longest common prefix of two sequences.
     " in
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "i" |),
+        M.get_name (| globals, locals_stack, "i" |),
         M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         M.call (|
-          M.get_name (| globals, "len" |),
+          M.get_name (| globals, locals_stack, "len" |),
           make_list [
-            M.get_name (| globals, "a" |)
+            M.get_name (| globals, locals_stack, "a" |)
           ],
           make_dict []
         |)
@@ -628,11 +636,11 @@ Definition common_prefix_length : Value.t -> Value.t -> M :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.gt_e (|
-                  M.get_name (| globals, "i" |),
+                  M.get_name (| globals, locals_stack, "i" |),
                   M.call (|
-                    M.get_name (| globals, "len" |),
+                    M.get_name (| globals, locals_stack, "len" |),
                     make_list [
-                      M.get_name (| globals, "b" |)
+                      M.get_name (| globals, locals_stack, "b" |)
                     ],
                     make_dict []
                   |)
@@ -640,12 +648,12 @@ Definition common_prefix_length : Value.t -> Value.t -> M :=
                 ltac:(M.monadic (
                   Compare.not_eq (|
                     M.get_subscript (|
-                      M.get_name (| globals, "a" |),
-                      M.get_name (| globals, "i" |)
+                      M.get_name (| globals, locals_stack, "a" |),
+                      M.get_name (| globals, locals_stack, "i" |)
                     |),
                     M.get_subscript (|
-                      M.get_name (| globals, "b" |),
-                      M.get_name (| globals, "i" |)
+                      M.get_name (| globals, locals_stack, "b" |),
+                      M.get_name (| globals, locals_stack, "i" |)
                     |)
                   |)
                 ))
@@ -653,7 +661,7 @@ Definition common_prefix_length : Value.t -> Value.t -> M :=
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "i" |)
+                M.get_name (| globals, locals_stack, "i" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -668,9 +676,9 @@ Definition common_prefix_length : Value.t -> Value.t -> M :=
     |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "len" |),
+        M.get_name (| globals, locals_stack, "len" |),
         make_list [
-          M.get_name (| globals, "a" |)
+          M.get_name (| globals, locals_stack, "a" |)
         ],
         make_dict []
       |)
@@ -678,8 +686,9 @@ Definition common_prefix_length : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition nibble_list_to_compact : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "x"; "is_leaf" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "x"; "is_leaf" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Compresses nibble-list into a standard byte array with a flag.
 
@@ -716,7 +725,7 @@ Definition nibble_list_to_compact : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "compact" ,
       M.call (|
-        M.get_name (| globals, "bytearray" |),
+        M.get_name (| globals, locals_stack, "bytearray" |),
         make_list [],
         make_dict []
       |)
@@ -727,9 +736,9 @@ Definition nibble_list_to_compact : Value.t -> Value.t -> M :=
         Compare.eq (|
           BinOp.mod_ (|
             M.call (|
-              M.get_name (| globals, "len" |),
+              M.get_name (| globals, locals_stack, "len" |),
               make_list [
-                M.get_name (| globals, "x" |)
+                M.get_name (| globals, locals_stack, "x" |)
               ],
               make_dict []
             |),
@@ -740,13 +749,13 @@ Definition nibble_list_to_compact : Value.t -> Value.t -> M :=
       (* then *)
       ltac:(M.monadic (
         let _ := M.call (|
-    M.get_field (| M.get_name (| globals, "compact" |), "append" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "compact" |), "append" |),
     make_list [
       BinOp.mult (|
         Constant.int 16,
         BinOp.mult (|
           Constant.int 2,
-          M.get_name (| globals, "is_leaf" |)
+          M.get_name (| globals, locals_stack, "is_leaf" |)
         |)
       |)
     ],
@@ -754,15 +763,15 @@ Definition nibble_list_to_compact : Value.t -> Value.t -> M :=
   |) in
         let _ :=
           M.for_ (|
-            M.get_name (| globals, "i" |),
+            M.get_name (| globals, locals_stack, "i" |),
             M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         Constant.int 0;
         M.call (|
-          M.get_name (| globals, "len" |),
+          M.get_name (| globals, locals_stack, "len" |),
           make_list [
-            M.get_name (| globals, "x" |)
+            M.get_name (| globals, locals_stack, "x" |)
           ],
           make_dict []
         |);
@@ -772,20 +781,20 @@ Definition nibble_list_to_compact : Value.t -> Value.t -> M :=
     |),
             ltac:(M.monadic (
               let _ := M.call (|
-    M.get_field (| M.get_name (| globals, "compact" |), "append" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "compact" |), "append" |),
     make_list [
       BinOp.add (|
         BinOp.mult (|
           Constant.int 16,
           M.get_subscript (|
-            M.get_name (| globals, "x" |),
-            M.get_name (| globals, "i" |)
+            M.get_name (| globals, locals_stack, "x" |),
+            M.get_name (| globals, locals_stack, "i" |)
           |)
         |),
         M.get_subscript (|
-          M.get_name (| globals, "x" |),
+          M.get_name (| globals, locals_stack, "x" |),
           BinOp.add (|
-            M.get_name (| globals, "i" |),
+            M.get_name (| globals, locals_stack, "i" |),
             Constant.int 1
           |)
         |)
@@ -803,7 +812,7 @@ Definition nibble_list_to_compact : Value.t -> Value.t -> M :=
       (* else *)
       )), ltac:(M.monadic (
         let _ := M.call (|
-    M.get_field (| M.get_name (| globals, "compact" |), "append" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "compact" |), "append" |),
     make_list [
       BinOp.add (|
         BinOp.mult (|
@@ -811,13 +820,13 @@ Definition nibble_list_to_compact : Value.t -> Value.t -> M :=
           BinOp.add (|
             BinOp.mult (|
               Constant.int 2,
-              M.get_name (| globals, "is_leaf" |)
+              M.get_name (| globals, locals_stack, "is_leaf" |)
             |),
             Constant.int 1
           |)
         |),
         M.get_subscript (|
-          M.get_name (| globals, "x" |),
+          M.get_name (| globals, locals_stack, "x" |),
           Constant.int 0
         |)
       |)
@@ -826,15 +835,15 @@ Definition nibble_list_to_compact : Value.t -> Value.t -> M :=
   |) in
         let _ :=
           M.for_ (|
-            M.get_name (| globals, "i" |),
+            M.get_name (| globals, locals_stack, "i" |),
             M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         Constant.int 1;
         M.call (|
-          M.get_name (| globals, "len" |),
+          M.get_name (| globals, locals_stack, "len" |),
           make_list [
-            M.get_name (| globals, "x" |)
+            M.get_name (| globals, locals_stack, "x" |)
           ],
           make_dict []
         |);
@@ -844,20 +853,20 @@ Definition nibble_list_to_compact : Value.t -> Value.t -> M :=
     |),
             ltac:(M.monadic (
               let _ := M.call (|
-    M.get_field (| M.get_name (| globals, "compact" |), "append" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "compact" |), "append" |),
     make_list [
       BinOp.add (|
         BinOp.mult (|
           Constant.int 16,
           M.get_subscript (|
-            M.get_name (| globals, "x" |),
-            M.get_name (| globals, "i" |)
+            M.get_name (| globals, locals_stack, "x" |),
+            M.get_name (| globals, locals_stack, "i" |)
           |)
         |),
         M.get_subscript (|
-          M.get_name (| globals, "x" |),
+          M.get_name (| globals, locals_stack, "x" |),
           BinOp.add (|
-            M.get_name (| globals, "i" |),
+            M.get_name (| globals, locals_stack, "i" |),
             Constant.int 1
           |)
         |)
@@ -875,9 +884,9 @@ Definition nibble_list_to_compact : Value.t -> Value.t -> M :=
       )) |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "Bytes" |),
+        M.get_name (| globals, locals_stack, "Bytes" |),
         make_list [
-          M.get_name (| globals, "compact" |)
+          M.get_name (| globals, locals_stack, "compact" |)
         ],
         make_dict []
       |)
@@ -885,8 +894,9 @@ Definition nibble_list_to_compact : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition bytes_to_nibble_list : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "bytes_" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "bytes_" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Converts a `Bytes` into to a sequence of nibbles (bytes with value < 16).
 
@@ -903,14 +913,14 @@ Definition bytes_to_nibble_list : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "nibble_list" ,
       M.call (|
-        M.get_name (| globals, "bytearray" |),
+        M.get_name (| globals, locals_stack, "bytearray" |),
         make_list [
           BinOp.mult (|
             Constant.int 2,
             M.call (|
-              M.get_name (| globals, "len" |),
+              M.get_name (| globals, locals_stack, "len" |),
               make_list [
-                M.get_name (| globals, "bytes_" |)
+                M.get_name (| globals, locals_stack, "bytes_" |)
               ],
               make_dict []
             |)
@@ -921,26 +931,26 @@ Definition bytes_to_nibble_list : Value.t -> Value.t -> M :=
     |) in
     let _ :=
       M.for_ (|
-        make_tuple [ M.get_name (| globals, "byte_index" |); M.get_name (| globals, "byte" |) ],
+        make_tuple [ M.get_name (| globals, locals_stack, "byte_index" |); M.get_name (| globals, locals_stack, "byte" |) ],
         M.call (|
-      M.get_name (| globals, "enumerate" |),
+      M.get_name (| globals, locals_stack, "enumerate" |),
       make_list [
-        M.get_name (| globals, "bytes_" |)
+        M.get_name (| globals, locals_stack, "bytes_" |)
       ],
       make_dict []
     |),
         ltac:(M.monadic (
           let _ := M.assign (|
             M.get_subscript (|
-              M.get_name (| globals, "nibble_list" |),
+              M.get_name (| globals, locals_stack, "nibble_list" |),
               BinOp.mult (|
-                M.get_name (| globals, "byte_index" |),
+                M.get_name (| globals, locals_stack, "byte_index" |),
                 Constant.int 2
               |)
             |),
             BinOp.r_shift (|
               BinOp.bit_and (|
-                M.get_name (| globals, "byte" |),
+                M.get_name (| globals, locals_stack, "byte" |),
                 Constant.int 240
               |),
               Constant.int 4
@@ -948,17 +958,17 @@ Definition bytes_to_nibble_list : Value.t -> Value.t -> M :=
           |) in
           let _ := M.assign (|
             M.get_subscript (|
-              M.get_name (| globals, "nibble_list" |),
+              M.get_name (| globals, locals_stack, "nibble_list" |),
               BinOp.add (|
                 BinOp.mult (|
-                  M.get_name (| globals, "byte_index" |),
+                  M.get_name (| globals, locals_stack, "byte_index" |),
                   Constant.int 2
                 |),
                 Constant.int 1
               |)
             |),
             BinOp.bit_and (|
-              M.get_name (| globals, "byte" |),
+              M.get_name (| globals, locals_stack, "byte" |),
               Constant.int 15
             |)
           |) in
@@ -970,9 +980,9 @@ Definition bytes_to_nibble_list : Value.t -> Value.t -> M :=
     |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "Bytes" |),
+        M.get_name (| globals, locals_stack, "Bytes" |),
         make_list [
-          M.get_name (| globals, "nibble_list" |)
+          M.get_name (| globals, locals_stack, "nibble_list" |)
         ],
         make_dict []
       |)
@@ -980,8 +990,9 @@ Definition bytes_to_nibble_list : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition _prepare_trie : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "trie"; "get_storage_root" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "trie"; "get_storage_root" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Prepares the trie for root calculation. Removes values that are empty,
     hashes the keys (if `secured == True`) and encodes all the nodes.
@@ -1002,9 +1013,9 @@ Definition _prepare_trie : Value.t -> Value.t -> M :=
 (* At stmt: unsupported node type: AnnAssign *)
     let _ :=
       M.for_ (|
-        make_tuple [ M.get_name (| globals, "preimage" |); M.get_name (| globals, "value" |) ],
+        make_tuple [ M.get_name (| globals, locals_stack, "preimage" |); M.get_name (| globals, locals_stack, "value" |) ],
         M.call (|
-      M.get_field (| M.get_field (| M.get_name (| globals, "trie" |), "_data" |), "items" |),
+      M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "trie" |), "_data" |), "items" |),
       make_list [],
       make_dict []
     |),
@@ -1013,25 +1024,25 @@ Definition _prepare_trie : Value.t -> Value.t -> M :=
             (* if *)
             M.if_then_else (|
               M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "value" |);
-                  M.get_name (| globals, "Account" |)
+                  M.get_name (| globals, locals_stack, "value" |);
+                  M.get_name (| globals, locals_stack, "Account" |)
                 ],
                 make_dict []
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.assert (| Compare.is_not (|
-    M.get_name (| globals, "get_storage_root" |),
+    M.get_name (| globals, locals_stack, "get_storage_root" |),
     Constant.None_
   |) |) in
               let _ := M.assign_local (|
                 "address" ,
                 M.call (|
-                  M.get_name (| globals, "Address" |),
+                  M.get_name (| globals, locals_stack, "Address" |),
                   make_list [
-                    M.get_name (| globals, "preimage" |)
+                    M.get_name (| globals, locals_stack, "preimage" |)
                   ],
                   make_dict []
                 |)
@@ -1039,13 +1050,13 @@ Definition _prepare_trie : Value.t -> Value.t -> M :=
               let _ := M.assign_local (|
                 "encoded_value" ,
                 M.call (|
-                  M.get_name (| globals, "encode_node" |),
+                  M.get_name (| globals, locals_stack, "encode_node" |),
                   make_list [
-                    M.get_name (| globals, "value" |);
+                    M.get_name (| globals, locals_stack, "value" |);
                     M.call (|
-                      M.get_name (| globals, "get_storage_root" |),
+                      M.get_name (| globals, locals_stack, "get_storage_root" |),
                       make_list [
-                        M.get_name (| globals, "address" |)
+                        M.get_name (| globals, locals_stack, "address" |)
                       ],
                       make_dict []
                     |)
@@ -1059,9 +1070,9 @@ Definition _prepare_trie : Value.t -> Value.t -> M :=
               let _ := M.assign_local (|
                 "encoded_value" ,
                 M.call (|
-                  M.get_name (| globals, "encode_node" |),
+                  M.get_name (| globals, locals_stack, "encode_node" |),
                   make_list [
-                    M.get_name (| globals, "value" |)
+                    M.get_name (| globals, locals_stack, "value" |)
                   ],
                   make_dict []
                 |)
@@ -1069,13 +1080,13 @@ Definition _prepare_trie : Value.t -> Value.t -> M :=
               M.pure Constant.None_
             )) |) in
           let _ := M.call (|
-    M.get_name (| globals, "ensure" |),
+    M.get_name (| globals, locals_stack, "ensure" |),
     make_list [
       Compare.not_eq (|
-        M.get_name (| globals, "encoded_value" |),
+        M.get_name (| globals, locals_stack, "encoded_value" |),
         Constant.bytes ""
       |);
-      M.get_name (| globals, "AssertionError" |)
+      M.get_name (| globals, locals_stack, "AssertionError" |)
     ],
     make_dict []
   |) in
@@ -1083,15 +1094,15 @@ Definition _prepare_trie : Value.t -> Value.t -> M :=
           let _ :=
             (* if *)
             M.if_then_else (|
-              M.get_field (| M.get_name (| globals, "trie" |), "secured" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "trie" |), "secured" |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.assign_local (|
                 "key" ,
                 M.call (|
-                  M.get_name (| globals, "keccak256" |),
+                  M.get_name (| globals, locals_stack, "keccak256" |),
                   make_list [
-                    M.get_name (| globals, "preimage" |)
+                    M.get_name (| globals, locals_stack, "preimage" |)
                   ],
                   make_dict []
                 |)
@@ -1101,22 +1112,22 @@ Definition _prepare_trie : Value.t -> Value.t -> M :=
             )), ltac:(M.monadic (
               let _ := M.assign_local (|
                 "key" ,
-                M.get_name (| globals, "preimage" |)
+                M.get_name (| globals, locals_stack, "preimage" |)
               |) in
               M.pure Constant.None_
             )) |) in
           let _ := M.assign (|
             M.get_subscript (|
-              M.get_name (| globals, "mapped" |),
+              M.get_name (| globals, locals_stack, "mapped" |),
               M.call (|
-                M.get_name (| globals, "bytes_to_nibble_list" |),
+                M.get_name (| globals, locals_stack, "bytes_to_nibble_list" |),
                 make_list [
-                  M.get_name (| globals, "key" |)
+                  M.get_name (| globals, locals_stack, "key" |)
                 ],
                 make_dict []
               |)
             |),
-            M.get_name (| globals, "encoded_value" |)
+            M.get_name (| globals, locals_stack, "encoded_value" |)
           |) in
           M.pure Constant.None_
         )),
@@ -1125,13 +1136,14 @@ Definition _prepare_trie : Value.t -> Value.t -> M :=
         ))
     |) in
     let _ := M.return_ (|
-      M.get_name (| globals, "mapped" |)
+      M.get_name (| globals, locals_stack, "mapped" |)
     |) in
     M.pure Constant.None_)).
 
 Definition root : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "trie"; "get_storage_root" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "trie"; "get_storage_root" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Computes the root of a modified merkle patricia trie (MPT).
 
@@ -1152,10 +1164,10 @@ Definition root : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "obj" ,
       M.call (|
-        M.get_name (| globals, "_prepare_trie" |),
+        M.get_name (| globals, locals_stack, "_prepare_trie" |),
         make_list [
-          M.get_name (| globals, "trie" |);
-          M.get_name (| globals, "get_storage_root" |)
+          M.get_name (| globals, locals_stack, "trie" |);
+          M.get_name (| globals, locals_stack, "get_storage_root" |)
         ],
         make_dict []
       |)
@@ -1163,14 +1175,14 @@ Definition root : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "root_node" ,
       M.call (|
-        M.get_name (| globals, "encode_internal_node" |),
+        M.get_name (| globals, locals_stack, "encode_internal_node" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "patricialize" |),
+            M.get_name (| globals, locals_stack, "patricialize" |),
             make_list [
-              M.get_name (| globals, "obj" |);
+              M.get_name (| globals, locals_stack, "obj" |);
               M.call (|
-                M.get_name (| globals, "Uint" |),
+                M.get_name (| globals, locals_stack, "Uint" |),
                 make_list [
                   Constant.int 0
                 ],
@@ -1188,12 +1200,12 @@ Definition root : Value.t -> Value.t -> M :=
       M.if_then_else (|
         Compare.lt (|
           M.call (|
-            M.get_name (| globals, "len" |),
+            M.get_name (| globals, locals_stack, "len" |),
             make_list [
               M.call (|
-                M.get_field (| M.get_name (| globals, "rlp" |), "encode" |),
+                M.get_field (| M.get_name (| globals, locals_stack, "rlp" |), "encode" |),
                 make_list [
-                  M.get_name (| globals, "root_node" |)
+                  M.get_name (| globals, locals_stack, "root_node" |)
                 ],
                 make_dict []
               |)
@@ -1206,12 +1218,12 @@ Definition root : Value.t -> Value.t -> M :=
       ltac:(M.monadic (
         let _ := M.return_ (|
           M.call (|
-            M.get_name (| globals, "keccak256" |),
+            M.get_name (| globals, locals_stack, "keccak256" |),
             make_list [
               M.call (|
-                M.get_field (| M.get_name (| globals, "rlp" |), "encode" |),
+                M.get_field (| M.get_name (| globals, locals_stack, "rlp" |), "encode" |),
                 make_list [
-                  M.get_name (| globals, "root_node" |)
+                  M.get_name (| globals, locals_stack, "root_node" |)
                 ],
                 make_dict []
               |)
@@ -1223,18 +1235,18 @@ Definition root : Value.t -> Value.t -> M :=
       (* else *)
       )), ltac:(M.monadic (
         let _ := M.assert (| M.call (|
-    M.get_name (| globals, "isinstance" |),
+    M.get_name (| globals, locals_stack, "isinstance" |),
     make_list [
-      M.get_name (| globals, "root_node" |);
-      M.get_name (| globals, "Bytes" |)
+      M.get_name (| globals, locals_stack, "root_node" |);
+      M.get_name (| globals, locals_stack, "Bytes" |)
     ],
     make_dict []
   |) |) in
         let _ := M.return_ (|
           M.call (|
-            M.get_name (| globals, "Root" |),
+            M.get_name (| globals, locals_stack, "Root" |),
             make_list [
-              M.get_name (| globals, "root_node" |)
+              M.get_name (| globals, locals_stack, "root_node" |)
             ],
             make_dict []
           |)
@@ -1244,8 +1256,9 @@ Definition root : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition patricialize : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "obj"; "level" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "obj"; "level" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Structural composition function.
 
@@ -1269,9 +1282,9 @@ Definition patricialize : Value.t -> Value.t -> M :=
       M.if_then_else (|
         Compare.eq (|
           M.call (|
-            M.get_name (| globals, "len" |),
+            M.get_name (| globals, locals_stack, "len" |),
             make_list [
-              M.get_name (| globals, "obj" |)
+              M.get_name (| globals, locals_stack, "obj" |)
             ],
             make_dict []
           |),
@@ -1290,12 +1303,12 @@ Definition patricialize : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "arbitrary_key" ,
       M.call (|
-        M.get_name (| globals, "next" |),
+        M.get_name (| globals, locals_stack, "next" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "iter" |),
+            M.get_name (| globals, locals_stack, "iter" |),
             make_list [
-              M.get_name (| globals, "obj" |)
+              M.get_name (| globals, locals_stack, "obj" |)
             ],
             make_dict []
           |)
@@ -1308,9 +1321,9 @@ Definition patricialize : Value.t -> Value.t -> M :=
       M.if_then_else (|
         Compare.eq (|
           M.call (|
-            M.get_name (| globals, "len" |),
+            M.get_name (| globals, locals_stack, "len" |),
             make_list [
-              M.get_name (| globals, "obj" |)
+              M.get_name (| globals, locals_stack, "obj" |)
             ],
             make_dict []
           |),
@@ -1321,24 +1334,24 @@ Definition patricialize : Value.t -> Value.t -> M :=
         let _ := M.assign_local (|
           "leaf" ,
           M.call (|
-            M.get_name (| globals, "LeafNode" |),
+            M.get_name (| globals, locals_stack, "LeafNode" |),
             make_list [
               M.slice (|
-                M.get_name (| globals, "arbitrary_key" |),
-                M.get_name (| globals, "level" |),
+                M.get_name (| globals, locals_stack, "arbitrary_key" |),
+                M.get_name (| globals, locals_stack, "level" |),
                 Constant.None_,
                 Constant.None_
               |);
               M.get_subscript (|
-                M.get_name (| globals, "obj" |),
-                M.get_name (| globals, "arbitrary_key" |)
+                M.get_name (| globals, locals_stack, "obj" |),
+                M.get_name (| globals, locals_stack, "arbitrary_key" |)
               |)
             ],
             make_dict []
           |)
         |) in
         let _ := M.return_ (|
-          M.get_name (| globals, "leaf" |)
+          M.get_name (| globals, locals_stack, "leaf" |)
         |) in
         M.pure Constant.None_
       (* else *)
@@ -1348,8 +1361,8 @@ Definition patricialize : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "substring" ,
       M.slice (|
-        M.get_name (| globals, "arbitrary_key" |),
-        M.get_name (| globals, "level" |),
+        M.get_name (| globals, locals_stack, "arbitrary_key" |),
+        M.get_name (| globals, locals_stack, "level" |),
         Constant.None_,
         Constant.None_
       |)
@@ -1357,31 +1370,31 @@ Definition patricialize : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "prefix_length" ,
       M.call (|
-        M.get_name (| globals, "len" |),
+        M.get_name (| globals, locals_stack, "len" |),
         make_list [
-          M.get_name (| globals, "substring" |)
+          M.get_name (| globals, locals_stack, "substring" |)
         ],
         make_dict []
       |)
     |) in
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "key" |),
-        M.get_name (| globals, "obj" |),
+        M.get_name (| globals, locals_stack, "key" |),
+        M.get_name (| globals, locals_stack, "obj" |),
         ltac:(M.monadic (
           let _ := M.assign_local (|
             "prefix_length" ,
             M.call (|
-              M.get_name (| globals, "min" |),
+              M.get_name (| globals, locals_stack, "min" |),
               make_list [
-                M.get_name (| globals, "prefix_length" |);
+                M.get_name (| globals, locals_stack, "prefix_length" |);
                 M.call (|
-                  M.get_name (| globals, "common_prefix_length" |),
+                  M.get_name (| globals, locals_stack, "common_prefix_length" |),
                   make_list [
-                    M.get_name (| globals, "substring" |);
+                    M.get_name (| globals, locals_stack, "substring" |);
                     M.slice (|
-                      M.get_name (| globals, "key" |),
-                      M.get_name (| globals, "level" |),
+                      M.get_name (| globals, locals_stack, "key" |),
+                      M.get_name (| globals, locals_stack, "level" |),
                       Constant.None_,
                       Constant.None_
                     |)
@@ -1396,7 +1409,7 @@ Definition patricialize : Value.t -> Value.t -> M :=
             (* if *)
             M.if_then_else (|
               Compare.eq (|
-                M.get_name (| globals, "prefix_length" |),
+                M.get_name (| globals, locals_stack, "prefix_length" |),
                 Constant.int 0
               |),
             (* then *)
@@ -1417,7 +1430,7 @@ Definition patricialize : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.gt (|
-          M.get_name (| globals, "prefix_length" |),
+          M.get_name (| globals, locals_stack, "prefix_length" |),
           Constant.int 0
         |),
       (* then *)
@@ -1425,30 +1438,30 @@ Definition patricialize : Value.t -> Value.t -> M :=
         let _ := M.assign_local (|
           "prefix" ,
           M.slice (|
-            M.get_name (| globals, "arbitrary_key" |),
-            M.get_name (| globals, "level" |),
+            M.get_name (| globals, locals_stack, "arbitrary_key" |),
+            M.get_name (| globals, locals_stack, "level" |),
             BinOp.add (|
-              M.get_name (| globals, "level" |),
-              M.get_name (| globals, "prefix_length" |)
+              M.get_name (| globals, locals_stack, "level" |),
+              M.get_name (| globals, locals_stack, "prefix_length" |)
             |),
             Constant.None_
           |)
         |) in
         let _ := M.return_ (|
           M.call (|
-            M.get_name (| globals, "ExtensionNode" |),
+            M.get_name (| globals, locals_stack, "ExtensionNode" |),
             make_list [
-              M.get_name (| globals, "prefix" |);
+              M.get_name (| globals, locals_stack, "prefix" |);
               M.call (|
-                M.get_name (| globals, "encode_internal_node" |),
+                M.get_name (| globals, locals_stack, "encode_internal_node" |),
                 make_list [
                   M.call (|
-                    M.get_name (| globals, "patricialize" |),
+                    M.get_name (| globals, locals_stack, "patricialize" |),
                     make_list [
-                      M.get_name (| globals, "obj" |);
+                      M.get_name (| globals, locals_stack, "obj" |);
                       BinOp.add (|
-                        M.get_name (| globals, "level" |),
-                        M.get_name (| globals, "prefix_length" |)
+                        M.get_name (| globals, locals_stack, "level" |),
+                        M.get_name (| globals, locals_stack, "prefix_length" |)
                       |)
                     ],
                     make_dict []
@@ -1468,9 +1481,9 @@ Definition patricialize : Value.t -> Value.t -> M :=
 (* At stmt: unsupported node type: AnnAssign *)
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "_" |),
+        M.get_name (| globals, locals_stack, "_" |),
         M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         Constant.int 16
       ],
@@ -1478,7 +1491,7 @@ Definition patricialize : Value.t -> Value.t -> M :=
     |),
         ltac:(M.monadic (
           let _ := M.call (|
-    M.get_field (| M.get_name (| globals, "branches" |), "append" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "branches" |), "append" |),
     make_list [
       Constant.str "(* At expr: unsupported node type: Dict *)"
     ],
@@ -1496,21 +1509,21 @@ Definition patricialize : Value.t -> Value.t -> M :=
     |) in
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "key" |),
-        M.get_name (| globals, "obj" |),
+        M.get_name (| globals, locals_stack, "key" |),
+        M.get_name (| globals, locals_stack, "obj" |),
         ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               Compare.eq (|
                 M.call (|
-                  M.get_name (| globals, "len" |),
+                  M.get_name (| globals, locals_stack, "len" |),
                   make_list [
-                    M.get_name (| globals, "key" |)
+                    M.get_name (| globals, locals_stack, "key" |)
                   ],
                   make_dict []
                 |),
-                M.get_name (| globals, "level" |)
+                M.get_name (| globals, locals_stack, "level" |)
               |),
             (* then *)
             ltac:(M.monadic (
@@ -1518,19 +1531,19 @@ Definition patricialize : Value.t -> Value.t -> M :=
                 (* if *)
                 M.if_then_else (|
                   M.call (|
-                    M.get_name (| globals, "isinstance" |),
+                    M.get_name (| globals, locals_stack, "isinstance" |),
                     make_list [
                       M.get_subscript (|
-                        M.get_name (| globals, "obj" |),
-                        M.get_name (| globals, "key" |)
+                        M.get_name (| globals, locals_stack, "obj" |),
+                        M.get_name (| globals, locals_stack, "key" |)
                       |);
-                      make_tuple [ M.get_name (| globals, "Account" |); M.get_name (| globals, "Receipt" |); M.get_name (| globals, "Uint" |) ]
+                      make_tuple [ M.get_name (| globals, locals_stack, "Account" |); M.get_name (| globals, locals_stack, "Receipt" |); M.get_name (| globals, locals_stack, "Uint" |) ]
                     ],
                     make_dict []
                   |),
                 (* then *)
                 ltac:(M.monadic (
-                  let _ := M.raise (| Some (M.get_name (| globals, "AssertionError" |)) |) in
+                  let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "AssertionError" |)) |) in
                   M.pure Constant.None_
                 (* else *)
                 )), ltac:(M.monadic (
@@ -1539,8 +1552,8 @@ Definition patricialize : Value.t -> Value.t -> M :=
               let _ := M.assign_local (|
                 "value" ,
                 M.get_subscript (|
-                  M.get_name (| globals, "obj" |),
-                  M.get_name (| globals, "key" |)
+                  M.get_name (| globals, locals_stack, "obj" |),
+                  M.get_name (| globals, locals_stack, "key" |)
                 |)
               |) in
               M.pure Constant.None_
@@ -1549,17 +1562,17 @@ Definition patricialize : Value.t -> Value.t -> M :=
               let _ := M.assign (|
                 M.get_subscript (|
                   M.get_subscript (|
-                    M.get_name (| globals, "branches" |),
+                    M.get_name (| globals, locals_stack, "branches" |),
                     M.get_subscript (|
-                      M.get_name (| globals, "key" |),
-                      M.get_name (| globals, "level" |)
+                      M.get_name (| globals, locals_stack, "key" |),
+                      M.get_name (| globals, locals_stack, "level" |)
                     |)
                   |),
-                  M.get_name (| globals, "key" |)
+                  M.get_name (| globals, locals_stack, "key" |)
                 |),
                 M.get_subscript (|
-                  M.get_name (| globals, "obj" |),
-                  M.get_name (| globals, "key" |)
+                  M.get_name (| globals, locals_stack, "obj" |),
+                  M.get_name (| globals, locals_stack, "key" |)
                 |)
               |) in
               M.pure Constant.None_
@@ -1572,10 +1585,10 @@ Definition patricialize : Value.t -> Value.t -> M :=
     |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "BranchNode" |),
+        M.get_name (| globals, locals_stack, "BranchNode" |),
         make_list [
           Constant.str "(* At expr: unsupported node type: ListComp *)";
-          M.get_name (| globals, "value" |)
+          M.get_name (| globals, locals_stack, "value" |)
         ],
         make_dict []
       |)

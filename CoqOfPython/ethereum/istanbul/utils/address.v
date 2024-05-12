@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.istanbul.utils.address".
+Definition globals : Globals.t := "ethereum.istanbul.utils.address".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -41,8 +43,9 @@ Axiom ethereum_istanbul_fork_types_imports_Address :
   IsImported globals "ethereum.istanbul.fork_types" "Address".
 
 Definition to_address : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "data" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "data" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Convert a Uint or U256 value to a valid address (20 bytes).
 
@@ -58,11 +61,11 @@ Definition to_address : Value.t -> Value.t -> M :=
     " in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "Address" |),
+        M.get_name (| globals, locals_stack, "Address" |),
         make_list [
           M.slice (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "data" |), "to_be_bytes32" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "data" |), "to_be_bytes32" |),
               make_list [],
               make_dict []
             |),
@@ -77,8 +80,9 @@ Definition to_address : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition compute_contract_address : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "address"; "nonce" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "address"; "nonce" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Computes address of the new account that needs to be created.
 
@@ -98,14 +102,14 @@ Definition compute_contract_address : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "computed_address" ,
       M.call (|
-        M.get_name (| globals, "keccak256" |),
+        M.get_name (| globals, locals_stack, "keccak256" |),
         make_list [
           M.call (|
-            M.get_field (| M.get_name (| globals, "rlp" |), "encode" |),
+            M.get_field (| M.get_name (| globals, locals_stack, "rlp" |), "encode" |),
             make_list [
               make_list [
-                M.get_name (| globals, "address" |);
-                M.get_name (| globals, "nonce" |)
+                M.get_name (| globals, locals_stack, "address" |);
+                M.get_name (| globals, locals_stack, "nonce" |)
               ]
             ],
             make_dict []
@@ -117,7 +121,7 @@ Definition compute_contract_address : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "canonical_address" ,
       M.slice (|
-        M.get_name (| globals, "computed_address" |),
+        M.get_name (| globals, locals_stack, "computed_address" |),
         UnOp.sub (| Constant.int 20 |),
         Constant.None_,
         Constant.None_
@@ -126,9 +130,9 @@ Definition compute_contract_address : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "padded_address" ,
       M.call (|
-        M.get_name (| globals, "left_pad_zero_bytes" |),
+        M.get_name (| globals, locals_stack, "left_pad_zero_bytes" |),
         make_list [
-          M.get_name (| globals, "canonical_address" |);
+          M.get_name (| globals, locals_stack, "canonical_address" |);
           Constant.int 20
         ],
         make_dict []
@@ -136,9 +140,9 @@ Definition compute_contract_address : Value.t -> Value.t -> M :=
     |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "Address" |),
+        M.get_name (| globals, locals_stack, "Address" |),
         make_list [
-          M.get_name (| globals, "padded_address" |)
+          M.get_name (| globals, locals_stack, "padded_address" |)
         ],
         make_dict []
       |)
@@ -146,8 +150,9 @@ Definition compute_contract_address : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition compute_create2_contract_address : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "address"; "salt"; "call_data" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "address"; "salt"; "call_data" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Computes address of the new account that needs to be created, which is
     based on the sender address, salt and the call data as well.
@@ -172,14 +177,14 @@ Definition compute_create2_contract_address : Value.t -> Value.t -> M :=
         BinOp.add (|
           BinOp.add (|
             Constant.bytes "ff",
-            M.get_name (| globals, "address" |)
+            M.get_name (| globals, locals_stack, "address" |)
           |),
-          M.get_name (| globals, "salt" |)
+          M.get_name (| globals, locals_stack, "salt" |)
         |),
         M.call (|
-          M.get_name (| globals, "keccak256" |),
+          M.get_name (| globals, locals_stack, "keccak256" |),
           make_list [
-            M.get_name (| globals, "call_data" |)
+            M.get_name (| globals, locals_stack, "call_data" |)
           ],
           make_dict []
         |)
@@ -188,9 +193,9 @@ Definition compute_create2_contract_address : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "computed_address" ,
       M.call (|
-        M.get_name (| globals, "keccak256" |),
+        M.get_name (| globals, locals_stack, "keccak256" |),
         make_list [
-          M.get_name (| globals, "preimage" |)
+          M.get_name (| globals, locals_stack, "preimage" |)
         ],
         make_dict []
       |)
@@ -198,7 +203,7 @@ Definition compute_create2_contract_address : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "canonical_address" ,
       M.slice (|
-        M.get_name (| globals, "computed_address" |),
+        M.get_name (| globals, locals_stack, "computed_address" |),
         UnOp.sub (| Constant.int 20 |),
         Constant.None_,
         Constant.None_
@@ -207,9 +212,9 @@ Definition compute_create2_contract_address : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "padded_address" ,
       M.call (|
-        M.get_name (| globals, "left_pad_zero_bytes" |),
+        M.get_name (| globals, locals_stack, "left_pad_zero_bytes" |),
         make_list [
-          M.get_name (| globals, "canonical_address" |);
+          M.get_name (| globals, locals_stack, "canonical_address" |);
           Constant.int 20
         ],
         make_dict []
@@ -217,9 +222,9 @@ Definition compute_create2_contract_address : Value.t -> Value.t -> M :=
     |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "Address" |),
+        M.get_name (| globals, locals_stack, "Address" |),
         make_list [
-          M.get_name (| globals, "padded_address" |)
+          M.get_name (| globals, locals_stack, "padded_address" |)
         ],
         make_dict []
       |)

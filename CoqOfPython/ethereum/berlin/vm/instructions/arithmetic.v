@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.berlin.vm.instructions.arithmetic".
+Definition globals : Globals.t := "ethereum.berlin.vm.instructions.arithmetic".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -51,8 +53,9 @@ Axiom ethereum_berlin_vm_stack_imports_push :
   IsImported globals "ethereum.berlin.vm.stack" "push".
 
 Definition add : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Adds the top two elements of the stack together, and pushes the result back
     on the stack.
@@ -66,9 +69,9 @@ Definition add : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "x" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
@@ -76,49 +79,50 @@ Definition add : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "y" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_VERY_LOW" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_VERY_LOW" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_local (|
       "result" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "x" |), "wrapping_add" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "x" |), "wrapping_add" |),
         make_list [
-          M.get_name (| globals, "y" |)
+          M.get_name (| globals, locals_stack, "y" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.get_name (| globals, "result" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
+      M.get_name (| globals, locals_stack, "result" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition sub : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Subtracts the top two elements of the stack, and pushes the result back
     on the stack.
@@ -132,9 +136,9 @@ Definition sub : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "x" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
@@ -142,49 +146,50 @@ Definition sub : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "y" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_VERY_LOW" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_VERY_LOW" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_local (|
       "result" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "x" |), "wrapping_sub" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "x" |), "wrapping_sub" |),
         make_list [
-          M.get_name (| globals, "y" |)
+          M.get_name (| globals, locals_stack, "y" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.get_name (| globals, "result" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
+      M.get_name (| globals, locals_stack, "result" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition mul : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Multiply the top two elements of the stack, and pushes the result back
     on the stack.
@@ -198,9 +203,9 @@ Definition mul : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "x" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
@@ -208,49 +213,50 @@ Definition mul : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "y" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_LOW" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_LOW" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_local (|
       "result" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "x" |), "wrapping_mul" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "x" |), "wrapping_mul" |),
         make_list [
-          M.get_name (| globals, "y" |)
+          M.get_name (| globals, locals_stack, "y" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.get_name (| globals, "result" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
+      M.get_name (| globals, locals_stack, "result" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition div : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Integer division of the top two elements of the stack. Pushes the result
     back on the stack.
@@ -264,9 +270,9 @@ Definition div : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "dividend" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
@@ -274,18 +280,18 @@ Definition div : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "divisor" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_LOW" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_LOW" |)
     ],
     make_dict []
   |) in
@@ -293,7 +299,7 @@ Definition div : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.eq (|
-          M.get_name (| globals, "divisor" |),
+          M.get_name (| globals, locals_stack, "divisor" |),
           Constant.int 0
         |),
       (* then *)
@@ -301,7 +307,7 @@ Definition div : Value.t -> Value.t -> M :=
         let _ := M.assign_local (|
           "quotient" ,
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               Constant.int 0
             ],
@@ -314,30 +320,31 @@ Definition div : Value.t -> Value.t -> M :=
         let _ := M.assign_local (|
           "quotient" ,
           BinOp.floor_div (|
-            M.get_name (| globals, "dividend" |),
-            M.get_name (| globals, "divisor" |)
+            M.get_name (| globals, locals_stack, "dividend" |),
+            M.get_name (| globals, locals_stack, "divisor" |)
           |)
         |) in
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.get_name (| globals, "quotient" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
+      M.get_name (| globals, locals_stack, "quotient" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition sdiv : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Signed integer division of the top two elements of the stack. Pushes the
     result back on the stack.
@@ -352,9 +359,9 @@ Definition sdiv : Value.t -> Value.t -> M :=
       "dividend" ,
       M.call (|
         M.get_field (| M.call (|
-          M.get_name (| globals, "pop" |),
+          M.get_name (| globals, locals_stack, "pop" |),
           make_list [
-            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
           ],
           make_dict []
         |), "to_signed" |),
@@ -366,9 +373,9 @@ Definition sdiv : Value.t -> Value.t -> M :=
       "divisor" ,
       M.call (|
         M.get_field (| M.call (|
-          M.get_name (| globals, "pop" |),
+          M.get_name (| globals, locals_stack, "pop" |),
           make_list [
-            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
           ],
           make_dict []
         |), "to_signed" |),
@@ -377,10 +384,10 @@ Definition sdiv : Value.t -> Value.t -> M :=
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_LOW" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_LOW" |)
     ],
     make_dict []
   |) in
@@ -388,7 +395,7 @@ Definition sdiv : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.eq (|
-          M.get_name (| globals, "divisor" |),
+          M.get_name (| globals, locals_stack, "divisor" |),
           Constant.int 0
         |),
       (* then *)
@@ -405,12 +412,12 @@ Definition sdiv : Value.t -> Value.t -> M :=
           M.if_then_else (|
             BoolOp.and (|
               Compare.eq (|
-                M.get_name (| globals, "dividend" |),
-                UnOp.sub (| M.get_name (| globals, "U255_CEIL_VALUE" |) |)
+                M.get_name (| globals, locals_stack, "dividend" |),
+                UnOp.sub (| M.get_name (| globals, locals_stack, "U255_CEIL_VALUE" |) |)
               |),
               ltac:(M.monadic (
                 Compare.eq (|
-                  M.get_name (| globals, "divisor" |),
+                  M.get_name (| globals, locals_stack, "divisor" |),
                   UnOp.sub (| Constant.int 1 |)
                 |)
               ))
@@ -419,7 +426,7 @@ Definition sdiv : Value.t -> Value.t -> M :=
           ltac:(M.monadic (
             let _ := M.assign_local (|
               "quotient" ,
-              UnOp.sub (| M.get_name (| globals, "U255_CEIL_VALUE" |) |)
+              UnOp.sub (| M.get_name (| globals, locals_stack, "U255_CEIL_VALUE" |) |)
             |) in
             M.pure Constant.None_
           (* else *)
@@ -427,11 +434,11 @@ Definition sdiv : Value.t -> Value.t -> M :=
             let _ := M.assign_local (|
               "sign" ,
               M.call (|
-                M.get_name (| globals, "get_sign" |),
+                M.get_name (| globals, locals_stack, "get_sign" |),
                 make_list [
                   BinOp.mult (|
-                    M.get_name (| globals, "dividend" |),
-                    M.get_name (| globals, "divisor" |)
+                    M.get_name (| globals, locals_stack, "dividend" |),
+                    M.get_name (| globals, locals_stack, "divisor" |)
                   |)
                 ],
                 make_dict []
@@ -440,19 +447,19 @@ Definition sdiv : Value.t -> Value.t -> M :=
             let _ := M.assign_local (|
               "quotient" ,
               BinOp.mult (|
-                M.get_name (| globals, "sign" |),
+                M.get_name (| globals, locals_stack, "sign" |),
                 BinOp.floor_div (|
                   M.call (|
-                    M.get_name (| globals, "abs" |),
+                    M.get_name (| globals, locals_stack, "abs" |),
                     make_list [
-                      M.get_name (| globals, "dividend" |)
+                      M.get_name (| globals, locals_stack, "dividend" |)
                     ],
                     make_dict []
                   |),
                   M.call (|
-                    M.get_name (| globals, "abs" |),
+                    M.get_name (| globals, locals_stack, "abs" |),
                     make_list [
-                      M.get_name (| globals, "divisor" |)
+                      M.get_name (| globals, locals_stack, "divisor" |)
                     ],
                     make_dict []
                   |)
@@ -464,13 +471,13 @@ Definition sdiv : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
       M.call (|
-        M.get_field (| M.get_name (| globals, "U256" |), "from_signed" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "U256" |), "from_signed" |),
         make_list [
-          M.get_name (| globals, "quotient" |)
+          M.get_name (| globals, locals_stack, "quotient" |)
         ],
         make_dict []
       |)
@@ -479,14 +486,15 @@ Definition sdiv : Value.t -> Value.t -> M :=
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition mod_ : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Modulo remainder of the top two elements of the stack. Pushes the result
     back on the stack.
@@ -500,9 +508,9 @@ Definition mod_ : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "x" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
@@ -510,18 +518,18 @@ Definition mod_ : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "y" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_LOW" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_LOW" |)
     ],
     make_dict []
   |) in
@@ -529,7 +537,7 @@ Definition mod_ : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.eq (|
-          M.get_name (| globals, "y" |),
+          M.get_name (| globals, locals_stack, "y" |),
           Constant.int 0
         |),
       (* then *)
@@ -537,7 +545,7 @@ Definition mod_ : Value.t -> Value.t -> M :=
         let _ := M.assign_local (|
           "remainder" ,
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               Constant.int 0
             ],
@@ -550,30 +558,31 @@ Definition mod_ : Value.t -> Value.t -> M :=
         let _ := M.assign_local (|
           "remainder" ,
           BinOp.mod_ (|
-            M.get_name (| globals, "x" |),
-            M.get_name (| globals, "y" |)
+            M.get_name (| globals, locals_stack, "x" |),
+            M.get_name (| globals, locals_stack, "y" |)
           |)
         |) in
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.get_name (| globals, "remainder" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
+      M.get_name (| globals, locals_stack, "remainder" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition smod : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Signed modulo remainder of the top two elements of the stack. Pushes the
     result back on the stack.
@@ -588,9 +597,9 @@ Definition smod : Value.t -> Value.t -> M :=
       "x" ,
       M.call (|
         M.get_field (| M.call (|
-          M.get_name (| globals, "pop" |),
+          M.get_name (| globals, locals_stack, "pop" |),
           make_list [
-            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
           ],
           make_dict []
         |), "to_signed" |),
@@ -602,9 +611,9 @@ Definition smod : Value.t -> Value.t -> M :=
       "y" ,
       M.call (|
         M.get_field (| M.call (|
-          M.get_name (| globals, "pop" |),
+          M.get_name (| globals, locals_stack, "pop" |),
           make_list [
-            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
           ],
           make_dict []
         |), "to_signed" |),
@@ -613,10 +622,10 @@ Definition smod : Value.t -> Value.t -> M :=
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_LOW" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_LOW" |)
     ],
     make_dict []
   |) in
@@ -624,7 +633,7 @@ Definition smod : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.eq (|
-          M.get_name (| globals, "y" |),
+          M.get_name (| globals, locals_stack, "y" |),
           Constant.int 0
         |),
       (* then *)
@@ -640,24 +649,24 @@ Definition smod : Value.t -> Value.t -> M :=
           "remainder" ,
           BinOp.mult (|
             M.call (|
-              M.get_name (| globals, "get_sign" |),
+              M.get_name (| globals, locals_stack, "get_sign" |),
               make_list [
-                M.get_name (| globals, "x" |)
+                M.get_name (| globals, locals_stack, "x" |)
               ],
               make_dict []
             |),
             BinOp.mod_ (|
               M.call (|
-                M.get_name (| globals, "abs" |),
+                M.get_name (| globals, locals_stack, "abs" |),
                 make_list [
-                  M.get_name (| globals, "x" |)
+                  M.get_name (| globals, locals_stack, "x" |)
                 ],
                 make_dict []
               |),
               M.call (|
-                M.get_name (| globals, "abs" |),
+                M.get_name (| globals, locals_stack, "abs" |),
                 make_list [
-                  M.get_name (| globals, "y" |)
+                  M.get_name (| globals, locals_stack, "y" |)
                 ],
                 make_dict []
               |)
@@ -667,13 +676,13 @@ Definition smod : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
       M.call (|
-        M.get_field (| M.get_name (| globals, "U256" |), "from_signed" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "U256" |), "from_signed" |),
         make_list [
-          M.get_name (| globals, "remainder" |)
+          M.get_name (| globals, locals_stack, "remainder" |)
         ],
         make_dict []
       |)
@@ -682,14 +691,15 @@ Definition smod : Value.t -> Value.t -> M :=
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition addmod : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Modulo addition of the top 2 elements with the 3rd element. Pushes the
     result back on the stack.
@@ -703,12 +713,12 @@ Definition addmod : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "x" ,
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "pop" |),
+            M.get_name (| globals, locals_stack, "pop" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
             ],
             make_dict []
           |)
@@ -719,12 +729,12 @@ Definition addmod : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "y" ,
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "pop" |),
+            M.get_name (| globals, locals_stack, "pop" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
             ],
             make_dict []
           |)
@@ -735,12 +745,12 @@ Definition addmod : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "z" ,
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "pop" |),
+            M.get_name (| globals, locals_stack, "pop" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
             ],
             make_dict []
           |)
@@ -749,10 +759,10 @@ Definition addmod : Value.t -> Value.t -> M :=
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_MID" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_MID" |)
     ],
     make_dict []
   |) in
@@ -760,7 +770,7 @@ Definition addmod : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.eq (|
-          M.get_name (| globals, "z" |),
+          M.get_name (| globals, locals_stack, "z" |),
           Constant.int 0
         |),
       (* then *)
@@ -768,7 +778,7 @@ Definition addmod : Value.t -> Value.t -> M :=
         let _ := M.assign_local (|
           "result" ,
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               Constant.int 0
             ],
@@ -781,14 +791,14 @@ Definition addmod : Value.t -> Value.t -> M :=
         let _ := M.assign_local (|
           "result" ,
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               BinOp.mod_ (|
                 BinOp.add (|
-                  M.get_name (| globals, "x" |),
-                  M.get_name (| globals, "y" |)
+                  M.get_name (| globals, locals_stack, "x" |),
+                  M.get_name (| globals, locals_stack, "y" |)
                 |),
-                M.get_name (| globals, "z" |)
+                M.get_name (| globals, locals_stack, "z" |)
               |)
             ],
             make_dict []
@@ -797,23 +807,24 @@ Definition addmod : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.get_name (| globals, "result" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
+      M.get_name (| globals, locals_stack, "result" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition mulmod : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Modulo multiplication of the top 2 elements with the 3rd element. Pushes
     the result back on the stack.
@@ -827,12 +838,12 @@ Definition mulmod : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "x" ,
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "pop" |),
+            M.get_name (| globals, locals_stack, "pop" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
             ],
             make_dict []
           |)
@@ -843,12 +854,12 @@ Definition mulmod : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "y" ,
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "pop" |),
+            M.get_name (| globals, locals_stack, "pop" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
             ],
             make_dict []
           |)
@@ -859,12 +870,12 @@ Definition mulmod : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "z" ,
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "pop" |),
+            M.get_name (| globals, locals_stack, "pop" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
             ],
             make_dict []
           |)
@@ -873,10 +884,10 @@ Definition mulmod : Value.t -> Value.t -> M :=
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_MID" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_MID" |)
     ],
     make_dict []
   |) in
@@ -884,7 +895,7 @@ Definition mulmod : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.eq (|
-          M.get_name (| globals, "z" |),
+          M.get_name (| globals, locals_stack, "z" |),
           Constant.int 0
         |),
       (* then *)
@@ -892,7 +903,7 @@ Definition mulmod : Value.t -> Value.t -> M :=
         let _ := M.assign_local (|
           "result" ,
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               Constant.int 0
             ],
@@ -905,14 +916,14 @@ Definition mulmod : Value.t -> Value.t -> M :=
         let _ := M.assign_local (|
           "result" ,
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               BinOp.mod_ (|
                 BinOp.mult (|
-                  M.get_name (| globals, "x" |),
-                  M.get_name (| globals, "y" |)
+                  M.get_name (| globals, locals_stack, "x" |),
+                  M.get_name (| globals, locals_stack, "y" |)
                 |),
-                M.get_name (| globals, "z" |)
+                M.get_name (| globals, locals_stack, "z" |)
               |)
             ],
             make_dict []
@@ -921,23 +932,24 @@ Definition mulmod : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.get_name (| globals, "result" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
+      M.get_name (| globals, locals_stack, "result" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition exp : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Exponential operation of the top 2 elements. Pushes the result back on
     the stack.
@@ -951,12 +963,12 @@ Definition exp : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "base" ,
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "pop" |),
+            M.get_name (| globals, locals_stack, "pop" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
             ],
             make_dict []
           |)
@@ -967,12 +979,12 @@ Definition exp : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "exponent" ,
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "pop" |),
+            M.get_name (| globals, locals_stack, "pop" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
             ],
             make_dict []
           |)
@@ -983,7 +995,7 @@ Definition exp : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "exponent_bits" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "exponent" |), "bit_length" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "exponent" |), "bit_length" |),
         make_list [],
         make_dict []
       |)
@@ -992,21 +1004,21 @@ Definition exp : Value.t -> Value.t -> M :=
       "exponent_bytes" ,
       BinOp.floor_div (|
         BinOp.add (|
-          M.get_name (| globals, "exponent_bits" |),
+          M.get_name (| globals, locals_stack, "exponent_bits" |),
           Constant.int 7
         |),
         Constant.int 8
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, locals_stack, "evm" |);
       BinOp.add (|
-        M.get_name (| globals, "GAS_EXPONENTIATION" |),
+        M.get_name (| globals, locals_stack, "GAS_EXPONENTIATION" |),
         BinOp.mult (|
-          M.get_name (| globals, "GAS_EXPONENTIATION_PER_BYTE" |),
-          M.get_name (| globals, "exponent_bytes" |)
+          M.get_name (| globals, locals_stack, "GAS_EXPONENTIATION_PER_BYTE" |),
+          M.get_name (| globals, locals_stack, "exponent_bytes" |)
         |)
       |)
     ],
@@ -1015,14 +1027,14 @@ Definition exp : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "result" ,
       M.call (|
-        M.get_name (| globals, "U256" |),
+        M.get_name (| globals, locals_stack, "U256" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "pow" |),
+            M.get_name (| globals, locals_stack, "pow" |),
             make_list [
-              M.get_name (| globals, "base" |);
-              M.get_name (| globals, "exponent" |);
-              M.get_name (| globals, "U256_CEIL_VALUE" |)
+              M.get_name (| globals, locals_stack, "base" |);
+              M.get_name (| globals, locals_stack, "exponent" |);
+              M.get_name (| globals, locals_stack, "U256_CEIL_VALUE" |)
             ],
             make_dict []
           |)
@@ -1031,23 +1043,24 @@ Definition exp : Value.t -> Value.t -> M :=
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.get_name (| globals, "result" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
+      M.get_name (| globals, locals_stack, "result" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition signextend : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Sign extend operation. In other words, extend a signed number which
     fits in N bytes to 32 bytes.
@@ -1061,9 +1074,9 @@ Definition signextend : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "byte_num" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
@@ -1071,18 +1084,18 @@ Definition signextend : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "value" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_LOW" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_LOW" |)
     ],
     make_dict []
   |) in
@@ -1090,14 +1103,14 @@ Definition signextend : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.gt (|
-          M.get_name (| globals, "byte_num" |),
+          M.get_name (| globals, locals_stack, "byte_num" |),
           Constant.int 31
         |),
       (* then *)
       ltac:(M.monadic (
         let _ := M.assign_local (|
           "result" ,
-          M.get_name (| globals, "value" |)
+          M.get_name (| globals, locals_stack, "value" |)
         |) in
         M.pure Constant.None_
       (* else *)
@@ -1105,10 +1118,10 @@ Definition signextend : Value.t -> Value.t -> M :=
         let _ := M.assign_local (|
           "value_bytes" ,
           M.call (|
-            M.get_name (| globals, "bytes" |),
+            M.get_name (| globals, locals_stack, "bytes" |),
             make_list [
               M.call (|
-                M.get_field (| M.get_name (| globals, "value" |), "to_be_bytes32" |),
+                M.get_field (| M.get_name (| globals, locals_stack, "value" |), "to_be_bytes32" |),
                 make_list [],
                 make_dict []
               |)
@@ -1119,13 +1132,13 @@ Definition signextend : Value.t -> Value.t -> M :=
         let _ := M.assign_local (|
           "value_bytes" ,
           M.slice (|
-            M.get_name (| globals, "value_bytes" |),
+            M.get_name (| globals, locals_stack, "value_bytes" |),
             BinOp.sub (|
               Constant.int 31,
               M.call (|
-                M.get_name (| globals, "int" |),
+                M.get_name (| globals, locals_stack, "int" |),
                 make_list [
-                  M.get_name (| globals, "byte_num" |)
+                  M.get_name (| globals, locals_stack, "byte_num" |)
                 ],
                 make_dict []
               |)
@@ -1138,7 +1151,7 @@ Definition signextend : Value.t -> Value.t -> M :=
           "sign_bit" ,
           BinOp.r_shift (|
             M.get_subscript (|
-              M.get_name (| globals, "value_bytes" |),
+              M.get_name (| globals, locals_stack, "value_bytes" |),
               Constant.int 0
             |),
             Constant.int 7
@@ -1148,7 +1161,7 @@ Definition signextend : Value.t -> Value.t -> M :=
           (* if *)
           M.if_then_else (|
             Compare.eq (|
-              M.get_name (| globals, "sign_bit" |),
+              M.get_name (| globals, locals_stack, "sign_bit" |),
               Constant.int 0
             |),
           (* then *)
@@ -1156,9 +1169,9 @@ Definition signextend : Value.t -> Value.t -> M :=
             let _ := M.assign_local (|
               "result" ,
               M.call (|
-                M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
+                M.get_field (| M.get_name (| globals, locals_stack, "U256" |), "from_be_bytes" |),
                 make_list [
-                  M.get_name (| globals, "value_bytes" |)
+                  M.get_name (| globals, locals_stack, "value_bytes" |)
                 ],
                 make_dict []
               |)
@@ -1171,7 +1184,7 @@ Definition signextend : Value.t -> Value.t -> M :=
               BinOp.sub (|
                 Constant.int 32,
                 BinOp.add (|
-                  M.get_name (| globals, "byte_num" |),
+                  M.get_name (| globals, locals_stack, "byte_num" |),
                   Constant.int 1
                 |)
               |)
@@ -1179,22 +1192,22 @@ Definition signextend : Value.t -> Value.t -> M :=
             let _ := M.assign_local (|
               "result" ,
               M.call (|
-                M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
+                M.get_field (| M.get_name (| globals, locals_stack, "U256" |), "from_be_bytes" |),
                 make_list [
                   BinOp.add (|
                     M.call (|
-                      M.get_name (| globals, "bytearray" |),
+                      M.get_name (| globals, locals_stack, "bytearray" |),
                       make_list [
                         BinOp.mult (|
                           make_list [
                             Constant.int 255
                           ],
-                          M.get_name (| globals, "num_bytes_prepend" |)
+                          M.get_name (| globals, locals_stack, "num_bytes_prepend" |)
                         |)
                       ],
                       make_dict []
                     |),
-                    M.get_name (| globals, "value_bytes" |)
+                    M.get_name (| globals, locals_stack, "value_bytes" |)
                   |)
                 ],
                 make_dict []
@@ -1205,16 +1218,16 @@ Definition signextend : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.get_name (| globals, "result" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
+      M.get_name (| globals, locals_stack, "result" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).

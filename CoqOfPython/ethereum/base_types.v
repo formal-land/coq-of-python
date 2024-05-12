@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.base_types".
+Definition globals : Globals.t := "ethereum.base_types".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -95,20 +97,21 @@ Definition Uint : Value.t :=
     [
       (
         "from_be_bytes",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "cls"; "buffer" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "cls"; "buffer" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Converts a sequence of bytes into an arbitrarily sized unsigned integer
         from its big endian representation.
         " in
           let _ := M.return_ (|
             M.call (|
-              M.get_name (| globals, "cls" |),
+              M.get_name (| globals, locals_stack, "cls" |),
               make_list [
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "from_bytes" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "from_bytes" |),
                   make_list [
-                    M.get_name (| globals, "buffer" |);
+                    M.get_name (| globals, locals_stack, "buffer" |);
                     Constant.str "big"
                   ],
                   make_dict []
@@ -121,20 +124,21 @@ Definition Uint : Value.t :=
       );
       (
         "from_le_bytes",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "cls"; "buffer" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "cls"; "buffer" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Converts a sequence of bytes into an arbitrarily sized unsigned integer
         from its little endian representation.
         " in
           let _ := M.return_ (|
             M.call (|
-              M.get_name (| globals, "cls" |),
+              M.get_name (| globals, locals_stack, "cls" |),
               make_list [
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "from_bytes" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "from_bytes" |),
                   make_list [
-                    M.get_name (| globals, "buffer" |);
+                    M.get_name (| globals, locals_stack, "buffer" |);
                     Constant.str "little"
                   ],
                   make_dict []
@@ -149,23 +153,24 @@ Definition Uint : Value.t :=
     [
       (
         "__init__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "value" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "value" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "value" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "value" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "TypeError" |),
+                M.get_name (| globals, locals_stack, "TypeError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -178,13 +183,13 @@ Definition Uint : Value.t :=
             (* if *)
             M.if_then_else (|
               Compare.lt (|
-                M.get_name (| globals, "value" |),
+                M.get_name (| globals, locals_stack, "value" |),
                 Constant.int 0
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -197,13 +202,14 @@ Definition Uint : Value.t :=
       );
       (
         "__radd__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__add__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__add__" |),
               make_list [
-                M.get_name (| globals, "left" |)
+                M.get_name (| globals, locals_stack, "left" |)
               ],
               make_dict []
             |)
@@ -212,23 +218,24 @@ Definition Uint : Value.t :=
       );
       (
         "__add__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -239,13 +246,13 @@ Definition Uint : Value.t :=
             (* if *)
             M.if_then_else (|
               Compare.lt (|
-                M.get_name (| globals, "right" |),
+                M.get_name (| globals, locals_stack, "right" |),
                 Constant.int 0
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -256,14 +263,14 @@ Definition Uint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__add__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__add__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "right" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "right" |)
                   ],
                   make_dict []
                 |)
@@ -275,13 +282,14 @@ Definition Uint : Value.t :=
       );
       (
         "__iadd__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__add__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__add__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -290,23 +298,24 @@ Definition Uint : Value.t :=
       );
       (
         "__sub__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -318,20 +327,20 @@ Definition Uint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "right" |),
+                  M.get_name (| globals, locals_stack, "right" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.lt (|
-                    M.get_name (| globals, "self" |),
-                    M.get_name (| globals, "right" |)
+                    M.get_name (| globals, locals_stack, "self" |),
+                    M.get_name (| globals, locals_stack, "right" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -342,14 +351,14 @@ Definition Uint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__sub__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__sub__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "right" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "right" |)
                   ],
                   make_dict []
                 |)
@@ -361,23 +370,24 @@ Definition Uint : Value.t :=
       );
       (
         "__rsub__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "left" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "left" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -389,20 +399,20 @@ Definition Uint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "left" |),
+                  M.get_name (| globals, locals_stack, "left" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "self" |),
-                    M.get_name (| globals, "left" |)
+                    M.get_name (| globals, locals_stack, "self" |),
+                    M.get_name (| globals, locals_stack, "left" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -413,14 +423,14 @@ Definition Uint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__rsub__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__rsub__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "left" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "left" |)
                   ],
                   make_dict []
                 |)
@@ -432,13 +442,14 @@ Definition Uint : Value.t :=
       );
       (
         "__isub__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__sub__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__sub__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -447,23 +458,24 @@ Definition Uint : Value.t :=
       );
       (
         "__mul__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -474,13 +486,13 @@ Definition Uint : Value.t :=
             (* if *)
             M.if_then_else (|
               Compare.lt (|
-                M.get_name (| globals, "right" |),
+                M.get_name (| globals, locals_stack, "right" |),
                 Constant.int 0
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -491,14 +503,14 @@ Definition Uint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__mul__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__mul__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "right" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "right" |)
                   ],
                   make_dict []
                 |)
@@ -510,13 +522,14 @@ Definition Uint : Value.t :=
       );
       (
         "__rmul__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__mul__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__mul__" |),
               make_list [
-                M.get_name (| globals, "left" |)
+                M.get_name (| globals, locals_stack, "left" |)
               ],
               make_dict []
             |)
@@ -525,13 +538,14 @@ Definition Uint : Value.t :=
       );
       (
         "__imul__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__mul__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__mul__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -540,23 +554,24 @@ Definition Uint : Value.t :=
       );
       (
         "__floordiv__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -567,13 +582,13 @@ Definition Uint : Value.t :=
             (* if *)
             M.if_then_else (|
               Compare.lt (|
-                M.get_name (| globals, "right" |),
+                M.get_name (| globals, locals_stack, "right" |),
                 Constant.int 0
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -584,14 +599,14 @@ Definition Uint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__floordiv__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__floordiv__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "right" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "right" |)
                   ],
                   make_dict []
                 |)
@@ -603,23 +618,24 @@ Definition Uint : Value.t :=
       );
       (
         "__rfloordiv__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "left" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "left" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -630,13 +646,13 @@ Definition Uint : Value.t :=
             (* if *)
             M.if_then_else (|
               Compare.lt (|
-                M.get_name (| globals, "left" |),
+                M.get_name (| globals, locals_stack, "left" |),
                 Constant.int 0
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -647,14 +663,14 @@ Definition Uint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__rfloordiv__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__rfloordiv__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "left" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "left" |)
                   ],
                   make_dict []
                 |)
@@ -666,13 +682,14 @@ Definition Uint : Value.t :=
       );
       (
         "__ifloordiv__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__floordiv__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__floordiv__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -681,23 +698,24 @@ Definition Uint : Value.t :=
       );
       (
         "__mod__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -708,13 +726,13 @@ Definition Uint : Value.t :=
             (* if *)
             M.if_then_else (|
               Compare.lt (|
-                M.get_name (| globals, "right" |),
+                M.get_name (| globals, locals_stack, "right" |),
                 Constant.int 0
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -725,14 +743,14 @@ Definition Uint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__mod__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__mod__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "right" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "right" |)
                   ],
                   make_dict []
                 |)
@@ -744,23 +762,24 @@ Definition Uint : Value.t :=
       );
       (
         "__rmod__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "left" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "left" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -771,13 +790,13 @@ Definition Uint : Value.t :=
             (* if *)
             M.if_then_else (|
               Compare.lt (|
-                M.get_name (| globals, "left" |),
+                M.get_name (| globals, locals_stack, "left" |),
                 Constant.int 0
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -788,14 +807,14 @@ Definition Uint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__rmod__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__rmod__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "left" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "left" |)
                   ],
                   make_dict []
                 |)
@@ -807,13 +826,14 @@ Definition Uint : Value.t :=
       );
       (
         "__imod__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__mod__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__mod__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -822,23 +842,24 @@ Definition Uint : Value.t :=
       );
       (
         "__divmod__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -849,13 +870,13 @@ Definition Uint : Value.t :=
             (* if *)
             M.if_then_else (|
               Compare.lt (|
-                M.get_name (| globals, "right" |),
+                M.get_name (| globals, locals_stack, "right" |),
                 Constant.int 0
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -867,31 +888,31 @@ Definition Uint : Value.t :=
           let _ := M.assign_local (|
             "result" ,
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__divmod__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__divmod__" |),
               make_list [
-                M.get_name (| globals, "self" |);
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "self" |);
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
           |) in
           let _ := M.return_ (|
             make_tuple [ M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.get_subscript (|
-                  M.get_name (| globals, "result" |),
+                  M.get_name (| globals, locals_stack, "result" |),
                   Constant.int 0
                 |)
               ],
               make_dict []
             |); M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.get_subscript (|
-                  M.get_name (| globals, "result" |),
+                  M.get_name (| globals, locals_stack, "result" |),
                   Constant.int 1
                 |)
               ],
@@ -902,23 +923,24 @@ Definition Uint : Value.t :=
       );
       (
         "__rdivmod__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "left" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "left" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -929,13 +951,13 @@ Definition Uint : Value.t :=
             (* if *)
             M.if_then_else (|
               Compare.lt (|
-                M.get_name (| globals, "left" |),
+                M.get_name (| globals, locals_stack, "left" |),
                 Constant.int 0
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -947,31 +969,31 @@ Definition Uint : Value.t :=
           let _ := M.assign_local (|
             "result" ,
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__rdivmod__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__rdivmod__" |),
               make_list [
-                M.get_name (| globals, "self" |);
-                M.get_name (| globals, "left" |)
+                M.get_name (| globals, locals_stack, "self" |);
+                M.get_name (| globals, locals_stack, "left" |)
               ],
               make_dict []
             |)
           |) in
           let _ := M.return_ (|
             make_tuple [ M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.get_subscript (|
-                  M.get_name (| globals, "result" |),
+                  M.get_name (| globals, locals_stack, "result" |),
                   Constant.int 0
                 |)
               ],
               make_dict []
             |); M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.get_subscript (|
-                  M.get_name (| globals, "result" |),
+                  M.get_name (| globals, locals_stack, "result" |),
                   Constant.int 1
                 |)
               ],
@@ -982,13 +1004,14 @@ Definition Uint : Value.t :=
       );
       (
         "__pow__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right"; "modulo" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right"; "modulo" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               Compare.is_not (|
-                M.get_name (| globals, "modulo" |),
+                M.get_name (| globals, locals_stack, "modulo" |),
                 Constant.None_
               |),
             (* then *)
@@ -997,17 +1020,17 @@ Definition Uint : Value.t :=
                 (* if *)
                 M.if_then_else (|
                   UnOp.not (| M.call (|
-                    M.get_name (| globals, "isinstance" |),
+                    M.get_name (| globals, locals_stack, "isinstance" |),
                     make_list [
-                      M.get_name (| globals, "modulo" |);
-                      M.get_name (| globals, "int" |)
+                      M.get_name (| globals, locals_stack, "modulo" |);
+                      M.get_name (| globals, locals_stack, "int" |)
                     ],
                     make_dict []
                   |) |),
                 (* then *)
                 ltac:(M.monadic (
                   let _ := M.return_ (|
-                    M.get_name (| globals, "NotImplemented" |)
+                    M.get_name (| globals, locals_stack, "NotImplemented" |)
                   |) in
                   M.pure Constant.None_
                 (* else *)
@@ -1018,13 +1041,13 @@ Definition Uint : Value.t :=
                 (* if *)
                 M.if_then_else (|
                   Compare.lt (|
-                    M.get_name (| globals, "modulo" |),
+                    M.get_name (| globals, locals_stack, "modulo" |),
                     Constant.int 0
                   |),
                 (* then *)
                 ltac:(M.monadic (
                   let _ := M.raise (| Some (M.call (|
-                    M.get_name (| globals, "OverflowError" |),
+                    M.get_name (| globals, locals_stack, "OverflowError" |),
                     make_list [],
                     make_dict []
                   |)) |) in
@@ -1042,17 +1065,17 @@ Definition Uint : Value.t :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -1063,13 +1086,13 @@ Definition Uint : Value.t :=
             (* if *)
             M.if_then_else (|
               Compare.lt (|
-                M.get_name (| globals, "right" |),
+                M.get_name (| globals, locals_stack, "right" |),
                 Constant.int 0
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -1080,15 +1103,15 @@ Definition Uint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__pow__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__pow__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "right" |);
-                    M.get_name (| globals, "modulo" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "right" |);
+                    M.get_name (| globals, locals_stack, "modulo" |)
                   ],
                   make_dict []
                 |)
@@ -1100,13 +1123,14 @@ Definition Uint : Value.t :=
       );
       (
         "__rpow__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left"; "modulo" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left"; "modulo" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               Compare.is_not (|
-                M.get_name (| globals, "modulo" |),
+                M.get_name (| globals, locals_stack, "modulo" |),
                 Constant.None_
               |),
             (* then *)
@@ -1115,17 +1139,17 @@ Definition Uint : Value.t :=
                 (* if *)
                 M.if_then_else (|
                   UnOp.not (| M.call (|
-                    M.get_name (| globals, "isinstance" |),
+                    M.get_name (| globals, locals_stack, "isinstance" |),
                     make_list [
-                      M.get_name (| globals, "modulo" |);
-                      M.get_name (| globals, "int" |)
+                      M.get_name (| globals, locals_stack, "modulo" |);
+                      M.get_name (| globals, locals_stack, "int" |)
                     ],
                     make_dict []
                   |) |),
                 (* then *)
                 ltac:(M.monadic (
                   let _ := M.return_ (|
-                    M.get_name (| globals, "NotImplemented" |)
+                    M.get_name (| globals, locals_stack, "NotImplemented" |)
                   |) in
                   M.pure Constant.None_
                 (* else *)
@@ -1136,13 +1160,13 @@ Definition Uint : Value.t :=
                 (* if *)
                 M.if_then_else (|
                   Compare.lt (|
-                    M.get_name (| globals, "modulo" |),
+                    M.get_name (| globals, locals_stack, "modulo" |),
                     Constant.int 0
                   |),
                 (* then *)
                 ltac:(M.monadic (
                   let _ := M.raise (| Some (M.call (|
-                    M.get_name (| globals, "OverflowError" |),
+                    M.get_name (| globals, locals_stack, "OverflowError" |),
                     make_list [],
                     make_dict []
                   |)) |) in
@@ -1160,17 +1184,17 @@ Definition Uint : Value.t :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "left" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "left" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -1181,13 +1205,13 @@ Definition Uint : Value.t :=
             (* if *)
             M.if_then_else (|
               Compare.lt (|
-                M.get_name (| globals, "left" |),
+                M.get_name (| globals, locals_stack, "left" |),
                 Constant.int 0
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -1198,15 +1222,15 @@ Definition Uint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__rpow__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__rpow__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "left" |);
-                    M.get_name (| globals, "modulo" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "left" |);
+                    M.get_name (| globals, locals_stack, "modulo" |)
                   ],
                   make_dict []
                 |)
@@ -1218,14 +1242,15 @@ Definition Uint : Value.t :=
       );
       (
         "__ipow__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right"; "modulo" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right"; "modulo" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__pow__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__pow__" |),
               make_list [
-                M.get_name (| globals, "right" |);
-                M.get_name (| globals, "modulo" |)
+                M.get_name (| globals, locals_stack, "right" |);
+                M.get_name (| globals, locals_stack, "modulo" |)
               ],
               make_dict []
             |)
@@ -1234,23 +1259,24 @@ Definition Uint : Value.t :=
       );
       (
         "__xor__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -1261,13 +1287,13 @@ Definition Uint : Value.t :=
             (* if *)
             M.if_then_else (|
               Compare.lt (|
-                M.get_name (| globals, "right" |),
+                M.get_name (| globals, locals_stack, "right" |),
                 Constant.int 0
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -1278,14 +1304,14 @@ Definition Uint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__xor__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__xor__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "right" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "right" |)
                   ],
                   make_dict []
                 |)
@@ -1297,23 +1323,24 @@ Definition Uint : Value.t :=
       );
       (
         "__rxor__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "left" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "left" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -1324,13 +1351,13 @@ Definition Uint : Value.t :=
             (* if *)
             M.if_then_else (|
               Compare.lt (|
-                M.get_name (| globals, "left" |),
+                M.get_name (| globals, locals_stack, "left" |),
                 Constant.int 0
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -1341,14 +1368,14 @@ Definition Uint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__rxor__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__rxor__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "left" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "left" |)
                   ],
                   make_dict []
                 |)
@@ -1360,13 +1387,14 @@ Definition Uint : Value.t :=
       );
       (
         "__ixor__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__xor__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__xor__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -1375,18 +1403,19 @@ Definition Uint : Value.t :=
       );
       (
         "to_be_bytes32",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Converts this arbitrarily sized unsigned integer into its big endian
         representation with exactly 32 bytes.
         " in
           let _ := M.return_ (|
             M.call (|
-              M.get_name (| globals, "Bytes32" |),
+              M.get_name (| globals, locals_stack, "Bytes32" |),
               make_list [
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "self" |), "to_bytes" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "self" |), "to_bytes" |),
                   make_list [
                     Constant.int 32;
                     Constant.str "big"
@@ -1401,8 +1430,9 @@ Definition Uint : Value.t :=
       );
       (
         "to_be_bytes",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Converts this arbitrarily sized unsigned integer into its big endian
         representation, without padding.
@@ -1410,7 +1440,7 @@ Definition Uint : Value.t :=
           let _ := M.assign_local (|
             "bit_length" ,
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "bit_length" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "bit_length" |),
               make_list [],
               make_dict []
             |)
@@ -1419,7 +1449,7 @@ Definition Uint : Value.t :=
             "byte_length" ,
             BinOp.floor_div (|
               BinOp.add (|
-                M.get_name (| globals, "bit_length" |),
+                M.get_name (| globals, locals_stack, "bit_length" |),
                 Constant.int 7
               |),
               Constant.int 8
@@ -1427,9 +1457,9 @@ Definition Uint : Value.t :=
           |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "to_bytes" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "to_bytes" |),
               make_list [
-                M.get_name (| globals, "byte_length" |);
+                M.get_name (| globals, locals_stack, "byte_length" |);
                 Constant.str "big"
               ],
               make_dict []
@@ -1439,8 +1469,9 @@ Definition Uint : Value.t :=
       );
       (
         "to_le_bytes",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "number_bytes" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "number_bytes" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Converts this arbitrarily sized unsigned integer into its little endian
         representation, without padding.
@@ -1449,7 +1480,7 @@ Definition Uint : Value.t :=
             (* if *)
             M.if_then_else (|
               Compare.is (|
-                M.get_name (| globals, "number_bytes" |),
+                M.get_name (| globals, locals_stack, "number_bytes" |),
                 Constant.None_
               |),
             (* then *)
@@ -1457,7 +1488,7 @@ Definition Uint : Value.t :=
               let _ := M.assign_local (|
                 "bit_length" ,
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "self" |), "bit_length" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "self" |), "bit_length" |),
                   make_list [],
                   make_dict []
                 |)
@@ -1466,7 +1497,7 @@ Definition Uint : Value.t :=
                 "number_bytes" ,
                 BinOp.floor_div (|
                   BinOp.add (|
-                    M.get_name (| globals, "bit_length" |),
+                    M.get_name (| globals, locals_stack, "bit_length" |),
                     Constant.int 7
                   |),
                   Constant.int 8
@@ -1479,9 +1510,9 @@ Definition Uint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "to_bytes" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "to_bytes" |),
               make_list [
-                M.get_name (| globals, "number_bytes" |);
+                M.get_name (| globals, locals_stack, "number_bytes" |);
                 Constant.str "little"
               ],
               make_dict []
@@ -1493,7 +1524,7 @@ Definition Uint : Value.t :=
 
 Definition T : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "TypeVar" |),
+    M.get_name (| globals, locals_stack, "TypeVar" |),
     make_list [
       Constant.str "T"
     ],
@@ -1510,23 +1541,24 @@ Definition FixedUint : Value.t :=
     [
       (
         "__init__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "value" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "value" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "value" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "value" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "TypeError" |),
+                M.get_name (| globals, locals_stack, "TypeError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -1540,20 +1572,20 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "value" |),
+                  M.get_name (| globals, locals_stack, "value" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "value" |),
-                    M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                    M.get_name (| globals, locals_stack, "value" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -1566,13 +1598,14 @@ Definition FixedUint : Value.t :=
       );
       (
         "__radd__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__add__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__add__" |),
               make_list [
-                M.get_name (| globals, "left" |)
+                M.get_name (| globals, locals_stack, "left" |)
               ],
               make_dict []
             |)
@@ -1581,23 +1614,24 @@ Definition FixedUint : Value.t :=
       );
       (
         "__add__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -1607,10 +1641,10 @@ Definition FixedUint : Value.t :=
           let _ := M.assign_local (|
             "result" ,
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__add__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__add__" |),
               make_list [
-                M.get_name (| globals, "self" |);
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "self" |);
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -1620,20 +1654,20 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "right" |),
+                  M.get_name (| globals, locals_stack, "right" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "result" |),
-                    M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                    M.get_name (| globals, locals_stack, "result" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -1644,10 +1678,10 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
-                M.get_name (| globals, "result" |)
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
+                M.get_name (| globals, locals_stack, "result" |)
               ],
               make_dict []
             |)
@@ -1656,8 +1690,9 @@ Definition FixedUint : Value.t :=
       );
       (
         "wrapping_add",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Return a new instance containing `self + right (mod N)`.
 
@@ -1671,17 +1706,17 @@ Definition FixedUint : Value.t :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -1693,20 +1728,20 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "right" |),
+                  M.get_name (| globals, locals_stack, "right" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "right" |),
-                    M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                    M.get_name (| globals, locals_stack, "right" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -1717,19 +1752,19 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 BinOp.bit_and (|
                   M.call (|
-                    M.get_field (| M.get_name (| globals, "int" |), "__add__" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__add__" |),
                     make_list [
-                      M.get_name (| globals, "self" |);
-                      M.get_name (| globals, "right" |)
+                      M.get_name (| globals, locals_stack, "self" |);
+                      M.get_name (| globals, locals_stack, "right" |)
                     ],
                     make_dict []
                   |),
-                  M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                  M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                 |)
               ],
               make_dict []
@@ -1739,13 +1774,14 @@ Definition FixedUint : Value.t :=
       );
       (
         "__iadd__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__add__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__add__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -1754,23 +1790,24 @@ Definition FixedUint : Value.t :=
       );
       (
         "__sub__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -1782,19 +1819,19 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "right" |),
+                  M.get_name (| globals, locals_stack, "right" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   BoolOp.or (|
                     Compare.gt (|
-                      M.get_name (| globals, "right" |),
-                      M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                      M.get_name (| globals, locals_stack, "right" |),
+                      M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                     |),
                     ltac:(M.monadic (
                       Compare.lt (|
-                        M.get_name (| globals, "self" |),
-                        M.get_name (| globals, "right" |)
+                        M.get_name (| globals, locals_stack, "self" |),
+                        M.get_name (| globals, locals_stack, "right" |)
                       |)
                     ))
                   |)
@@ -1803,7 +1840,7 @@ Definition FixedUint : Value.t :=
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -1814,14 +1851,14 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__sub__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__sub__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "right" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "right" |)
                   ],
                   make_dict []
                 |)
@@ -1833,8 +1870,9 @@ Definition FixedUint : Value.t :=
       );
       (
         "wrapping_sub",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Return a new instance containing `self - right (mod N)`.
 
@@ -1848,17 +1886,17 @@ Definition FixedUint : Value.t :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -1870,20 +1908,20 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "right" |),
+                  M.get_name (| globals, locals_stack, "right" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "right" |),
-                    M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                    M.get_name (| globals, locals_stack, "right" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -1894,19 +1932,19 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 BinOp.bit_and (|
                   M.call (|
-                    M.get_field (| M.get_name (| globals, "int" |), "__sub__" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__sub__" |),
                     make_list [
-                      M.get_name (| globals, "self" |);
-                      M.get_name (| globals, "right" |)
+                      M.get_name (| globals, locals_stack, "self" |);
+                      M.get_name (| globals, locals_stack, "right" |)
                     ],
                     make_dict []
                   |),
-                  M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                  M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                 |)
               ],
               make_dict []
@@ -1916,23 +1954,24 @@ Definition FixedUint : Value.t :=
       );
       (
         "__rsub__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "left" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "left" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -1944,19 +1983,19 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "left" |),
+                  M.get_name (| globals, locals_stack, "left" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   BoolOp.or (|
                     Compare.gt (|
-                      M.get_name (| globals, "left" |),
-                      M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                      M.get_name (| globals, locals_stack, "left" |),
+                      M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                     |),
                     ltac:(M.monadic (
                       Compare.gt (|
-                        M.get_name (| globals, "self" |),
-                        M.get_name (| globals, "left" |)
+                        M.get_name (| globals, locals_stack, "self" |),
+                        M.get_name (| globals, locals_stack, "left" |)
                       |)
                     ))
                   |)
@@ -1965,7 +2004,7 @@ Definition FixedUint : Value.t :=
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -1976,14 +2015,14 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__rsub__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__rsub__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "left" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "left" |)
                   ],
                   make_dict []
                 |)
@@ -1995,13 +2034,14 @@ Definition FixedUint : Value.t :=
       );
       (
         "__isub__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__sub__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__sub__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -2010,23 +2050,24 @@ Definition FixedUint : Value.t :=
       );
       (
         "__mul__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -2036,10 +2077,10 @@ Definition FixedUint : Value.t :=
           let _ := M.assign_local (|
             "result" ,
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__mul__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__mul__" |),
               make_list [
-                M.get_name (| globals, "self" |);
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "self" |);
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -2049,20 +2090,20 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "right" |),
+                  M.get_name (| globals, locals_stack, "right" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "result" |),
-                    M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                    M.get_name (| globals, locals_stack, "result" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -2073,10 +2114,10 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
-                M.get_name (| globals, "result" |)
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
+                M.get_name (| globals, locals_stack, "result" |)
               ],
               make_dict []
             |)
@@ -2085,8 +2126,9 @@ Definition FixedUint : Value.t :=
       );
       (
         "wrapping_mul",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Return a new instance containing `self * right (mod N)`.
 
@@ -2100,17 +2142,17 @@ Definition FixedUint : Value.t :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -2122,20 +2164,20 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "right" |),
+                  M.get_name (| globals, locals_stack, "right" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "right" |),
-                    M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                    M.get_name (| globals, locals_stack, "right" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -2146,19 +2188,19 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 BinOp.bit_and (|
                   M.call (|
-                    M.get_field (| M.get_name (| globals, "int" |), "__mul__" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__mul__" |),
                     make_list [
-                      M.get_name (| globals, "self" |);
-                      M.get_name (| globals, "right" |)
+                      M.get_name (| globals, locals_stack, "self" |);
+                      M.get_name (| globals, locals_stack, "right" |)
                     ],
                     make_dict []
                   |),
-                  M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                  M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                 |)
               ],
               make_dict []
@@ -2168,13 +2210,14 @@ Definition FixedUint : Value.t :=
       );
       (
         "__rmul__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__mul__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__mul__" |),
               make_list [
-                M.get_name (| globals, "left" |)
+                M.get_name (| globals, locals_stack, "left" |)
               ],
               make_dict []
             |)
@@ -2183,13 +2226,14 @@ Definition FixedUint : Value.t :=
       );
       (
         "__imul__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__mul__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__mul__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -2198,23 +2242,24 @@ Definition FixedUint : Value.t :=
       );
       (
         "__floordiv__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -2226,20 +2271,20 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "right" |),
+                  M.get_name (| globals, locals_stack, "right" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "right" |),
-                    M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                    M.get_name (| globals, locals_stack, "right" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -2250,14 +2295,14 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__floordiv__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__floordiv__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "right" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "right" |)
                   ],
                   make_dict []
                 |)
@@ -2269,23 +2314,24 @@ Definition FixedUint : Value.t :=
       );
       (
         "__rfloordiv__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "left" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "left" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -2297,20 +2343,20 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "left" |),
+                  M.get_name (| globals, locals_stack, "left" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "left" |),
-                    M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                    M.get_name (| globals, locals_stack, "left" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -2321,14 +2367,14 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__rfloordiv__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__rfloordiv__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "left" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "left" |)
                   ],
                   make_dict []
                 |)
@@ -2340,13 +2386,14 @@ Definition FixedUint : Value.t :=
       );
       (
         "__ifloordiv__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__floordiv__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__floordiv__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -2355,23 +2402,24 @@ Definition FixedUint : Value.t :=
       );
       (
         "__mod__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -2383,20 +2431,20 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "right" |),
+                  M.get_name (| globals, locals_stack, "right" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "right" |),
-                    M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                    M.get_name (| globals, locals_stack, "right" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -2407,14 +2455,14 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__mod__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__mod__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "right" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "right" |)
                   ],
                   make_dict []
                 |)
@@ -2426,23 +2474,24 @@ Definition FixedUint : Value.t :=
       );
       (
         "__rmod__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "left" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "left" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -2454,20 +2503,20 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "left" |),
+                  M.get_name (| globals, locals_stack, "left" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "left" |),
-                    M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                    M.get_name (| globals, locals_stack, "left" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -2478,14 +2527,14 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__rmod__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__rmod__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "left" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "left" |)
                   ],
                   make_dict []
                 |)
@@ -2497,13 +2546,14 @@ Definition FixedUint : Value.t :=
       );
       (
         "__imod__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__mod__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__mod__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -2512,23 +2562,24 @@ Definition FixedUint : Value.t :=
       );
       (
         "__divmod__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -2540,20 +2591,20 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "right" |),
+                  M.get_name (| globals, locals_stack, "right" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "right" |),
-                    M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                    M.get_name (| globals, locals_stack, "right" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -2566,36 +2617,36 @@ Definition FixedUint : Value.t :=
             "result" ,
             M.call (|
               M.get_field (| M.call (|
-                M.get_name (| globals, "super" |),
+                M.get_name (| globals, locals_stack, "super" |),
                 make_list [
-                  M.get_name (| globals, "FixedUint" |);
-                  M.get_name (| globals, "self" |)
+                  M.get_name (| globals, locals_stack, "FixedUint" |);
+                  M.get_name (| globals, locals_stack, "self" |)
                 ],
                 make_dict []
               |), "__divmod__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
           |) in
           let _ := M.return_ (|
             make_tuple [ M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.get_subscript (|
-                  M.get_name (| globals, "result" |),
+                  M.get_name (| globals, locals_stack, "result" |),
                   Constant.int 0
                 |)
               ],
               make_dict []
             |); M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.get_subscript (|
-                  M.get_name (| globals, "result" |),
+                  M.get_name (| globals, locals_stack, "result" |),
                   Constant.int 1
                 |)
               ],
@@ -2606,23 +2657,24 @@ Definition FixedUint : Value.t :=
       );
       (
         "__rdivmod__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "left" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "left" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -2634,20 +2686,20 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "left" |),
+                  M.get_name (| globals, locals_stack, "left" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "left" |),
-                    M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                    M.get_name (| globals, locals_stack, "left" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -2660,36 +2712,36 @@ Definition FixedUint : Value.t :=
             "result" ,
             M.call (|
               M.get_field (| M.call (|
-                M.get_name (| globals, "super" |),
+                M.get_name (| globals, locals_stack, "super" |),
                 make_list [
-                  M.get_name (| globals, "FixedUint" |);
-                  M.get_name (| globals, "self" |)
+                  M.get_name (| globals, locals_stack, "FixedUint" |);
+                  M.get_name (| globals, locals_stack, "self" |)
                 ],
                 make_dict []
               |), "__rdivmod__" |),
               make_list [
-                M.get_name (| globals, "left" |)
+                M.get_name (| globals, locals_stack, "left" |)
               ],
               make_dict []
             |)
           |) in
           let _ := M.return_ (|
             make_tuple [ M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.get_subscript (|
-                  M.get_name (| globals, "result" |),
+                  M.get_name (| globals, locals_stack, "result" |),
                   Constant.int 0
                 |)
               ],
               make_dict []
             |); M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.get_subscript (|
-                  M.get_name (| globals, "result" |),
+                  M.get_name (| globals, locals_stack, "result" |),
                   Constant.int 1
                 |)
               ],
@@ -2700,13 +2752,14 @@ Definition FixedUint : Value.t :=
       );
       (
         "__pow__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right"; "modulo" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right"; "modulo" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               Compare.is_not (|
-                M.get_name (| globals, "modulo" |),
+                M.get_name (| globals, locals_stack, "modulo" |),
                 Constant.None_
               |),
             (* then *)
@@ -2715,17 +2768,17 @@ Definition FixedUint : Value.t :=
                 (* if *)
                 M.if_then_else (|
                   UnOp.not (| M.call (|
-                    M.get_name (| globals, "isinstance" |),
+                    M.get_name (| globals, locals_stack, "isinstance" |),
                     make_list [
-                      M.get_name (| globals, "modulo" |);
-                      M.get_name (| globals, "int" |)
+                      M.get_name (| globals, locals_stack, "modulo" |);
+                      M.get_name (| globals, locals_stack, "int" |)
                     ],
                     make_dict []
                   |) |),
                 (* then *)
                 ltac:(M.monadic (
                   let _ := M.return_ (|
-                    M.get_name (| globals, "NotImplemented" |)
+                    M.get_name (| globals, locals_stack, "NotImplemented" |)
                   |) in
                   M.pure Constant.None_
                 (* else *)
@@ -2737,20 +2790,20 @@ Definition FixedUint : Value.t :=
                 M.if_then_else (|
                   BoolOp.or (|
                     Compare.lt (|
-                      M.get_name (| globals, "modulo" |),
+                      M.get_name (| globals, locals_stack, "modulo" |),
                       Constant.int 0
                     |),
                     ltac:(M.monadic (
                       Compare.gt (|
-                        M.get_name (| globals, "modulo" |),
-                        M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                        M.get_name (| globals, locals_stack, "modulo" |),
+                        M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                       |)
                     ))
                   |),
                 (* then *)
                 ltac:(M.monadic (
                   let _ := M.raise (| Some (M.call (|
-                    M.get_name (| globals, "OverflowError" |),
+                    M.get_name (| globals, locals_stack, "OverflowError" |),
                     make_list [],
                     make_dict []
                   |)) |) in
@@ -2768,17 +2821,17 @@ Definition FixedUint : Value.t :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -2788,11 +2841,11 @@ Definition FixedUint : Value.t :=
           let _ := M.assign_local (|
             "result" ,
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__pow__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__pow__" |),
               make_list [
-                M.get_name (| globals, "self" |);
-                M.get_name (| globals, "right" |);
-                M.get_name (| globals, "modulo" |)
+                M.get_name (| globals, locals_stack, "self" |);
+                M.get_name (| globals, locals_stack, "right" |);
+                M.get_name (| globals, locals_stack, "modulo" |)
               ],
               make_dict []
             |)
@@ -2802,19 +2855,19 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "right" |),
+                  M.get_name (| globals, locals_stack, "right" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   BoolOp.or (|
                     Compare.gt (|
-                      M.get_name (| globals, "right" |),
-                      M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                      M.get_name (| globals, locals_stack, "right" |),
+                      M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                     |),
                     ltac:(M.monadic (
                       Compare.gt (|
-                        M.get_name (| globals, "result" |),
-                        M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                        M.get_name (| globals, locals_stack, "result" |),
+                        M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                       |)
                     ))
                   |)
@@ -2823,7 +2876,7 @@ Definition FixedUint : Value.t :=
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -2834,10 +2887,10 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
-                M.get_name (| globals, "result" |)
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
+                M.get_name (| globals, locals_stack, "result" |)
               ],
               make_dict []
             |)
@@ -2846,8 +2899,9 @@ Definition FixedUint : Value.t :=
       );
       (
         "wrapping_pow",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right"; "modulo" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right"; "modulo" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Return a new instance containing `self ** right (mod modulo)`.
 
@@ -2863,7 +2917,7 @@ Definition FixedUint : Value.t :=
             (* if *)
             M.if_then_else (|
               Compare.is_not (|
-                M.get_name (| globals, "modulo" |),
+                M.get_name (| globals, locals_stack, "modulo" |),
                 Constant.None_
               |),
             (* then *)
@@ -2872,17 +2926,17 @@ Definition FixedUint : Value.t :=
                 (* if *)
                 M.if_then_else (|
                   UnOp.not (| M.call (|
-                    M.get_name (| globals, "isinstance" |),
+                    M.get_name (| globals, locals_stack, "isinstance" |),
                     make_list [
-                      M.get_name (| globals, "modulo" |);
-                      M.get_name (| globals, "int" |)
+                      M.get_name (| globals, locals_stack, "modulo" |);
+                      M.get_name (| globals, locals_stack, "int" |)
                     ],
                     make_dict []
                   |) |),
                 (* then *)
                 ltac:(M.monadic (
                   let _ := M.return_ (|
-                    M.get_name (| globals, "NotImplemented" |)
+                    M.get_name (| globals, locals_stack, "NotImplemented" |)
                   |) in
                   M.pure Constant.None_
                 (* else *)
@@ -2894,20 +2948,20 @@ Definition FixedUint : Value.t :=
                 M.if_then_else (|
                   BoolOp.or (|
                     Compare.lt (|
-                      M.get_name (| globals, "modulo" |),
+                      M.get_name (| globals, locals_stack, "modulo" |),
                       Constant.int 0
                     |),
                     ltac:(M.monadic (
                       Compare.gt (|
-                        M.get_name (| globals, "modulo" |),
-                        M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                        M.get_name (| globals, locals_stack, "modulo" |),
+                        M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                       |)
                     ))
                   |),
                 (* then *)
                 ltac:(M.monadic (
                   let _ := M.raise (| Some (M.call (|
-                    M.get_name (| globals, "OverflowError" |),
+                    M.get_name (| globals, locals_stack, "OverflowError" |),
                     make_list [],
                     make_dict []
                   |)) |) in
@@ -2925,17 +2979,17 @@ Definition FixedUint : Value.t :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -2947,20 +3001,20 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "right" |),
+                  M.get_name (| globals, locals_stack, "right" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "right" |),
-                    M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                    M.get_name (| globals, locals_stack, "right" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -2971,20 +3025,20 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 BinOp.bit_and (|
                   M.call (|
-                    M.get_field (| M.get_name (| globals, "int" |), "__pow__" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__pow__" |),
                     make_list [
-                      M.get_name (| globals, "self" |);
-                      M.get_name (| globals, "right" |);
-                      M.get_name (| globals, "modulo" |)
+                      M.get_name (| globals, locals_stack, "self" |);
+                      M.get_name (| globals, locals_stack, "right" |);
+                      M.get_name (| globals, locals_stack, "modulo" |)
                     ],
                     make_dict []
                   |),
-                  M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                  M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                 |)
               ],
               make_dict []
@@ -2994,13 +3048,14 @@ Definition FixedUint : Value.t :=
       );
       (
         "__rpow__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left"; "modulo" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left"; "modulo" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               Compare.is_not (|
-                M.get_name (| globals, "modulo" |),
+                M.get_name (| globals, locals_stack, "modulo" |),
                 Constant.None_
               |),
             (* then *)
@@ -3009,17 +3064,17 @@ Definition FixedUint : Value.t :=
                 (* if *)
                 M.if_then_else (|
                   UnOp.not (| M.call (|
-                    M.get_name (| globals, "isinstance" |),
+                    M.get_name (| globals, locals_stack, "isinstance" |),
                     make_list [
-                      M.get_name (| globals, "modulo" |);
-                      M.get_name (| globals, "int" |)
+                      M.get_name (| globals, locals_stack, "modulo" |);
+                      M.get_name (| globals, locals_stack, "int" |)
                     ],
                     make_dict []
                   |) |),
                 (* then *)
                 ltac:(M.monadic (
                   let _ := M.return_ (|
-                    M.get_name (| globals, "NotImplemented" |)
+                    M.get_name (| globals, locals_stack, "NotImplemented" |)
                   |) in
                   M.pure Constant.None_
                 (* else *)
@@ -3031,20 +3086,20 @@ Definition FixedUint : Value.t :=
                 M.if_then_else (|
                   BoolOp.or (|
                     Compare.lt (|
-                      M.get_name (| globals, "modulo" |),
+                      M.get_name (| globals, locals_stack, "modulo" |),
                       Constant.int 0
                     |),
                     ltac:(M.monadic (
                       Compare.gt (|
-                        M.get_name (| globals, "modulo" |),
-                        M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                        M.get_name (| globals, locals_stack, "modulo" |),
+                        M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                       |)
                     ))
                   |),
                 (* then *)
                 ltac:(M.monadic (
                   let _ := M.raise (| Some (M.call (|
-                    M.get_name (| globals, "OverflowError" |),
+                    M.get_name (| globals, locals_stack, "OverflowError" |),
                     make_list [],
                     make_dict []
                   |)) |) in
@@ -3062,17 +3117,17 @@ Definition FixedUint : Value.t :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "left" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "left" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -3084,20 +3139,20 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "left" |),
+                  M.get_name (| globals, locals_stack, "left" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "left" |),
-                    M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                    M.get_name (| globals, locals_stack, "left" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -3108,15 +3163,15 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__rpow__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__rpow__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "left" |);
-                    M.get_name (| globals, "modulo" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "left" |);
+                    M.get_name (| globals, locals_stack, "modulo" |)
                   ],
                   make_dict []
                 |)
@@ -3128,14 +3183,15 @@ Definition FixedUint : Value.t :=
       );
       (
         "__ipow__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right"; "modulo" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right"; "modulo" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__pow__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__pow__" |),
               make_list [
-                M.get_name (| globals, "right" |);
-                M.get_name (| globals, "modulo" |)
+                M.get_name (| globals, locals_stack, "right" |);
+                M.get_name (| globals, locals_stack, "modulo" |)
               ],
               make_dict []
             |)
@@ -3144,23 +3200,24 @@ Definition FixedUint : Value.t :=
       );
       (
         "__and__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -3172,20 +3229,20 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "right" |),
+                  M.get_name (| globals, locals_stack, "right" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "right" |),
-                    M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                    M.get_name (| globals, locals_stack, "right" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -3196,14 +3253,14 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__and__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__and__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "right" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "right" |)
                   ],
                   make_dict []
                 |)
@@ -3215,23 +3272,24 @@ Definition FixedUint : Value.t :=
       );
       (
         "__or__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -3243,20 +3301,20 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "right" |),
+                  M.get_name (| globals, locals_stack, "right" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "right" |),
-                    M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                    M.get_name (| globals, locals_stack, "right" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -3267,14 +3325,14 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__or__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__or__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "right" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "right" |)
                   ],
                   make_dict []
                 |)
@@ -3286,23 +3344,24 @@ Definition FixedUint : Value.t :=
       );
       (
         "__xor__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -3314,20 +3373,20 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "right" |),
+                  M.get_name (| globals, locals_stack, "right" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "right" |),
-                    M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                    M.get_name (| globals, locals_stack, "right" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -3338,14 +3397,14 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__xor__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__xor__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "right" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "right" |)
                   ],
                   make_dict []
                 |)
@@ -3357,23 +3416,24 @@ Definition FixedUint : Value.t :=
       );
       (
         "__rxor__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "left" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "left" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -3385,20 +3445,20 @@ Definition FixedUint : Value.t :=
             M.if_then_else (|
               BoolOp.or (|
                 Compare.lt (|
-                  M.get_name (| globals, "left" |),
+                  M.get_name (| globals, locals_stack, "left" |),
                   Constant.int 0
                 |),
                 ltac:(M.monadic (
                   Compare.gt (|
-                    M.get_name (| globals, "left" |),
-                    M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                    M.get_name (| globals, locals_stack, "left" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                   |)
                 ))
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "OverflowError" |),
+                M.get_name (| globals, locals_stack, "OverflowError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -3409,14 +3469,14 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__rxor__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__rxor__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "left" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "left" |)
                   ],
                   make_dict []
                 |)
@@ -3428,13 +3488,14 @@ Definition FixedUint : Value.t :=
       );
       (
         "__ixor__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__xor__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__xor__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -3443,22 +3504,23 @@ Definition FixedUint : Value.t :=
       );
       (
         "__invert__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 BinOp.bit_and (|
                   M.call (|
-                    M.get_field (| M.get_name (| globals, "int" |), "__invert__" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__invert__" |),
                     make_list [
-                      M.get_name (| globals, "self" |)
+                      M.get_name (| globals, locals_stack, "self" |)
                     ],
                     make_dict []
                   |),
-                  M.get_field (| M.get_name (| globals, "self" |), "MAX_VALUE" |)
+                  M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MAX_VALUE" |)
                 |)
               ],
               make_dict []
@@ -3468,23 +3530,24 @@ Definition FixedUint : Value.t :=
       );
       (
         "__rshift__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "shift_by" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "shift_by" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "shift_by" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "shift_by" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -3493,14 +3556,14 @@ Definition FixedUint : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "__class__" |);
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__class__" |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__rshift__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__rshift__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "shift_by" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "shift_by" |)
                   ],
                   make_dict []
                 |)
@@ -3512,8 +3575,9 @@ Definition FixedUint : Value.t :=
       );
       (
         "to_be_bytes",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Converts this unsigned integer into its big endian representation,
         omitting leading zero bytes.
@@ -3521,7 +3585,7 @@ Definition FixedUint : Value.t :=
           let _ := M.assign_local (|
             "bit_length" ,
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "bit_length" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "bit_length" |),
               make_list [],
               make_dict []
             |)
@@ -3530,7 +3594,7 @@ Definition FixedUint : Value.t :=
             "byte_length" ,
             BinOp.floor_div (|
               BinOp.add (|
-                M.get_name (| globals, "bit_length" |),
+                M.get_name (| globals, locals_stack, "bit_length" |),
                 Constant.int 7
               |),
               Constant.int 8
@@ -3538,9 +3602,9 @@ Definition FixedUint : Value.t :=
           |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "to_bytes" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "to_bytes" |),
               make_list [
-                M.get_name (| globals, "byte_length" |);
+                M.get_name (| globals, locals_stack, "byte_length" |);
                 Constant.str "big"
               ],
               make_dict []
@@ -3556,8 +3620,9 @@ Definition U256 : Value.t :=
     [
       (
         "from_be_bytes",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "cls"; "buffer" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "cls"; "buffer" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Converts a sequence of bytes into a fixed sized unsigned integer
         from its big endian representation.
@@ -3567,9 +3632,9 @@ Definition U256 : Value.t :=
             M.if_then_else (|
               Compare.gt (|
                 M.call (|
-                  M.get_name (| globals, "len" |),
+                  M.get_name (| globals, locals_stack, "len" |),
                   make_list [
-                    M.get_name (| globals, "buffer" |)
+                    M.get_name (| globals, locals_stack, "buffer" |)
                   ],
                   make_dict []
                 |),
@@ -3578,7 +3643,7 @@ Definition U256 : Value.t :=
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "ValueError" |),
+                M.get_name (| globals, locals_stack, "ValueError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -3589,12 +3654,12 @@ Definition U256 : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_name (| globals, "cls" |),
+              M.get_name (| globals, locals_stack, "cls" |),
               make_list [
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "from_bytes" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "from_bytes" |),
                   make_list [
-                    M.get_name (| globals, "buffer" |);
+                    M.get_name (| globals, locals_stack, "buffer" |);
                     Constant.str "big"
                   ],
                   make_dict []
@@ -3607,8 +3672,9 @@ Definition U256 : Value.t :=
       );
       (
         "from_signed",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "cls"; "value" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "cls"; "value" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Creates an unsigned integer representing `value` using two's
         complement.
@@ -3617,16 +3683,16 @@ Definition U256 : Value.t :=
             (* if *)
             M.if_then_else (|
               Compare.gt_e (|
-                M.get_name (| globals, "value" |),
+                M.get_name (| globals, locals_stack, "value" |),
                 Constant.int 0
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
                 M.call (|
-                  M.get_name (| globals, "cls" |),
+                  M.get_name (| globals, locals_stack, "cls" |),
                   make_list [
-                    M.get_name (| globals, "value" |)
+                    M.get_name (| globals, locals_stack, "value" |)
                   ],
                   make_dict []
                 |)
@@ -3638,11 +3704,11 @@ Definition U256 : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_name (| globals, "cls" |),
+              M.get_name (| globals, locals_stack, "cls" |),
               make_list [
                 BinOp.bit_and (|
-                  M.get_name (| globals, "value" |),
-                  M.get_field (| M.get_name (| globals, "cls" |), "MAX_VALUE" |)
+                  M.get_name (| globals, locals_stack, "value" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "MAX_VALUE" |)
                 |)
               ],
               make_dict []
@@ -3654,18 +3720,19 @@ Definition U256 : Value.t :=
     [
       (
         "to_be_bytes32",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Converts this 256-bit unsigned integer into its big endian
         representation with exactly 32 bytes.
         " in
           let _ := M.return_ (|
             M.call (|
-              M.get_name (| globals, "Bytes32" |),
+              M.get_name (| globals, locals_stack, "Bytes32" |),
               make_list [
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "self" |), "to_bytes" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "self" |), "to_bytes" |),
                   make_list [
                     Constant.int 32;
                     Constant.str "big"
@@ -3680,8 +3747,9 @@ Definition U256 : Value.t :=
       );
       (
         "to_signed",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Decodes a signed integer from its two's complement representation.
         " in
@@ -3690,7 +3758,7 @@ Definition U256 : Value.t :=
             M.if_then_else (|
               Compare.lt (|
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "self" |), "bit_length" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "self" |), "bit_length" |),
                   make_list [],
                   make_dict []
                 |),
@@ -3700,9 +3768,9 @@ Definition U256 : Value.t :=
             ltac:(M.monadic (
               let _ := M.return_ (|
                 M.call (|
-                  M.get_name (| globals, "int" |),
+                  M.get_name (| globals, locals_stack, "int" |),
                   make_list [
-                    M.get_name (| globals, "self" |)
+                    M.get_name (| globals, locals_stack, "self" |)
                   ],
                   make_dict []
                 |)
@@ -3715,13 +3783,13 @@ Definition U256 : Value.t :=
           let _ := M.return_ (|
             BinOp.sub (|
               M.call (|
-                M.get_name (| globals, "int" |),
+                M.get_name (| globals, locals_stack, "int" |),
                 make_list [
-                  M.get_name (| globals, "self" |)
+                  M.get_name (| globals, locals_stack, "self" |)
                 ],
                 make_dict []
               |),
-              M.get_name (| globals, "U256_CEIL_VALUE" |)
+              M.get_name (| globals, locals_stack, "U256_CEIL_VALUE" |)
             |)
           |) in
           M.pure Constant.None_))
@@ -3736,8 +3804,9 @@ Definition U32 : Value.t :=
     [
       (
         "from_le_bytes",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "cls"; "buffer" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "cls"; "buffer" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Converts a sequence of bytes into an arbitrarily sized unsigned integer
         from its little endian representation.
@@ -3747,9 +3816,9 @@ Definition U32 : Value.t :=
             M.if_then_else (|
               Compare.gt (|
                 M.call (|
-                  M.get_name (| globals, "len" |),
+                  M.get_name (| globals, locals_stack, "len" |),
                   make_list [
-                    M.get_name (| globals, "buffer" |)
+                    M.get_name (| globals, locals_stack, "buffer" |)
                   ],
                   make_dict []
                 |),
@@ -3758,7 +3827,7 @@ Definition U32 : Value.t :=
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "ValueError" |),
+                M.get_name (| globals, locals_stack, "ValueError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -3769,12 +3838,12 @@ Definition U32 : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_name (| globals, "cls" |),
+              M.get_name (| globals, locals_stack, "cls" |),
               make_list [
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "from_bytes" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "from_bytes" |),
                   make_list [
-                    M.get_name (| globals, "buffer" |);
+                    M.get_name (| globals, locals_stack, "buffer" |);
                     Constant.str "little"
                   ],
                   make_dict []
@@ -3789,18 +3858,19 @@ Definition U32 : Value.t :=
     [
       (
         "to_le_bytes4",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Converts this fixed sized unsigned integer into its little endian
         representation, with exactly 4 bytes.
         " in
           let _ := M.return_ (|
             M.call (|
-              M.get_name (| globals, "Bytes4" |),
+              M.get_name (| globals, locals_stack, "Bytes4" |),
               make_list [
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "self" |), "to_bytes" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "self" |), "to_bytes" |),
                   make_list [
                     Constant.int 4;
                     Constant.str "little"
@@ -3815,8 +3885,9 @@ Definition U32 : Value.t :=
       );
       (
         "to_le_bytes",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Converts this fixed sized unsigned integer into its little endian
         representation, in the fewest bytes possible.
@@ -3824,7 +3895,7 @@ Definition U32 : Value.t :=
           let _ := M.assign_local (|
             "bit_length" ,
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "bit_length" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "bit_length" |),
               make_list [],
               make_dict []
             |)
@@ -3833,7 +3904,7 @@ Definition U32 : Value.t :=
             "byte_length" ,
             BinOp.floor_div (|
               BinOp.add (|
-                M.get_name (| globals, "bit_length" |),
+                M.get_name (| globals, locals_stack, "bit_length" |),
                 Constant.int 7
               |),
               Constant.int 8
@@ -3841,9 +3912,9 @@ Definition U32 : Value.t :=
           |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "to_bytes" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "to_bytes" |),
               make_list [
-                M.get_name (| globals, "byte_length" |);
+                M.get_name (| globals, locals_stack, "byte_length" |);
                 Constant.str "little"
               ],
               make_dict []
@@ -3861,8 +3932,9 @@ Definition U64 : Value.t :=
     [
       (
         "from_le_bytes",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "cls"; "buffer" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "cls"; "buffer" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Converts a sequence of bytes into an arbitrarily sized unsigned integer
         from its little endian representation.
@@ -3872,9 +3944,9 @@ Definition U64 : Value.t :=
             M.if_then_else (|
               Compare.gt (|
                 M.call (|
-                  M.get_name (| globals, "len" |),
+                  M.get_name (| globals, locals_stack, "len" |),
                   make_list [
-                    M.get_name (| globals, "buffer" |)
+                    M.get_name (| globals, locals_stack, "buffer" |)
                   ],
                   make_dict []
                 |),
@@ -3883,7 +3955,7 @@ Definition U64 : Value.t :=
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "ValueError" |),
+                M.get_name (| globals, locals_stack, "ValueError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -3894,12 +3966,12 @@ Definition U64 : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_name (| globals, "cls" |),
+              M.get_name (| globals, locals_stack, "cls" |),
               make_list [
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "from_bytes" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "from_bytes" |),
                   make_list [
-                    M.get_name (| globals, "buffer" |);
+                    M.get_name (| globals, locals_stack, "buffer" |);
                     Constant.str "little"
                   ],
                   make_dict []
@@ -3912,8 +3984,9 @@ Definition U64 : Value.t :=
       );
       (
         "from_be_bytes",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "cls"; "buffer" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "cls"; "buffer" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Converts a sequence of bytes into an unsigned 64 bit integer from its
         big endian representation.
@@ -3923,9 +3996,9 @@ Definition U64 : Value.t :=
             M.if_then_else (|
               Compare.gt (|
                 M.call (|
-                  M.get_name (| globals, "len" |),
+                  M.get_name (| globals, locals_stack, "len" |),
                   make_list [
-                    M.get_name (| globals, "buffer" |)
+                    M.get_name (| globals, locals_stack, "buffer" |)
                   ],
                   make_dict []
                 |),
@@ -3934,7 +4007,7 @@ Definition U64 : Value.t :=
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "ValueError" |),
+                M.get_name (| globals, locals_stack, "ValueError" |),
                 make_list [],
                 make_dict []
               |)) |) in
@@ -3945,12 +4018,12 @@ Definition U64 : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_name (| globals, "cls" |),
+              M.get_name (| globals, locals_stack, "cls" |),
               make_list [
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "from_bytes" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "from_bytes" |),
                   make_list [
-                    M.get_name (| globals, "buffer" |);
+                    M.get_name (| globals, locals_stack, "buffer" |);
                     Constant.str "big"
                   ],
                   make_dict []
@@ -3965,18 +4038,19 @@ Definition U64 : Value.t :=
     [
       (
         "to_le_bytes8",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Converts this fixed sized unsigned integer into its little endian
         representation, with exactly 8 bytes.
         " in
           let _ := M.return_ (|
             M.call (|
-              M.get_name (| globals, "Bytes8" |),
+              M.get_name (| globals, locals_stack, "Bytes8" |),
               make_list [
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "self" |), "to_bytes" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "self" |), "to_bytes" |),
                   make_list [
                     Constant.int 8;
                     Constant.str "little"
@@ -3991,8 +4065,9 @@ Definition U64 : Value.t :=
       );
       (
         "to_le_bytes",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Converts this fixed sized unsigned integer into its little endian
         representation, in the fewest bytes possible.
@@ -4000,7 +4075,7 @@ Definition U64 : Value.t :=
           let _ := M.assign_local (|
             "bit_length" ,
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "bit_length" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "bit_length" |),
               make_list [],
               make_dict []
             |)
@@ -4009,7 +4084,7 @@ Definition U64 : Value.t :=
             "byte_length" ,
             BinOp.floor_div (|
               BinOp.add (|
-                M.get_name (| globals, "bit_length" |),
+                M.get_name (| globals, locals_stack, "bit_length" |),
                 Constant.int 7
               |),
               Constant.int 8
@@ -4017,9 +4092,9 @@ Definition U64 : Value.t :=
           |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "to_bytes" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "to_bytes" |),
               make_list [
-                M.get_name (| globals, "byte_length" |);
+                M.get_name (| globals, locals_stack, "byte_length" |);
                 Constant.str "little"
               ],
               make_dict []
@@ -4033,7 +4108,7 @@ Definition U64 : Value.t :=
 
 Definition B : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "TypeVar" |),
+    M.get_name (| globals, locals_stack, "TypeVar" |),
     make_list [
       Constant.str "B"
     ],
@@ -4050,8 +4125,9 @@ Definition FixedBytes : Value.t :=
     [
       (
         "__new__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "cls" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "cls" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Create a new instance, ensuring the result has the correct length.
         " in
@@ -4059,18 +4135,18 @@ Definition FixedBytes : Value.t :=
             "result" ,
             M.call (|
               M.get_field (| M.call (|
-                M.get_name (| globals, "super" |),
+                M.get_name (| globals, locals_stack, "super" |),
                 make_list [
-                  M.get_name (| globals, "FixedBytes" |);
-                  M.get_name (| globals, "cls" |)
+                  M.get_name (| globals, locals_stack, "FixedBytes" |);
+                  M.get_name (| globals, locals_stack, "cls" |)
                 ],
                 make_dict []
               |), "__new__" |),
               make_list_concat (| [
                 make_list [
-                  M.get_name (| globals, "cls" |)
+                  M.get_name (| globals, locals_stack, "cls" |)
                 ];
-                M.get_name (| globals, "args" |)
+                M.get_name (| globals, locals_stack, "args" |)
               ] |),
               make_dict []
             |)
@@ -4080,18 +4156,18 @@ Definition FixedBytes : Value.t :=
             M.if_then_else (|
               Compare.not_eq (|
                 M.call (|
-                  M.get_name (| globals, "len" |),
+                  M.get_name (| globals, locals_stack, "len" |),
                   make_list [
-                    M.get_name (| globals, "result" |)
+                    M.get_name (| globals, locals_stack, "result" |)
                   ],
                   make_dict []
                 |),
-                M.get_field (| M.get_name (| globals, "cls" |), "LENGTH" |)
+                M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "LENGTH" |)
               |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.raise (| Some (M.call (|
-                M.get_name (| globals, "ValueError" |),
+                M.get_name (| globals, locals_stack, "ValueError" |),
                 make_list [
                   Constant.str "(* At expr: unsupported node type: JoinedStr *)"
                 ],
@@ -4103,7 +4179,7 @@ Definition FixedBytes : Value.t :=
               M.pure Constant.None_
             )) |) in
           let _ := M.return_ (|
-            M.get_name (| globals, "result" |)
+            M.get_name (| globals, locals_stack, "result" |)
           |) in
           M.pure Constant.None_))
       )
@@ -4190,7 +4266,7 @@ Definition Bytes256 : Value.t :=
     ].
 
 Definition Bytes : Value.t := M.run ltac:(M.monadic (
-  M.get_name (| globals, "bytes" |)
+  M.get_name (| globals, locals_stack, "bytes" |)
 )).
 
 Definition expr_925 : Value.t :=
@@ -4199,15 +4275,16 @@ Sequence of bytes (octets) of arbitrary length.
 ".
 
 Definition _setattr_function : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "self"; "attr"; "value" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "attr"; "value" ] in
+    ltac:(M.monadic (
     let _ :=
       (* if *)
       M.if_then_else (|
         M.call (|
-          M.get_name (| globals, "getattr" |),
+          M.get_name (| globals, locals_stack, "getattr" |),
           make_list [
-            M.get_name (| globals, "self" |);
+            M.get_name (| globals, locals_stack, "self" |);
             Constant.str "_frozen";
             Constant.None_
           ],
@@ -4216,7 +4293,7 @@ Definition _setattr_function : Value.t -> Value.t -> M :=
       (* then *)
       ltac:(M.monadic (
         let _ := M.raise (| Some (M.call (|
-          M.get_name (| globals, "Exception" |),
+          M.get_name (| globals, locals_stack, "Exception" |),
           make_list [
             Constant.str "Mutating frozen dataclasses is not allowed."
           ],
@@ -4226,11 +4303,11 @@ Definition _setattr_function : Value.t -> Value.t -> M :=
       (* else *)
       )), ltac:(M.monadic (
         let _ := M.call (|
-    M.get_field (| M.get_name (| globals, "object" |), "__setattr__" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "object" |), "__setattr__" |),
     make_list [
-      M.get_name (| globals, "self" |);
-      M.get_name (| globals, "attr" |);
-      M.get_name (| globals, "value" |)
+      M.get_name (| globals, locals_stack, "self" |);
+      M.get_name (| globals, locals_stack, "attr" |);
+      M.get_name (| globals, locals_stack, "value" |)
     ],
     make_dict []
   |) in
@@ -4239,16 +4316,17 @@ Definition _setattr_function : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition _delattr_function : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "self"; "attr" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "attr" ] in
+    ltac:(M.monadic (
     let _ :=
       (* if *)
       M.if_then_else (|
-        M.get_field (| M.get_name (| globals, "self" |), "_frozen" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "self" |), "_frozen" |),
       (* then *)
       ltac:(M.monadic (
         let _ := M.raise (| Some (M.call (|
-          M.get_name (| globals, "Exception" |),
+          M.get_name (| globals, locals_stack, "Exception" |),
           make_list [
             Constant.str "Mutating frozen dataclasses is not allowed."
           ],
@@ -4258,10 +4336,10 @@ Definition _delattr_function : Value.t -> Value.t -> M :=
       (* else *)
       )), ltac:(M.monadic (
         let _ := M.call (|
-    M.get_field (| M.get_name (| globals, "object" |), "__delattr__" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "object" |), "__delattr__" |),
     make_list [
-      M.get_name (| globals, "self" |);
-      M.get_name (| globals, "attr" |)
+      M.get_name (| globals, locals_stack, "self" |);
+      M.get_name (| globals, locals_stack, "attr" |)
     ],
     make_dict []
   |) in
@@ -4270,17 +4348,19 @@ Definition _delattr_function : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition _make_init_function : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "f" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "f" ] in
+    ltac:(M.monadic (
 (* At stmt: unsupported node type: FunctionDef *)
     let _ := M.return_ (|
-      M.get_name (| globals, "init_function" |)
+      M.get_name (| globals, locals_stack, "init_function" |)
     |) in
     M.pure Constant.None_)).
 
 Definition slotted_freezable : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "cls" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "cls" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Monkey patches a dataclass so it can be frozen by setting `_frozen` to
     `True` and uses `__slots__` for efficiency.
@@ -4289,52 +4369,52 @@ Definition slotted_freezable : Value.t -> Value.t -> M :=
     to `__init__`.
     " in
     let _ := M.assign (|
-      M.get_field (| M.get_name (| globals, "cls" |), "__slots__" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "__slots__" |),
       BinOp.add (|
         make_tuple [ Constant.str "_frozen" ],
         M.call (|
-          M.get_name (| globals, "tuple" |),
+          M.get_name (| globals, locals_stack, "tuple" |),
           make_list [
-            M.get_field (| M.get_name (| globals, "cls" |), "__annotations__" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "__annotations__" |)
           ],
           make_dict []
         |)
       |)
     |) in
     let _ := M.assign (|
-      M.get_field (| M.get_name (| globals, "cls" |), "__init__" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "__init__" |),
       M.call (|
-        M.get_name (| globals, "_make_init_function" |),
+        M.get_name (| globals, locals_stack, "_make_init_function" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "cls" |), "__init__" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "__init__" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.assign (|
-      M.get_field (| M.get_name (| globals, "cls" |), "__setattr__" |),
-      M.get_name (| globals, "_setattr_function" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "__setattr__" |),
+      M.get_name (| globals, locals_stack, "_setattr_function" |)
     |) in
     let _ := M.assign (|
-      M.get_field (| M.get_name (| globals, "cls" |), "__delattr__" |),
-      M.get_name (| globals, "_delattr_function" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "__delattr__" |),
+      M.get_name (| globals, locals_stack, "_delattr_function" |)
     |) in
     let _ := M.return_ (|
       M.call (|
         M.call (|
-          M.get_name (| globals, "type" |),
+          M.get_name (| globals, locals_stack, "type" |),
           make_list [
-            M.get_name (| globals, "cls" |)
+            M.get_name (| globals, locals_stack, "cls" |)
           ],
           make_dict []
         |),
         make_list [
-          M.get_field (| M.get_name (| globals, "cls" |), "__name__" |);
-          M.get_field (| M.get_name (| globals, "cls" |), "__bases__" |);
+          M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "__name__" |);
+          M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "__bases__" |);
           M.call (|
-            M.get_name (| globals, "dict" |),
+            M.get_name (| globals, locals_stack, "dict" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "cls" |), "__dict__" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "__dict__" |)
             ],
             make_dict []
           |)
@@ -4346,7 +4426,7 @@ Definition slotted_freezable : Value.t -> Value.t -> M :=
 
 Definition S : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "TypeVar" |),
+    M.get_name (| globals, locals_stack, "TypeVar" |),
     make_list [
       Constant.str "S"
     ],
@@ -4355,8 +4435,9 @@ Definition S : Value.t := M.run ltac:(M.monadic (
 )).
 
 Definition modify : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "obj"; "f" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "obj"; "f" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Create a copy of `obj` (which must be [`@slotted_freezable`]), and modify
     it by applying `f`. The returned copy will be frozen.
@@ -4364,42 +4445,42 @@ Definition modify : Value.t -> Value.t -> M :=
     [`@slotted_freezable`]: ref:ethereum.base_types.slotted_freezable
     " in
     let _ := M.assert (| M.call (|
-    M.get_name (| globals, "is_dataclass" |),
+    M.get_name (| globals, locals_stack, "is_dataclass" |),
     make_list [
-      M.get_name (| globals, "obj" |)
+      M.get_name (| globals, locals_stack, "obj" |)
     ],
     make_dict []
   |) |) in
     let _ := M.assert (| M.call (|
-    M.get_name (| globals, "isinstance" |),
+    M.get_name (| globals, locals_stack, "isinstance" |),
     make_list [
-      M.get_name (| globals, "obj" |);
-      M.get_name (| globals, "SlottedFreezable" |)
+      M.get_name (| globals, locals_stack, "obj" |);
+      M.get_name (| globals, locals_stack, "SlottedFreezable" |)
     ],
     make_dict []
   |) |) in
     let _ := M.assign_local (|
       "new_obj" ,
       M.call (|
-        M.get_name (| globals, "replace" |),
+        M.get_name (| globals, locals_stack, "replace" |),
         make_list [
-          M.get_name (| globals, "obj" |)
+          M.get_name (| globals, locals_stack, "obj" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "f" |),
+    M.get_name (| globals, locals_stack, "f" |),
     make_list [
-      M.get_name (| globals, "new_obj" |)
+      M.get_name (| globals, locals_stack, "new_obj" |)
     ],
     make_dict []
   |) in
     let _ := M.assign (|
-      M.get_field (| M.get_name (| globals, "new_obj" |), "_frozen" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "new_obj" |), "_frozen" |),
       Constant.bool true
     |) in
     let _ := M.return_ (|
-      M.get_name (| globals, "new_obj" |)
+      M.get_name (| globals, locals_stack, "new_obj" |)
     |) in
     M.pure Constant.None_)).

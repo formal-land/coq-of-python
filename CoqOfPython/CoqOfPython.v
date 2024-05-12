@@ -15,6 +15,19 @@ Global Open Scope type_scope.
 
 Export List.ListNotations.
 
+Module Dict.
+  Definition t (Value : Set) : Set :=
+    list (string * Value).
+
+  Parameter read : forall {Value : Set}, t Value -> string -> option Value.
+
+  Parameter write : forall {Value : Set}, t Value -> string -> Value -> t Value.
+End Dict.
+
+Module Globals.
+  Definition t : Set := string.
+End Globals.
+
 Module Data.
   (** This type is not accessible directly in Python, as only object are. We use this type
       internally to represent integers, closures, ... that can be made accessible in a special
@@ -30,10 +43,10 @@ Module Data.
       a list when the number of elements is not statically known. *)
   | List (items : list Value)
   | Set_ (items : list Value)
-  | Dict (dict : list (string * Value))
+  | Dict (dict : Dict.t Value)
   | Closure {Value M : Set} (f : Value -> Value -> M)
   | Klass {Value M : Set}
-    (bases : list (string * string))
+    (bases : list (Globals.t * string))
     (class_methods : list (string * (Value -> Value -> M)))
     (methods : list (string * (Value -> Value -> M))).
   Arguments Ellipsis {_}.
@@ -52,7 +65,7 @@ End Data.
 Module Object.
   Record t {Value : Set} : Set := {
     internal : option (Data.t Value);
-    fields : list (string * Value);
+    fields : Dict.t Value;
   }.
   Arguments t : clear implicits.
   Arguments Build_t {_}.
@@ -81,28 +94,74 @@ End Pointer.
 
 Module Value.
   Inductive t : Set :=
-  | Make (globals : string) (klass : string) (value : Pointer.t t).
+  | Make (globals : Globals.t) (klass : string) (value : Pointer.t t).
 End Value.
+
+Module Locals.
+  Definition t : Set := Pointer.Mutable.t Value.t.
+End Locals.
+
+(** ** Constants *)
+Module Constant.
+  Definition None_ : Value.t :=
+    Value.Make "builtins" "NoneType" (Pointer.Imm {|
+      Object.internal := None;
+      Object.fields := [];
+    |}).
+
+  Definition ellipsis : Value.t :=
+    Value.Make "builtins" "ellipsis" (Pointer.Imm (Object.wrapper Data.Ellipsis)).
+
+  Definition bool (b : bool) : Value.t :=
+    Value.Make "builtins" "bool" (Pointer.Imm (Object.wrapper (Data.Bool b))).
+
+  Definition int (z : Z) : Value.t :=
+    Value.Make "builtins" "int" (Pointer.Imm (Object.wrapper (Data.Integer z))).
+
+  Definition float (f : string) : Value.t :=
+    Value.Make "builtins" "float" (Pointer.Imm (Object.wrapper (Data.Float f))).
+
+  Definition str (s : string) : Value.t :=
+    Value.Make "builtins" "str" (Pointer.Imm (Object.wrapper (Data.String s))).
+
+  Definition bytes (b : string) : Value.t :=
+    Value.Make "builtins" "bytes" (Pointer.Imm (Object.wrapper (Data.String b))).
+End Constant.
+
+Definition make_tuple (items : list Value.t) : Value.t :=
+  Value.Make "builtins" "tuple" (Pointer.Imm (Object.wrapper (Data.Tuple items))).
+
+Definition make_list (items : list Value.t) : Value.t :=
+  Value.Make "builtins" "list" (Pointer.Imm (Object.wrapper (Data.List items))).
+
+Definition make_set (items : list Value.t) : Value.t :=
+  Value.Make "builtins" "set" (Pointer.Imm (Object.wrapper (Data.Set_ items))).
+
+Parameter order_dict : list (string * Value.t) -> list (string * Value.t).
+
+Definition make_dict (dict : list (string * Value.t)) : Value.t :=
+  Value.Make "builtins" "dict" (Pointer.Imm (Object.wrapper (Data.Dict (order_dict dict)))).
 
 Module Primitive.
   Inductive t : Set -> Set :=
-  | StateAlloc (value : Value.t) : t unit
+  | StateAlloc (object : Object.t Value.t) : t (Pointer.Mutable.t Value.t)
   | StateRead (mutable : Pointer.Mutable.t Value.t) : t (Object.t Value.t)
-  | StateWrite (mutable : Pointer.Mutable.t Value.t) (update : Value.t) : t unit.
+  | StateWrite (mutable : Pointer.Mutable.t Value.t) (update : Object.t Value.t) : t unit
+  | GetInGlobals (globals : Globals.t) (name : string) : t Value.t.
 End Primitive.
 
 Module LowM.
   Inductive t (A : Set) : Set :=
   | Pure (a : A)
   | CallPrimitive {B : Set} (primitive : Primitive.t B) (k : B -> t A)
-  | CallClosure (closure : Value.t) (args kwargs : Value.t) (k : A -> t A)
+  | CallClosure {B : Set} (closure : Value.t) (args kwargs : Value.t) (k : B -> t A)
   | Impossible.
   Arguments Pure {_}.
   Arguments CallPrimitive {_ _}.
-  Arguments CallClosure {_}.
+  Arguments CallClosure {_ _}.
   Arguments Impossible {_}.
 
-  Fixpoint bind {A : Set} (e1 : t A) (e2 : A -> t A) : t A :=
+  Fixpoint bind {A B : Set} (e1 : t A) (e2 : A -> t B) : t B :=
     match e1 with
     | Pure a => e2 a
     | CallPrimitive primitive k => CallPrimitive primitive (fun v => bind (k v) e2)
@@ -136,6 +195,9 @@ Module M.
     | inr e => LowM.Pure (inr e)
     end).
 
+  Definition impossible : M :=
+    LowM.Impossible.
+
   (** This axiom is only used as a marker for the [monadic] tactic below, and should not appear in
       the final code of the definitions once the tactic is applied. *)
   Parameter run : M -> Value.t.
@@ -161,6 +223,10 @@ Module M.
       (run e)
       (at level 100).
   End Notations.
+  Import Notations.
+
+  Definition call_primitive {A : Set} (primitive : Primitive.t A) : LowM.t A :=
+    LowM.CallPrimitive primitive LowM.Pure.
 
   Definition call (f : Value.t) (args kwargs : Value.t) : M :=
     LowM.CallClosure f args kwargs LowM.Pure.
@@ -170,20 +236,69 @@ Module M.
     match pointer with
     | Pointer.Imm obj =>
       LowM.Pure obj
-    | Pointer.Mutable mutable =>
-      LowM.CallPrimitive (Primitive.StateRead mutable) LowM.Pure
+    | Pointer.Mutable mutable => call_primitive (Primitive.StateRead mutable)
     end.
 
-  Parameter get_field : Value.t -> string -> M.
+  Definition get_field (value : Value.t) (field : string) : M :=
+    let- obj := get_object value in
+    match Dict.read obj.(Object.fields) field with
+    | Some value => pure value
+    | None => impossible
+    end.
 
   (** For the `x[i]` syntax. *)
-  Parameter get_subscript : Value.t -> Value.t -> M.
+  Definition get_subscript (value : Value.t) (key : Value.t) : M :=
+    let* __getitem__ := get_field value "__getitem__" in
+    call __getitem__ (make_tuple [key]) (make_dict []).
 
   Parameter slice : Value.t -> Value.t -> Value.t -> Value.t -> M.
 
-  Parameter get_name : string -> string -> M.
+  Fixpoint get_name_in_locals_stack
+      (locals_stack : list Locals.t)
+      (name : string) :
+      LowM.t (option Value.t) :=
+    match locals_stack with
+    | [] => LowM.Pure None
+    | locals :: locals_stack =>
+      let- locals_object := call_primitive (Primitive.StateRead locals) in
+      match Dict.read locals_object.(Object.fields) name with
+      | Some value => LowM.Pure (Some value)
+      | None => get_name_in_locals_stack locals_stack name
+      end
+    end.
 
-  Parameter set_locals : Value.t -> Value.t -> list string -> M.
+  Definition get_name (globals : Globals.t) (locals_stack : list Locals.t) (name : string) : M :=
+    let- value_in_locals_stack := get_name_in_locals_stack locals_stack name in
+    match value_in_locals_stack with
+    | Some value => pure value
+    | None =>
+      let- value := call_primitive (Primitive.GetInGlobals globals name) in
+      pure value
+    end.
+
+  Fixpoint fields_of_args (args_values : list Value.t) (arg_names : list string) : Dict.t Value.t :=
+    match args_values, arg_names with
+    | value :: args_values, name :: arg_names =>
+      Dict.write (fields_of_args args_values arg_names) name value
+    | _, _ => []
+    end.
+
+  Definition create_locals
+      (locals_stack : list Locals.t)
+      (args kwargs : Value.t)
+      (arg_names : list string) :
+      LowM.t (list Locals.t) :=
+    let- args_object := get_object args in
+    let- args_values :=
+      match args_object.(Object.internal) with
+      | Some (Data.List arg_values) => LowM.Pure arg_values
+      | _ => LowM.Impossible
+      end in
+    let- new_locals := call_primitive (Primitive.StateAlloc {|
+      Object.internal := None;
+      Object.fields := fields_of_args args_values arg_names;
+    |}) in
+    LowM.Pure (new_locals :: locals_stack).
 
   Parameter assign : Value.t -> Value.t -> M.
 
@@ -207,8 +322,6 @@ Module M.
 
   Parameter assert : Value.t -> M.
 
-  Parameter impossible : M.
-
   Parameter if_then_else : Value.t -> M -> M -> M.
 
   Parameter for_ : Value.t -> Value.t -> M -> M -> M.
@@ -221,7 +334,7 @@ Module M.
   Ltac monadic e :=
     lazymatch e with
     | context ctxt [let v : _ := ?x in @?f v] =>
-      refine (let_ _ _);
+      refine (bind _ _);
         [ monadic x
         | let v' := fresh v in
           intro v';
@@ -229,7 +342,7 @@ Module M.
           lazymatch context ctxt [let v := x in y] with
           | let _ := x in y => monadic y
           | _ =>
-            refine (let_ _ _);
+            refine (bind _ _);
               [ monadic y
               | let w := fresh "v" in
                 intro w;
@@ -242,7 +355,7 @@ Module M.
       lazymatch context ctxt [run x] with
       | run x => monadic x
       | _ =>
-        refine (let_ _ _);
+        refine (bind _ _);
           [ monadic x
           | let v := fresh "v" in
             intro v;
@@ -330,68 +443,26 @@ End Compare.
 
 (** ** Builtins *)
 Module builtins.
-  Definition globals : string := "builtins".
-
   Definition make_klass
     (bases : list (string * string))
     (class_methods : list (string * (Value.t -> Value.t -> M)))
     (methods : list (string * (Value.t -> Value.t -> M))) :
     Value.t :=
-  Value.Make builtins.globals "type" (Pointer.Imm (Object.wrapper (
+  Value.Make "builtins" "type" (Pointer.Imm (Object.wrapper (
     Data.Klass bases class_methods methods
   ))).
 
   Definition type : Value.t :=
     make_klass [] [] [].
-  Axiom type_in_globals : IsInGlobals globals type "type".
+  Axiom type_in_globals : IsInGlobals "builtins" type "type".
 
   Definition int : Value.t :=
     make_klass [] [] [].
-  Axiom int_in_globals : IsInGlobals globals int "int".
+  Axiom int_in_globals : IsInGlobals "builtins" int "int".
 
   Definition str : Value.t :=
     make_klass [] [] [].
-  Axiom str_in_globals : IsInGlobals globals str "str".
+  Axiom str_in_globals : IsInGlobals "builtins" str "str".
 End builtins.
 
-Module Constant.
-  Definition None_ : Value.t :=
-    Value.Make builtins.globals "NoneType" (Pointer.Imm {|
-      Object.internal := None;
-      Object.fields := [];
-    |}).
-
-  Definition ellipsis : Value.t :=
-    Value.Make builtins.globals "ellipsis" (Pointer.Imm (Object.wrapper Data.Ellipsis)).
-
-  Definition bool (b : bool) : Value.t :=
-    Value.Make builtins.globals "bool" (Pointer.Imm (Object.wrapper (Data.Bool b))).
-
-  Definition int (z : Z) : Value.t :=
-    Value.Make builtins.globals "int" (Pointer.Imm (Object.wrapper (Data.Integer z))).
-
-  Definition float (f : string) : Value.t :=
-    Value.Make builtins.globals "float" (Pointer.Imm (Object.wrapper (Data.Float f))).
-
-  Definition str (s : string) : Value.t :=
-    Value.Make builtins.globals "str" (Pointer.Imm (Object.wrapper (Data.String s))).
-
-  Definition bytes (b : string) : Value.t :=
-    Value.Make builtins.globals "bytes" (Pointer.Imm (Object.wrapper (Data.String b))).
-End Constant.
-
-Definition make_tuple (items : list Value.t) : Value.t :=
-  Value.Make builtins.globals "tuple" (Pointer.Imm (Object.wrapper (Data.Tuple items))).
-
-Definition make_list (items : list Value.t) : Value.t :=
-  Value.Make builtins.globals "list" (Pointer.Imm (Object.wrapper (Data.List items))).
-
 Parameter make_list_concat : list Value.t -> M.
-
-Definition make_set (items : list Value.t) : Value.t :=
-  Value.Make builtins.globals "set" (Pointer.Imm (Object.wrapper (Data.Set_ items))).
-
-Parameter order_dict : list (string * Value.t) -> list (string * Value.t).
-
-Definition make_dict (dict : list (string * Value.t)) : Value.t :=
-  Value.Make builtins.globals "dict" (Pointer.Imm (Object.wrapper (Data.Dict (order_dict dict)))).

@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.gray_glacier.vm.precompiled_contracts.ripemd160".
+Definition globals : Globals.t := "ethereum.gray_glacier.vm.precompiled_contracts.ripemd160".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -39,8 +41,9 @@ Axiom ethereum_gray_glacier_vm_gas_imports_charge_gas :
   IsImported globals "ethereum.gray_glacier.vm.gas" "charge_gas".
 
 Definition ripemd160 : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Writes the ripemd160 hash to output.
 
@@ -51,21 +54,21 @@ Definition ripemd160 : Value.t -> Value.t -> M :=
     " in
     let _ := M.assign_local (|
       "data" ,
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |)
+      M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "data" |)
     |) in
     let _ := M.assign_local (|
       "word_count" ,
       BinOp.floor_div (|
         M.call (|
-          M.get_name (| globals, "ceil32" |),
+          M.get_name (| globals, locals_stack, "ceil32" |),
           make_list [
             M.call (|
-              M.get_name (| globals, "Uint" |),
+              M.get_name (| globals, locals_stack, "Uint" |),
               make_list [
                 M.call (|
-                  M.get_name (| globals, "len" |),
+                  M.get_name (| globals, locals_stack, "len" |),
                   make_list [
-                    M.get_name (| globals, "data" |)
+                    M.get_name (| globals, locals_stack, "data" |)
                   ],
                   make_dict []
                 |)
@@ -79,14 +82,14 @@ Definition ripemd160 : Value.t -> Value.t -> M :=
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, locals_stack, "evm" |);
       BinOp.add (|
-        M.get_name (| globals, "GAS_RIPEMD160" |),
+        M.get_name (| globals, locals_stack, "GAS_RIPEMD160" |),
         BinOp.mult (|
-          M.get_name (| globals, "GAS_RIPEMD160_WORD" |),
-          M.get_name (| globals, "word_count" |)
+          M.get_name (| globals, locals_stack, "GAS_RIPEMD160_WORD" |),
+          M.get_name (| globals, locals_stack, "word_count" |)
         |)
       |)
     ],
@@ -96,10 +99,10 @@ Definition ripemd160 : Value.t -> Value.t -> M :=
       "hash_bytes" ,
       M.call (|
         M.get_field (| M.call (|
-          M.get_field (| M.get_name (| globals, "hashlib" |), "new" |),
+          M.get_field (| M.get_name (| globals, locals_stack, "hashlib" |), "new" |),
           make_list [
             Constant.str "ripemd160";
-            M.get_name (| globals, "data" |)
+            M.get_name (| globals, locals_stack, "data" |)
           ],
           make_dict []
         |), "digest" |),
@@ -110,16 +113,16 @@ Definition ripemd160 : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "padded_hash" ,
       M.call (|
-        M.get_name (| globals, "left_pad_zero_bytes" |),
+        M.get_name (| globals, locals_stack, "left_pad_zero_bytes" |),
         make_list [
-          M.get_name (| globals, "hash_bytes" |);
+          M.get_name (| globals, locals_stack, "hash_bytes" |);
           Constant.int 32
         ],
         make_dict []
       |)
     |) in
     let _ := M.assign (|
-      M.get_field (| M.get_name (| globals, "evm" |), "output" |),
-      M.get_name (| globals, "padded_hash" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "output" |),
+      M.get_name (| globals, locals_stack, "padded_hash" |)
     |) in
     M.pure Constant.None_)).

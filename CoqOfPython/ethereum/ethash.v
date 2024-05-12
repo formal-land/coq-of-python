@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.ethash".
+Definition globals : Globals.t := "ethereum.ethash".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -194,8 +196,9 @@ Number of accesses in the [`hashimoto`] loop.
 ".
 
 Definition epoch : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "block_number" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "block_number" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Obtain the epoch number to which the block identified by `block_number`
     belongs. The first epoch is numbered zero.
@@ -209,15 +212,16 @@ Definition epoch : Value.t -> Value.t -> M :=
     " in
     let _ := M.return_ (|
       BinOp.floor_div (|
-        M.get_name (| globals, "block_number" |),
-        M.get_name (| globals, "EPOCH_SIZE" |)
+        M.get_name (| globals, locals_stack, "block_number" |),
+        M.get_name (| globals, locals_stack, "EPOCH_SIZE" |)
       |)
     |) in
     M.pure Constant.None_)).
 
 Definition cache_size : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "block_number" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "block_number" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Obtain the cache size (in bytes) of the epoch to which `block_number`
     belongs.
@@ -238,13 +242,13 @@ Definition cache_size : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "size" ,
       BinOp.add (|
-        M.get_name (| globals, "INITIAL_CACHE_SIZE" |),
+        M.get_name (| globals, locals_stack, "INITIAL_CACHE_SIZE" |),
         BinOp.mult (|
-          M.get_name (| globals, "CACHE_EPOCH_GROWTH_SIZE" |),
+          M.get_name (| globals, locals_stack, "CACHE_EPOCH_GROWTH_SIZE" |),
           M.call (|
-            M.get_name (| globals, "epoch" |),
+            M.get_name (| globals, locals_stack, "epoch" |),
             make_list [
-              M.get_name (| globals, "block_number" |)
+              M.get_name (| globals, locals_stack, "block_number" |)
             ],
             make_dict []
           |)
@@ -254,16 +258,16 @@ Definition cache_size : Value.t -> Value.t -> M :=
     let _ := M.assign_op_local (|
       BinOp.sub,
       "size",
-      M.get_name (| globals, "HASH_BYTES" |)
+      M.get_name (| globals, locals_stack, "HASH_BYTES" |)
     |) in
     let _ :=
       M.while (|
         UnOp.not (| M.call (|
-      M.get_name (| globals, "is_prime" |),
+      M.get_name (| globals, locals_stack, "is_prime" |),
       make_list [
         BinOp.floor_div (|
-          M.get_name (| globals, "size" |),
-          M.get_name (| globals, "HASH_BYTES" |)
+          M.get_name (| globals, locals_stack, "size" |),
+          M.get_name (| globals, locals_stack, "HASH_BYTES" |)
         |)
       ],
       make_dict []
@@ -274,7 +278,7 @@ Definition cache_size : Value.t -> Value.t -> M :=
             "size",
             BinOp.mult (|
     Constant.int 2,
-    M.get_name (| globals, "HASH_BYTES" |)
+    M.get_name (| globals, locals_stack, "HASH_BYTES" |)
   |)
           |) in
           M.pure Constant.None_
@@ -284,13 +288,14 @@ Definition cache_size : Value.t -> Value.t -> M :=
         ))
     |) in
     let _ := M.return_ (|
-      M.get_name (| globals, "size" |)
+      M.get_name (| globals, locals_stack, "size" |)
     |) in
     M.pure Constant.None_)).
 
 Definition dataset_size : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "block_number" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "block_number" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Obtain the dataset size (in bytes) of the epoch to which `block_number`
     belongs.
@@ -313,13 +318,13 @@ Definition dataset_size : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "size" ,
       BinOp.add (|
-        M.get_name (| globals, "INITIAL_DATASET_SIZE" |),
+        M.get_name (| globals, locals_stack, "INITIAL_DATASET_SIZE" |),
         BinOp.mult (|
-          M.get_name (| globals, "DATASET_EPOCH_GROWTH_SIZE" |),
+          M.get_name (| globals, locals_stack, "DATASET_EPOCH_GROWTH_SIZE" |),
           M.call (|
-            M.get_name (| globals, "epoch" |),
+            M.get_name (| globals, locals_stack, "epoch" |),
             make_list [
-              M.get_name (| globals, "block_number" |)
+              M.get_name (| globals, locals_stack, "block_number" |)
             ],
             make_dict []
           |)
@@ -329,16 +334,16 @@ Definition dataset_size : Value.t -> Value.t -> M :=
     let _ := M.assign_op_local (|
       BinOp.sub,
       "size",
-      M.get_name (| globals, "MIX_BYTES" |)
+      M.get_name (| globals, locals_stack, "MIX_BYTES" |)
     |) in
     let _ :=
       M.while (|
         UnOp.not (| M.call (|
-      M.get_name (| globals, "is_prime" |),
+      M.get_name (| globals, locals_stack, "is_prime" |),
       make_list [
         BinOp.floor_div (|
-          M.get_name (| globals, "size" |),
-          M.get_name (| globals, "MIX_BYTES" |)
+          M.get_name (| globals, locals_stack, "size" |),
+          M.get_name (| globals, locals_stack, "MIX_BYTES" |)
         |)
       ],
       make_dict []
@@ -349,7 +354,7 @@ Definition dataset_size : Value.t -> Value.t -> M :=
             "size",
             BinOp.mult (|
     Constant.int 2,
-    M.get_name (| globals, "MIX_BYTES" |)
+    M.get_name (| globals, locals_stack, "MIX_BYTES" |)
   |)
           |) in
           M.pure Constant.None_
@@ -359,13 +364,14 @@ Definition dataset_size : Value.t -> Value.t -> M :=
         ))
     |) in
     let _ := M.return_ (|
-      M.get_name (| globals, "size" |)
+      M.get_name (| globals, locals_stack, "size" |)
     |) in
     M.pure Constant.None_)).
 
 Definition generate_seed : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "block_number" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "block_number" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Obtain the cache generation seed for the block identified by
     `block_number`. See [`generate_cache`].
@@ -375,9 +381,9 @@ Definition generate_seed : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "epoch_number" ,
       M.call (|
-        M.get_name (| globals, "epoch" |),
+        M.get_name (| globals, locals_stack, "epoch" |),
         make_list [
-          M.get_name (| globals, "block_number" |)
+          M.get_name (| globals, locals_stack, "block_number" |)
         ],
         make_dict []
       |)
@@ -392,16 +398,16 @@ Definition generate_seed : Value.t -> Value.t -> M :=
     let _ :=
       M.while (|
         Compare.not_eq (|
-      M.get_name (| globals, "epoch_number" |),
+      M.get_name (| globals, locals_stack, "epoch_number" |),
       Constant.int 0
     |),
         ltac:(M.monadic (
           let _ := M.assign_local (|
             "seed" ,
             M.call (|
-              M.get_name (| globals, "keccak256" |),
+              M.get_name (| globals, locals_stack, "keccak256" |),
               make_list [
-                M.get_name (| globals, "seed" |)
+                M.get_name (| globals, locals_stack, "seed" |)
               ],
               make_dict []
             |)
@@ -419,9 +425,9 @@ Definition generate_seed : Value.t -> Value.t -> M :=
     |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "Hash32" |),
+        M.get_name (| globals, locals_stack, "Hash32" |),
         make_list [
-          M.get_name (| globals, "seed" |)
+          M.get_name (| globals, locals_stack, "seed" |)
         ],
         make_dict []
       |)
@@ -429,8 +435,9 @@ Definition generate_seed : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition generate_cache : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "block_number" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "block_number" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Generate the cache for the block identified by `block_number`. See
     [`generate_dataset`] for how the cache is used.
@@ -446,9 +453,9 @@ Definition generate_cache : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "seed" ,
       M.call (|
-        M.get_name (| globals, "generate_seed" |),
+        M.get_name (| globals, locals_stack, "generate_seed" |),
         make_list [
-          M.get_name (| globals, "block_number" |)
+          M.get_name (| globals, locals_stack, "block_number" |)
         ],
         make_dict []
       |)
@@ -456,9 +463,9 @@ Definition generate_cache : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "cache_size_bytes" ,
       M.call (|
-        M.get_name (| globals, "cache_size" |),
+        M.get_name (| globals, locals_stack, "cache_size" |),
         make_list [
-          M.get_name (| globals, "block_number" |)
+          M.get_name (| globals, locals_stack, "block_number" |)
         ],
         make_dict []
       |)
@@ -466,17 +473,17 @@ Definition generate_cache : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "cache_size_words" ,
       BinOp.floor_div (|
-        M.get_name (| globals, "cache_size_bytes" |),
-        M.get_name (| globals, "HASH_BYTES" |)
+        M.get_name (| globals, locals_stack, "cache_size_bytes" |),
+        M.get_name (| globals, locals_stack, "HASH_BYTES" |)
       |)
     |) in
     let _ := M.assign_local (|
       "cache" ,
       make_list [
         M.call (|
-          M.get_name (| globals, "keccak512" |),
+          M.get_name (| globals, locals_stack, "keccak512" |),
           make_list [
-            M.get_name (| globals, "seed" |)
+            M.get_name (| globals, locals_stack, "seed" |)
           ],
           make_dict []
         |)
@@ -484,12 +491,12 @@ Definition generate_cache : Value.t -> Value.t -> M :=
     |) in
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "index" |),
+        M.get_name (| globals, locals_stack, "index" |),
         M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         Constant.int 1;
-        M.get_name (| globals, "cache_size_words" |)
+        M.get_name (| globals, locals_stack, "cache_size_words" |)
       ],
       make_dict []
     |),
@@ -497,12 +504,12 @@ Definition generate_cache : Value.t -> Value.t -> M :=
           let _ := M.assign_local (|
             "cache_item" ,
             M.call (|
-              M.get_name (| globals, "keccak512" |),
+              M.get_name (| globals, locals_stack, "keccak512" |),
               make_list [
                 M.get_subscript (|
-                  M.get_name (| globals, "cache" |),
+                  M.get_name (| globals, locals_stack, "cache" |),
                   BinOp.sub (|
-                    M.get_name (| globals, "index" |),
+                    M.get_name (| globals, locals_stack, "index" |),
                     Constant.int 1
                   |)
                 |)
@@ -511,9 +518,9 @@ Definition generate_cache : Value.t -> Value.t -> M :=
             |)
           |) in
           let _ := M.call (|
-    M.get_field (| M.get_name (| globals, "cache" |), "append" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "cache" |), "append" |),
     make_list [
-      M.get_name (| globals, "cache_item" |)
+      M.get_name (| globals, locals_stack, "cache_item" |)
     ],
     make_dict []
   |) in
@@ -525,22 +532,22 @@ Definition generate_cache : Value.t -> Value.t -> M :=
     |) in
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "_" |),
+        M.get_name (| globals, locals_stack, "_" |),
         M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
-        M.get_name (| globals, "CACHE_ROUNDS" |)
+        M.get_name (| globals, locals_stack, "CACHE_ROUNDS" |)
       ],
       make_dict []
     |),
         ltac:(M.monadic (
           let _ :=
             M.for_ (|
-              M.get_name (| globals, "index" |),
+              M.get_name (| globals, locals_stack, "index" |),
               M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
-        M.get_name (| globals, "cache_size_words" |)
+        M.get_name (| globals, locals_stack, "cache_size_words" |)
       ],
       make_dict []
     |),
@@ -548,37 +555,37 @@ Definition generate_cache : Value.t -> Value.t -> M :=
                 let _ := M.assign_local (|
                   "first_cache_item" ,
                   M.get_subscript (|
-                    M.get_name (| globals, "cache" |),
+                    M.get_name (| globals, locals_stack, "cache" |),
                     BinOp.mod_ (|
                       BinOp.add (|
                         BinOp.sub (|
-                          M.get_name (| globals, "index" |),
+                          M.get_name (| globals, locals_stack, "index" |),
                           Constant.int 1
                         |),
                         M.call (|
-                          M.get_name (| globals, "int" |),
+                          M.get_name (| globals, locals_stack, "int" |),
                           make_list [
-                            M.get_name (| globals, "cache_size_words" |)
+                            M.get_name (| globals, locals_stack, "cache_size_words" |)
                           ],
                           make_dict []
                         |)
                       |),
-                      M.get_name (| globals, "cache_size_words" |)
+                      M.get_name (| globals, locals_stack, "cache_size_words" |)
                     |)
                   |)
                 |) in
                 let _ := M.assign_local (|
                   "second_cache_item" ,
                   M.get_subscript (|
-                    M.get_name (| globals, "cache" |),
+                    M.get_name (| globals, locals_stack, "cache" |),
                     BinOp.mod_ (|
                       M.call (|
-                        M.get_field (| M.get_name (| globals, "U32" |), "from_le_bytes" |),
+                        M.get_field (| M.get_name (| globals, locals_stack, "U32" |), "from_le_bytes" |),
                         make_list [
                           M.slice (|
                             M.get_subscript (|
-                              M.get_name (| globals, "cache" |),
-                              M.get_name (| globals, "index" |)
+                              M.get_name (| globals, locals_stack, "cache" |),
+                              M.get_name (| globals, locals_stack, "index" |)
                             |),
                             Constant.int 0,
                             Constant.int 4,
@@ -587,14 +594,14 @@ Definition generate_cache : Value.t -> Value.t -> M :=
                         ],
                         make_dict []
                       |),
-                      M.get_name (| globals, "cache_size_words" |)
+                      M.get_name (| globals, locals_stack, "cache_size_words" |)
                     |)
                   |)
                 |) in
                 let _ := M.assign_local (|
                   "result" ,
                   M.call (|
-                    M.get_name (| globals, "bytes" |),
+                    M.get_name (| globals, locals_stack, "bytes" |),
                     make_list [
                       Constant.str "(* At expr: unsupported node type: ListComp *)"
                     ],
@@ -603,13 +610,13 @@ Definition generate_cache : Value.t -> Value.t -> M :=
                 |) in
                 let _ := M.assign (|
                   M.get_subscript (|
-                    M.get_name (| globals, "cache" |),
-                    M.get_name (| globals, "index" |)
+                    M.get_name (| globals, locals_stack, "cache" |),
+                    M.get_name (| globals, locals_stack, "index" |)
                   |),
                   M.call (|
-                    M.get_name (| globals, "keccak512" |),
+                    M.get_name (| globals, locals_stack, "keccak512" |),
                     make_list [
-                      M.get_name (| globals, "result" |)
+                      M.get_name (| globals, locals_stack, "result" |)
                     ],
                     make_dict []
                   |)
@@ -628,7 +635,7 @@ Definition generate_cache : Value.t -> Value.t -> M :=
     |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "tuple" |),
+        M.get_name (| globals, locals_stack, "tuple" |),
         make_list [
           Constant.str "(* At expr: unsupported node type: GeneratorExp *)"
         ],
@@ -638,8 +645,9 @@ Definition generate_cache : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition fnv : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "a"; "b" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "a"; "b" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     A non-associative substitute for XOR, inspired by the [FNV] hash by Fowler,
     Noll, and Vo. See [`fnv_hash`], [`generate_dataset_item`], and
@@ -661,30 +669,30 @@ Definition fnv : Value.t -> Value.t -> M :=
         BinOp.bit_xor (|
           BinOp.mult (|
             M.call (|
-              M.get_name (| globals, "Uint" |),
+              M.get_name (| globals, locals_stack, "Uint" |),
               make_list [
-                M.get_name (| globals, "a" |)
+                M.get_name (| globals, locals_stack, "a" |)
               ],
               make_dict []
             |),
             Constant.int 16777619
           |),
           M.call (|
-            M.get_name (| globals, "Uint" |),
+            M.get_name (| globals, locals_stack, "Uint" |),
             make_list [
-              M.get_name (| globals, "b" |)
+              M.get_name (| globals, locals_stack, "b" |)
             ],
             make_dict []
           |)
         |),
-        M.get_field (| M.get_name (| globals, "U32" |), "MAX_VALUE" |)
+        M.get_field (| M.get_name (| globals, locals_stack, "U32" |), "MAX_VALUE" |)
       |)
     |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "U32" |),
+        M.get_name (| globals, locals_stack, "U32" |),
         make_list [
-          M.get_name (| globals, "result" |)
+          M.get_name (| globals, locals_stack, "result" |)
         ],
         make_dict []
       |)
@@ -692,8 +700,9 @@ Definition fnv : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition fnv_hash : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "mix_integers"; "data" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "mix_integers"; "data" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Combines `data` into `mix_integers` using [`fnv`]. See [`hashimoto`] and
     [`generate_dataset_item`].
@@ -704,7 +713,7 @@ Definition fnv_hash : Value.t -> Value.t -> M :=
     " in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "tuple" |),
+        M.get_name (| globals, locals_stack, "tuple" |),
         make_list [
           Constant.str "(* At expr: unsupported node type: GeneratorExp *)"
         ],
@@ -714,8 +723,9 @@ Definition fnv_hash : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition generate_dataset_item : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "cache"; "index" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "cache"; "index" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Generate a particular dataset item 0-indexed by `index` by hashing
     pseudorandomly-selected entries from `cache` together. See [`fnv`] and
@@ -731,21 +741,21 @@ Definition generate_dataset_item : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "mix" ,
       M.call (|
-        M.get_name (| globals, "keccak512" |),
+        M.get_name (| globals, locals_stack, "keccak512" |),
         make_list [
           M.call (|
             M.get_field (| BinOp.bit_xor (|
               M.call (|
-                M.get_name (| globals, "le_uint32_sequence_to_uint" |),
+                M.get_name (| globals, locals_stack, "le_uint32_sequence_to_uint" |),
                 make_list [
                   M.get_subscript (|
-                    M.get_name (| globals, "cache" |),
+                    M.get_name (| globals, locals_stack, "cache" |),
                     BinOp.mod_ (|
-                      M.get_name (| globals, "index" |),
+                      M.get_name (| globals, locals_stack, "index" |),
                       M.call (|
-                        M.get_name (| globals, "len" |),
+                        M.get_name (| globals, locals_stack, "len" |),
                         make_list [
-                          M.get_name (| globals, "cache" |)
+                          M.get_name (| globals, locals_stack, "cache" |)
                         ],
                         make_dict []
                       |)
@@ -754,7 +764,7 @@ Definition generate_dataset_item : Value.t -> Value.t -> M :=
                 ],
                 make_dict []
               |),
-              M.get_name (| globals, "index" |)
+              M.get_name (| globals, locals_stack, "index" |)
             |), "to_le_bytes" |),
             make_list [],
             make_dict []
@@ -766,20 +776,20 @@ Definition generate_dataset_item : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "mix_integers" ,
       M.call (|
-        M.get_name (| globals, "le_bytes_to_uint32_sequence" |),
+        M.get_name (| globals, locals_stack, "le_bytes_to_uint32_sequence" |),
         make_list [
-          M.get_name (| globals, "mix" |)
+          M.get_name (| globals, locals_stack, "mix" |)
         ],
         make_dict []
       |)
     |) in
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "j" |),
+        M.get_name (| globals, locals_stack, "j" |),
         M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
-        M.get_name (| globals, "DATASET_PARENTS" |)
+        M.get_name (| globals, locals_stack, "DATASET_PARENTS" |)
       ],
       make_dict []
     |),
@@ -789,20 +799,20 @@ Definition generate_dataset_item : Value.t -> Value.t -> M :=
             "cache_index" ,
             BinOp.mod_ (|
               M.call (|
-                M.get_name (| globals, "fnv" |),
+                M.get_name (| globals, locals_stack, "fnv" |),
                 make_list [
                   BinOp.bit_xor (|
-                    M.get_name (| globals, "index" |),
-                    M.get_name (| globals, "j" |)
+                    M.get_name (| globals, locals_stack, "index" |),
+                    M.get_name (| globals, locals_stack, "j" |)
                   |);
-                  M.get_name (| globals, "mix_word" |)
+                  M.get_name (| globals, locals_stack, "mix_word" |)
                 ],
                 make_dict []
               |),
               M.call (|
-                M.get_name (| globals, "len" |),
+                M.get_name (| globals, locals_stack, "len" |),
                 make_list [
-                  M.get_name (| globals, "cache" |)
+                  M.get_name (| globals, locals_stack, "cache" |)
                 ],
                 make_dict []
               |)
@@ -811,17 +821,17 @@ Definition generate_dataset_item : Value.t -> Value.t -> M :=
           let _ := M.assign_local (|
             "parent" ,
             M.get_subscript (|
-              M.get_name (| globals, "cache" |),
-              M.get_name (| globals, "cache_index" |)
+              M.get_name (| globals, locals_stack, "cache" |),
+              M.get_name (| globals, locals_stack, "cache_index" |)
             |)
           |) in
           let _ := M.assign_local (|
             "mix_integers" ,
             M.call (|
-              M.get_name (| globals, "fnv_hash" |),
+              M.get_name (| globals, locals_stack, "fnv_hash" |),
               make_list [
-                M.get_name (| globals, "mix_integers" |);
-                M.get_name (| globals, "parent" |)
+                M.get_name (| globals, locals_stack, "mix_integers" |);
+                M.get_name (| globals, locals_stack, "parent" |)
               ],
               make_dict []
             |)
@@ -835,12 +845,12 @@ Definition generate_dataset_item : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "mix" ,
       M.call (|
-        M.get_name (| globals, "Hash64" |),
+        M.get_name (| globals, locals_stack, "Hash64" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "le_uint32_sequence_to_bytes" |),
+            M.get_name (| globals, locals_stack, "le_uint32_sequence_to_bytes" |),
             make_list [
-              M.get_name (| globals, "mix_integers" |)
+              M.get_name (| globals, locals_stack, "mix_integers" |)
             ],
             make_dict []
           |)
@@ -850,9 +860,9 @@ Definition generate_dataset_item : Value.t -> Value.t -> M :=
     |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "keccak512" |),
+        M.get_name (| globals, locals_stack, "keccak512" |),
         make_list [
-          M.get_name (| globals, "mix" |)
+          M.get_name (| globals, locals_stack, "mix" |)
         ],
         make_dict []
       |)
@@ -860,8 +870,9 @@ Definition generate_dataset_item : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition generate_dataset : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "block_number" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "block_number" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Generate the full dataset for the block identified by `block_number`.
 
@@ -872,7 +883,7 @@ Definition generate_dataset : Value.t -> Value.t -> M :=
 (* At stmt: unsupported node type: AnnAssign *)
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "tuple" |),
+        M.get_name (| globals, locals_stack, "tuple" |),
         make_list [
           Constant.str "(* At expr: unsupported node type: GeneratorExp *)"
         ],
@@ -882,8 +893,9 @@ Definition generate_dataset : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition hashimoto : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "header_hash"; "nonce"; "dataset_size"; "fetch_dataset_item" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "header_hash"; "nonce"; "dataset_size"; "fetch_dataset_item" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Obtain the mix digest and the final value for a header, by aggregating
     data from the full dataset.
@@ -908,12 +920,12 @@ Definition hashimoto : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "nonce_le" ,
       M.call (|
-        M.get_name (| globals, "bytes" |),
+        M.get_name (| globals, locals_stack, "bytes" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "reversed" |),
+            M.get_name (| globals, locals_stack, "reversed" |),
             make_list [
-              M.get_name (| globals, "nonce" |)
+              M.get_name (| globals, locals_stack, "nonce" |)
             ],
             make_dict []
           |)
@@ -924,11 +936,11 @@ Definition hashimoto : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "seed_hash" ,
       M.call (|
-        M.get_name (| globals, "keccak512" |),
+        M.get_name (| globals, locals_stack, "keccak512" |),
         make_list [
           BinOp.add (|
-            M.get_name (| globals, "header_hash" |),
-            M.get_name (| globals, "nonce_le" |)
+            M.get_name (| globals, locals_stack, "header_hash" |),
+            M.get_name (| globals, locals_stack, "nonce_le" |)
           |)
         ],
         make_dict []
@@ -937,10 +949,10 @@ Definition hashimoto : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "seed_head" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "U32" |), "from_le_bytes" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "U32" |), "from_le_bytes" |),
         make_list [
           M.slice (|
-            M.get_name (| globals, "seed_hash" |),
+            M.get_name (| globals, locals_stack, "seed_hash" |),
             Constant.None_,
             Constant.int 4,
             Constant.None_
@@ -952,7 +964,7 @@ Definition hashimoto : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "rows" ,
       BinOp.floor_div (|
-        M.get_name (| globals, "dataset_size" |),
+        M.get_name (| globals, locals_stack, "dataset_size" |),
         Constant.int 128
       |)
     |) in
@@ -960,25 +972,25 @@ Definition hashimoto : Value.t -> Value.t -> M :=
       "mix" ,
       BinOp.mult (|
         M.call (|
-          M.get_name (| globals, "le_bytes_to_uint32_sequence" |),
+          M.get_name (| globals, locals_stack, "le_bytes_to_uint32_sequence" |),
           make_list [
-            M.get_name (| globals, "seed_hash" |)
+            M.get_name (| globals, locals_stack, "seed_hash" |)
           ],
           make_dict []
         |),
         BinOp.floor_div (|
-          M.get_name (| globals, "MIX_BYTES" |),
-          M.get_name (| globals, "HASH_BYTES" |)
+          M.get_name (| globals, locals_stack, "MIX_BYTES" |),
+          M.get_name (| globals, locals_stack, "HASH_BYTES" |)
         |)
       |)
     |) in
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "i" |),
+        M.get_name (| globals, locals_stack, "i" |),
         M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
-        M.get_name (| globals, "HASHIMOTO_ACCESSES" |)
+        M.get_name (| globals, locals_stack, "HASHIMOTO_ACCESSES" |)
       ],
       make_dict []
     |),
@@ -988,20 +1000,20 @@ Definition hashimoto : Value.t -> Value.t -> M :=
             "parent" ,
             BinOp.mod_ (|
               M.call (|
-                M.get_name (| globals, "fnv" |),
+                M.get_name (| globals, locals_stack, "fnv" |),
                 make_list [
                   BinOp.bit_xor (|
-                    M.get_name (| globals, "i" |),
-                    M.get_name (| globals, "seed_head" |)
+                    M.get_name (| globals, locals_stack, "i" |),
+                    M.get_name (| globals, locals_stack, "seed_head" |)
                   |);
                   M.get_subscript (|
-                    M.get_name (| globals, "mix" |),
+                    M.get_name (| globals, locals_stack, "mix" |),
                     BinOp.mod_ (|
-                      M.get_name (| globals, "i" |),
+                      M.get_name (| globals, locals_stack, "i" |),
                       M.call (|
-                        M.get_name (| globals, "len" |),
+                        M.get_name (| globals, locals_stack, "len" |),
                         make_list [
-                          M.get_name (| globals, "mix" |)
+                          M.get_name (| globals, locals_stack, "mix" |)
                         ],
                         make_dict []
                       |)
@@ -1010,18 +1022,18 @@ Definition hashimoto : Value.t -> Value.t -> M :=
                 ],
                 make_dict []
               |),
-              M.get_name (| globals, "rows" |)
+              M.get_name (| globals, locals_stack, "rows" |)
             |)
           |) in
           let _ :=
             M.for_ (|
-              M.get_name (| globals, "j" |),
+              M.get_name (| globals, locals_stack, "j" |),
               M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         BinOp.floor_div (|
-          M.get_name (| globals, "MIX_BYTES" |),
-          M.get_name (| globals, "HASH_BYTES" |)
+          M.get_name (| globals, locals_stack, "MIX_BYTES" |),
+          M.get_name (| globals, locals_stack, "HASH_BYTES" |)
         |)
       ],
       make_dict []
@@ -1031,20 +1043,20 @@ Definition hashimoto : Value.t -> Value.t -> M :=
                   BinOp.add,
                   "new_data",
                   M.call (|
-    M.get_name (| globals, "fetch_dataset_item" |),
+    M.get_name (| globals, locals_stack, "fetch_dataset_item" |),
     make_list [
       BinOp.add (|
         BinOp.mult (|
           Constant.int 2,
           M.call (|
-            M.get_name (| globals, "Uint" |),
+            M.get_name (| globals, locals_stack, "Uint" |),
             make_list [
-              M.get_name (| globals, "parent" |)
+              M.get_name (| globals, locals_stack, "parent" |)
             ],
             make_dict []
           |)
         |),
-        M.get_name (| globals, "j" |)
+        M.get_name (| globals, locals_stack, "j" |)
       |)
     ],
     make_dict []
@@ -1059,10 +1071,10 @@ Definition hashimoto : Value.t -> Value.t -> M :=
           let _ := M.assign_local (|
             "mix" ,
             M.call (|
-              M.get_name (| globals, "fnv_hash" |),
+              M.get_name (| globals, locals_stack, "fnv_hash" |),
               make_list [
-                M.get_name (| globals, "mix" |);
-                M.get_name (| globals, "new_data" |)
+                M.get_name (| globals, locals_stack, "mix" |);
+                M.get_name (| globals, locals_stack, "new_data" |)
               ],
               make_dict []
             |)
@@ -1079,15 +1091,15 @@ Definition hashimoto : Value.t -> Value.t -> M :=
     |) in
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "i" |),
+        M.get_name (| globals, locals_stack, "i" |),
         M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         Constant.int 0;
         M.call (|
-          M.get_name (| globals, "len" |),
+          M.get_name (| globals, locals_stack, "len" |),
           make_list [
-            M.get_name (| globals, "mix" |)
+            M.get_name (| globals, locals_stack, "mix" |)
           ],
           make_dict []
         |);
@@ -1097,25 +1109,25 @@ Definition hashimoto : Value.t -> Value.t -> M :=
     |),
         ltac:(M.monadic (
           let _ := M.call (|
-    M.get_field (| M.get_name (| globals, "compressed_mix" |), "append" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "compressed_mix" |), "append" |),
     make_list [
       M.call (|
-        M.get_name (| globals, "fnv" |),
+        M.get_name (| globals, locals_stack, "fnv" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "fnv" |),
+            M.get_name (| globals, locals_stack, "fnv" |),
             make_list [
               M.call (|
-                M.get_name (| globals, "fnv" |),
+                M.get_name (| globals, locals_stack, "fnv" |),
                 make_list [
                   M.get_subscript (|
-                    M.get_name (| globals, "mix" |),
-                    M.get_name (| globals, "i" |)
+                    M.get_name (| globals, locals_stack, "mix" |),
+                    M.get_name (| globals, locals_stack, "i" |)
                   |);
                   M.get_subscript (|
-                    M.get_name (| globals, "mix" |),
+                    M.get_name (| globals, locals_stack, "mix" |),
                     BinOp.add (|
-                      M.get_name (| globals, "i" |),
+                      M.get_name (| globals, locals_stack, "i" |),
                       Constant.int 1
                     |)
                   |)
@@ -1123,9 +1135,9 @@ Definition hashimoto : Value.t -> Value.t -> M :=
                 make_dict []
               |);
               M.get_subscript (|
-                M.get_name (| globals, "mix" |),
+                M.get_name (| globals, locals_stack, "mix" |),
                 BinOp.add (|
-                  M.get_name (| globals, "i" |),
+                  M.get_name (| globals, locals_stack, "i" |),
                   Constant.int 2
                 |)
               |)
@@ -1133,9 +1145,9 @@ Definition hashimoto : Value.t -> Value.t -> M :=
             make_dict []
           |);
           M.get_subscript (|
-            M.get_name (| globals, "mix" |),
+            M.get_name (| globals, locals_stack, "mix" |),
             BinOp.add (|
-              M.get_name (| globals, "i" |),
+              M.get_name (| globals, locals_stack, "i" |),
               Constant.int 3
             |)
           |)
@@ -1154,9 +1166,9 @@ Definition hashimoto : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "mix_digest" ,
       M.call (|
-        M.get_name (| globals, "le_uint32_sequence_to_bytes" |),
+        M.get_name (| globals, locals_stack, "le_uint32_sequence_to_bytes" |),
         make_list [
-          M.get_name (| globals, "compressed_mix" |)
+          M.get_name (| globals, locals_stack, "compressed_mix" |)
         ],
         make_dict []
       |)
@@ -1164,24 +1176,25 @@ Definition hashimoto : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "result" ,
       M.call (|
-        M.get_name (| globals, "keccak256" |),
+        M.get_name (| globals, locals_stack, "keccak256" |),
         make_list [
           BinOp.add (|
-            M.get_name (| globals, "seed_hash" |),
-            M.get_name (| globals, "mix_digest" |)
+            M.get_name (| globals, locals_stack, "seed_hash" |),
+            M.get_name (| globals, locals_stack, "mix_digest" |)
           |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.return_ (|
-      make_tuple [ M.get_name (| globals, "mix_digest" |); M.get_name (| globals, "result" |) ]
+      make_tuple [ M.get_name (| globals, locals_stack, "mix_digest" |); M.get_name (| globals, locals_stack, "result" |) ]
     |) in
     M.pure Constant.None_)).
 
 Definition hashimoto_light : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "header_hash"; "nonce"; "cache"; "dataset_size" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "header_hash"; "nonce"; "cache"; "dataset_size" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Run the [`hashimoto`] algorithm by generating dataset item using the cache
     instead of loading the full dataset into main memory.
@@ -1207,12 +1220,12 @@ Definition hashimoto_light : Value.t -> Value.t -> M :=
 (* At stmt: unsupported node type: FunctionDef *)
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "hashimoto" |),
+        M.get_name (| globals, locals_stack, "hashimoto" |),
         make_list [
-          M.get_name (| globals, "header_hash" |);
-          M.get_name (| globals, "nonce" |);
-          M.get_name (| globals, "dataset_size" |);
-          M.get_name (| globals, "fetch_dataset_item" |)
+          M.get_name (| globals, locals_stack, "header_hash" |);
+          M.get_name (| globals, locals_stack, "nonce" |);
+          M.get_name (| globals, locals_stack, "dataset_size" |);
+          M.get_name (| globals, locals_stack, "fetch_dataset_item" |)
         ],
         make_dict []
       |)

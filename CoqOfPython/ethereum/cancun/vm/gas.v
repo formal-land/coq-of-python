@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.cancun.vm.gas".
+Definition globals : Globals.t := "ethereum.cancun.vm.gas".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -58,7 +60,7 @@ Axiom ethereum_cancun_vm_exceptions_imports_OutOfGasError :
 
 Definition GAS_JUMPDEST : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 1
     ],
@@ -68,7 +70,7 @@ Definition GAS_JUMPDEST : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_BASE : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 2
     ],
@@ -78,7 +80,7 @@ Definition GAS_BASE : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_VERY_LOW : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 3
     ],
@@ -88,7 +90,7 @@ Definition GAS_VERY_LOW : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_STORAGE_SET : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 20000
     ],
@@ -98,7 +100,7 @@ Definition GAS_STORAGE_SET : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_STORAGE_UPDATE : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 5000
     ],
@@ -108,7 +110,7 @@ Definition GAS_STORAGE_UPDATE : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_STORAGE_CLEAR_REFUND : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 4800
     ],
@@ -118,7 +120,7 @@ Definition GAS_STORAGE_CLEAR_REFUND : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_LOW : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 5
     ],
@@ -128,7 +130,7 @@ Definition GAS_LOW : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_MID : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 8
     ],
@@ -138,7 +140,7 @@ Definition GAS_MID : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_HIGH : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 10
     ],
@@ -148,7 +150,7 @@ Definition GAS_HIGH : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_EXPONENTIATION : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 10
     ],
@@ -158,7 +160,7 @@ Definition GAS_EXPONENTIATION : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_EXPONENTIATION_PER_BYTE : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 50
     ],
@@ -168,7 +170,7 @@ Definition GAS_EXPONENTIATION_PER_BYTE : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_MEMORY : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 3
     ],
@@ -178,7 +180,7 @@ Definition GAS_MEMORY : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_KECCAK256 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 30
     ],
@@ -188,7 +190,7 @@ Definition GAS_KECCAK256 : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_KECCAK256_WORD : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 6
     ],
@@ -198,7 +200,7 @@ Definition GAS_KECCAK256_WORD : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_COPY : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 3
     ],
@@ -208,7 +210,7 @@ Definition GAS_COPY : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_BLOCK_HASH : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 20
     ],
@@ -218,7 +220,7 @@ Definition GAS_BLOCK_HASH : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_LOG : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 375
     ],
@@ -228,7 +230,7 @@ Definition GAS_LOG : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_LOG_DATA : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 8
     ],
@@ -238,7 +240,7 @@ Definition GAS_LOG_DATA : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_LOG_TOPIC : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 375
     ],
@@ -248,7 +250,7 @@ Definition GAS_LOG_TOPIC : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_CREATE : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 32000
     ],
@@ -258,7 +260,7 @@ Definition GAS_CREATE : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_CODE_DEPOSIT : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 200
     ],
@@ -268,7 +270,7 @@ Definition GAS_CODE_DEPOSIT : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_ZERO : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 0
     ],
@@ -278,7 +280,7 @@ Definition GAS_ZERO : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_NEW_ACCOUNT : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 25000
     ],
@@ -288,7 +290,7 @@ Definition GAS_NEW_ACCOUNT : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_CALL_VALUE : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 9000
     ],
@@ -298,7 +300,7 @@ Definition GAS_CALL_VALUE : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_CALL_STIPEND : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 2300
     ],
@@ -308,7 +310,7 @@ Definition GAS_CALL_STIPEND : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_SELF_DESTRUCT : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 5000
     ],
@@ -318,7 +320,7 @@ Definition GAS_SELF_DESTRUCT : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_SELF_DESTRUCT_NEW_ACCOUNT : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 25000
     ],
@@ -328,7 +330,7 @@ Definition GAS_SELF_DESTRUCT_NEW_ACCOUNT : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_ECRECOVER : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 3000
     ],
@@ -338,7 +340,7 @@ Definition GAS_ECRECOVER : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_SHA256 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 60
     ],
@@ -348,7 +350,7 @@ Definition GAS_SHA256 : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_SHA256_WORD : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 12
     ],
@@ -358,7 +360,7 @@ Definition GAS_SHA256_WORD : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_RIPEMD160 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 600
     ],
@@ -368,7 +370,7 @@ Definition GAS_RIPEMD160 : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_RIPEMD160_WORD : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 120
     ],
@@ -378,7 +380,7 @@ Definition GAS_RIPEMD160_WORD : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_IDENTITY : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 15
     ],
@@ -388,7 +390,7 @@ Definition GAS_IDENTITY : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_IDENTITY_WORD : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 3
     ],
@@ -398,7 +400,7 @@ Definition GAS_IDENTITY_WORD : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_RETURN_DATA_COPY : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 3
     ],
@@ -408,7 +410,7 @@ Definition GAS_RETURN_DATA_COPY : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_FAST_STEP : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 5
     ],
@@ -418,7 +420,7 @@ Definition GAS_FAST_STEP : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_BLAKE2_PER_ROUND : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 1
     ],
@@ -428,7 +430,7 @@ Definition GAS_BLAKE2_PER_ROUND : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_COLD_SLOAD : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 2100
     ],
@@ -438,7 +440,7 @@ Definition GAS_COLD_SLOAD : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_COLD_ACCOUNT_ACCESS : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 2600
     ],
@@ -448,7 +450,7 @@ Definition GAS_COLD_ACCOUNT_ACCESS : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_WARM_ACCESS : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 100
     ],
@@ -462,7 +464,7 @@ Definition GAS_INIT_CODE_WORD_COST : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_BLOBHASH_OPCODE : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 3
     ],
@@ -472,7 +474,7 @@ Definition GAS_BLOBHASH_OPCODE : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_POINT_EVALUATION : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 50000
     ],
@@ -482,7 +484,7 @@ Definition GAS_POINT_EVALUATION : Value.t := M.run ltac:(M.monadic (
 
 Definition TARGET_BLOB_GAS_PER_BLOCK : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "U64" |),
+    M.get_name (| globals, locals_stack, "U64" |),
     make_list [
       Constant.int 393216
     ],
@@ -492,7 +494,7 @@ Definition TARGET_BLOB_GAS_PER_BLOCK : Value.t := M.run ltac:(M.monadic (
 
 Definition GAS_PER_BLOB : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       BinOp.pow (|
         Constant.int 2,
@@ -505,7 +507,7 @@ Definition GAS_PER_BLOB : Value.t := M.run ltac:(M.monadic (
 
 Definition MIN_BLOB_GASPRICE : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 1
     ],
@@ -515,7 +517,7 @@ Definition MIN_BLOB_GASPRICE : Value.t := M.run ltac:(M.monadic (
 
 Definition BLOB_GASPRICE_UPDATE_FRACTION : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Uint" |),
+    M.get_name (| globals, locals_stack, "Uint" |),
     make_list [
       Constant.int 3338477
     ],
@@ -544,8 +546,9 @@ Definition MessageCallGas : Value.t :=
     ].
 
 Definition charge_gas : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm"; "amount" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm"; "amount" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Subtracts `amount` from `evm.gas_left`.
 
@@ -558,13 +561,13 @@ Definition charge_gas : Value.t -> Value.t -> M :=
 
     " in
     let _ := M.call (|
-    M.get_name (| globals, "evm_trace" |),
+    M.get_name (| globals, locals_stack, "evm_trace" |),
     make_list [
-      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, locals_stack, "evm" |);
       M.call (|
-        M.get_name (| globals, "GasAndRefund" |),
+        M.get_name (| globals, locals_stack, "GasAndRefund" |),
         make_list [
-          M.get_name (| globals, "amount" |)
+          M.get_name (| globals, locals_stack, "amount" |)
         ],
         make_dict []
       |)
@@ -575,22 +578,22 @@ Definition charge_gas : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.lt (|
-          M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |),
-          M.get_name (| globals, "amount" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "gas_left" |),
+          M.get_name (| globals, locals_stack, "amount" |)
         |),
       (* then *)
       ltac:(M.monadic (
-        let _ := M.raise (| Some (M.get_name (| globals, "OutOfGasError" |)) |) in
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "OutOfGasError" |)) |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
         let _ := M.assign_op (|
           BinOp.sub,
-          M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |),
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "gas_left" |),
           M.call (|
-    M.get_name (| globals, "U256" |),
+    M.get_name (| globals, locals_stack, "U256" |),
     make_list [
-      M.get_name (| globals, "amount" |)
+      M.get_name (| globals, locals_stack, "amount" |)
     ],
     make_dict []
   |)
@@ -600,8 +603,9 @@ Definition charge_gas : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition calculate_memory_gas_cost : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "size_in_bytes" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "size_in_bytes" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Calculates the gas cost for allocating memory
     to the smallest multiple of 32 bytes,
@@ -621,9 +625,9 @@ Definition calculate_memory_gas_cost : Value.t -> Value.t -> M :=
       "size_in_words" ,
       BinOp.floor_div (|
         M.call (|
-          M.get_name (| globals, "ceil32" |),
+          M.get_name (| globals, locals_stack, "ceil32" |),
           make_list [
-            M.get_name (| globals, "size_in_bytes" |)
+            M.get_name (| globals, locals_stack, "size_in_bytes" |)
           ],
           make_dict []
         |),
@@ -633,15 +637,15 @@ Definition calculate_memory_gas_cost : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "linear_cost" ,
       BinOp.mult (|
-        M.get_name (| globals, "size_in_words" |),
-        M.get_name (| globals, "GAS_MEMORY" |)
+        M.get_name (| globals, locals_stack, "size_in_words" |),
+        M.get_name (| globals, locals_stack, "GAS_MEMORY" |)
       |)
     |) in
     let _ := M.assign_local (|
       "quadratic_cost" ,
       BinOp.floor_div (|
         BinOp.pow (|
-          M.get_name (| globals, "size_in_words" |),
+          M.get_name (| globals, locals_stack, "size_in_words" |),
           Constant.int 2
         |),
         Constant.int 512
@@ -650,16 +654,17 @@ Definition calculate_memory_gas_cost : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "total_gas_cost" ,
       BinOp.add (|
-        M.get_name (| globals, "linear_cost" |),
-        M.get_name (| globals, "quadratic_cost" |)
+        M.get_name (| globals, locals_stack, "linear_cost" |),
+        M.get_name (| globals, locals_stack, "quadratic_cost" |)
       |)
     |) in
 (* At stmt: unsupported node type: Try *)
     M.pure Constant.None_)).
 
 Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "memory"; "extensions" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "memory"; "extensions" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Calculates the gas amount to extend memory
 
@@ -678,7 +683,7 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "size_to_extend" ,
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
           Constant.int 0
         ],
@@ -688,7 +693,7 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "to_be_paid" ,
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
           Constant.int 0
         ],
@@ -698,12 +703,12 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "current_size" ,
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "len" |),
+            M.get_name (| globals, locals_stack, "len" |),
             make_list [
-              M.get_name (| globals, "memory" |)
+              M.get_name (| globals, locals_stack, "memory" |)
             ],
             make_dict []
           |)
@@ -713,14 +718,14 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
     |) in
     let _ :=
       M.for_ (|
-        make_tuple [ M.get_name (| globals, "start_position" |); M.get_name (| globals, "size" |) ],
-        M.get_name (| globals, "extensions" |),
+        make_tuple [ M.get_name (| globals, locals_stack, "start_position" |); M.get_name (| globals, locals_stack, "size" |) ],
+        M.get_name (| globals, locals_stack, "extensions" |),
         ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               Compare.eq (|
-                M.get_name (| globals, "size" |),
+                M.get_name (| globals, locals_stack, "size" |),
                 Constant.int 0
               |),
             (* then *)
@@ -734,9 +739,9 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
           let _ := M.assign_local (|
             "before_size" ,
             M.call (|
-              M.get_name (| globals, "ceil32" |),
+              M.get_name (| globals, locals_stack, "ceil32" |),
               make_list [
-                M.get_name (| globals, "current_size" |)
+                M.get_name (| globals, locals_stack, "current_size" |)
               ],
               make_dict []
             |)
@@ -744,20 +749,20 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
           let _ := M.assign_local (|
             "after_size" ,
             M.call (|
-              M.get_name (| globals, "ceil32" |),
+              M.get_name (| globals, locals_stack, "ceil32" |),
               make_list [
                 BinOp.add (|
                   M.call (|
-                    M.get_name (| globals, "Uint" |),
+                    M.get_name (| globals, locals_stack, "Uint" |),
                     make_list [
-                      M.get_name (| globals, "start_position" |)
+                      M.get_name (| globals, locals_stack, "start_position" |)
                     ],
                     make_dict []
                   |),
                   M.call (|
-                    M.get_name (| globals, "Uint" |),
+                    M.get_name (| globals, locals_stack, "Uint" |),
                     make_list [
-                      M.get_name (| globals, "size" |)
+                      M.get_name (| globals, locals_stack, "size" |)
                     ],
                     make_dict []
                   |)
@@ -770,8 +775,8 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
             (* if *)
             M.if_then_else (|
               Compare.lt_e (|
-                M.get_name (| globals, "after_size" |),
-                M.get_name (| globals, "before_size" |)
+                M.get_name (| globals, locals_stack, "after_size" |),
+                M.get_name (| globals, locals_stack, "before_size" |)
               |),
             (* then *)
             ltac:(M.monadic (
@@ -785,16 +790,16 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
             BinOp.add,
             "size_to_extend",
             BinOp.sub (|
-    M.get_name (| globals, "after_size" |),
-    M.get_name (| globals, "before_size" |)
+    M.get_name (| globals, locals_stack, "after_size" |),
+    M.get_name (| globals, locals_stack, "before_size" |)
   |)
           |) in
           let _ := M.assign_local (|
             "already_paid" ,
             M.call (|
-              M.get_name (| globals, "calculate_memory_gas_cost" |),
+              M.get_name (| globals, locals_stack, "calculate_memory_gas_cost" |),
               make_list [
-                M.get_name (| globals, "before_size" |)
+                M.get_name (| globals, locals_stack, "before_size" |)
               ],
               make_dict []
             |)
@@ -802,9 +807,9 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
           let _ := M.assign_local (|
             "total_cost" ,
             M.call (|
-              M.get_name (| globals, "calculate_memory_gas_cost" |),
+              M.get_name (| globals, locals_stack, "calculate_memory_gas_cost" |),
               make_list [
-                M.get_name (| globals, "after_size" |)
+                M.get_name (| globals, locals_stack, "after_size" |)
               ],
               make_dict []
             |)
@@ -813,13 +818,13 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
             BinOp.add,
             "to_be_paid",
             BinOp.sub (|
-    M.get_name (| globals, "total_cost" |),
-    M.get_name (| globals, "already_paid" |)
+    M.get_name (| globals, locals_stack, "total_cost" |),
+    M.get_name (| globals, locals_stack, "already_paid" |)
   |)
           |) in
           let _ := M.assign_local (|
             "current_size" ,
-            M.get_name (| globals, "after_size" |)
+            M.get_name (| globals, locals_stack, "after_size" |)
           |) in
           M.pure Constant.None_
         )),
@@ -829,10 +834,10 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
     |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "ExtendMemory" |),
+        M.get_name (| globals, locals_stack, "ExtendMemory" |),
         make_list [
-          M.get_name (| globals, "to_be_paid" |);
-          M.get_name (| globals, "size_to_extend" |)
+          M.get_name (| globals, locals_stack, "to_be_paid" |);
+          M.get_name (| globals, locals_stack, "size_to_extend" |)
         ],
         make_dict []
       |)
@@ -840,8 +845,9 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition calculate_message_call_gas : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "value"; "gas"; "gas_left"; "memory_cost"; "extra_gas"; "call_stipend" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "value"; "gas"; "gas_left"; "memory_cost"; "extra_gas"; "call_stipend" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Calculates the MessageCallGas (cost and stipend) for
     executing call Opcodes.
@@ -872,13 +878,13 @@ Definition calculate_message_call_gas : Value.t -> Value.t -> M :=
             (* if *)
       M.if_then_else (|
         Compare.eq (|
-          M.get_name (| globals, "value" |),
+          M.get_name (| globals, locals_stack, "value" |),
           Constant.int 0
         |),
       (* then *)
       ltac:(M.monadic (
 M.call (|
-          M.get_name (| globals, "Uint" |),
+          M.get_name (| globals, locals_stack, "Uint" |),
           make_list [
             Constant.int 0
           ],
@@ -886,32 +892,32 @@ M.call (|
         |)
       (* else *)
       )), ltac:(M.monadic (
-M.get_name (| globals, "call_stipend" |)
+M.get_name (| globals, locals_stack, "call_stipend" |)
       )) |)
     |) in
     let _ :=
       (* if *)
       M.if_then_else (|
         Compare.lt (|
-          M.get_name (| globals, "gas_left" |),
+          M.get_name (| globals, locals_stack, "gas_left" |),
           BinOp.add (|
-            M.get_name (| globals, "extra_gas" |),
-            M.get_name (| globals, "memory_cost" |)
+            M.get_name (| globals, locals_stack, "extra_gas" |),
+            M.get_name (| globals, locals_stack, "memory_cost" |)
           |)
         |),
       (* then *)
       ltac:(M.monadic (
         let _ := M.return_ (|
           M.call (|
-            M.get_name (| globals, "MessageCallGas" |),
+            M.get_name (| globals, locals_stack, "MessageCallGas" |),
             make_list [
               BinOp.add (|
-                M.get_name (| globals, "gas" |),
-                M.get_name (| globals, "extra_gas" |)
+                M.get_name (| globals, locals_stack, "gas" |),
+                M.get_name (| globals, locals_stack, "extra_gas" |)
               |);
               BinOp.add (|
-                M.get_name (| globals, "gas" |),
-                M.get_name (| globals, "call_stipend" |)
+                M.get_name (| globals, locals_stack, "gas" |),
+                M.get_name (| globals, locals_stack, "call_stipend" |)
               |)
             ],
             make_dict []
@@ -925,18 +931,18 @@ M.get_name (| globals, "call_stipend" |)
     let _ := M.assign_local (|
       "gas" ,
       M.call (|
-        M.get_name (| globals, "min" |),
+        M.get_name (| globals, locals_stack, "min" |),
         make_list [
-          M.get_name (| globals, "gas" |);
+          M.get_name (| globals, locals_stack, "gas" |);
           M.call (|
-            M.get_name (| globals, "max_message_call_gas" |),
+            M.get_name (| globals, locals_stack, "max_message_call_gas" |),
             make_list [
               BinOp.sub (|
                 BinOp.sub (|
-                  M.get_name (| globals, "gas_left" |),
-                  M.get_name (| globals, "memory_cost" |)
+                  M.get_name (| globals, locals_stack, "gas_left" |),
+                  M.get_name (| globals, locals_stack, "memory_cost" |)
                 |),
-                M.get_name (| globals, "extra_gas" |)
+                M.get_name (| globals, locals_stack, "extra_gas" |)
               |)
             ],
             make_dict []
@@ -947,15 +953,15 @@ M.get_name (| globals, "call_stipend" |)
     |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "MessageCallGas" |),
+        M.get_name (| globals, locals_stack, "MessageCallGas" |),
         make_list [
           BinOp.add (|
-            M.get_name (| globals, "gas" |),
-            M.get_name (| globals, "extra_gas" |)
+            M.get_name (| globals, locals_stack, "gas" |),
+            M.get_name (| globals, locals_stack, "extra_gas" |)
           |);
           BinOp.add (|
-            M.get_name (| globals, "gas" |),
-            M.get_name (| globals, "call_stipend" |)
+            M.get_name (| globals, locals_stack, "gas" |),
+            M.get_name (| globals, locals_stack, "call_stipend" |)
           |)
         ],
         make_dict []
@@ -964,8 +970,9 @@ M.get_name (| globals, "call_stipend" |)
     M.pure Constant.None_)).
 
 Definition max_message_call_gas : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "gas" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "gas" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Calculates the maximum gas that is allowed for making a message call
 
@@ -981,9 +988,9 @@ Definition max_message_call_gas : Value.t -> Value.t -> M :=
     " in
     let _ := M.return_ (|
       BinOp.sub (|
-        M.get_name (| globals, "gas" |),
+        M.get_name (| globals, locals_stack, "gas" |),
         BinOp.floor_div (|
-          M.get_name (| globals, "gas" |),
+          M.get_name (| globals, locals_stack, "gas" |),
           Constant.int 64
         |)
       |)
@@ -991,8 +998,9 @@ Definition max_message_call_gas : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition init_code_cost : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "init_code_length" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "init_code_length" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Calculates the gas to be charged for the init code in CREAT*
     opcodes as well as create transactions.
@@ -1011,11 +1019,11 @@ Definition init_code_cost : Value.t -> Value.t -> M :=
     let _ := M.return_ (|
       BinOp.floor_div (|
         BinOp.mult (|
-          M.get_name (| globals, "GAS_INIT_CODE_WORD_COST" |),
+          M.get_name (| globals, locals_stack, "GAS_INIT_CODE_WORD_COST" |),
           M.call (|
-            M.get_name (| globals, "ceil32" |),
+            M.get_name (| globals, locals_stack, "ceil32" |),
             make_list [
-              M.get_name (| globals, "init_code_length" |)
+              M.get_name (| globals, locals_stack, "init_code_length" |)
             ],
             make_dict []
           |)
@@ -1026,8 +1034,9 @@ Definition init_code_cost : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition calculate_excess_blob_gas : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "parent_header" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "parent_header" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Calculated the excess blob gas for the current block based
     on the gas used in the parent block.
@@ -1045,22 +1054,22 @@ Definition calculate_excess_blob_gas : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "parent_blob_gas" ,
       BinOp.add (|
-        M.get_field (| M.get_name (| globals, "parent_header" |), "excess_blob_gas" |),
-        M.get_field (| M.get_name (| globals, "parent_header" |), "blob_gas_used" |)
+        M.get_field (| M.get_name (| globals, locals_stack, "parent_header" |), "excess_blob_gas" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "parent_header" |), "blob_gas_used" |)
       |)
     |) in
     let _ :=
       (* if *)
       M.if_then_else (|
         Compare.lt (|
-          M.get_name (| globals, "parent_blob_gas" |),
-          M.get_name (| globals, "TARGET_BLOB_GAS_PER_BLOCK" |)
+          M.get_name (| globals, locals_stack, "parent_blob_gas" |),
+          M.get_name (| globals, locals_stack, "TARGET_BLOB_GAS_PER_BLOCK" |)
         |),
       (* then *)
       ltac:(M.monadic (
         let _ := M.return_ (|
           M.call (|
-            M.get_name (| globals, "U64" |),
+            M.get_name (| globals, locals_stack, "U64" |),
             make_list [
               Constant.int 0
             ],
@@ -1072,8 +1081,8 @@ Definition calculate_excess_blob_gas : Value.t -> Value.t -> M :=
       )), ltac:(M.monadic (
         let _ := M.return_ (|
           BinOp.sub (|
-            M.get_name (| globals, "parent_blob_gas" |),
-            M.get_name (| globals, "TARGET_BLOB_GAS_PER_BLOCK" |)
+            M.get_name (| globals, locals_stack, "parent_blob_gas" |),
+            M.get_name (| globals, locals_stack, "TARGET_BLOB_GAS_PER_BLOCK" |)
           |)
         |) in
         M.pure Constant.None_
@@ -1081,8 +1090,9 @@ Definition calculate_excess_blob_gas : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition calculate_total_blob_gas : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "tx" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "tx" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Calculate the total blob gas for a transaction.
 
@@ -1100,10 +1110,10 @@ Definition calculate_total_blob_gas : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         M.call (|
-          M.get_name (| globals, "isinstance" |),
+          M.get_name (| globals, locals_stack, "isinstance" |),
           make_list [
-            M.get_name (| globals, "tx" |);
-            M.get_name (| globals, "BlobTransaction" |)
+            M.get_name (| globals, locals_stack, "tx" |);
+            M.get_name (| globals, locals_stack, "BlobTransaction" |)
           ],
           make_dict []
         |),
@@ -1111,11 +1121,11 @@ Definition calculate_total_blob_gas : Value.t -> Value.t -> M :=
       ltac:(M.monadic (
         let _ := M.return_ (|
           BinOp.mult (|
-            M.get_name (| globals, "GAS_PER_BLOB" |),
+            M.get_name (| globals, locals_stack, "GAS_PER_BLOB" |),
             M.call (|
-              M.get_name (| globals, "len" |),
+              M.get_name (| globals, locals_stack, "len" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "tx" |), "blob_versioned_hashes" |)
+                M.get_field (| M.get_name (| globals, locals_stack, "tx" |), "blob_versioned_hashes" |)
               ],
               make_dict []
             |)
@@ -1126,7 +1136,7 @@ Definition calculate_total_blob_gas : Value.t -> Value.t -> M :=
       )), ltac:(M.monadic (
         let _ := M.return_ (|
           M.call (|
-            M.get_name (| globals, "Uint" |),
+            M.get_name (| globals, locals_stack, "Uint" |),
             make_list [
               Constant.int 0
             ],
@@ -1138,8 +1148,9 @@ Definition calculate_total_blob_gas : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition calculate_blob_gas_price : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "excess_blob_gas" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "excess_blob_gas" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Calculate the blob gasprice for a block.
 
@@ -1155,17 +1166,17 @@ Definition calculate_blob_gas_price : Value.t -> Value.t -> M :=
     " in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "taylor_exponential" |),
+        M.get_name (| globals, locals_stack, "taylor_exponential" |),
         make_list [
-          M.get_name (| globals, "MIN_BLOB_GASPRICE" |);
+          M.get_name (| globals, locals_stack, "MIN_BLOB_GASPRICE" |);
           M.call (|
-            M.get_name (| globals, "Uint" |),
+            M.get_name (| globals, locals_stack, "Uint" |),
             make_list [
-              M.get_name (| globals, "excess_blob_gas" |)
+              M.get_name (| globals, locals_stack, "excess_blob_gas" |)
             ],
             make_dict []
           |);
-          M.get_name (| globals, "BLOB_GASPRICE_UPDATE_FRACTION" |)
+          M.get_name (| globals, locals_stack, "BLOB_GASPRICE_UPDATE_FRACTION" |)
         ],
         make_dict []
       |)
@@ -1173,8 +1184,9 @@ Definition calculate_blob_gas_price : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition calculate_data_fee : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "excess_blob_gas"; "tx" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "excess_blob_gas"; "tx" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Calculate the blob data fee for a transaction.
 
@@ -1193,16 +1205,16 @@ Definition calculate_data_fee : Value.t -> Value.t -> M :=
     let _ := M.return_ (|
       BinOp.mult (|
         M.call (|
-          M.get_name (| globals, "calculate_total_blob_gas" |),
+          M.get_name (| globals, locals_stack, "calculate_total_blob_gas" |),
           make_list [
-            M.get_name (| globals, "tx" |)
+            M.get_name (| globals, locals_stack, "tx" |)
           ],
           make_dict []
         |),
         M.call (|
-          M.get_name (| globals, "calculate_blob_gas_price" |),
+          M.get_name (| globals, locals_stack, "calculate_blob_gas_price" |),
           make_list [
-            M.get_name (| globals, "excess_blob_gas" |)
+            M.get_name (| globals, locals_stack, "excess_blob_gas" |)
           ],
           make_dict []
         |)

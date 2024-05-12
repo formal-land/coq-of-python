@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.utils.safe_arithmetic".
+Definition globals : Globals.t := "ethereum.utils.safe_arithmetic".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -30,8 +32,9 @@ Axiom ethereum_base_types_imports_Uint :
   IsImported globals "ethereum.base_types" "Uint".
 
 Definition u256_safe_add : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [  ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [  ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Adds together the given sequence of numbers. If the total sum of the
     numbers exceeds `U256.MAX_VALUE` then an exception is raised.
@@ -61,8 +64,9 @@ Definition u256_safe_add : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition u256_safe_multiply : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [  ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [  ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Multiplies together the given sequence of numbers. If the net product of
     the numbers exceeds `U256.MAX_VALUE` then an exception is raised.
@@ -91,7 +95,7 @@ Definition u256_safe_multiply : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "result" ,
       M.get_subscript (|
-        M.get_name (| globals, "numbers" |),
+        M.get_name (| globals, locals_stack, "numbers" |),
         Constant.int 0
       |)
     |) in

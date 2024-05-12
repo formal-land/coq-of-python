@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.muir_glacier.vm.exceptions".
+Definition globals : Globals.t := "ethereum.muir_glacier.vm.exceptions".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -79,22 +81,23 @@ Definition InvalidOpcode : Value.t :=
     [
       (
         "__init__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "code" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "code" ] in
+          ltac:(M.monadic (
           let _ := M.call (|
     M.get_field (| M.call (|
-      M.get_name (| globals, "super" |),
+      M.get_name (| globals, locals_stack, "super" |),
       make_list [],
       make_dict []
     |), "__init__" |),
     make_list [
-      M.get_name (| globals, "code" |)
+      M.get_name (| globals, locals_stack, "code" |)
     ],
     make_dict []
   |) in
           let _ := M.assign (|
-            M.get_field (| M.get_name (| globals, "self" |), "code" |),
-            M.get_name (| globals, "code" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "self" |), "code" |),
+            M.get_name (| globals, locals_stack, "code" |)
           |) in
           M.pure Constant.None_))
       )

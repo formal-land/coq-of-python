@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.crypto.finite_field".
+Definition globals : Globals.t := "ethereum.crypto.finite_field".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -31,7 +33,7 @@ Axiom ethereum_base_types_imports_Bytes32 :
 
 Definition F : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "TypeVar" |),
+    M.get_name (| globals, locals_stack, "TypeVar" |),
     make_list [
       Constant.str "F"
     ],
@@ -45,15 +47,17 @@ Definition Field : Value.t :=
     [
       (
         "zero",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "cls" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "cls" ] in
+          ltac:(M.monadic (
           let _ := Constant.ellipsis in
           M.pure Constant.None_))
       );
       (
         "from_int",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "cls"; "n" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "cls"; "n" ] in
+          ltac:(M.monadic (
           let _ := Constant.ellipsis in
           M.pure Constant.None_))
       )
@@ -61,85 +65,97 @@ Definition Field : Value.t :=
     [
       (
         "__radd__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ := Constant.ellipsis in
           M.pure Constant.None_))
       );
       (
         "__add__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := Constant.ellipsis in
           M.pure Constant.None_))
       );
       (
         "__iadd__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := Constant.ellipsis in
           M.pure Constant.None_))
       );
       (
         "__sub__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := Constant.ellipsis in
           M.pure Constant.None_))
       );
       (
         "__rsub__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ := Constant.ellipsis in
           M.pure Constant.None_))
       );
       (
         "__mul__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := Constant.ellipsis in
           M.pure Constant.None_))
       );
       (
         "__rmul__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ := Constant.ellipsis in
           M.pure Constant.None_))
       );
       (
         "__imul__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := Constant.ellipsis in
           M.pure Constant.None_))
       );
       (
         "__pow__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "exponent" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "exponent" ] in
+          ltac:(M.monadic (
           let _ := Constant.ellipsis in
           M.pure Constant.None_))
       );
       (
         "__ipow__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := Constant.ellipsis in
           M.pure Constant.None_))
       );
       (
         "__neg__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := Constant.ellipsis in
           M.pure Constant.None_))
       );
       (
         "__truediv__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := Constant.ellipsis in
           M.pure Constant.None_))
       )
@@ -147,7 +163,7 @@ Definition Field : Value.t :=
 
 Definition T : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "TypeVar" |),
+    M.get_name (| globals, locals_stack, "TypeVar" |),
     make_list [
       Constant.str "T"
     ],
@@ -161,8 +177,9 @@ Definition PrimeField : Value.t :=
     [
       (
         "from_be_bytes",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "cls"; "buffer" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "cls"; "buffer" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Converts a sequence of bytes into a element of the field.
         Parameters
@@ -176,12 +193,12 @@ Definition PrimeField : Value.t :=
         " in
           let _ := M.return_ (|
             M.call (|
-              M.get_name (| globals, "cls" |),
+              M.get_name (| globals, locals_stack, "cls" |),
               make_list [
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "from_bytes" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "from_bytes" |),
                   make_list [
-                    M.get_name (| globals, "buffer" |);
+                    M.get_name (| globals, locals_stack, "buffer" |);
                     Constant.str "big"
                   ],
                   make_dict []
@@ -194,13 +211,14 @@ Definition PrimeField : Value.t :=
       );
       (
         "zero",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "cls" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "cls" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "cls" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "__new__" |),
               make_list [
-                M.get_name (| globals, "cls" |);
+                M.get_name (| globals, locals_stack, "cls" |);
                 Constant.int 0
               ],
               make_dict []
@@ -210,13 +228,14 @@ Definition PrimeField : Value.t :=
       );
       (
         "from_int",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "cls"; "n" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "cls"; "n" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_name (| globals, "cls" |),
+              M.get_name (| globals, locals_stack, "cls" |),
               make_list [
-                M.get_name (| globals, "n" |)
+                M.get_name (| globals, locals_stack, "n" |)
               ],
               make_dict []
             |)
@@ -227,16 +246,17 @@ Definition PrimeField : Value.t :=
     [
       (
         "__new__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "cls"; "value" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "cls"; "value" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "int" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__new__" |),
               make_list [
-                M.get_name (| globals, "cls" |);
+                M.get_name (| globals, locals_stack, "cls" |);
                 BinOp.mod_ (|
-                  M.get_name (| globals, "value" |),
-                  M.get_field (| M.get_name (| globals, "cls" |), "PRIME" |)
+                  M.get_name (| globals, locals_stack, "value" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "PRIME" |)
                 |)
               ],
               make_dict []
@@ -246,13 +266,14 @@ Definition PrimeField : Value.t :=
       );
       (
         "__radd__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__add__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__add__" |),
               make_list [
-                M.get_name (| globals, "left" |)
+                M.get_name (| globals, locals_stack, "left" |)
               ],
               make_dict []
             |)
@@ -261,23 +282,24 @@ Definition PrimeField : Value.t :=
       );
       (
         "__add__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -286,20 +308,20 @@ Definition PrimeField : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__new__" |),
               make_list [
                 M.call (|
-                  M.get_name (| globals, "type" |),
+                  M.get_name (| globals, locals_stack, "type" |),
                   make_list [
-                    M.get_name (| globals, "self" |)
+                    M.get_name (| globals, locals_stack, "self" |)
                   ],
                   make_dict []
                 |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__add__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__add__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "right" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "right" |)
                   ],
                   make_dict []
                 |)
@@ -311,13 +333,14 @@ Definition PrimeField : Value.t :=
       );
       (
         "__iadd__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__add__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__add__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -326,23 +349,24 @@ Definition PrimeField : Value.t :=
       );
       (
         "__sub__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -351,20 +375,20 @@ Definition PrimeField : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__new__" |),
               make_list [
                 M.call (|
-                  M.get_name (| globals, "type" |),
+                  M.get_name (| globals, locals_stack, "type" |),
                   make_list [
-                    M.get_name (| globals, "self" |)
+                    M.get_name (| globals, locals_stack, "self" |)
                   ],
                   make_dict []
                 |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__sub__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__sub__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "right" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "right" |)
                   ],
                   make_dict []
                 |)
@@ -376,23 +400,24 @@ Definition PrimeField : Value.t :=
       );
       (
         "__rsub__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "left" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "left" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -401,20 +426,20 @@ Definition PrimeField : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__new__" |),
               make_list [
                 M.call (|
-                  M.get_name (| globals, "type" |),
+                  M.get_name (| globals, locals_stack, "type" |),
                   make_list [
-                    M.get_name (| globals, "self" |)
+                    M.get_name (| globals, locals_stack, "self" |)
                   ],
                   make_dict []
                 |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__rsub__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__rsub__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "left" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "left" |)
                   ],
                   make_dict []
                 |)
@@ -426,23 +451,24 @@ Definition PrimeField : Value.t :=
       );
       (
         "__mul__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
-                  M.get_name (| globals, "int" |)
+                  M.get_name (| globals, locals_stack, "right" |);
+                  M.get_name (| globals, locals_stack, "int" |)
                 ],
                 make_dict []
               |) |),
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -451,20 +477,20 @@ Definition PrimeField : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__new__" |),
               make_list [
                 M.call (|
-                  M.get_name (| globals, "type" |),
+                  M.get_name (| globals, locals_stack, "type" |),
                   make_list [
-                    M.get_name (| globals, "self" |)
+                    M.get_name (| globals, locals_stack, "self" |)
                   ],
                   make_dict []
                 |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__mul__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__mul__" |),
                   make_list [
-                    M.get_name (| globals, "self" |);
-                    M.get_name (| globals, "right" |)
+                    M.get_name (| globals, locals_stack, "self" |);
+                    M.get_name (| globals, locals_stack, "right" |)
                   ],
                   make_dict []
                 |)
@@ -476,13 +502,14 @@ Definition PrimeField : Value.t :=
       );
       (
         "__rmul__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__mul__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__mul__" |),
               make_list [
-                M.get_name (| globals, "left" |)
+                M.get_name (| globals, locals_stack, "left" |)
               ],
               make_dict []
             |)
@@ -491,13 +518,14 @@ Definition PrimeField : Value.t :=
       );
       (
         "__imul__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__mul__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__mul__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -506,31 +534,32 @@ Definition PrimeField : Value.t :=
       );
       (
         "__pow__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "exponent" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "exponent" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__new__" |),
               make_list [
                 M.call (|
-                  M.get_name (| globals, "type" |),
+                  M.get_name (| globals, locals_stack, "type" |),
                   make_list [
-                    M.get_name (| globals, "self" |)
+                    M.get_name (| globals, locals_stack, "self" |)
                   ],
                   make_dict []
                 |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__pow__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__pow__" |),
                   make_list [
                     M.call (|
-                      M.get_name (| globals, "int" |),
+                      M.get_name (| globals, locals_stack, "int" |),
                       make_list [
-                        M.get_name (| globals, "self" |)
+                        M.get_name (| globals, locals_stack, "self" |)
                       ],
                       make_dict []
                     |);
-                    M.get_name (| globals, "exponent" |);
-                    M.get_field (| M.get_name (| globals, "self" |), "PRIME" |)
+                    M.get_name (| globals, locals_stack, "exponent" |);
+                    M.get_field (| M.get_name (| globals, locals_stack, "self" |), "PRIME" |)
                   ],
                   make_dict []
                 |)
@@ -542,13 +571,14 @@ Definition PrimeField : Value.t :=
       );
       (
         "__ipow__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__pow__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__pow__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -557,23 +587,24 @@ Definition PrimeField : Value.t :=
       );
       (
         "__neg__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__new__" |),
               make_list [
                 M.call (|
-                  M.get_name (| globals, "type" |),
+                  M.get_name (| globals, locals_stack, "type" |),
                   make_list [
-                    M.get_name (| globals, "self" |)
+                    M.get_name (| globals, locals_stack, "self" |)
                   ],
                   make_dict []
                 |);
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "int" |), "__neg__" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "int" |), "__neg__" |),
                   make_list [
-                    M.get_name (| globals, "self" |)
+                    M.get_name (| globals, locals_stack, "self" |)
                   ],
                   make_dict []
                 |)
@@ -585,13 +616,14 @@ Definition PrimeField : Value.t :=
       );
       (
         "__truediv__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             BinOp.mult (|
-              M.get_name (| globals, "self" |),
+              M.get_name (| globals, locals_stack, "self" |),
               M.call (|
-                M.get_field (| M.get_name (| globals, "right" |), "multiplicative_inverse" |),
+                M.get_field (| M.get_name (| globals, locals_stack, "right" |), "multiplicative_inverse" |),
                 make_list [],
                 make_dict []
               |)
@@ -601,11 +633,12 @@ Definition PrimeField : Value.t :=
       );
       (
         "multiplicative_inverse",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             BinOp.pow (|
-              M.get_name (| globals, "self" |),
+              M.get_name (| globals, locals_stack, "self" |),
               UnOp.sub (| Constant.int 1 |)
             |)
           |) in
@@ -613,8 +646,9 @@ Definition PrimeField : Value.t :=
       );
       (
         "to_be_bytes32",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Converts this arbitrarily sized unsigned integer into its big endian
         representation with exactly 32 bytes.
@@ -625,10 +659,10 @@ Definition PrimeField : Value.t :=
         " in
           let _ := M.return_ (|
             M.call (|
-              M.get_name (| globals, "Bytes32" |),
+              M.get_name (| globals, locals_stack, "Bytes32" |),
               make_list [
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "self" |), "to_bytes" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "self" |), "to_bytes" |),
                   make_list [
                     Constant.int 32;
                     Constant.str "big"
@@ -645,7 +679,7 @@ Definition PrimeField : Value.t :=
 
 Definition U : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "TypeVar" |),
+    M.get_name (| globals, locals_stack, "TypeVar" |),
     make_list [
       Constant.str "U"
     ],
@@ -659,21 +693,22 @@ Definition GaloisField : Value.t :=
     [
       (
         "zero",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "cls" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "cls" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "cls" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "__new__" |),
               make_list [
-                M.get_name (| globals, "cls" |);
+                M.get_name (| globals, locals_stack, "cls" |);
                 BinOp.mult (|
                   make_list [
                     Constant.int 0
                   ],
                   M.call (|
-                    M.get_name (| globals, "len" |),
+                    M.get_name (| globals, locals_stack, "len" |),
                     make_list [
-                      M.get_field (| M.get_name (| globals, "cls" |), "MODULUS" |)
+                      M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "MODULUS" |)
                     ],
                     make_dict []
                   |)
@@ -686,16 +721,17 @@ Definition GaloisField : Value.t :=
       );
       (
         "from_int",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "cls"; "n" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "cls"; "n" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "cls" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "__new__" |),
               make_list [
-                M.get_name (| globals, "cls" |);
+                M.get_name (| globals, locals_stack, "cls" |);
                 BinOp.add (|
                   make_list [
-                    M.get_name (| globals, "n" |)
+                    M.get_name (| globals, locals_stack, "n" |)
                   ],
                   BinOp.mult (|
                     make_list [
@@ -703,9 +739,9 @@ Definition GaloisField : Value.t :=
                     ],
                     BinOp.sub (|
                       M.call (|
-                        M.get_name (| globals, "len" |),
+                        M.get_name (| globals, locals_stack, "len" |),
                         make_list [
-                          M.get_field (| M.get_name (| globals, "cls" |), "MODULUS" |)
+                          M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "MODULUS" |)
                         ],
                         make_dict []
                       |),
@@ -721,8 +757,9 @@ Definition GaloisField : Value.t :=
       );
       (
         "calculate_frobenius_coefficients",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "cls" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "cls" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Calculate the coefficients needed by `frobenius()`.
         " in
@@ -732,14 +769,14 @@ Definition GaloisField : Value.t :=
           |) in
           let _ :=
             M.for_ (|
-              M.get_name (| globals, "i" |),
+              M.get_name (| globals, locals_stack, "i" |),
               M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         M.call (|
-          M.get_name (| globals, "len" |),
+          M.get_name (| globals, locals_stack, "len" |),
           make_list [
-            M.get_field (| M.get_name (| globals, "cls" |), "MODULUS" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "MODULUS" |)
           ],
           make_dict []
         |)
@@ -754,9 +791,9 @@ Definition GaloisField : Value.t :=
                       Constant.int 0
                     ],
                     M.call (|
-                      M.get_name (| globals, "len" |),
+                      M.get_name (| globals, locals_stack, "len" |),
                       make_list [
-                        M.get_field (| M.get_name (| globals, "cls" |), "MODULUS" |)
+                        M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "MODULUS" |)
                       ],
                       make_dict []
                     |)
@@ -764,24 +801,24 @@ Definition GaloisField : Value.t :=
                 |) in
                 let _ := M.assign (|
                   M.get_subscript (|
-                    M.get_name (| globals, "x" |),
-                    M.get_name (| globals, "i" |)
+                    M.get_name (| globals, locals_stack, "x" |),
+                    M.get_name (| globals, locals_stack, "i" |)
                   |),
                   Constant.int 1
                 |) in
                 let _ := M.call (|
-    M.get_field (| M.get_name (| globals, "coefficients" |), "append" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "coefficients" |), "append" |),
     make_list [
       BinOp.pow (|
         M.call (|
-          M.get_field (| M.get_name (| globals, "cls" |), "__new__" |),
+          M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "__new__" |),
           make_list [
-            M.get_name (| globals, "cls" |);
-            M.get_name (| globals, "x" |)
+            M.get_name (| globals, locals_stack, "cls" |);
+            M.get_name (| globals, locals_stack, "x" |)
           ],
           make_dict []
         |),
-        M.get_field (| M.get_name (| globals, "cls" |), "PRIME" |)
+        M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "PRIME" |)
       |)
     ],
     make_dict []
@@ -794,9 +831,9 @@ Definition GaloisField : Value.t :=
           |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_name (| globals, "tuple" |),
+              M.get_name (| globals, locals_stack, "tuple" |),
               make_list [
-                M.get_name (| globals, "coefficients" |)
+                M.get_name (| globals, locals_stack, "coefficients" |)
               ],
               make_dict []
             |)
@@ -807,14 +844,15 @@ Definition GaloisField : Value.t :=
     [
       (
         "__new__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "cls"; "iterable" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "cls"; "iterable" ] in
+          ltac:(M.monadic (
           let _ := M.assign_local (|
             "self" ,
             M.call (|
-              M.get_field (| M.get_name (| globals, "tuple" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "tuple" |), "__new__" |),
               make_list [
-                M.get_name (| globals, "cls" |);
+                M.get_name (| globals, locals_stack, "cls" |);
                 Constant.str "(* At expr: unsupported node type: GeneratorExp *)"
               ],
               make_dict []
@@ -822,40 +860,41 @@ Definition GaloisField : Value.t :=
           |) in
           let _ := M.assert (| Compare.eq (|
     M.call (|
-      M.get_name (| globals, "len" |),
+      M.get_name (| globals, locals_stack, "len" |),
       make_list [
-        M.get_name (| globals, "self" |)
+        M.get_name (| globals, locals_stack, "self" |)
       ],
       make_dict []
     |),
     M.call (|
-      M.get_name (| globals, "len" |),
+      M.get_name (| globals, locals_stack, "len" |),
       make_list [
-        M.get_field (| M.get_name (| globals, "cls" |), "MODULUS" |)
+        M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "MODULUS" |)
       ],
       make_dict []
     |)
   |) |) in
           let _ := M.return_ (|
-            M.get_name (| globals, "self" |)
+            M.get_name (| globals, locals_stack, "self" |)
           |) in
           M.pure Constant.None_))
       );
       (
         "__add__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
+                  M.get_name (| globals, locals_stack, "right" |);
                   M.call (|
-                    M.get_name (| globals, "type" |),
+                    M.get_name (| globals, locals_stack, "type" |),
                     make_list [
-                      M.get_name (| globals, "self" |)
+                      M.get_name (| globals, locals_stack, "self" |)
                     ],
                     make_dict []
                   |)
@@ -865,7 +904,7 @@ Definition GaloisField : Value.t :=
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -874,12 +913,12 @@ Definition GaloisField : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__new__" |),
               make_list [
                 M.call (|
-                  M.get_name (| globals, "type" |),
+                  M.get_name (| globals, locals_stack, "type" |),
                   make_list [
-                    M.get_name (| globals, "self" |)
+                    M.get_name (| globals, locals_stack, "self" |)
                   ],
                   make_dict []
                 |);
@@ -892,13 +931,14 @@ Definition GaloisField : Value.t :=
       );
       (
         "__radd__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__add__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__add__" |),
               make_list [
-                M.get_name (| globals, "left" |)
+                M.get_name (| globals, locals_stack, "left" |)
               ],
               make_dict []
             |)
@@ -907,13 +947,14 @@ Definition GaloisField : Value.t :=
       );
       (
         "__iadd__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__add__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__add__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -922,19 +963,20 @@ Definition GaloisField : Value.t :=
       );
       (
         "__sub__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "right" |);
+                  M.get_name (| globals, locals_stack, "right" |);
                   M.call (|
-                    M.get_name (| globals, "type" |),
+                    M.get_name (| globals, locals_stack, "type" |),
                     make_list [
-                      M.get_name (| globals, "self" |)
+                      M.get_name (| globals, locals_stack, "self" |)
                     ],
                     make_dict []
                   |)
@@ -944,7 +986,7 @@ Definition GaloisField : Value.t :=
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -955,12 +997,12 @@ Definition GaloisField : Value.t :=
 (* At stmt: unsupported node type: AnnAssign *)
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__new__" |),
               make_list [
                 M.call (|
-                  M.get_name (| globals, "type" |),
+                  M.get_name (| globals, locals_stack, "type" |),
                   make_list [
-                    M.get_name (| globals, "self" |)
+                    M.get_name (| globals, locals_stack, "self" |)
                   ],
                   make_dict []
                 |);
@@ -973,19 +1015,20 @@ Definition GaloisField : Value.t :=
       );
       (
         "__rsub__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               UnOp.not (| M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "left" |);
+                  M.get_name (| globals, locals_stack, "left" |);
                   M.call (|
-                    M.get_name (| globals, "type" |),
+                    M.get_name (| globals, locals_stack, "type" |),
                     make_list [
-                      M.get_name (| globals, "self" |)
+                      M.get_name (| globals, locals_stack, "self" |)
                     ],
                     make_dict []
                   |)
@@ -995,7 +1038,7 @@ Definition GaloisField : Value.t :=
             (* then *)
             ltac:(M.monadic (
               let _ := M.return_ (|
-                M.get_name (| globals, "NotImplemented" |)
+                M.get_name (| globals, locals_stack, "NotImplemented" |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -1004,12 +1047,12 @@ Definition GaloisField : Value.t :=
             )) |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__new__" |),
               make_list [
                 M.call (|
-                  M.get_name (| globals, "type" |),
+                  M.get_name (| globals, locals_stack, "type" |),
                   make_list [
-                    M.get_name (| globals, "self" |)
+                    M.get_name (| globals, locals_stack, "self" |)
                   ],
                   make_dict []
                 |);
@@ -1022,25 +1065,26 @@ Definition GaloisField : Value.t :=
       );
       (
         "__mul__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.assign_local (|
             "modulus" ,
-            M.get_field (| M.get_name (| globals, "self" |), "MODULUS" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MODULUS" |)
           |) in
           let _ := M.assign_local (|
             "degree" ,
             M.call (|
-              M.get_name (| globals, "len" |),
+              M.get_name (| globals, locals_stack, "len" |),
               make_list [
-                M.get_name (| globals, "modulus" |)
+                M.get_name (| globals, locals_stack, "modulus" |)
               ],
               make_dict []
             |)
           |) in
           let _ := M.assign_local (|
             "prime" ,
-            M.get_field (| M.get_name (| globals, "self" |), "PRIME" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "self" |), "PRIME" |)
           |) in
           let _ := M.assign_local (|
             "mul" ,
@@ -1049,29 +1093,29 @@ Definition GaloisField : Value.t :=
                 Constant.int 0
               ],
               BinOp.mult (|
-                M.get_name (| globals, "degree" |),
+                M.get_name (| globals, locals_stack, "degree" |),
                 Constant.int 2
               |)
             |)
           |) in
           let _ :=
             M.for_ (|
-              M.get_name (| globals, "i" |),
+              M.get_name (| globals, locals_stack, "i" |),
               M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
-        M.get_name (| globals, "degree" |)
+        M.get_name (| globals, locals_stack, "degree" |)
       ],
       make_dict []
     |),
               ltac:(M.monadic (
                 let _ :=
                   M.for_ (|
-                    M.get_name (| globals, "j" |),
+                    M.get_name (| globals, locals_stack, "j" |),
                     M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
-        M.get_name (| globals, "degree" |)
+        M.get_name (| globals, locals_stack, "degree" |)
       ],
       make_dict []
     |),
@@ -1079,20 +1123,20 @@ Definition GaloisField : Value.t :=
                       let _ := M.assign_op (|
                         BinOp.add,
                         M.get_subscript (|
-    M.get_name (| globals, "mul" |),
+    M.get_name (| globals, locals_stack, "mul" |),
     BinOp.add (|
-      M.get_name (| globals, "i" |),
-      M.get_name (| globals, "j" |)
+      M.get_name (| globals, locals_stack, "i" |),
+      M.get_name (| globals, locals_stack, "j" |)
     |)
   |),
                         BinOp.mult (|
     M.get_subscript (|
-      M.get_name (| globals, "self" |),
-      M.get_name (| globals, "i" |)
+      M.get_name (| globals, locals_stack, "self" |),
+      M.get_name (| globals, locals_stack, "i" |)
     |),
     M.get_subscript (|
-      M.get_name (| globals, "right" |),
-      M.get_name (| globals, "j" |)
+      M.get_name (| globals, locals_stack, "right" |),
+      M.get_name (| globals, locals_stack, "j" |)
     |)
   |)
                       |) in
@@ -1110,19 +1154,19 @@ Definition GaloisField : Value.t :=
           |) in
           let _ :=
             M.for_ (|
-              M.get_name (| globals, "i" |),
+              M.get_name (| globals, locals_stack, "i" |),
               M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         BinOp.sub (|
           BinOp.mult (|
-            M.get_name (| globals, "degree" |),
+            M.get_name (| globals, locals_stack, "degree" |),
             Constant.int 2
           |),
           Constant.int 1
         |);
         BinOp.sub (|
-          M.get_name (| globals, "degree" |),
+          M.get_name (| globals, locals_stack, "degree" |),
           Constant.int 1
         |);
         UnOp.sub (| Constant.int 1 |)
@@ -1132,15 +1176,15 @@ Definition GaloisField : Value.t :=
               ltac:(M.monadic (
                 let _ :=
                   M.for_ (|
-                    M.get_name (| globals, "j" |),
+                    M.get_name (| globals, locals_stack, "j" |),
                     M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         BinOp.sub (|
-          M.get_name (| globals, "i" |),
-          M.get_name (| globals, "degree" |)
+          M.get_name (| globals, locals_stack, "i" |),
+          M.get_name (| globals, locals_stack, "degree" |)
         |);
-        M.get_name (| globals, "i" |)
+        M.get_name (| globals, locals_stack, "i" |)
       ],
       make_dict []
     |),
@@ -1148,27 +1192,27 @@ Definition GaloisField : Value.t :=
                       let _ := M.assign_op (|
                         BinOp.sub,
                         M.get_subscript (|
-    M.get_name (| globals, "mul" |),
-    M.get_name (| globals, "j" |)
+    M.get_name (| globals, locals_stack, "mul" |),
+    M.get_name (| globals, locals_stack, "j" |)
   |),
                         BinOp.mod_ (|
     BinOp.mult (|
       M.get_subscript (|
-        M.get_name (| globals, "mul" |),
-        M.get_name (| globals, "i" |)
+        M.get_name (| globals, locals_stack, "mul" |),
+        M.get_name (| globals, locals_stack, "i" |)
       |),
       M.get_subscript (|
-        M.get_name (| globals, "modulus" |),
+        M.get_name (| globals, locals_stack, "modulus" |),
         BinOp.sub (|
-          M.get_name (| globals, "degree" |),
+          M.get_name (| globals, locals_stack, "degree" |),
           BinOp.sub (|
-            M.get_name (| globals, "i" |),
-            M.get_name (| globals, "j" |)
+            M.get_name (| globals, locals_stack, "i" |),
+            M.get_name (| globals, locals_stack, "j" |)
           |)
         |)
       |)
     |),
-    M.get_name (| globals, "prime" |)
+    M.get_name (| globals, locals_stack, "prime" |)
   |)
                       |) in
                       M.pure Constant.None_
@@ -1185,19 +1229,19 @@ Definition GaloisField : Value.t :=
           |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__new__" |),
               make_list [
                 M.call (|
-                  M.get_name (| globals, "type" |),
+                  M.get_name (| globals, locals_stack, "type" |),
                   make_list [
-                    M.get_name (| globals, "self" |)
+                    M.get_name (| globals, locals_stack, "self" |)
                   ],
                   make_dict []
                 |);
                 M.slice (|
-                  M.get_name (| globals, "mul" |),
+                  M.get_name (| globals, locals_stack, "mul" |),
                   Constant.None_,
-                  M.get_name (| globals, "degree" |),
+                  M.get_name (| globals, locals_stack, "degree" |),
                   Constant.None_
                 |)
               ],
@@ -1208,13 +1252,14 @@ Definition GaloisField : Value.t :=
       );
       (
         "__rmul__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "left" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "left" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__mul__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__mul__" |),
               make_list [
-                M.get_name (| globals, "left" |)
+                M.get_name (| globals, locals_stack, "left" |)
               ],
               make_dict []
             |)
@@ -1223,13 +1268,14 @@ Definition GaloisField : Value.t :=
       );
       (
         "__imul__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__mul__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__mul__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -1238,13 +1284,14 @@ Definition GaloisField : Value.t :=
       );
       (
         "__truediv__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             BinOp.mult (|
-              M.get_name (| globals, "self" |),
+              M.get_name (| globals, locals_stack, "self" |),
               M.call (|
-                M.get_field (| M.get_name (| globals, "right" |), "multiplicative_inverse" |),
+                M.get_field (| M.get_name (| globals, locals_stack, "right" |), "multiplicative_inverse" |),
                 make_list [],
                 make_dict []
               |)
@@ -1254,16 +1301,17 @@ Definition GaloisField : Value.t :=
       );
       (
         "__neg__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__new__" |),
               make_list [
                 M.call (|
-                  M.get_name (| globals, "type" |),
+                  M.get_name (| globals, locals_stack, "type" |),
                   make_list [
-                    M.get_name (| globals, "self" |)
+                    M.get_name (| globals, locals_stack, "self" |)
                   ],
                   make_dict []
                 |);
@@ -1276,20 +1324,21 @@ Definition GaloisField : Value.t :=
       );
       (
         "scalar_mul",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "x" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "x" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Multiply a field element by a integer. This is faster than using
         `from_int()` and field multiplication.
         " in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__new__" |),
               make_list [
                 M.call (|
-                  M.get_name (| globals, "type" |),
+                  M.get_name (| globals, locals_stack, "type" |),
                   make_list [
-                    M.get_name (| globals, "self" |)
+                    M.get_name (| globals, locals_stack, "self" |)
                   ],
                   make_dict []
                 |);
@@ -1302,22 +1351,23 @@ Definition GaloisField : Value.t :=
       );
       (
         "deg",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         This is a support function for `multiplicative_inverse()`.
         " in
           let _ :=
             M.for_ (|
-              M.get_name (| globals, "i" |),
+              M.get_name (| globals, locals_stack, "i" |),
               M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         BinOp.sub (|
           M.call (|
-            M.get_name (| globals, "len" |),
+            M.get_name (| globals, locals_stack, "len" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "self" |), "MODULUS" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MODULUS" |)
             ],
             make_dict []
           |),
@@ -1334,15 +1384,15 @@ Definition GaloisField : Value.t :=
                   M.if_then_else (|
                     Compare.not_eq (|
                       M.get_subscript (|
-                        M.get_name (| globals, "self" |),
-                        M.get_name (| globals, "i" |)
+                        M.get_name (| globals, locals_stack, "self" |),
+                        M.get_name (| globals, locals_stack, "i" |)
                       |),
                       Constant.int 0
                     |),
                   (* then *)
                   ltac:(M.monadic (
                     let _ := M.return_ (|
-                      M.get_name (| globals, "i" |)
+                      M.get_name (| globals, locals_stack, "i" |)
                     |) in
                     M.pure Constant.None_
                   (* else *)
@@ -1356,7 +1406,7 @@ Definition GaloisField : Value.t :=
               ))
           |) in
           let _ := M.raise (| Some (M.call (|
-            M.get_name (| globals, "ValueError" |),
+            M.get_name (| globals, locals_stack, "ValueError" |),
             make_list [
               Constant.str "deg() does not support zero"
             ],
@@ -1366,22 +1416,23 @@ Definition GaloisField : Value.t :=
       );
       (
         "multiplicative_inverse",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Calculate the multiplicative inverse. Uses the Euclidean algorithm.
         " in
 (* At stmt: unsupported node type: AnnAssign *)
           let _ := M.assign_local (|
             "p" ,
-            M.get_field (| M.get_name (| globals, "self" |), "PRIME" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "self" |), "PRIME" |)
           |) in
           let _ := M.assign (|
-            make_tuple [ M.get_name (| globals, "x1" |); M.get_name (| globals, "f1" |) ],
+            make_tuple [ M.get_name (| globals, locals_stack, "x1" |); M.get_name (| globals, locals_stack, "f1" |) ],
             make_tuple [ M.call (|
-              M.get_name (| globals, "list" |),
+              M.get_name (| globals, locals_stack, "list" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "MODULUS" |)
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MODULUS" |)
               ],
               make_dict []
             |); BinOp.mult (|
@@ -1389,20 +1440,20 @@ Definition GaloisField : Value.t :=
                 Constant.int 0
               ],
               M.call (|
-                M.get_name (| globals, "len" |),
+                M.get_name (| globals, locals_stack, "len" |),
                 make_list [
-                  M.get_name (| globals, "self" |)
+                  M.get_name (| globals, locals_stack, "self" |)
                 ],
                 make_dict []
               |)
             |) ]
           |) in
           let _ := M.assign (|
-            make_tuple [ M.get_name (| globals, "x2" |); M.get_name (| globals, "f2" |); M.get_name (| globals, "d2" |) ],
+            make_tuple [ M.get_name (| globals, locals_stack, "x2" |); M.get_name (| globals, locals_stack, "f2" |); M.get_name (| globals, locals_stack, "d2" |) ],
             make_tuple [ M.call (|
-              M.get_name (| globals, "list" |),
+              M.get_name (| globals, locals_stack, "list" |),
               make_list [
-                M.get_name (| globals, "self" |)
+                M.get_name (| globals, locals_stack, "self" |)
               ],
               make_dict []
             |); BinOp.add (|
@@ -1415,9 +1466,9 @@ Definition GaloisField : Value.t :=
                 ],
                 BinOp.sub (|
                   M.call (|
-                    M.get_name (| globals, "len" |),
+                    M.get_name (| globals, locals_stack, "len" |),
                     make_list [
-                      M.get_name (| globals, "self" |)
+                      M.get_name (| globals, locals_stack, "self" |)
                     ],
                     make_dict []
                   |),
@@ -1425,7 +1476,7 @@ Definition GaloisField : Value.t :=
                 |)
               |)
             |); M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "deg" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "deg" |),
               make_list [],
               make_dict []
             |) ]
@@ -1433,119 +1484,119 @@ Definition GaloisField : Value.t :=
           let _ := M.assign_local (|
             "q_0" ,
             M.call (|
-              M.get_name (| globals, "pow" |),
+              M.get_name (| globals, locals_stack, "pow" |),
               make_list [
                 M.get_subscript (|
-                  M.get_name (| globals, "x2" |),
-                  M.get_name (| globals, "d2" |)
+                  M.get_name (| globals, locals_stack, "x2" |),
+                  M.get_name (| globals, locals_stack, "d2" |)
                 |);
                 UnOp.sub (| Constant.int 1 |);
-                M.get_name (| globals, "p" |)
+                M.get_name (| globals, locals_stack, "p" |)
               ],
               make_dict []
             |)
           |) in
           let _ :=
             M.for_ (|
-              M.get_name (| globals, "i" |),
+              M.get_name (| globals, locals_stack, "i" |),
               M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
-        M.get_name (| globals, "d2" |)
+        M.get_name (| globals, locals_stack, "d2" |)
       ],
       make_dict []
     |),
               ltac:(M.monadic (
                 let _ := M.assign (|
                   M.get_subscript (|
-                    M.get_name (| globals, "x1" |),
+                    M.get_name (| globals, locals_stack, "x1" |),
                     BinOp.sub (|
                       BinOp.add (|
-                        M.get_name (| globals, "i" |),
+                        M.get_name (| globals, locals_stack, "i" |),
                         M.call (|
-                          M.get_name (| globals, "len" |),
+                          M.get_name (| globals, locals_stack, "len" |),
                           make_list [
-                            M.get_name (| globals, "x1" |)
+                            M.get_name (| globals, locals_stack, "x1" |)
                           ],
                           make_dict []
                         |)
                       |),
-                      M.get_name (| globals, "d2" |)
+                      M.get_name (| globals, locals_stack, "d2" |)
                     |)
                   |),
                   BinOp.mod_ (|
                     BinOp.sub (|
                       M.get_subscript (|
-                        M.get_name (| globals, "x1" |),
+                        M.get_name (| globals, locals_stack, "x1" |),
                         BinOp.sub (|
                           BinOp.add (|
-                            M.get_name (| globals, "i" |),
+                            M.get_name (| globals, locals_stack, "i" |),
                             M.call (|
-                              M.get_name (| globals, "len" |),
+                              M.get_name (| globals, locals_stack, "len" |),
                               make_list [
-                                M.get_name (| globals, "x1" |)
+                                M.get_name (| globals, locals_stack, "x1" |)
                               ],
                               make_dict []
                             |)
                           |),
-                          M.get_name (| globals, "d2" |)
+                          M.get_name (| globals, locals_stack, "d2" |)
                         |)
                       |),
                       BinOp.mult (|
-                        M.get_name (| globals, "q_0" |),
+                        M.get_name (| globals, locals_stack, "q_0" |),
                         M.get_subscript (|
-                          M.get_name (| globals, "x2" |),
-                          M.get_name (| globals, "i" |)
+                          M.get_name (| globals, locals_stack, "x2" |),
+                          M.get_name (| globals, locals_stack, "i" |)
                         |)
                       |)
                     |),
-                    M.get_name (| globals, "p" |)
+                    M.get_name (| globals, locals_stack, "p" |)
                   |)
                 |) in
                 let _ := M.assign (|
                   M.get_subscript (|
-                    M.get_name (| globals, "f1" |),
+                    M.get_name (| globals, locals_stack, "f1" |),
                     BinOp.sub (|
                       BinOp.add (|
-                        M.get_name (| globals, "i" |),
+                        M.get_name (| globals, locals_stack, "i" |),
                         M.call (|
-                          M.get_name (| globals, "len" |),
+                          M.get_name (| globals, locals_stack, "len" |),
                           make_list [
-                            M.get_name (| globals, "x1" |)
+                            M.get_name (| globals, locals_stack, "x1" |)
                           ],
                           make_dict []
                         |)
                       |),
-                      M.get_name (| globals, "d2" |)
+                      M.get_name (| globals, locals_stack, "d2" |)
                     |)
                   |),
                   BinOp.mod_ (|
                     BinOp.sub (|
                       M.get_subscript (|
-                        M.get_name (| globals, "f1" |),
+                        M.get_name (| globals, locals_stack, "f1" |),
                         BinOp.sub (|
                           BinOp.add (|
-                            M.get_name (| globals, "i" |),
+                            M.get_name (| globals, locals_stack, "i" |),
                             M.call (|
-                              M.get_name (| globals, "len" |),
+                              M.get_name (| globals, locals_stack, "len" |),
                               make_list [
-                                M.get_name (| globals, "x1" |)
+                                M.get_name (| globals, locals_stack, "x1" |)
                               ],
                               make_dict []
                             |)
                           |),
-                          M.get_name (| globals, "d2" |)
+                          M.get_name (| globals, locals_stack, "d2" |)
                         |)
                       |),
                       BinOp.mult (|
-                        M.get_name (| globals, "q_0" |),
+                        M.get_name (| globals, locals_stack, "q_0" |),
                         M.get_subscript (|
-                          M.get_name (| globals, "f2" |),
-                          M.get_name (| globals, "i" |)
+                          M.get_name (| globals, locals_stack, "f2" |),
+                          M.get_name (| globals, locals_stack, "i" |)
                         |)
                       |)
                     |),
-                    M.get_name (| globals, "p" |)
+                    M.get_name (| globals, locals_stack, "p" |)
                   |)
                 |) in
                 M.pure Constant.None_
@@ -1556,15 +1607,15 @@ Definition GaloisField : Value.t :=
           |) in
           let _ :=
             M.for_ (|
-              M.get_name (| globals, "i" |),
+              M.get_name (| globals, locals_stack, "i" |),
               M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         BinOp.sub (|
           M.call (|
-            M.get_name (| globals, "len" |),
+            M.get_name (| globals, locals_stack, "len" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "self" |), "MODULUS" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MODULUS" |)
             ],
             make_dict []
           |),
@@ -1581,8 +1632,8 @@ Definition GaloisField : Value.t :=
                   M.if_then_else (|
                     Compare.not_eq (|
                       M.get_subscript (|
-                        M.get_name (| globals, "x1" |),
-                        M.get_name (| globals, "i" |)
+                        M.get_name (| globals, locals_stack, "x1" |),
+                        M.get_name (| globals, locals_stack, "i" |)
                       |),
                       Constant.int 0
                     |),
@@ -1590,7 +1641,7 @@ Definition GaloisField : Value.t :=
                   ltac:(M.monadic (
                     let _ := M.assign_local (|
                       "d1" ,
-                      M.get_name (| globals, "i" |)
+                      M.get_name (| globals, locals_stack, "i" |)
                     |) in
                     let _ := M.break (| |) in
                     M.pure Constant.None_
@@ -1612,40 +1663,40 @@ Definition GaloisField : Value.t :=
                   (* if *)
                   M.if_then_else (|
                     Compare.eq (|
-                      M.get_name (| globals, "d1" |),
+                      M.get_name (| globals, locals_stack, "d1" |),
                       Constant.int 0
                     |),
                   (* then *)
                   ltac:(M.monadic (
                     let _ := M.assign_local (|
                       "ans" ,
-                      M.get_name (| globals, "f1" |)
+                      M.get_name (| globals, locals_stack, "f1" |)
                     |) in
                     let _ := M.assign_local (|
                       "q" ,
                       M.call (|
-                        M.get_name (| globals, "pow" |),
+                        M.get_name (| globals, locals_stack, "pow" |),
                         make_list [
                           M.get_subscript (|
-                            M.get_name (| globals, "x1" |),
+                            M.get_name (| globals, locals_stack, "x1" |),
                             Constant.int 0
                           |);
                           UnOp.sub (| Constant.int 1 |);
-                          M.get_field (| M.get_name (| globals, "self" |), "PRIME" |)
+                          M.get_field (| M.get_name (| globals, locals_stack, "self" |), "PRIME" |)
                         ],
                         make_dict []
                       |)
                     |) in
                     let _ :=
                       M.for_ (|
-                        M.get_name (| globals, "i" |),
+                        M.get_name (| globals, locals_stack, "i" |),
                         M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         M.call (|
-          M.get_name (| globals, "len" |),
+          M.get_name (| globals, locals_stack, "len" |),
           make_list [
-            M.get_name (| globals, "ans" |)
+            M.get_name (| globals, locals_stack, "ans" |)
           ],
           make_dict []
         |)
@@ -1656,10 +1707,10 @@ Definition GaloisField : Value.t :=
                           let _ := M.assign_op (|
                             BinOp.mult,
                             M.get_subscript (|
-    M.get_name (| globals, "ans" |),
-    M.get_name (| globals, "i" |)
+    M.get_name (| globals, locals_stack, "ans" |),
+    M.get_name (| globals, locals_stack, "i" |)
   |),
-                            M.get_name (| globals, "q" |)
+                            M.get_name (| globals, locals_stack, "q" |)
                           |) in
                           M.pure Constant.None_
                         )),
@@ -1675,40 +1726,40 @@ Definition GaloisField : Value.t :=
                       (* if *)
                       M.if_then_else (|
                         Compare.eq (|
-                          M.get_name (| globals, "d2" |),
+                          M.get_name (| globals, locals_stack, "d2" |),
                           Constant.int 0
                         |),
                       (* then *)
                       ltac:(M.monadic (
                         let _ := M.assign_local (|
                           "ans" ,
-                          M.get_name (| globals, "f2" |)
+                          M.get_name (| globals, locals_stack, "f2" |)
                         |) in
                         let _ := M.assign_local (|
                           "q" ,
                           M.call (|
-                            M.get_name (| globals, "pow" |),
+                            M.get_name (| globals, locals_stack, "pow" |),
                             make_list [
                               M.get_subscript (|
-                                M.get_name (| globals, "x2" |),
+                                M.get_name (| globals, locals_stack, "x2" |),
                                 Constant.int 0
                               |);
                               UnOp.sub (| Constant.int 1 |);
-                              M.get_field (| M.get_name (| globals, "self" |), "PRIME" |)
+                              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "PRIME" |)
                             ],
                             make_dict []
                           |)
                         |) in
                         let _ :=
                           M.for_ (|
-                            M.get_name (| globals, "i" |),
+                            M.get_name (| globals, locals_stack, "i" |),
                             M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         M.call (|
-          M.get_name (| globals, "len" |),
+          M.get_name (| globals, locals_stack, "len" |),
           make_list [
-            M.get_name (| globals, "ans" |)
+            M.get_name (| globals, locals_stack, "ans" |)
           ],
           make_dict []
         |)
@@ -1719,7 +1770,7 @@ Definition GaloisField : Value.t :=
                               let _ := M.assign_op_local (|
                                 BinOp.mult,
                                 "ans",
-                                M.get_name (| globals, "q" |)
+                                M.get_name (| globals, locals_stack, "q" |)
                               |) in
                               M.pure Constant.None_
                             )),
@@ -1739,8 +1790,8 @@ Definition GaloisField : Value.t :=
                   (* if *)
                   M.if_then_else (|
                     Compare.lt (|
-                      M.get_name (| globals, "d1" |),
-                      M.get_name (| globals, "d2" |)
+                      M.get_name (| globals, locals_stack, "d1" |),
+                      M.get_name (| globals, locals_stack, "d2" |)
                     |),
                   (* then *)
                   ltac:(M.monadic (
@@ -1748,18 +1799,18 @@ Definition GaloisField : Value.t :=
                       "q" ,
                       BinOp.mult (|
                         M.get_subscript (|
-                          M.get_name (| globals, "x2" |),
-                          M.get_name (| globals, "d2" |)
+                          M.get_name (| globals, locals_stack, "x2" |),
+                          M.get_name (| globals, locals_stack, "d2" |)
                         |),
                         M.call (|
-                          M.get_name (| globals, "pow" |),
+                          M.get_name (| globals, locals_stack, "pow" |),
                           make_list [
                             M.get_subscript (|
-                              M.get_name (| globals, "x1" |),
-                              M.get_name (| globals, "d1" |)
+                              M.get_name (| globals, locals_stack, "x1" |),
+                              M.get_name (| globals, locals_stack, "d1" |)
                             |);
                             UnOp.sub (| Constant.int 1 |);
-                            M.get_field (| M.get_name (| globals, "self" |), "PRIME" |)
+                            M.get_field (| M.get_name (| globals, locals_stack, "self" |), "PRIME" |)
                           ],
                           make_dict []
                         |)
@@ -1767,21 +1818,21 @@ Definition GaloisField : Value.t :=
                     |) in
                     let _ :=
                       M.for_ (|
-                        M.get_name (| globals, "i" |),
+                        M.get_name (| globals, locals_stack, "i" |),
                         M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         BinOp.sub (|
           M.call (|
-            M.get_name (| globals, "len" |),
+            M.get_name (| globals, locals_stack, "len" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "self" |), "MODULUS" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MODULUS" |)
             ],
             make_dict []
           |),
           BinOp.sub (|
-            M.get_name (| globals, "d2" |),
-            M.get_name (| globals, "d1" |)
+            M.get_name (| globals, locals_stack, "d2" |),
+            M.get_name (| globals, locals_stack, "d1" |)
           |)
         |)
       ],
@@ -1790,70 +1841,70 @@ Definition GaloisField : Value.t :=
                         ltac:(M.monadic (
                           let _ := M.assign (|
                             M.get_subscript (|
-                              M.get_name (| globals, "x2" |),
+                              M.get_name (| globals, locals_stack, "x2" |),
                               BinOp.add (|
-                                M.get_name (| globals, "i" |),
+                                M.get_name (| globals, locals_stack, "i" |),
                                 BinOp.sub (|
-                                  M.get_name (| globals, "d2" |),
-                                  M.get_name (| globals, "d1" |)
+                                  M.get_name (| globals, locals_stack, "d2" |),
+                                  M.get_name (| globals, locals_stack, "d1" |)
                                 |)
                               |)
                             |),
                             BinOp.mod_ (|
                               BinOp.sub (|
                                 M.get_subscript (|
-                                  M.get_name (| globals, "x2" |),
+                                  M.get_name (| globals, locals_stack, "x2" |),
                                   BinOp.add (|
-                                    M.get_name (| globals, "i" |),
+                                    M.get_name (| globals, locals_stack, "i" |),
                                     BinOp.sub (|
-                                      M.get_name (| globals, "d2" |),
-                                      M.get_name (| globals, "d1" |)
+                                      M.get_name (| globals, locals_stack, "d2" |),
+                                      M.get_name (| globals, locals_stack, "d1" |)
                                     |)
                                   |)
                                 |),
                                 BinOp.mult (|
-                                  M.get_name (| globals, "q" |),
+                                  M.get_name (| globals, locals_stack, "q" |),
                                   M.get_subscript (|
-                                    M.get_name (| globals, "x1" |),
-                                    M.get_name (| globals, "i" |)
+                                    M.get_name (| globals, locals_stack, "x1" |),
+                                    M.get_name (| globals, locals_stack, "i" |)
                                   |)
                                 |)
                               |),
-                              M.get_name (| globals, "p" |)
+                              M.get_name (| globals, locals_stack, "p" |)
                             |)
                           |) in
                           let _ := M.assign (|
                             M.get_subscript (|
-                              M.get_name (| globals, "f2" |),
+                              M.get_name (| globals, locals_stack, "f2" |),
                               BinOp.add (|
-                                M.get_name (| globals, "i" |),
+                                M.get_name (| globals, locals_stack, "i" |),
                                 BinOp.sub (|
-                                  M.get_name (| globals, "d2" |),
-                                  M.get_name (| globals, "d1" |)
+                                  M.get_name (| globals, locals_stack, "d2" |),
+                                  M.get_name (| globals, locals_stack, "d1" |)
                                 |)
                               |)
                             |),
                             BinOp.mod_ (|
                               BinOp.sub (|
                                 M.get_subscript (|
-                                  M.get_name (| globals, "f2" |),
+                                  M.get_name (| globals, locals_stack, "f2" |),
                                   BinOp.add (|
-                                    M.get_name (| globals, "i" |),
+                                    M.get_name (| globals, locals_stack, "i" |),
                                     BinOp.sub (|
-                                      M.get_name (| globals, "d2" |),
-                                      M.get_name (| globals, "d1" |)
+                                      M.get_name (| globals, locals_stack, "d2" |),
+                                      M.get_name (| globals, locals_stack, "d1" |)
                                     |)
                                   |)
                                 |),
                                 BinOp.mult (|
-                                  M.get_name (| globals, "q" |),
+                                  M.get_name (| globals, locals_stack, "q" |),
                                   M.get_subscript (|
-                                    M.get_name (| globals, "f1" |),
-                                    M.get_name (| globals, "i" |)
+                                    M.get_name (| globals, locals_stack, "f1" |),
+                                    M.get_name (| globals, locals_stack, "i" |)
                                   |)
                                 |)
                               |),
-                              M.get_name (| globals, "p" |)
+                              M.get_name (| globals, locals_stack, "p" |)
                             |)
                           |) in
                           M.pure Constant.None_
@@ -1866,8 +1917,8 @@ Definition GaloisField : Value.t :=
                       M.while (|
                         Compare.eq (|
       M.get_subscript (|
-        M.get_name (| globals, "x2" |),
-        M.get_name (| globals, "d2" |)
+        M.get_name (| globals, locals_stack, "x2" |),
+        M.get_name (| globals, locals_stack, "d2" |)
       |),
       Constant.int 0
     |),
@@ -1890,18 +1941,18 @@ Definition GaloisField : Value.t :=
                       "q" ,
                       BinOp.mult (|
                         M.get_subscript (|
-                          M.get_name (| globals, "x1" |),
-                          M.get_name (| globals, "d1" |)
+                          M.get_name (| globals, locals_stack, "x1" |),
+                          M.get_name (| globals, locals_stack, "d1" |)
                         |),
                         M.call (|
-                          M.get_name (| globals, "pow" |),
+                          M.get_name (| globals, locals_stack, "pow" |),
                           make_list [
                             M.get_subscript (|
-                              M.get_name (| globals, "x2" |),
-                              M.get_name (| globals, "d2" |)
+                              M.get_name (| globals, locals_stack, "x2" |),
+                              M.get_name (| globals, locals_stack, "d2" |)
                             |);
                             UnOp.sub (| Constant.int 1 |);
-                            M.get_field (| M.get_name (| globals, "self" |), "PRIME" |)
+                            M.get_field (| M.get_name (| globals, locals_stack, "self" |), "PRIME" |)
                           ],
                           make_dict []
                         |)
@@ -1909,21 +1960,21 @@ Definition GaloisField : Value.t :=
                     |) in
                     let _ :=
                       M.for_ (|
-                        M.get_name (| globals, "i" |),
+                        M.get_name (| globals, locals_stack, "i" |),
                         M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         BinOp.sub (|
           M.call (|
-            M.get_name (| globals, "len" |),
+            M.get_name (| globals, locals_stack, "len" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "self" |), "MODULUS" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MODULUS" |)
             ],
             make_dict []
           |),
           BinOp.sub (|
-            M.get_name (| globals, "d1" |),
-            M.get_name (| globals, "d2" |)
+            M.get_name (| globals, locals_stack, "d1" |),
+            M.get_name (| globals, locals_stack, "d2" |)
           |)
         |)
       ],
@@ -1932,70 +1983,70 @@ Definition GaloisField : Value.t :=
                         ltac:(M.monadic (
                           let _ := M.assign (|
                             M.get_subscript (|
-                              M.get_name (| globals, "x1" |),
+                              M.get_name (| globals, locals_stack, "x1" |),
                               BinOp.add (|
-                                M.get_name (| globals, "i" |),
+                                M.get_name (| globals, locals_stack, "i" |),
                                 BinOp.sub (|
-                                  M.get_name (| globals, "d1" |),
-                                  M.get_name (| globals, "d2" |)
+                                  M.get_name (| globals, locals_stack, "d1" |),
+                                  M.get_name (| globals, locals_stack, "d2" |)
                                 |)
                               |)
                             |),
                             BinOp.mod_ (|
                               BinOp.sub (|
                                 M.get_subscript (|
-                                  M.get_name (| globals, "x1" |),
+                                  M.get_name (| globals, locals_stack, "x1" |),
                                   BinOp.add (|
-                                    M.get_name (| globals, "i" |),
+                                    M.get_name (| globals, locals_stack, "i" |),
                                     BinOp.sub (|
-                                      M.get_name (| globals, "d1" |),
-                                      M.get_name (| globals, "d2" |)
+                                      M.get_name (| globals, locals_stack, "d1" |),
+                                      M.get_name (| globals, locals_stack, "d2" |)
                                     |)
                                   |)
                                 |),
                                 BinOp.mult (|
-                                  M.get_name (| globals, "q" |),
+                                  M.get_name (| globals, locals_stack, "q" |),
                                   M.get_subscript (|
-                                    M.get_name (| globals, "x2" |),
-                                    M.get_name (| globals, "i" |)
+                                    M.get_name (| globals, locals_stack, "x2" |),
+                                    M.get_name (| globals, locals_stack, "i" |)
                                   |)
                                 |)
                               |),
-                              M.get_name (| globals, "p" |)
+                              M.get_name (| globals, locals_stack, "p" |)
                             |)
                           |) in
                           let _ := M.assign (|
                             M.get_subscript (|
-                              M.get_name (| globals, "f1" |),
+                              M.get_name (| globals, locals_stack, "f1" |),
                               BinOp.add (|
-                                M.get_name (| globals, "i" |),
+                                M.get_name (| globals, locals_stack, "i" |),
                                 BinOp.sub (|
-                                  M.get_name (| globals, "d1" |),
-                                  M.get_name (| globals, "d2" |)
+                                  M.get_name (| globals, locals_stack, "d1" |),
+                                  M.get_name (| globals, locals_stack, "d2" |)
                                 |)
                               |)
                             |),
                             BinOp.mod_ (|
                               BinOp.sub (|
                                 M.get_subscript (|
-                                  M.get_name (| globals, "f1" |),
+                                  M.get_name (| globals, locals_stack, "f1" |),
                                   BinOp.add (|
-                                    M.get_name (| globals, "i" |),
+                                    M.get_name (| globals, locals_stack, "i" |),
                                     BinOp.sub (|
-                                      M.get_name (| globals, "d1" |),
-                                      M.get_name (| globals, "d2" |)
+                                      M.get_name (| globals, locals_stack, "d1" |),
+                                      M.get_name (| globals, locals_stack, "d2" |)
                                     |)
                                   |)
                                 |),
                                 BinOp.mult (|
-                                  M.get_name (| globals, "q" |),
+                                  M.get_name (| globals, locals_stack, "q" |),
                                   M.get_subscript (|
-                                    M.get_name (| globals, "f2" |),
-                                    M.get_name (| globals, "i" |)
+                                    M.get_name (| globals, locals_stack, "f2" |),
+                                    M.get_name (| globals, locals_stack, "i" |)
                                   |)
                                 |)
                               |),
-                              M.get_name (| globals, "p" |)
+                              M.get_name (| globals, locals_stack, "p" |)
                             |)
                           |) in
                           M.pure Constant.None_
@@ -2008,8 +2059,8 @@ Definition GaloisField : Value.t :=
                       M.while (|
                         Compare.eq (|
       M.get_subscript (|
-        M.get_name (| globals, "x1" |),
-        M.get_name (| globals, "d1" |)
+        M.get_name (| globals, locals_stack, "x1" |),
+        M.get_name (| globals, locals_stack, "d1" |)
       |),
       Constant.int 0
     |),
@@ -2035,16 +2086,16 @@ Definition GaloisField : Value.t :=
           |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__new__" |),
               make_list [
                 M.call (|
-                  M.get_name (| globals, "type" |),
+                  M.get_name (| globals, locals_stack, "type" |),
                   make_list [
-                    M.get_name (| globals, "self" |)
+                    M.get_name (| globals, locals_stack, "self" |)
                   ],
                   make_dict []
                 |);
-                M.get_name (| globals, "ans" |)
+                M.get_name (| globals, locals_stack, "ans" |)
               ],
               make_dict []
             |)
@@ -2053,14 +2104,15 @@ Definition GaloisField : Value.t :=
       );
       (
         "__pow__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "exponent" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "exponent" ] in
+          ltac:(M.monadic (
           let _ := M.assign_local (|
             "degree" ,
             M.call (|
-              M.get_name (| globals, "len" |),
+              M.get_name (| globals, locals_stack, "len" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "MODULUS" |)
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "MODULUS" |)
               ],
               make_dict []
             |)
@@ -2069,7 +2121,7 @@ Definition GaloisField : Value.t :=
             (* if *)
             M.if_then_else (|
               Compare.lt (|
-                M.get_name (| globals, "exponent" |),
+                M.get_name (| globals, locals_stack, "exponent" |),
                 Constant.int 0
               |),
             (* then *)
@@ -2077,14 +2129,14 @@ Definition GaloisField : Value.t :=
               let _ := M.assign_local (|
                 "self" ,
                 M.call (|
-                  M.get_field (| M.get_name (| globals, "self" |), "multiplicative_inverse" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "self" |), "multiplicative_inverse" |),
                   make_list [],
                   make_dict []
                 |)
               |) in
               let _ := M.assign_local (|
                 "exponent" ,
-                UnOp.sub (| M.get_name (| globals, "exponent" |) |)
+                UnOp.sub (| M.get_name (| globals, locals_stack, "exponent" |) |)
               |) in
               M.pure Constant.None_
             (* else *)
@@ -2094,12 +2146,12 @@ Definition GaloisField : Value.t :=
           let _ := M.assign_local (|
             "res" ,
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__new__" |),
               make_list [
                 M.call (|
-                  M.get_name (| globals, "type" |),
+                  M.get_name (| globals, locals_stack, "type" |),
                   make_list [
-                    M.get_name (| globals, "self" |)
+                    M.get_name (| globals, locals_stack, "self" |)
                   ],
                   make_dict []
                 |);
@@ -2112,7 +2164,7 @@ Definition GaloisField : Value.t :=
                       Constant.int 0
                     ],
                     BinOp.sub (|
-                      M.get_name (| globals, "degree" |),
+                      M.get_name (| globals, locals_stack, "degree" |),
                       Constant.int 1
                     |)
                   |)
@@ -2123,12 +2175,12 @@ Definition GaloisField : Value.t :=
           |) in
           let _ := M.assign_local (|
             "s" ,
-            M.get_name (| globals, "self" |)
+            M.get_name (| globals, locals_stack, "self" |)
           |) in
           let _ :=
             M.while (|
               Compare.not_eq (|
-      M.get_name (| globals, "exponent" |),
+      M.get_name (| globals, locals_stack, "exponent" |),
       Constant.int 0
     |),
               ltac:(M.monadic (
@@ -2137,7 +2189,7 @@ Definition GaloisField : Value.t :=
                   M.if_then_else (|
                     Compare.eq (|
                       BinOp.mod_ (|
-                        M.get_name (| globals, "exponent" |),
+                        M.get_name (| globals, locals_stack, "exponent" |),
                         Constant.int 2
                       |),
                       Constant.int 1
@@ -2147,7 +2199,7 @@ Definition GaloisField : Value.t :=
                     let _ := M.assign_op_local (|
                       BinOp.mult,
                       "res",
-                      M.get_name (| globals, "s" |)
+                      M.get_name (| globals, locals_stack, "s" |)
                     |) in
                     M.pure Constant.None_
                   (* else *)
@@ -2157,7 +2209,7 @@ Definition GaloisField : Value.t :=
                 let _ := M.assign_op_local (|
                   BinOp.mult,
                   "s",
-                  M.get_name (| globals, "s" |)
+                  M.get_name (| globals, locals_stack, "s" |)
                 |) in
                 let _ := M.assign_op_local (|
                   BinOp.floor_div,
@@ -2171,19 +2223,20 @@ Definition GaloisField : Value.t :=
               ))
           |) in
           let _ := M.return_ (|
-            M.get_name (| globals, "res" |)
+            M.get_name (| globals, locals_stack, "res" |)
           |) in
           M.pure Constant.None_))
       );
       (
         "__ipow__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "__pow__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "__pow__" |),
               make_list [
-                M.get_name (| globals, "right" |)
+                M.get_name (| globals, locals_stack, "right" |)
               ],
               make_dict []
             |)
@@ -2192,8 +2245,9 @@ Definition GaloisField : Value.t :=
       );
       (
         "frobenius",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Returns `self ** p`. This function is known as the Frobenius
         endomorphism and has many special mathematical properties. In
@@ -2203,7 +2257,7 @@ Definition GaloisField : Value.t :=
           let _ := M.assign_local (|
             "ans" ,
             M.call (|
-              M.get_field (| M.get_name (| globals, "self" |), "from_int" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "from_int" |),
               make_list [
                 Constant.int 0
               ],
@@ -2213,11 +2267,11 @@ Definition GaloisField : Value.t :=
 (* At stmt: unsupported node type: AnnAssign *)
           let _ :=
             M.for_ (|
-              make_tuple [ M.get_name (| globals, "i" |); M.get_name (| globals, "a" |) ],
+              make_tuple [ M.get_name (| globals, locals_stack, "i" |); M.get_name (| globals, locals_stack, "a" |) ],
               M.call (|
-      M.get_name (| globals, "enumerate" |),
+      M.get_name (| globals, locals_stack, "enumerate" |),
       make_list [
-        M.get_name (| globals, "self" |)
+        M.get_name (| globals, locals_stack, "self" |)
       ],
       make_dict []
     |),
@@ -2227,18 +2281,18 @@ Definition GaloisField : Value.t :=
                   "ans",
                   M.call (|
     M.get_field (| M.call (|
-      M.get_name (| globals, "cast" |),
+      M.get_name (| globals, locals_stack, "cast" |),
       make_list [
-        M.get_name (| globals, "U" |);
+        M.get_name (| globals, locals_stack, "U" |);
         M.get_subscript (|
-          M.get_field (| M.get_name (| globals, "self" |), "FROBENIUS_COEFFICIENTS" |),
-          M.get_name (| globals, "i" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "self" |), "FROBENIUS_COEFFICIENTS" |),
+          M.get_name (| globals, locals_stack, "i" |)
         |)
       ],
       make_dict []
     |), "scalar_mul" |),
     make_list [
-      M.get_name (| globals, "a" |)
+      M.get_name (| globals, locals_stack, "a" |)
     ],
     make_dict []
   |)
@@ -2250,7 +2304,7 @@ Definition GaloisField : Value.t :=
               ))
           |) in
           let _ := M.return_ (|
-            M.get_name (| globals, "ans" |)
+            M.get_name (| globals, locals_stack, "ans" |)
           |) in
           M.pure Constant.None_))
       )

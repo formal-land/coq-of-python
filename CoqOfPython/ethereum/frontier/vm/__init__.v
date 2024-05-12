@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.frontier.vm.__init__".
+Definition globals : Globals.t := "ethereum.frontier.vm.__init__".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -88,8 +90,9 @@ Definition Evm : Value.t :=
     ].
 
 Definition incorporate_child_on_success : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm"; "child_evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm"; "child_evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Incorporate the state of a successful `child_evm` into the parent `evm`.
 
@@ -102,31 +105,32 @@ Definition incorporate_child_on_success : Value.t -> Value.t -> M :=
     " in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |),
-      M.get_field (| M.get_name (| globals, "child_evm" |), "gas_left" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "gas_left" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "child_evm" |), "gas_left" |)
     |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "logs" |),
-      M.get_field (| M.get_name (| globals, "child_evm" |), "logs" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "logs" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "child_evm" |), "logs" |)
     |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "refund_counter" |),
-      M.get_field (| M.get_name (| globals, "child_evm" |), "refund_counter" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "refund_counter" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "child_evm" |), "refund_counter" |)
     |) in
     let _ := M.call (|
-    M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "accounts_to_delete" |), "update" |),
+    M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "accounts_to_delete" |), "update" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "child_evm" |), "accounts_to_delete" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "child_evm" |), "accounts_to_delete" |)
     ],
     make_dict []
   |) in
     M.pure Constant.None_)).
 
 Definition incorporate_child_on_error : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm"; "child_evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm"; "child_evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Incorporate the state of an unsuccessful `child_evm` into the parent `evm`.
 
@@ -139,7 +143,7 @@ Definition incorporate_child_on_error : Value.t -> Value.t -> M :=
     " in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |),
-      M.get_field (| M.get_name (| globals, "child_evm" |), "gas_left" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "gas_left" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "child_evm" |), "gas_left" |)
     |) in
     M.pure Constant.None_)).

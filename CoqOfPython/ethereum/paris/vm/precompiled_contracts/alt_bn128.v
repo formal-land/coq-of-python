@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.paris.vm.precompiled_contracts.alt_bn128".
+Definition globals : Globals.t := "ethereum.paris.vm.precompiled_contracts.alt_bn128".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -55,8 +57,9 @@ Axiom ethereum_paris_vm_exceptions_imports_OutOfGasError :
   IsImported globals "ethereum.paris.vm.exceptions" "OutOfGasError".
 
 Definition alt_bn128_add : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     The ALT_BN128 addition precompiled contract.
 
@@ -67,14 +70,14 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
     " in
     let _ := M.assign_local (|
       "data" ,
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |)
+      M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "data" |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, locals_stack, "evm" |);
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
           Constant.int 150
         ],
@@ -86,18 +89,18 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "x0_bytes" ,
       M.call (|
-        M.get_name (| globals, "buffer_read" |),
+        M.get_name (| globals, locals_stack, "buffer_read" |),
         make_list [
-          M.get_name (| globals, "data" |);
+          M.get_name (| globals, locals_stack, "data" |);
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               Constant.int 0
             ],
             make_dict []
           |);
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               Constant.int 32
             ],
@@ -110,9 +113,9 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "x0_value" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "U256" |), "from_be_bytes" |),
         make_list [
-          M.get_name (| globals, "x0_bytes" |)
+          M.get_name (| globals, locals_stack, "x0_bytes" |)
         ],
         make_dict []
       |)
@@ -120,18 +123,18 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "y0_bytes" ,
       M.call (|
-        M.get_name (| globals, "buffer_read" |),
+        M.get_name (| globals, locals_stack, "buffer_read" |),
         make_list [
-          M.get_name (| globals, "data" |);
+          M.get_name (| globals, locals_stack, "data" |);
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               Constant.int 32
             ],
             make_dict []
           |);
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               Constant.int 32
             ],
@@ -144,9 +147,9 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "y0_value" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "U256" |), "from_be_bytes" |),
         make_list [
-          M.get_name (| globals, "y0_bytes" |)
+          M.get_name (| globals, locals_stack, "y0_bytes" |)
         ],
         make_dict []
       |)
@@ -154,18 +157,18 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "x1_bytes" ,
       M.call (|
-        M.get_name (| globals, "buffer_read" |),
+        M.get_name (| globals, locals_stack, "buffer_read" |),
         make_list [
-          M.get_name (| globals, "data" |);
+          M.get_name (| globals, locals_stack, "data" |);
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               Constant.int 64
             ],
             make_dict []
           |);
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               Constant.int 32
             ],
@@ -178,9 +181,9 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "x1_value" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "U256" |), "from_be_bytes" |),
         make_list [
-          M.get_name (| globals, "x1_bytes" |)
+          M.get_name (| globals, locals_stack, "x1_bytes" |)
         ],
         make_dict []
       |)
@@ -188,18 +191,18 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "y1_bytes" ,
       M.call (|
-        M.get_name (| globals, "buffer_read" |),
+        M.get_name (| globals, locals_stack, "buffer_read" |),
         make_list [
-          M.get_name (| globals, "data" |);
+          M.get_name (| globals, locals_stack, "data" |);
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               Constant.int 96
             ],
             make_dict []
           |);
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               Constant.int 32
             ],
@@ -212,28 +215,28 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "y1_value" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "U256" |), "from_be_bytes" |),
         make_list [
-          M.get_name (| globals, "y1_bytes" |)
+          M.get_name (| globals, locals_stack, "y1_bytes" |)
         ],
         make_dict []
       |)
     |) in
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "i" |),
-        make_tuple [ M.get_name (| globals, "x0_value" |); M.get_name (| globals, "y0_value" |); M.get_name (| globals, "x1_value" |); M.get_name (| globals, "y1_value" |) ],
+        M.get_name (| globals, locals_stack, "i" |),
+        make_tuple [ M.get_name (| globals, locals_stack, "x0_value" |); M.get_name (| globals, locals_stack, "y0_value" |); M.get_name (| globals, locals_stack, "x1_value" |); M.get_name (| globals, locals_stack, "y1_value" |) ],
         ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               Compare.gt_e (|
-                M.get_name (| globals, "i" |),
-                M.get_name (| globals, "ALT_BN128_PRIME" |)
+                M.get_name (| globals, locals_stack, "i" |),
+                M.get_name (| globals, locals_stack, "ALT_BN128_PRIME" |)
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some (M.get_name (| globals, "OutOfGasError" |)) |) in
+              let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "OutOfGasError" |)) |) in
               M.pure Constant.None_
             (* else *)
             )), ltac:(M.monadic (
@@ -249,20 +252,20 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "p" ,
       BinOp.add (|
-        M.get_name (| globals, "p0" |),
-        M.get_name (| globals, "p1" |)
+        M.get_name (| globals, locals_stack, "p0" |),
+        M.get_name (| globals, locals_stack, "p1" |)
       |)
     |) in
     let _ := M.assign (|
-      M.get_field (| M.get_name (| globals, "evm" |), "output" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "output" |),
       BinOp.add (|
         M.call (|
-          M.get_field (| M.get_field (| M.get_name (| globals, "p" |), "x" |), "to_be_bytes32" |),
+          M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "p" |), "x" |), "to_be_bytes32" |),
           make_list [],
           make_dict []
         |),
         M.call (|
-          M.get_field (| M.get_field (| M.get_name (| globals, "p" |), "y" |), "to_be_bytes32" |),
+          M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "p" |), "y" |), "to_be_bytes32" |),
           make_list [],
           make_dict []
         |)
@@ -271,8 +274,9 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition alt_bn128_mul : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     The ALT_BN128 multiplication precompiled contract.
 
@@ -283,14 +287,14 @@ Definition alt_bn128_mul : Value.t -> Value.t -> M :=
     " in
     let _ := M.assign_local (|
       "data" ,
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |)
+      M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "data" |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, locals_stack, "evm" |);
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
           Constant.int 6000
         ],
@@ -302,18 +306,18 @@ Definition alt_bn128_mul : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "x0_bytes" ,
       M.call (|
-        M.get_name (| globals, "buffer_read" |),
+        M.get_name (| globals, locals_stack, "buffer_read" |),
         make_list [
-          M.get_name (| globals, "data" |);
+          M.get_name (| globals, locals_stack, "data" |);
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               Constant.int 0
             ],
             make_dict []
           |);
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               Constant.int 32
             ],
@@ -326,9 +330,9 @@ Definition alt_bn128_mul : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "x0_value" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "U256" |), "from_be_bytes" |),
         make_list [
-          M.get_name (| globals, "x0_bytes" |)
+          M.get_name (| globals, locals_stack, "x0_bytes" |)
         ],
         make_dict []
       |)
@@ -336,18 +340,18 @@ Definition alt_bn128_mul : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "y0_bytes" ,
       M.call (|
-        M.get_name (| globals, "buffer_read" |),
+        M.get_name (| globals, locals_stack, "buffer_read" |),
         make_list [
-          M.get_name (| globals, "data" |);
+          M.get_name (| globals, locals_stack, "data" |);
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               Constant.int 32
             ],
             make_dict []
           |);
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               Constant.int 32
             ],
@@ -360,9 +364,9 @@ Definition alt_bn128_mul : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "y0_value" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "U256" |), "from_be_bytes" |),
         make_list [
-          M.get_name (| globals, "y0_bytes" |)
+          M.get_name (| globals, locals_stack, "y0_bytes" |)
         ],
         make_dict []
       |)
@@ -370,21 +374,21 @@ Definition alt_bn128_mul : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "n" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "U256" |), "from_be_bytes" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "buffer_read" |),
+            M.get_name (| globals, locals_stack, "buffer_read" |),
             make_list [
-              M.get_name (| globals, "data" |);
+              M.get_name (| globals, locals_stack, "data" |);
               M.call (|
-                M.get_name (| globals, "U256" |),
+                M.get_name (| globals, locals_stack, "U256" |),
                 make_list [
                   Constant.int 64
                 ],
                 make_dict []
               |);
               M.call (|
-                M.get_name (| globals, "U256" |),
+                M.get_name (| globals, locals_stack, "U256" |),
                 make_list [
                   Constant.int 32
                 ],
@@ -399,19 +403,19 @@ Definition alt_bn128_mul : Value.t -> Value.t -> M :=
     |) in
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "i" |),
-        make_tuple [ M.get_name (| globals, "x0_value" |); M.get_name (| globals, "y0_value" |) ],
+        M.get_name (| globals, locals_stack, "i" |),
+        make_tuple [ M.get_name (| globals, locals_stack, "x0_value" |); M.get_name (| globals, locals_stack, "y0_value" |) ],
         ltac:(M.monadic (
           let _ :=
             (* if *)
             M.if_then_else (|
               Compare.gt_e (|
-                M.get_name (| globals, "i" |),
-                M.get_name (| globals, "ALT_BN128_PRIME" |)
+                M.get_name (| globals, locals_stack, "i" |),
+                M.get_name (| globals, locals_stack, "ALT_BN128_PRIME" |)
               |),
             (* then *)
             ltac:(M.monadic (
-              let _ := M.raise (| Some (M.get_name (| globals, "OutOfGasError" |)) |) in
+              let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "OutOfGasError" |)) |) in
               M.pure Constant.None_
             (* else *)
             )), ltac:(M.monadic (
@@ -427,23 +431,23 @@ Definition alt_bn128_mul : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "p" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "p0" |), "mul_by" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "p0" |), "mul_by" |),
         make_list [
-          M.get_name (| globals, "n" |)
+          M.get_name (| globals, locals_stack, "n" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.assign (|
-      M.get_field (| M.get_name (| globals, "evm" |), "output" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "output" |),
       BinOp.add (|
         M.call (|
-          M.get_field (| M.get_field (| M.get_name (| globals, "p" |), "x" |), "to_be_bytes32" |),
+          M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "p" |), "x" |), "to_be_bytes32" |),
           make_list [],
           make_dict []
         |),
         M.call (|
-          M.get_field (| M.get_field (| M.get_name (| globals, "p" |), "y" |), "to_be_bytes32" |),
+          M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "p" |), "y" |), "to_be_bytes32" |),
           make_list [],
           make_dict []
         |)
@@ -452,8 +456,9 @@ Definition alt_bn128_mul : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     The ALT_BN128 pairing check precompiled contract.
 
@@ -464,23 +469,23 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
     " in
     let _ := M.assign_local (|
       "data" ,
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |)
+      M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "data" |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, locals_stack, "evm" |);
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
           BinOp.add (|
             BinOp.mult (|
               Constant.int 34000,
               BinOp.floor_div (|
                 M.call (|
-                  M.get_name (| globals, "len" |),
+                  M.get_name (| globals, locals_stack, "len" |),
                   make_list [
-                    M.get_name (| globals, "data" |)
+                    M.get_name (| globals, locals_stack, "data" |)
                   ],
                   make_dict []
                 |),
@@ -501,9 +506,9 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
         Compare.not_eq (|
           BinOp.mod_ (|
             M.call (|
-              M.get_name (| globals, "len" |),
+              M.get_name (| globals, locals_stack, "len" |),
               make_list [
-                M.get_name (| globals, "data" |)
+                M.get_name (| globals, locals_stack, "data" |)
               ],
               make_dict []
             |),
@@ -513,7 +518,7 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let _ := M.raise (| Some (M.get_name (| globals, "OutOfGasError" |)) |) in
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "OutOfGasError" |)) |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
@@ -522,7 +527,7 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "result" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "BNF12" |), "from_int" |),
         make_list [
           Constant.int 1
         ],
@@ -531,15 +536,15 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
     |) in
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "i" |),
+        M.get_name (| globals, locals_stack, "i" |),
         M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         BinOp.floor_div (|
           M.call (|
-            M.get_name (| globals, "len" |),
+            M.get_name (| globals, locals_stack, "len" |),
             make_list [
-              M.get_name (| globals, "data" |)
+              M.get_name (| globals, locals_stack, "data" |)
             ],
             make_dict []
           |),
@@ -555,9 +560,9 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
           |) in
           let _ :=
             M.for_ (|
-              M.get_name (| globals, "j" |),
+              M.get_name (| globals, locals_stack, "j" |),
               M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         Constant.int 6
       ],
@@ -567,29 +572,29 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
                 let _ := M.assign_local (|
                   "value" ,
                   M.call (|
-                    M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "U256" |), "from_be_bytes" |),
                     make_list [
                       M.slice (|
-                        M.get_name (| globals, "data" |),
+                        M.get_name (| globals, locals_stack, "data" |),
                         BinOp.add (|
                           BinOp.mult (|
-                            M.get_name (| globals, "i" |),
+                            M.get_name (| globals, locals_stack, "i" |),
                             Constant.int 192
                           |),
                           BinOp.mult (|
                             Constant.int 32,
-                            M.get_name (| globals, "j" |)
+                            M.get_name (| globals, locals_stack, "j" |)
                           |)
                         |),
                         BinOp.add (|
                           BinOp.mult (|
-                            M.get_name (| globals, "i" |),
+                            M.get_name (| globals, locals_stack, "i" |),
                             Constant.int 192
                           |),
                           BinOp.mult (|
                             Constant.int 32,
                             BinOp.add (|
-                              M.get_name (| globals, "j" |),
+                              M.get_name (| globals, locals_stack, "j" |),
                               Constant.int 1
                             |)
                           |)
@@ -604,24 +609,24 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
                   (* if *)
                   M.if_then_else (|
                     Compare.gt_e (|
-                      M.get_name (| globals, "value" |),
-                      M.get_name (| globals, "ALT_BN128_PRIME" |)
+                      M.get_name (| globals, locals_stack, "value" |),
+                      M.get_name (| globals, locals_stack, "ALT_BN128_PRIME" |)
                     |),
                   (* then *)
                   ltac:(M.monadic (
-                    let _ := M.raise (| Some (M.get_name (| globals, "OutOfGasError" |)) |) in
+                    let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "OutOfGasError" |)) |) in
                     M.pure Constant.None_
                   (* else *)
                   )), ltac:(M.monadic (
                     M.pure Constant.None_
                   )) |) in
                 let _ := M.call (|
-    M.get_field (| M.get_name (| globals, "values" |), "append" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "values" |), "append" |),
     make_list [
       M.call (|
-        M.get_name (| globals, "int" |),
+        M.get_name (| globals, locals_stack, "int" |),
         make_list [
-          M.get_name (| globals, "value" |)
+          M.get_name (| globals, locals_stack, "value" |)
         ],
         make_dict []
       |)
@@ -636,44 +641,44 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
           |) in
 (* At stmt: unsupported node type: Try *)
           let _ := M.call (|
-    M.get_name (| globals, "ensure" |),
+    M.get_name (| globals, locals_stack, "ensure" |),
     make_list [
       Compare.eq (|
         M.call (|
-          M.get_field (| M.get_name (| globals, "p" |), "mul_by" |),
+          M.get_field (| M.get_name (| globals, locals_stack, "p" |), "mul_by" |),
           make_list [
-            M.get_name (| globals, "ALT_BN128_CURVE_ORDER" |)
+            M.get_name (| globals, locals_stack, "ALT_BN128_CURVE_ORDER" |)
           ],
           make_dict []
         |),
         M.call (|
-          M.get_field (| M.get_name (| globals, "BNP" |), "point_at_infinity" |),
+          M.get_field (| M.get_name (| globals, locals_stack, "BNP" |), "point_at_infinity" |),
           make_list [],
           make_dict []
         |)
       |);
-      M.get_name (| globals, "OutOfGasError" |)
+      M.get_name (| globals, locals_stack, "OutOfGasError" |)
     ],
     make_dict []
   |) in
           let _ := M.call (|
-    M.get_name (| globals, "ensure" |),
+    M.get_name (| globals, locals_stack, "ensure" |),
     make_list [
       Compare.eq (|
         M.call (|
-          M.get_field (| M.get_name (| globals, "q" |), "mul_by" |),
+          M.get_field (| M.get_name (| globals, locals_stack, "q" |), "mul_by" |),
           make_list [
-            M.get_name (| globals, "ALT_BN128_CURVE_ORDER" |)
+            M.get_name (| globals, locals_stack, "ALT_BN128_CURVE_ORDER" |)
           ],
           make_dict []
         |),
         M.call (|
-          M.get_field (| M.get_name (| globals, "BNP2" |), "point_at_infinity" |),
+          M.get_field (| M.get_name (| globals, locals_stack, "BNP2" |), "point_at_infinity" |),
           make_list [],
           make_dict []
         |)
       |);
-      M.get_name (| globals, "OutOfGasError" |)
+      M.get_name (| globals, locals_stack, "OutOfGasError" |)
     ],
     make_dict []
   |) in
@@ -682,18 +687,18 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
             M.if_then_else (|
               BoolOp.and (|
                 Compare.not_eq (|
-                  M.get_name (| globals, "p" |),
+                  M.get_name (| globals, locals_stack, "p" |),
                   M.call (|
-                    M.get_field (| M.get_name (| globals, "BNP" |), "point_at_infinity" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "BNP" |), "point_at_infinity" |),
                     make_list [],
                     make_dict []
                   |)
                 |),
                 ltac:(M.monadic (
                   Compare.not_eq (|
-                    M.get_name (| globals, "q" |),
+                    M.get_name (| globals, locals_stack, "q" |),
                     M.call (|
-                      M.get_field (| M.get_name (| globals, "BNP2" |), "point_at_infinity" |),
+                      M.get_field (| M.get_name (| globals, locals_stack, "BNP2" |), "point_at_infinity" |),
                       make_list [],
                       make_dict []
                     |)
@@ -705,12 +710,12 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
               let _ := M.assign_local (|
                 "result" ,
                 BinOp.mult (|
-                  M.get_name (| globals, "result" |),
+                  M.get_name (| globals, locals_stack, "result" |),
                   M.call (|
-                    M.get_name (| globals, "pairing" |),
+                    M.get_name (| globals, locals_stack, "pairing" |),
                     make_list [
-                      M.get_name (| globals, "q" |);
-                      M.get_name (| globals, "p" |)
+                      M.get_name (| globals, locals_stack, "q" |);
+                      M.get_name (| globals, locals_stack, "p" |)
                     ],
                     make_dict []
                   |)
@@ -731,9 +736,9 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.eq (|
-          M.get_name (| globals, "result" |),
+          M.get_name (| globals, locals_stack, "result" |),
           M.call (|
-            M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
+            M.get_field (| M.get_name (| globals, locals_stack, "BNF12" |), "from_int" |),
             make_list [
               Constant.int 1
             ],
@@ -743,10 +748,10 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
       (* then *)
       ltac:(M.monadic (
         let _ := M.assign (|
-          M.get_field (| M.get_name (| globals, "evm" |), "output" |),
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "output" |),
           M.call (|
             M.get_field (| M.call (|
-              M.get_name (| globals, "U256" |),
+              M.get_name (| globals, locals_stack, "U256" |),
               make_list [
                 Constant.int 1
               ],
@@ -760,10 +765,10 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
       (* else *)
       )), ltac:(M.monadic (
         let _ := M.assign (|
-          M.get_field (| M.get_name (| globals, "evm" |), "output" |),
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "output" |),
           M.call (|
             M.get_field (| M.call (|
-              M.get_name (| globals, "U256" |),
+              M.get_name (| globals, locals_stack, "U256" |),
               make_list [
                 Constant.int 0
               ],

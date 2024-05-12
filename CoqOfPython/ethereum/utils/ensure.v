@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.utils.ensure".
+Definition globals : Globals.t := "ethereum.utils.ensure".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -23,8 +25,9 @@ Axiom typing_imports_Union :
   IsImported globals "typing" "Union".
 
 Definition ensure : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "value"; "exception" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "value"; "exception" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Does nothing if `value` is truthy, otherwise raises the exception returned
     by `exception_class`.
@@ -41,7 +44,7 @@ Definition ensure : Value.t -> Value.t -> M :=
     let _ :=
       (* if *)
       M.if_then_else (|
-        M.get_name (| globals, "value" |),
+        M.get_name (| globals, locals_stack, "value" |),
       (* then *)
       ltac:(M.monadic (
         let _ := M.return_ (|
@@ -52,5 +55,5 @@ Definition ensure : Value.t -> Value.t -> M :=
       )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
-    let _ := M.raise (| Some (M.get_name (| globals, "exception" |)) |) in
+    let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "exception" |)) |) in
     M.pure Constant.None_)).

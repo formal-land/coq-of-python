@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.frontier.utils.message".
+Definition globals : Globals.t := "ethereum.frontier.utils.message".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -46,8 +48,9 @@ Axiom ethereum_frontier_utils_address_imports_compute_contract_address :
   IsImported globals "ethereum.frontier.utils.address" "compute_contract_address".
 
 Definition prepare_message : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "caller"; "target"; "value"; "data"; "gas"; "env"; "code_address" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "caller"; "target"; "value"; "data"; "gas"; "env"; "code_address" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Execute a transaction against the provided environment.
 
@@ -79,10 +82,10 @@ Definition prepare_message : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         M.call (|
-          M.get_name (| globals, "isinstance" |),
+          M.get_name (| globals, locals_stack, "isinstance" |),
           make_list [
-            M.get_name (| globals, "target" |);
-            M.get_name (| globals, "Bytes0" |)
+            M.get_name (| globals, locals_stack, "target" |);
+            M.get_name (| globals, locals_stack, "Bytes0" |)
           ],
           make_dict []
         |),
@@ -91,20 +94,20 @@ Definition prepare_message : Value.t -> Value.t -> M :=
         let _ := M.assign_local (|
           "current_target" ,
           M.call (|
-            M.get_name (| globals, "compute_contract_address" |),
+            M.get_name (| globals, locals_stack, "compute_contract_address" |),
             make_list [
-              M.get_name (| globals, "caller" |);
+              M.get_name (| globals, locals_stack, "caller" |);
               BinOp.sub (|
                 M.get_field (| M.call (|
-                  M.get_name (| globals, "get_account" |),
+                  M.get_name (| globals, locals_stack, "get_account" |),
                   make_list [
-                    M.get_field (| M.get_name (| globals, "env" |), "state" |);
-                    M.get_name (| globals, "caller" |)
+                    M.get_field (| M.get_name (| globals, locals_stack, "env" |), "state" |);
+                    M.get_name (| globals, locals_stack, "caller" |)
                   ],
                   make_dict []
                 |), "nonce" |),
                 M.call (|
-                  M.get_name (| globals, "U256" |),
+                  M.get_name (| globals, locals_stack, "U256" |),
                   make_list [
                     Constant.int 1
                   ],
@@ -118,7 +121,7 @@ Definition prepare_message : Value.t -> Value.t -> M :=
         let _ := M.assign_local (|
           "msg_data" ,
           M.call (|
-            M.get_name (| globals, "Bytes" |),
+            M.get_name (| globals, locals_stack, "Bytes" |),
             make_list [
               Constant.bytes ""
             ],
@@ -127,7 +130,7 @@ Definition prepare_message : Value.t -> Value.t -> M :=
         |) in
         let _ := M.assign_local (|
           "code" ,
-          M.get_name (| globals, "data" |)
+          M.get_name (| globals, locals_stack, "data" |)
         |) in
         M.pure Constant.None_
       (* else *)
@@ -136,10 +139,10 @@ Definition prepare_message : Value.t -> Value.t -> M :=
           (* if *)
           M.if_then_else (|
             M.call (|
-              M.get_name (| globals, "isinstance" |),
+              M.get_name (| globals, locals_stack, "isinstance" |),
               make_list [
-                M.get_name (| globals, "target" |);
-                M.get_name (| globals, "Address" |)
+                M.get_name (| globals, locals_stack, "target" |);
+                M.get_name (| globals, locals_stack, "Address" |)
               ],
               make_dict []
             |),
@@ -147,19 +150,19 @@ Definition prepare_message : Value.t -> Value.t -> M :=
           ltac:(M.monadic (
             let _ := M.assign_local (|
               "current_target" ,
-              M.get_name (| globals, "target" |)
+              M.get_name (| globals, locals_stack, "target" |)
             |) in
             let _ := M.assign_local (|
               "msg_data" ,
-              M.get_name (| globals, "data" |)
+              M.get_name (| globals, locals_stack, "data" |)
             |) in
             let _ := M.assign_local (|
               "code" ,
               M.get_field (| M.call (|
-                M.get_name (| globals, "get_account" |),
+                M.get_name (| globals, locals_stack, "get_account" |),
                 make_list [
-                  M.get_field (| M.get_name (| globals, "env" |), "state" |);
-                  M.get_name (| globals, "target" |)
+                  M.get_field (| M.get_name (| globals, locals_stack, "env" |), "state" |);
+                  M.get_name (| globals, locals_stack, "target" |)
                 ],
                 make_dict []
               |), "code" |)
@@ -168,14 +171,14 @@ Definition prepare_message : Value.t -> Value.t -> M :=
               (* if *)
               M.if_then_else (|
                 Compare.is (|
-                  M.get_name (| globals, "code_address" |),
+                  M.get_name (| globals, locals_stack, "code_address" |),
                   Constant.None_
                 |),
               (* then *)
               ltac:(M.monadic (
                 let _ := M.assign_local (|
                   "code_address" ,
-                  M.get_name (| globals, "target" |)
+                  M.get_name (| globals, locals_stack, "target" |)
                 |) in
                 M.pure Constant.None_
               (* else *)
@@ -186,7 +189,7 @@ Definition prepare_message : Value.t -> Value.t -> M :=
           (* else *)
           )), ltac:(M.monadic (
             let _ := M.raise (| Some (M.call (|
-              M.get_name (| globals, "AssertionError" |),
+              M.get_name (| globals, locals_stack, "AssertionError" |),
               make_list [
                 Constant.str "Target must be address or empty bytes"
               ],
@@ -198,7 +201,7 @@ Definition prepare_message : Value.t -> Value.t -> M :=
       )) |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "Message" |),
+        M.get_name (| globals, locals_stack, "Message" |),
         make_list [],
         make_dict []
       |)

@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.tangerine_whistle.fork_types".
+Definition globals : Globals.t := "ethereum.tangerine_whistle.fork_types".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -42,15 +44,15 @@ Axiom ethereum_crypto_hash_imports_keccak256 :
   IsImported globals "ethereum.crypto.hash" "keccak256".
 
 Definition Address : Value.t := M.run ltac:(M.monadic (
-  M.get_name (| globals, "Bytes20" |)
+  M.get_name (| globals, locals_stack, "Bytes20" |)
 )).
 
 Definition Root : Value.t := M.run ltac:(M.monadic (
-  M.get_name (| globals, "Hash32" |)
+  M.get_name (| globals, locals_stack, "Hash32" |)
 )).
 
 Definition Bloom : Value.t := M.run ltac:(M.monadic (
-  M.get_name (| globals, "Bytes256" |)
+  M.get_name (| globals, locals_stack, "Bytes256" |)
 )).
 
 Definition Account : Value.t :=
@@ -65,15 +67,16 @@ Definition Account : Value.t :=
 
 Definition EMPTY_ACCOUNT : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "Account" |),
+    M.get_name (| globals, locals_stack, "Account" |),
     make_list [],
     make_dict []
   |)
 )).
 
 Definition encode_account : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "raw_account_data"; "storage_root" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "raw_account_data"; "storage_root" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Encode `Account` dataclass.
 
@@ -82,12 +85,12 @@ Definition encode_account : Value.t -> Value.t -> M :=
     " in
     let _ := M.return_ (|
       M.call (|
-        M.get_field (| M.get_name (| globals, "rlp" |), "encode" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "rlp" |), "encode" |),
         make_list [
-          make_tuple [ M.get_field (| M.get_name (| globals, "raw_account_data" |), "nonce" |); M.get_field (| M.get_name (| globals, "raw_account_data" |), "balance" |); M.get_name (| globals, "storage_root" |); M.call (|
-            M.get_name (| globals, "keccak256" |),
+          make_tuple [ M.get_field (| M.get_name (| globals, locals_stack, "raw_account_data" |), "nonce" |); M.get_field (| M.get_name (| globals, locals_stack, "raw_account_data" |), "balance" |); M.get_name (| globals, locals_stack, "storage_root" |); M.call (|
+            M.get_name (| globals, locals_stack, "keccak256" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "raw_account_data" |), "code" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "raw_account_data" |), "code" |)
             ],
             make_dict []
           |) ]

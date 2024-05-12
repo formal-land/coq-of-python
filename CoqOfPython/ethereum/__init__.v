@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.__init__".
+Definition globals : Globals.t := "ethereum.__init__".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -37,14 +39,14 @@ Definition EVM_RECURSION_LIMIT : Value.t := M.run ltac:(M.monadic (
 
 Definition expr_27 : Value.t :=
   M.call (|
-    M.get_field (| M.get_name (| globals, "sys" |), "setrecursionlimit" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "sys" |), "setrecursionlimit" |),
     make_list [
       M.call (|
-        M.get_name (| globals, "max" |),
+        M.get_name (| globals, locals_stack, "max" |),
         make_list [
-          M.get_name (| globals, "EVM_RECURSION_LIMIT" |);
+          M.get_name (| globals, locals_stack, "EVM_RECURSION_LIMIT" |);
           M.call (|
-            M.get_field (| M.get_name (| globals, "sys" |), "getrecursionlimit" |),
+            M.get_field (| M.get_name (| globals, locals_stack, "sys" |), "getrecursionlimit" |),
             make_list [],
             make_dict []
           |)

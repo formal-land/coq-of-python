@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.spurious_dragon.vm.instructions.log".
+Definition globals : Globals.t := "ethereum.spurious_dragon.vm.instructions.log".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -47,8 +49,9 @@ Axiom ethereum_spurious_dragon_vm_stack_imports_pop :
   IsImported globals "ethereum.spurious_dragon.vm.stack" "pop".
 
 Definition log_n : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm"; "num_topics" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm"; "num_topics" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Appends a log entry, having `num_topics` topics, to the evm logs.
 
@@ -66,9 +69,9 @@ Definition log_n : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "memory_start_index" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
@@ -76,9 +79,9 @@ Definition log_n : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "size" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
@@ -89,11 +92,11 @@ Definition log_n : Value.t -> Value.t -> M :=
     |) in
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "_" |),
+        M.get_name (| globals, locals_stack, "_" |),
         M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
-        M.get_name (| globals, "num_topics" |)
+        M.get_name (| globals, locals_stack, "num_topics" |)
       ],
       make_dict []
     |),
@@ -102,9 +105,9 @@ Definition log_n : Value.t -> Value.t -> M :=
             "topic" ,
             M.call (|
               M.get_field (| M.call (|
-                M.get_name (| globals, "pop" |),
+                M.get_name (| globals, locals_stack, "pop" |),
                 make_list [
-                  M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+                  M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
                 ],
                 make_dict []
               |), "to_be_bytes32" |),
@@ -113,9 +116,9 @@ Definition log_n : Value.t -> Value.t -> M :=
             |)
           |) in
           let _ := M.call (|
-    M.get_field (| M.get_name (| globals, "topics" |), "append" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "topics" |), "append" |),
     make_list [
-      M.get_name (| globals, "topic" |)
+      M.get_name (| globals, locals_stack, "topic" |)
     ],
     make_dict []
   |) in
@@ -128,74 +131,74 @@ Definition log_n : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "extend_memory" ,
       M.call (|
-        M.get_name (| globals, "calculate_gas_extend_memory" |),
+        M.get_name (| globals, locals_stack, "calculate_gas_extend_memory" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "memory" |);
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "memory" |);
           make_list [
-            make_tuple [ M.get_name (| globals, "memory_start_index" |); M.get_name (| globals, "size" |) ]
+            make_tuple [ M.get_name (| globals, locals_stack, "memory_start_index" |); M.get_name (| globals, locals_stack, "size" |) ]
           ]
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, locals_stack, "evm" |);
       BinOp.add (|
         BinOp.add (|
           BinOp.add (|
-            M.get_name (| globals, "GAS_LOG" |),
+            M.get_name (| globals, locals_stack, "GAS_LOG" |),
             BinOp.mult (|
-              M.get_name (| globals, "GAS_LOG_DATA" |),
-              M.get_name (| globals, "size" |)
+              M.get_name (| globals, locals_stack, "GAS_LOG_DATA" |),
+              M.get_name (| globals, locals_stack, "size" |)
             |)
           |),
           BinOp.mult (|
-            M.get_name (| globals, "GAS_LOG_TOPIC" |),
-            M.get_name (| globals, "num_topics" |)
+            M.get_name (| globals, locals_stack, "GAS_LOG_TOPIC" |),
+            M.get_name (| globals, locals_stack, "num_topics" |)
           |)
         |),
-        M.get_field (| M.get_name (| globals, "extend_memory" |), "cost" |)
+        M.get_field (| M.get_name (| globals, locals_stack, "extend_memory" |), "cost" |)
       |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "memory" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "memory" |),
       BinOp.mult (|
     Constant.bytes "00",
-    M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
+    M.get_field (| M.get_name (| globals, locals_stack, "extend_memory" |), "expand_by" |)
   |)
     |) in
     let _ := M.assign_local (|
       "log_entry" ,
       M.call (|
-        M.get_name (| globals, "Log" |),
+        M.get_name (| globals, locals_stack, "Log" |),
         make_list [],
         make_dict []
       |)
     |) in
     let _ := M.assign (|
-      M.get_field (| M.get_name (| globals, "evm" |), "logs" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "logs" |),
       BinOp.add (|
-        M.get_field (| M.get_name (| globals, "evm" |), "logs" |),
-        make_tuple [ M.get_name (| globals, "log_entry" |) ]
+        M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "logs" |),
+        make_tuple [ M.get_name (| globals, locals_stack, "log_entry" |) ]
       |)
     |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition log0 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "log_n" |)
+      M.get_name (| globals, locals_stack, "log_n" |)
     ],
     make_dict []
   |)
@@ -203,9 +206,9 @@ Definition log0 : Value.t := M.run ltac:(M.monadic (
 
 Definition log1 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "log_n" |)
+      M.get_name (| globals, locals_stack, "log_n" |)
     ],
     make_dict []
   |)
@@ -213,9 +216,9 @@ Definition log1 : Value.t := M.run ltac:(M.monadic (
 
 Definition log2 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "log_n" |)
+      M.get_name (| globals, locals_stack, "log_n" |)
     ],
     make_dict []
   |)
@@ -223,9 +226,9 @@ Definition log2 : Value.t := M.run ltac:(M.monadic (
 
 Definition log3 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "log_n" |)
+      M.get_name (| globals, locals_stack, "log_n" |)
     ],
     make_dict []
   |)
@@ -233,9 +236,9 @@ Definition log3 : Value.t := M.run ltac:(M.monadic (
 
 Definition log4 : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "partial" |),
+    M.get_name (| globals, locals_stack, "partial" |),
     make_list [
-      M.get_name (| globals, "log_n" |)
+      M.get_name (| globals, locals_stack, "log_n" |)
     ],
     make_dict []
   |)
