@@ -107,3 +107,6 @@ Definition sha256 : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom sha256_in_globals :
+  IsInGlobals globals "sha256" (make_function sha256).

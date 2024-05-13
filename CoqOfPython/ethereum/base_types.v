@@ -4315,6 +4315,9 @@ Definition _setattr_function : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom _setattr_function_in_globals :
+  IsInGlobals globals "_setattr_function" (make_function _setattr_function).
+
 Definition _delattr_function : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "attr" ] in
@@ -4347,6 +4350,9 @@ Definition _delattr_function : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom _delattr_function_in_globals :
+  IsInGlobals globals "_delattr_function" (make_function _delattr_function).
+
 Definition _make_init_function : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "f" ] in
@@ -4356,6 +4362,9 @@ Definition _make_init_function : Value.t -> Value.t -> M :=
       M.get_name (| globals, locals_stack, "init_function" |)
     |) in
     M.pure Constant.None_)).
+
+Axiom _make_init_function_in_globals :
+  IsInGlobals globals "_make_init_function" (make_function _make_init_function).
 
 Definition slotted_freezable : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -4424,6 +4433,9 @@ Definition slotted_freezable : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom slotted_freezable_in_globals :
+  IsInGlobals globals "slotted_freezable" (make_function slotted_freezable).
+
 Definition S : Value.t := M.run ltac:(M.monadic (
   M.call (|
     M.get_name (| globals, locals_stack, "TypeVar" |),
@@ -4484,3 +4496,6 @@ Definition modify : Value.t -> Value.t -> M :=
       M.get_name (| globals, locals_stack, "new_obj" |)
     |) in
     M.pure Constant.None_)).
+
+Axiom modify_in_globals :
+  IsInGlobals globals "modify" (make_function modify).

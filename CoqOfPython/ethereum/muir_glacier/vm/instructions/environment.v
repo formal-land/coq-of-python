@@ -122,6 +122,9 @@ Definition address : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom address_in_globals :
+  IsInGlobals globals "address" (make_function address).
+
 Definition balance : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -185,6 +188,9 @@ Definition balance : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom balance_in_globals :
+  IsInGlobals globals "balance" (make_function balance).
+
 Definition origin : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -229,6 +235,9 @@ Definition origin : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom origin_in_globals :
+  IsInGlobals globals "origin" (make_function origin).
+
 Definition caller : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -272,6 +281,9 @@ Definition caller : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom caller_in_globals :
+  IsInGlobals globals "caller" (make_function caller).
+
 Definition callvalue : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -308,6 +320,9 @@ Definition callvalue : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom callvalue_in_globals :
+  IsInGlobals globals "callvalue" (make_function callvalue).
 
 Definition calldataload : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -380,6 +395,9 @@ Definition calldataload : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom calldataload_in_globals :
+  IsInGlobals globals "calldataload" (make_function calldataload).
+
 Definition calldatasize : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -428,6 +446,9 @@ Definition calldatasize : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom calldatasize_in_globals :
+  IsInGlobals globals "calldatasize" (make_function calldatasize).
 
 Definition calldatacopy : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -564,6 +585,9 @@ Definition calldatacopy : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom calldatacopy_in_globals :
+  IsInGlobals globals "calldatacopy" (make_function calldatacopy).
+
 Definition codesize : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -612,6 +636,9 @@ Definition codesize : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom codesize_in_globals :
+  IsInGlobals globals "codesize" (make_function codesize).
 
 Definition codecopy : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -748,6 +775,9 @@ Definition codecopy : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom codecopy_in_globals :
+  IsInGlobals globals "codecopy" (make_function codecopy).
+
 Definition gasprice : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -790,6 +820,9 @@ Definition gasprice : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom gasprice_in_globals :
+  IsInGlobals globals "gasprice" (make_function gasprice).
 
 Definition extcodesize : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -865,6 +898,9 @@ Definition extcodesize : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom extcodesize_in_globals :
+  IsInGlobals globals "extcodesize" (make_function extcodesize).
 
 Definition extcodecopy : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1025,6 +1061,9 @@ Definition extcodecopy : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom extcodecopy_in_globals :
+  IsInGlobals globals "extcodecopy" (make_function extcodecopy).
+
 Definition returndatasize : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -1072,6 +1111,9 @@ Definition returndatasize : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom returndatasize_in_globals :
+  IsInGlobals globals "returndatasize" (make_function returndatasize).
 
 Definition returndatacopy : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1236,6 +1278,9 @@ Definition returndatacopy : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom returndatacopy_in_globals :
+  IsInGlobals globals "returndatacopy" (make_function returndatacopy).
+
 Definition extcodehash : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -1337,6 +1382,9 @@ Definition extcodehash : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom extcodehash_in_globals :
+  IsInGlobals globals "extcodehash" (make_function extcodehash).
+
 Definition self_balance : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -1384,3 +1432,6 @@ Definition self_balance : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom self_balance_in_globals :
+  IsInGlobals globals "self_balance" (make_function self_balance).

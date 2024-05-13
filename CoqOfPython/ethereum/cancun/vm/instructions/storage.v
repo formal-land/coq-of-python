@@ -156,6 +156,9 @@ Definition sload : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom sload_in_globals :
+  IsInGlobals globals "sload" (make_function sload).
+
 Definition sstore : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -498,6 +501,9 @@ Definition sstore : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom sstore_in_globals :
+  IsInGlobals globals "sstore" (make_function sstore).
+
 Definition tload : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -558,6 +564,9 @@ Definition tload : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom tload_in_globals :
+  IsInGlobals globals "tload" (make_function tload).
 
 Definition tstore : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -626,3 +635,6 @@ Definition tstore : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom tstore_in_globals :
+  IsInGlobals globals "tstore" (make_function tstore).

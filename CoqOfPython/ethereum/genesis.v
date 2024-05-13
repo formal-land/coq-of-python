@@ -138,6 +138,9 @@ Definition get_genesis_configuration : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom get_genesis_configuration_in_globals :
+  IsInGlobals globals "get_genesis_configuration" (make_function get_genesis_configuration).
+
 Definition hex_or_base_10_str_to_u256 : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "balance" ] in
@@ -188,6 +191,9 @@ Definition hex_or_base_10_str_to_u256 : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
+
+Axiom hex_or_base_10_str_to_u256_in_globals :
+  IsInGlobals globals "hex_or_base_10_str_to_u256" (make_function hex_or_base_10_str_to_u256).
 
 Definition add_genesis_block : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -484,3 +490,6 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
       M.get_field (| M.get_name (| globals, locals_stack, "genesis" |), "chain_id" |)
     |) in
     M.pure Constant.None_)).
+
+Axiom add_genesis_block_in_globals :
+  IsInGlobals globals "add_genesis_block" (make_function add_genesis_block).

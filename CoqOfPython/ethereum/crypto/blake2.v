@@ -96,6 +96,9 @@ Definition spit_le_to_uint : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom spit_le_to_uint_in_globals :
+  IsInGlobals globals "spit_le_to_uint" (make_function spit_le_to_uint).
+
 Definition Blake2 : Value.t :=
   builtins.make_klass
     []

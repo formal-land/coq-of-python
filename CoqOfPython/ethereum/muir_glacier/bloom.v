@@ -140,6 +140,9 @@ Definition add_to_bloom : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom add_to_bloom_in_globals :
+  IsInGlobals globals "add_to_bloom" (make_function add_to_bloom).
+
 Definition logs_bloom : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "logs" ] in
@@ -209,3 +212,6 @@ Definition logs_bloom : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom logs_bloom_in_globals :
+  IsInGlobals globals "logs_bloom" (make_function logs_bloom).

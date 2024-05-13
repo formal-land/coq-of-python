@@ -83,6 +83,9 @@ Definition keccak256 : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom keccak256_in_globals :
+  IsInGlobals globals "keccak256" (make_function keccak256).
+
 Definition keccak512 : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "buffer" ] in
@@ -128,3 +131,6 @@ Definition keccak512 : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom keccak512_in_globals :
+  IsInGlobals globals "keccak512" (make_function keccak512).

@@ -32,9 +32,32 @@ Module Dict.
   Definition t (Value : Set) : Set :=
     list (string * Value).
 
-  Parameter read : forall {Value : Set}, t Value -> string -> option Value.
+  Fixpoint read {Value : Set} (dict : t Value) (key : string) : option Value :=
+    match dict with
+    | [] => None
+    | (current_key, value) :: dict =>
+      if String.eqb current_key key then
+        Some value
+      else
+        read dict key
+    end.
 
-  Parameter write : forall {Value : Set}, t Value -> string -> Value -> t Value.
+  Fixpoint update {Value : Set} (dict : t Value) (key : string) (value : Value) : t Value :=
+    match dict with
+    | [] => []
+    | (current_key, current_value) :: dict =>
+      if String.eqb current_key key then
+        (current_key, value) :: dict
+      else
+        (current_key, current_value) :: update dict key value
+    end.
+
+  (** Starting from Python 3.7 the ordering in `dict` is guaranted to follow the insersion order. *)
+  Definition write {Value : Set} (dict : t Value) (key : string) (value : Value) : t Value :=
+    match read dict key with
+    | Some _ => update dict key value
+    | None => dict ++ [(key, value)]
+    end.
 End Dict.
 
 Module Globals.
@@ -211,9 +234,12 @@ End Exception.
 Definition M : Set :=
   LowM.t (Value.t + Exception.t).
 
-Parameter IsInGlobals : string -> Value.t -> string -> Prop.
+Parameter IsInGlobals : Globals.t -> string -> Value.t -> Prop.
 
-Parameter IsImported : string -> string -> string -> Prop.
+Definition IsImported (globals : Globals.t) (import : Globals.t) (name : string) : Prop :=
+  forall (value : Value.t),
+    IsInGlobals import name value ->
+    IsInGlobals globals name value.
 
 Module M.
   Definition pure (v : Value.t) : M :=
@@ -494,15 +520,18 @@ Module builtins.
 
   Definition type : Value.t :=
     make_klass [] [] [].
-  Axiom type_in_globals : IsInGlobals "builtins" type "type".
+  Axiom type_in_globals : IsInGlobals "builtins" "type" type.
 
   Definition int : Value.t :=
     make_klass [] [] [].
-  Axiom int_in_globals : IsInGlobals "builtins" int "int".
+  Axiom int_in_globals : IsInGlobals "builtins" "int" int.
 
   Definition str : Value.t :=
     make_klass [] [] [].
-  Axiom str_in_globals : IsInGlobals "builtins" str "str".
+  Axiom str_in_globals : IsInGlobals "builtins" "str" str.
 End builtins.
 
 Parameter make_list_concat : list Value.t -> M.
+
+Definition make_function (f : Value.t -> Value.t -> M) : Value.t :=
+  Value.Make "builtins" "function" (Pointer.Imm (Object.wrapper (Data.Closure f))).

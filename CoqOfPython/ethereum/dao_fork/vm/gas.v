@@ -501,6 +501,9 @@ Definition charge_gas : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom charge_gas_in_globals :
+  IsInGlobals globals "charge_gas" (make_function charge_gas).
+
 Definition calculate_memory_gas_cost : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "size_in_bytes" ] in
@@ -559,6 +562,9 @@ Definition calculate_memory_gas_cost : Value.t -> Value.t -> M :=
     |) in
 (* At stmt: unsupported node type: Try *)
     M.pure Constant.None_)).
+
+Axiom calculate_memory_gas_cost_in_globals :
+  IsInGlobals globals "calculate_memory_gas_cost" (make_function calculate_memory_gas_cost).
 
 Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -743,6 +749,9 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom calculate_gas_extend_memory_in_globals :
+  IsInGlobals globals "calculate_gas_extend_memory" (make_function calculate_gas_extend_memory).
+
 Definition calculate_message_call_gas : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "state"; "gas"; "to"; "value" ] in
@@ -856,3 +865,6 @@ BinOp.add (|
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom calculate_message_call_gas_in_globals :
+  IsInGlobals globals "calculate_message_call_gas" (make_function calculate_message_call_gas).

@@ -91,3 +91,6 @@ Definition apply_dao : Value.t -> Value.t -> M :=
         ))
     |) in
     M.pure Constant.None_)).
+
+Axiom apply_dao_in_globals :
+  IsInGlobals globals "apply_dao" (make_function apply_dao).

@@ -86,6 +86,9 @@ Definition get_sign : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom get_sign_in_globals :
+  IsInGlobals globals "get_sign" (make_function get_sign).
+
 Definition ceil32 : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "value" ] in
@@ -155,6 +158,9 @@ Definition ceil32 : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
+
+Axiom ceil32_in_globals :
+  IsInGlobals globals "ceil32" (make_function ceil32).
 
 Definition is_prime : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -245,6 +251,9 @@ Definition is_prime : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom is_prime_in_globals :
+  IsInGlobals globals "is_prime" (make_function is_prime).
+
 Definition le_bytes_to_uint32_sequence : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "data" ] in
@@ -327,6 +336,9 @@ Definition le_bytes_to_uint32_sequence : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom le_bytes_to_uint32_sequence_in_globals :
+  IsInGlobals globals "le_bytes_to_uint32_sequence" (make_function le_bytes_to_uint32_sequence).
+
 Definition le_uint32_sequence_to_bytes : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "sequence" ] in
@@ -384,6 +396,9 @@ Definition le_uint32_sequence_to_bytes : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom le_uint32_sequence_to_bytes_in_globals :
+  IsInGlobals globals "le_uint32_sequence_to_bytes" (make_function le_uint32_sequence_to_bytes).
+
 Definition le_uint32_sequence_to_uint : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "sequence" ] in
@@ -424,6 +439,9 @@ Definition le_uint32_sequence_to_uint : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom le_uint32_sequence_to_uint_in_globals :
+  IsInGlobals globals "le_uint32_sequence_to_uint" (make_function le_uint32_sequence_to_uint).
 
 Definition taylor_exponential : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -506,3 +524,6 @@ Definition taylor_exponential : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom taylor_exponential_in_globals :
+  IsInGlobals globals "taylor_exponential" (make_function taylor_exponential).

@@ -71,6 +71,9 @@ Definition memory_write : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom memory_write_in_globals :
+  IsInGlobals globals "memory_write" (make_function memory_write).
+
 Definition memory_read_bytes : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "memory"; "start_position"; "size" ] in
@@ -116,6 +119,9 @@ Definition memory_read_bytes : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom memory_read_bytes_in_globals :
+  IsInGlobals globals "memory_read_bytes" (make_function memory_read_bytes).
 
 Definition buffer_read : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -169,3 +175,6 @@ Definition buffer_read : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom buffer_read_in_globals :
+  IsInGlobals globals "buffer_read" (make_function buffer_read).

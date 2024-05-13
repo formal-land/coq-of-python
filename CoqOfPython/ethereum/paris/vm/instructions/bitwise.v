@@ -97,6 +97,9 @@ Definition bitwise_and : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom bitwise_and_in_globals :
+  IsInGlobals globals "bitwise_and" (make_function bitwise_and).
+
 Definition bitwise_or : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -156,6 +159,9 @@ Definition bitwise_or : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom bitwise_or_in_globals :
+  IsInGlobals globals "bitwise_or" (make_function bitwise_or).
 
 Definition bitwise_xor : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -217,6 +223,9 @@ Definition bitwise_xor : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom bitwise_xor_in_globals :
+  IsInGlobals globals "bitwise_xor" (make_function bitwise_xor).
+
 Definition bitwise_not : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -263,6 +272,9 @@ Definition bitwise_not : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom bitwise_not_in_globals :
+  IsInGlobals globals "bitwise_not" (make_function bitwise_not).
 
 Definition get_byte : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -380,6 +392,9 @@ Definition get_byte : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom get_byte_in_globals :
+  IsInGlobals globals "get_byte" (make_function get_byte).
+
 Definition bitwise_shl : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -475,6 +490,9 @@ Definition bitwise_shl : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom bitwise_shl_in_globals :
+  IsInGlobals globals "bitwise_shl" (make_function bitwise_shl).
+
 Definition bitwise_shr : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -560,6 +578,9 @@ Definition bitwise_shr : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom bitwise_shr_in_globals :
+  IsInGlobals globals "bitwise_shr" (make_function bitwise_shr).
 
 Definition bitwise_sar : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -674,3 +695,6 @@ Definition bitwise_sar : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom bitwise_sar_in_globals :
+  IsInGlobals globals "bitwise_sar" (make_function bitwise_sar).

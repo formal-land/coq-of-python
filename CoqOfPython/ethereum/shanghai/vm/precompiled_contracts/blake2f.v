@@ -128,3 +128,6 @@ Definition blake2f : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom blake2f_in_globals :
+  IsInGlobals globals "blake2f" (make_function blake2f).

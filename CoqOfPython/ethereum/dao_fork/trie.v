@@ -365,6 +365,9 @@ Definition encode_internal_node : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom encode_internal_node_in_globals :
+  IsInGlobals globals "encode_internal_node" (make_function encode_internal_node).
+
 Definition encode_node : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "node"; "storage_root" ] in
@@ -473,6 +476,9 @@ Definition encode_node : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom encode_node_in_globals :
+  IsInGlobals globals "encode_node" (make_function encode_node).
+
 Definition Trie : Value.t :=
   builtins.make_klass
     [(* At base: unsupported node type: Subscript *)]
@@ -519,6 +525,9 @@ Definition copy_trie : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom copy_trie_in_globals :
+  IsInGlobals globals "copy_trie" (make_function copy_trie).
 
 Definition trie_set : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -580,6 +589,9 @@ Definition trie_set : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom trie_set_in_globals :
+  IsInGlobals globals "trie_set" (make_function trie_set).
+
 Definition trie_get : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "trie"; "key" ] in
@@ -612,6 +624,9 @@ Definition trie_get : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom trie_get_in_globals :
+  IsInGlobals globals "trie_get" (make_function trie_get).
 
 Definition common_prefix_length : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -690,6 +705,9 @@ Definition common_prefix_length : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom common_prefix_length_in_globals :
+  IsInGlobals globals "common_prefix_length" (make_function common_prefix_length).
 
 Definition nibble_list_to_compact : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -899,6 +917,9 @@ Definition nibble_list_to_compact : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom nibble_list_to_compact_in_globals :
+  IsInGlobals globals "nibble_list_to_compact" (make_function nibble_list_to_compact).
+
 Definition bytes_to_nibble_list : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "bytes_" ] in
@@ -994,6 +1015,9 @@ Definition bytes_to_nibble_list : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom bytes_to_nibble_list_in_globals :
+  IsInGlobals globals "bytes_to_nibble_list" (make_function bytes_to_nibble_list).
 
 Definition _prepare_trie : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1146,6 +1170,9 @@ Definition _prepare_trie : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom _prepare_trie_in_globals :
+  IsInGlobals globals "_prepare_trie" (make_function _prepare_trie).
+
 Definition root : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "trie"; "get_storage_root" ] in
@@ -1260,6 +1287,9 @@ Definition root : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
+
+Axiom root_in_globals :
+  IsInGlobals globals "root" (make_function root).
 
 Definition patricialize : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1600,3 +1630,6 @@ Definition patricialize : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom patricialize_in_globals :
+  IsInGlobals globals "patricialize" (make_function patricialize).

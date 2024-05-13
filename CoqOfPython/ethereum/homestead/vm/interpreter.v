@@ -325,6 +325,9 @@ Definition process_message_call : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom process_message_call_in_globals :
+  IsInGlobals globals "process_message_call" (make_function process_message_call).
+
 Definition process_create_message : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "message"; "env" ] in
@@ -410,6 +413,9 @@ Definition process_create_message : Value.t -> Value.t -> M :=
       M.get_name (| globals, locals_stack, "evm" |)
     |) in
     M.pure Constant.None_)).
+
+Axiom process_create_message_in_globals :
+  IsInGlobals globals "process_create_message" (make_function process_create_message).
 
 Definition process_message : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -536,6 +542,9 @@ Definition process_message : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom process_message_in_globals :
+  IsInGlobals globals "process_message" (make_function process_message).
+
 Definition execute_code : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "message"; "env" ] in
@@ -582,3 +591,6 @@ Definition execute_code : Value.t -> Value.t -> M :=
       M.get_name (| globals, locals_stack, "evm" |)
     |) in
     M.pure Constant.None_)).
+
+Axiom execute_code_in_globals :
+  IsInGlobals globals "execute_code" (make_function execute_code).

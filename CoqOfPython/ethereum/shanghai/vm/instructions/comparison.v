@@ -105,6 +105,9 @@ Definition less_than : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom less_than_in_globals :
+  IsInGlobals globals "less_than" (make_function less_than).
+
 Definition signed_less_than : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -182,6 +185,9 @@ Definition signed_less_than : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom signed_less_than_in_globals :
+  IsInGlobals globals "signed_less_than" (make_function signed_less_than).
+
 Definition greater_than : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -251,6 +257,9 @@ Definition greater_than : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom greater_than_in_globals :
+  IsInGlobals globals "greater_than" (make_function greater_than).
 
 Definition signed_greater_than : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -329,6 +338,9 @@ Definition signed_greater_than : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom signed_greater_than_in_globals :
+  IsInGlobals globals "signed_greater_than" (make_function signed_greater_than).
+
 Definition equal : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -399,6 +411,9 @@ Definition equal : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom equal_in_globals :
+  IsInGlobals globals "equal" (make_function equal).
+
 Definition is_zero : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -458,3 +473,6 @@ Definition is_zero : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom is_zero_in_globals :
+  IsInGlobals globals "is_zero" (make_function is_zero).
