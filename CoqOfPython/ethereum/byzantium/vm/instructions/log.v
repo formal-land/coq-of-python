@@ -208,6 +208,9 @@ Definition log_n : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom log_n_in_globals :
+  IsInGlobals globals "log_n" (make_function log_n).
+
 Definition log0 : Value.t := M.run ltac:(M.monadic (
   M.call (|
     M.get_name (| globals, locals_stack, "partial" |),

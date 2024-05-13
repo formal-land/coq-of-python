@@ -70,6 +70,9 @@ Definition hex_to_root : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom hex_to_root_in_globals :
+  IsInGlobals globals "hex_to_root" (make_function hex_to_root).
+
 Definition hex_to_bloom : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "hex_string" ] in
@@ -109,6 +112,9 @@ Definition hex_to_bloom : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom hex_to_bloom_in_globals :
+  IsInGlobals globals "hex_to_bloom" (make_function hex_to_bloom).
 
 Definition hex_to_address : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -156,3 +162,6 @@ Definition hex_to_address : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom hex_to_address_in_globals :
+  IsInGlobals globals "hex_to_address" (make_function hex_to_address).

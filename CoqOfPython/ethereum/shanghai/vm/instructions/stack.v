@@ -82,6 +82,9 @@ Definition pop : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom pop_in_globals :
+  IsInGlobals globals "pop" (make_function pop).
+
 Definition push_n : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm"; "num_bytes" ] in
@@ -181,6 +184,9 @@ Definition push_n : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom push_n_in_globals :
+  IsInGlobals globals "push_n" (make_function push_n).
+
 Definition dup_n : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm"; "item_number" ] in
@@ -258,6 +264,9 @@ Definition dup_n : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom dup_n_in_globals :
+  IsInGlobals globals "dup_n" (make_function dup_n).
+
 Definition swap_n : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm"; "item_number" ] in
@@ -333,6 +342,9 @@ Definition swap_n : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom swap_n_in_globals :
+  IsInGlobals globals "swap_n" (make_function swap_n).
 
 Definition push0 : Value.t := M.run ltac:(M.monadic (
   M.call (|

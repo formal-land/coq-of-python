@@ -5,6 +5,7 @@ Require Import proofs.heap.
 
 Require ethereum.paris.vm.instructions.simulations.arithmetic.
 Require ethereum.paris.vm.instructions.arithmetic.
+Require ethereum.paris.vm.stack.
 
 Require ethereum.simulations.base_types.
 Module U256 := base_types.U256.
@@ -64,6 +65,10 @@ Proof.
   eapply Run.CallPrimitiveStateReadStack.
   { now erewrite Stack.read_length_eq. }
   { cbn.
-    admit.
+    eapply Run.CallPrimitiveGetInGlobals.
+    { apply arithmetic.ethereum_paris_vm_stack_imports_pop.
+      apply stack.pop_in_globals.
+    }
+    { admit. }
   }
 Admitted.

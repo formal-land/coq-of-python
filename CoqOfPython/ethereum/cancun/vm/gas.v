@@ -602,6 +602,9 @@ Definition charge_gas : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom charge_gas_in_globals :
+  IsInGlobals globals "charge_gas" (make_function charge_gas).
+
 Definition calculate_memory_gas_cost : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "size_in_bytes" ] in
@@ -660,6 +663,9 @@ Definition calculate_memory_gas_cost : Value.t -> Value.t -> M :=
     |) in
 (* At stmt: unsupported node type: Try *)
     M.pure Constant.None_)).
+
+Axiom calculate_memory_gas_cost_in_globals :
+  IsInGlobals globals "calculate_memory_gas_cost" (make_function calculate_memory_gas_cost).
 
 Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -844,6 +850,9 @@ Definition calculate_gas_extend_memory : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom calculate_gas_extend_memory_in_globals :
+  IsInGlobals globals "calculate_gas_extend_memory" (make_function calculate_gas_extend_memory).
+
 Definition calculate_message_call_gas : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "value"; "gas"; "gas_left"; "memory_cost"; "extra_gas"; "call_stipend" ] in
@@ -969,6 +978,9 @@ M.get_name (| globals, locals_stack, "call_stipend" |)
     |) in
     M.pure Constant.None_)).
 
+Axiom calculate_message_call_gas_in_globals :
+  IsInGlobals globals "calculate_message_call_gas" (make_function calculate_message_call_gas).
+
 Definition max_message_call_gas : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "gas" ] in
@@ -996,6 +1008,9 @@ Definition max_message_call_gas : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom max_message_call_gas_in_globals :
+  IsInGlobals globals "max_message_call_gas" (make_function max_message_call_gas).
 
 Definition init_code_cost : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1032,6 +1047,9 @@ Definition init_code_cost : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom init_code_cost_in_globals :
+  IsInGlobals globals "init_code_cost" (make_function init_code_cost).
 
 Definition calculate_excess_blob_gas : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1088,6 +1106,9 @@ Definition calculate_excess_blob_gas : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
+
+Axiom calculate_excess_blob_gas_in_globals :
+  IsInGlobals globals "calculate_excess_blob_gas" (make_function calculate_excess_blob_gas).
 
 Definition calculate_total_blob_gas : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1147,6 +1168,9 @@ Definition calculate_total_blob_gas : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom calculate_total_blob_gas_in_globals :
+  IsInGlobals globals "calculate_total_blob_gas" (make_function calculate_total_blob_gas).
+
 Definition calculate_blob_gas_price : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "excess_blob_gas" ] in
@@ -1182,6 +1206,9 @@ Definition calculate_blob_gas_price : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom calculate_blob_gas_price_in_globals :
+  IsInGlobals globals "calculate_blob_gas_price" (make_function calculate_blob_gas_price).
 
 Definition calculate_data_fee : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1221,3 +1248,6 @@ Definition calculate_data_fee : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom calculate_data_fee_in_globals :
+  IsInGlobals globals "calculate_data_fee" (make_function calculate_data_fee).

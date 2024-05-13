@@ -103,3 +103,6 @@ Definition encode_account : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom encode_account_in_globals :
+  IsInGlobals globals "encode_account" (make_function encode_account).

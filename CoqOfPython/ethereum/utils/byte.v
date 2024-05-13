@@ -53,6 +53,9 @@ Definition left_pad_zero_bytes : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom left_pad_zero_bytes_in_globals :
+  IsInGlobals globals "left_pad_zero_bytes" (make_function left_pad_zero_bytes).
+
 Definition right_pad_zero_bytes : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "value"; "size" ] in
@@ -83,3 +86,6 @@ Definition right_pad_zero_bytes : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom right_pad_zero_bytes_in_globals :
+  IsInGlobals globals "right_pad_zero_bytes" (make_function right_pad_zero_bytes).

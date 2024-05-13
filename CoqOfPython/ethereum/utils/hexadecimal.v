@@ -67,6 +67,9 @@ Definition has_hex_prefix : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom has_hex_prefix_in_globals :
+  IsInGlobals globals "has_hex_prefix" (make_function has_hex_prefix).
+
 Definition remove_hex_prefix : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "hex_string" ] in
@@ -121,6 +124,9 @@ Definition remove_hex_prefix : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom remove_hex_prefix_in_globals :
+  IsInGlobals globals "remove_hex_prefix" (make_function remove_hex_prefix).
+
 Definition hex_to_bytes : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "hex_string" ] in
@@ -154,6 +160,9 @@ Definition hex_to_bytes : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom hex_to_bytes_in_globals :
+  IsInGlobals globals "hex_to_bytes" (make_function hex_to_bytes).
 
 Definition hex_to_bytes8 : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -202,6 +211,9 @@ Definition hex_to_bytes8 : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom hex_to_bytes8_in_globals :
+  IsInGlobals globals "hex_to_bytes8" (make_function hex_to_bytes8).
+
 Definition hex_to_bytes20 : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "hex_string" ] in
@@ -248,6 +260,9 @@ Definition hex_to_bytes20 : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom hex_to_bytes20_in_globals :
+  IsInGlobals globals "hex_to_bytes20" (make_function hex_to_bytes20).
 
 Definition hex_to_bytes32 : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -296,6 +311,9 @@ Definition hex_to_bytes32 : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom hex_to_bytes32_in_globals :
+  IsInGlobals globals "hex_to_bytes32" (make_function hex_to_bytes32).
+
 Definition hex_to_bytes256 : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "hex_string" ] in
@@ -343,6 +361,9 @@ Definition hex_to_bytes256 : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom hex_to_bytes256_in_globals :
+  IsInGlobals globals "hex_to_bytes256" (make_function hex_to_bytes256).
+
 Definition hex_to_hash : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "hex_string" ] in
@@ -382,6 +403,9 @@ Definition hex_to_hash : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom hex_to_hash_in_globals :
+  IsInGlobals globals "hex_to_hash" (make_function hex_to_hash).
 
 Definition hex_to_uint : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -424,6 +448,9 @@ Definition hex_to_uint : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom hex_to_uint_in_globals :
+  IsInGlobals globals "hex_to_uint" (make_function hex_to_uint).
+
 Definition hex_to_u64 : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "hex_string" ] in
@@ -465,6 +492,9 @@ Definition hex_to_u64 : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom hex_to_u64_in_globals :
+  IsInGlobals globals "hex_to_u64" (make_function hex_to_u64).
+
 Definition hex_to_u256 : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "hex_string" ] in
@@ -505,3 +535,6 @@ Definition hex_to_u256 : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom hex_to_u256_in_globals :
+  IsInGlobals globals "hex_to_u256" (make_function hex_to_u256).

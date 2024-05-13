@@ -152,6 +152,9 @@ Definition mstore : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom mstore_in_globals :
+  IsInGlobals globals "mstore" (make_function mstore).
+
 Definition mstore8 : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -256,6 +259,9 @@ Definition mstore8 : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom mstore8_in_globals :
+  IsInGlobals globals "mstore8" (make_function mstore8).
+
 Definition mload : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -356,6 +362,9 @@ Definition mload : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom mload_in_globals :
+  IsInGlobals globals "mload" (make_function mload).
+
 Definition msize : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -404,6 +413,9 @@ Definition msize : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom msize_in_globals :
+  IsInGlobals globals "msize" (make_function msize).
 
 Definition mcopy : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -537,3 +549,6 @@ Definition mcopy : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom mcopy_in_globals :
+  IsInGlobals globals "mcopy" (make_function mcopy).

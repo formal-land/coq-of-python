@@ -126,3 +126,6 @@ Definition ripemd160 : Value.t -> Value.t -> M :=
       M.get_name (| globals, locals_stack, "padded_hash" |)
     |) in
     M.pure Constant.None_)).
+
+Axiom ripemd160_in_globals :
+  IsInGlobals globals "ripemd160" (make_function ripemd160).

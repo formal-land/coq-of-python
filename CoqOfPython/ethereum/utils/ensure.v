@@ -57,3 +57,6 @@ Definition ensure : Value.t -> Value.t -> M :=
       )) |) in
     let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "exception" |)) |) in
     M.pure Constant.None_)).
+
+Axiom ensure_in_globals :
+  IsInGlobals globals "ensure" (make_function ensure).

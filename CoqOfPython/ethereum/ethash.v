@@ -218,6 +218,9 @@ Definition epoch : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom epoch_in_globals :
+  IsInGlobals globals "epoch" (make_function epoch).
+
 Definition cache_size : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "block_number" ] in
@@ -291,6 +294,9 @@ Definition cache_size : Value.t -> Value.t -> M :=
       M.get_name (| globals, locals_stack, "size" |)
     |) in
     M.pure Constant.None_)).
+
+Axiom cache_size_in_globals :
+  IsInGlobals globals "cache_size" (make_function cache_size).
 
 Definition dataset_size : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -368,6 +374,9 @@ Definition dataset_size : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom dataset_size_in_globals :
+  IsInGlobals globals "dataset_size" (make_function dataset_size).
+
 Definition generate_seed : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "block_number" ] in
@@ -433,6 +442,9 @@ Definition generate_seed : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom generate_seed_in_globals :
+  IsInGlobals globals "generate_seed" (make_function generate_seed).
 
 Definition generate_cache : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -644,6 +656,9 @@ Definition generate_cache : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom generate_cache_in_globals :
+  IsInGlobals globals "generate_cache" (make_function generate_cache).
+
 Definition fnv : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "a"; "b" ] in
@@ -699,6 +714,9 @@ Definition fnv : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom fnv_in_globals :
+  IsInGlobals globals "fnv" (make_function fnv).
+
 Definition fnv_hash : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "mix_integers"; "data" ] in
@@ -721,6 +739,9 @@ Definition fnv_hash : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom fnv_hash_in_globals :
+  IsInGlobals globals "fnv_hash" (make_function fnv_hash).
 
 Definition generate_dataset_item : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -869,6 +890,9 @@ Definition generate_dataset_item : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom generate_dataset_item_in_globals :
+  IsInGlobals globals "generate_dataset_item" (make_function generate_dataset_item).
+
 Definition generate_dataset : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "block_number" ] in
@@ -891,6 +915,9 @@ Definition generate_dataset : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom generate_dataset_in_globals :
+  IsInGlobals globals "generate_dataset" (make_function generate_dataset).
 
 Definition hashimoto : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1191,6 +1218,9 @@ Definition hashimoto : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom hashimoto_in_globals :
+  IsInGlobals globals "hashimoto" (make_function hashimoto).
+
 Definition hashimoto_light : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "header_hash"; "nonce"; "cache"; "dataset_size" ] in
@@ -1231,3 +1261,6 @@ Definition hashimoto_light : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom hashimoto_light_in_globals :
+  IsInGlobals globals "hashimoto_light" (make_function hashimoto_light).

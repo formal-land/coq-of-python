@@ -137,3 +137,6 @@ Definition evm_trace : Value.t -> Value.t -> M :=
     " in
     let _ := M.pass (| |) in
     M.pure Constant.None_)).
+
+Axiom evm_trace_in_globals :
+  IsInGlobals globals "evm_trace" (make_function evm_trace).

@@ -209,6 +209,9 @@ Definition apply_fork : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom apply_fork_in_globals :
+  IsInGlobals globals "apply_fork" (make_function apply_fork).
+
 Definition get_last_256_block_hashes : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "chain" ] in
@@ -320,6 +323,9 @@ Definition get_last_256_block_hashes : Value.t -> Value.t -> M :=
       M.get_name (| globals, locals_stack, "recent_block_hashes" |)
     |) in
     M.pure Constant.None_)).
+
+Axiom get_last_256_block_hashes_in_globals :
+  IsInGlobals globals "get_last_256_block_hashes" (make_function get_last_256_block_hashes).
 
 Definition state_transition : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -487,6 +493,9 @@ Definition state_transition : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom state_transition_in_globals :
+  IsInGlobals globals "state_transition" (make_function state_transition).
+
 Definition validate_header : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "header"; "parent_header" ] in
@@ -625,6 +634,9 @@ Definition validate_header : Value.t -> Value.t -> M :=
   |) in
     M.pure Constant.None_)).
 
+Axiom validate_header_in_globals :
+  IsInGlobals globals "validate_header" (make_function validate_header).
+
 Definition generate_header_hash_for_pow : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "header" ] in
@@ -679,6 +691,9 @@ Definition generate_header_hash_for_pow : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom generate_header_hash_for_pow_in_globals :
+  IsInGlobals globals "generate_header_hash_for_pow" (make_function generate_header_hash_for_pow).
 
 Definition validate_proof_of_work : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -770,6 +785,9 @@ Definition validate_proof_of_work : Value.t -> Value.t -> M :=
   |) in
     M.pure Constant.None_)).
 
+Axiom validate_proof_of_work_in_globals :
+  IsInGlobals globals "validate_proof_of_work" (make_function validate_proof_of_work).
+
 Definition check_transaction : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "tx"; "gas_available" ] in
@@ -820,6 +838,9 @@ Definition check_transaction : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom check_transaction_in_globals :
+  IsInGlobals globals "check_transaction" (make_function check_transaction).
+
 Definition make_receipt : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "tx"; "post_state"; "cumulative_gas_used"; "logs" ] in
@@ -856,6 +877,9 @@ Definition make_receipt : Value.t -> Value.t -> M :=
       M.get_name (| globals, locals_stack, "receipt" |)
     |) in
     M.pure Constant.None_)).
+
+Axiom make_receipt_in_globals :
+  IsInGlobals globals "make_receipt" (make_function make_receipt).
 
 Definition ApplyBodyOutput : Value.t :=
   builtins.make_klass
@@ -1096,6 +1120,9 @@ Definition apply_body : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom apply_body_in_globals :
+  IsInGlobals globals "apply_body" (make_function apply_body).
 
 Definition validate_ommers : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1418,6 +1445,9 @@ Definition validate_ommers : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom validate_ommers_in_globals :
+  IsInGlobals globals "validate_ommers" (make_function validate_ommers).
+
 Definition pay_rewards : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "state"; "block_number"; "coinbase"; "ommers" ] in
@@ -1522,6 +1552,9 @@ Definition pay_rewards : Value.t -> Value.t -> M :=
         ))
     |) in
     M.pure Constant.None_)).
+
+Axiom pay_rewards_in_globals :
+  IsInGlobals globals "pay_rewards" (make_function pay_rewards).
 
 Definition process_transaction : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1813,6 +1846,9 @@ Definition process_transaction : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom process_transaction_in_globals :
+  IsInGlobals globals "process_transaction" (make_function process_transaction).
+
 Definition validate_transaction : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "tx" ] in
@@ -1868,6 +1904,9 @@ Definition validate_transaction : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom validate_transaction_in_globals :
+  IsInGlobals globals "validate_transaction" (make_function validate_transaction).
 
 Definition calculate_intrinsic_cost : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1978,6 +2017,9 @@ Definition calculate_intrinsic_cost : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom calculate_intrinsic_cost_in_globals :
+  IsInGlobals globals "calculate_intrinsic_cost" (make_function calculate_intrinsic_cost).
 
 Definition recover_sender : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -2110,6 +2152,9 @@ Definition recover_sender : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom recover_sender_in_globals :
+  IsInGlobals globals "recover_sender" (make_function recover_sender).
+
 Definition signing_hash : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "tx" ] in
@@ -2147,6 +2192,9 @@ Definition signing_hash : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom signing_hash_in_globals :
+  IsInGlobals globals "signing_hash" (make_function signing_hash).
 
 Definition compute_header_hash : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -2199,6 +2247,9 @@ Definition compute_header_hash : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom compute_header_hash_in_globals :
+  IsInGlobals globals "compute_header_hash" (make_function compute_header_hash).
 
 Definition check_gas_limit : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -2299,6 +2350,9 @@ Definition check_gas_limit : Value.t -> Value.t -> M :=
       Constant.bool true
     |) in
     M.pure Constant.None_)).
+
+Axiom check_gas_limit_in_globals :
+  IsInGlobals globals "check_gas_limit" (make_function check_gas_limit).
 
 Definition calculate_block_difficulty : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -2446,3 +2500,6 @@ Definition calculate_block_difficulty : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom calculate_block_difficulty_in_globals :
+  IsInGlobals globals "calculate_block_difficulty" (make_function calculate_block_difficulty).

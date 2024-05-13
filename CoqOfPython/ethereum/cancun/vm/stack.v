@@ -78,6 +78,9 @@ Definition pop : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom pop_in_globals :
+  IsInGlobals globals "pop" (make_function pop).
+
 Definition push : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "stack"; "value" ] in
@@ -125,3 +128,6 @@ Definition push : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom push_in_globals :
+  IsInGlobals globals "push" (make_function push).

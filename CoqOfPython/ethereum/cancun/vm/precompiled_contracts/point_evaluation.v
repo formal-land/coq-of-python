@@ -211,3 +211,6 @@ Definition point_evaluation : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom point_evaluation_in_globals :
+  IsInGlobals globals "point_evaluation" (make_function point_evaluation).

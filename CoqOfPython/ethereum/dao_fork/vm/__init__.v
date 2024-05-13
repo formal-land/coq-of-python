@@ -120,6 +120,9 @@ Definition incorporate_child_on_success : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom incorporate_child_on_success_in_globals :
+  IsInGlobals globals "incorporate_child_on_success" (make_function incorporate_child_on_success).
+
 Definition incorporate_child_on_error : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm"; "child_evm" ] in
@@ -140,3 +143,6 @@ Definition incorporate_child_on_error : Value.t -> Value.t -> M :=
       M.get_field (| M.get_name (| globals, locals_stack, "child_evm" |), "gas_left" |)
     |) in
     M.pure Constant.None_)).
+
+Axiom incorporate_child_on_error_in_globals :
+  IsInGlobals globals "incorporate_child_on_error" (make_function incorporate_child_on_error).
