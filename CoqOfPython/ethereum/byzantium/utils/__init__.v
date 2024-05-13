@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.byzantium.utils.__init__".
+Definition globals : Globals.t := "ethereum.byzantium.utils.__init__".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "

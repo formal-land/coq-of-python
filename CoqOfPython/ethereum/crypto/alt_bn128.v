@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.crypto.alt_bn128".
+Definition globals : Globals.t := "ethereum.crypto.alt_bn128".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -93,8 +95,9 @@ Definition BNF12 : Value.t :=
     [
       (
         "__mul__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "right" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Multiplication special cased for BNF12.
         " in
@@ -109,9 +112,9 @@ Definition BNF12 : Value.t :=
           |) in
           let _ :=
             M.for_ (|
-              M.get_name (| globals, "i" |),
+              M.get_name (| globals, locals_stack, "i" |),
               M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         Constant.int 12
       ],
@@ -120,9 +123,9 @@ Definition BNF12 : Value.t :=
               ltac:(M.monadic (
                 let _ :=
                   M.for_ (|
-                    M.get_name (| globals, "j" |),
+                    M.get_name (| globals, locals_stack, "j" |),
                     M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         Constant.int 12
       ],
@@ -132,20 +135,20 @@ Definition BNF12 : Value.t :=
                       let _ := M.assign_op (|
                         BinOp.add,
                         M.get_subscript (|
-    M.get_name (| globals, "mul" |),
+    M.get_name (| globals, locals_stack, "mul" |),
     BinOp.add (|
-      M.get_name (| globals, "i" |),
-      M.get_name (| globals, "j" |)
+      M.get_name (| globals, locals_stack, "i" |),
+      M.get_name (| globals, locals_stack, "j" |)
     |)
   |),
                         BinOp.mult (|
     M.get_subscript (|
-      M.get_name (| globals, "self" |),
-      M.get_name (| globals, "i" |)
+      M.get_name (| globals, locals_stack, "self" |),
+      M.get_name (| globals, locals_stack, "i" |)
     |),
     M.get_subscript (|
-      M.get_name (| globals, "right" |),
-      M.get_name (| globals, "j" |)
+      M.get_name (| globals, locals_stack, "right" |),
+      M.get_name (| globals, locals_stack, "j" |)
     |)
   |)
                       |) in
@@ -163,9 +166,9 @@ Definition BNF12 : Value.t :=
           |) in
           let _ :=
             M.for_ (|
-              M.get_name (| globals, "i" |),
+              M.get_name (| globals, locals_stack, "i" |),
               M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         Constant.int 22;
         Constant.int 11;
@@ -177,16 +180,16 @@ Definition BNF12 : Value.t :=
                 let _ := M.assign_op (|
                   BinOp.sub,
                   M.get_subscript (|
-    M.get_name (| globals, "mul" |),
+    M.get_name (| globals, locals_stack, "mul" |),
     BinOp.sub (|
-      M.get_name (| globals, "i" |),
+      M.get_name (| globals, locals_stack, "i" |),
       Constant.int 6
     |)
   |),
                   BinOp.mult (|
     M.get_subscript (|
-      M.get_name (| globals, "mul" |),
-      M.get_name (| globals, "i" |)
+      M.get_name (| globals, locals_stack, "mul" |),
+      M.get_name (| globals, locals_stack, "i" |)
     |),
     UnOp.sub (| Constant.int 18 |)
   |)
@@ -194,16 +197,16 @@ Definition BNF12 : Value.t :=
                 let _ := M.assign_op (|
                   BinOp.sub,
                   M.get_subscript (|
-    M.get_name (| globals, "mul" |),
+    M.get_name (| globals, locals_stack, "mul" |),
     BinOp.sub (|
-      M.get_name (| globals, "i" |),
+      M.get_name (| globals, locals_stack, "i" |),
       Constant.int 12
     |)
   |),
                   BinOp.mult (|
     M.get_subscript (|
-      M.get_name (| globals, "mul" |),
-      M.get_name (| globals, "i" |)
+      M.get_name (| globals, locals_stack, "mul" |),
+      M.get_name (| globals, locals_stack, "i" |)
     |),
     Constant.int 82
   |)
@@ -216,11 +219,11 @@ Definition BNF12 : Value.t :=
           |) in
           let _ := M.return_ (|
             M.call (|
-              M.get_field (| M.get_name (| globals, "BNF12" |), "__new__" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "BNF12" |), "__new__" |),
               make_list [
-                M.get_name (| globals, "BNF12" |);
+                M.get_name (| globals, locals_stack, "BNF12" |);
                 M.slice (|
-                  M.get_name (| globals, "mul" |),
+                  M.get_name (| globals, locals_stack, "mul" |),
                   Constant.None_,
                   Constant.int 12,
                   Constant.None_
@@ -259,18 +262,19 @@ Definition BNP12 : Value.t :=
     ].
 
 Definition bnf2_to_bnf12 : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "x" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "x" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Lift a field element in `BNF2` to `BNF12`.
     " in
     let _ := M.return_ (|
       BinOp.add (|
         M.call (|
-          M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
+          M.get_field (| M.get_name (| globals, locals_stack, "BNF12" |), "from_int" |),
           make_list [
             M.get_subscript (|
-              M.get_name (| globals, "x" |),
+              M.get_name (| globals, locals_stack, "x" |),
               Constant.int 0
             |)
           ],
@@ -278,19 +282,19 @@ Definition bnf2_to_bnf12 : Value.t -> Value.t -> M :=
         |),
         BinOp.mult (|
           M.call (|
-            M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
+            M.get_field (| M.get_name (| globals, locals_stack, "BNF12" |), "from_int" |),
             make_list [
               M.get_subscript (|
-                M.get_name (| globals, "x" |),
+                M.get_name (| globals, locals_stack, "x" |),
                 Constant.int 1
               |)
             ],
             make_dict []
           |),
           BinOp.sub (|
-            M.get_field (| M.get_name (| globals, "BNF12" |), "i_plus_9" |),
+            M.get_field (| M.get_name (| globals, locals_stack, "BNF12" |), "i_plus_9" |),
             M.call (|
-              M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "BNF12" |), "from_int" |),
               make_list [
                 Constant.int 9
               ],
@@ -303,22 +307,23 @@ Definition bnf2_to_bnf12 : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition bnp_to_bnp12 : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "p" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "p" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Lift a point from `BNP` to `BNP12`.
     " in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "BNP12" |),
+        M.get_name (| globals, locals_stack, "BNP12" |),
         make_list [
           M.call (|
-            M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
+            M.get_field (| M.get_name (| globals, locals_stack, "BNF12" |), "from_int" |),
             make_list [
               M.call (|
-                M.get_name (| globals, "int" |),
+                M.get_name (| globals, locals_stack, "int" |),
                 make_list [
-                  M.get_field (| M.get_name (| globals, "p" |), "x" |)
+                  M.get_field (| M.get_name (| globals, locals_stack, "p" |), "x" |)
                 ],
                 make_dict []
               |)
@@ -326,12 +331,12 @@ Definition bnp_to_bnp12 : Value.t -> Value.t -> M :=
             make_dict []
           |);
           M.call (|
-            M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
+            M.get_field (| M.get_name (| globals, locals_stack, "BNF12" |), "from_int" |),
             make_list [
               M.call (|
-                M.get_name (| globals, "int" |),
+                M.get_name (| globals, locals_stack, "int" |),
                 make_list [
-                  M.get_field (| M.get_name (| globals, "p" |), "y" |)
+                  M.get_field (| M.get_name (| globals, locals_stack, "p" |), "y" |)
                 ],
                 make_dict []
               |)
@@ -345,38 +350,39 @@ Definition bnp_to_bnp12 : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition twist : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "p" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "p" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Apply to twist to change variables from the curve `BNP2` to `BNP12`.
     " in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "BNP12" |),
+        M.get_name (| globals, locals_stack, "BNP12" |),
         make_list [
           BinOp.mult (|
             M.call (|
-              M.get_name (| globals, "bnf2_to_bnf12" |),
+              M.get_name (| globals, locals_stack, "bnf2_to_bnf12" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "p" |), "x" |)
+                M.get_field (| M.get_name (| globals, locals_stack, "p" |), "x" |)
               ],
               make_dict []
             |),
             BinOp.pow (|
-              M.get_field (| M.get_name (| globals, "BNF12" |), "w" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "BNF12" |), "w" |),
               Constant.int 2
             |)
           |);
           BinOp.mult (|
             M.call (|
-              M.get_name (| globals, "bnf2_to_bnf12" |),
+              M.get_name (| globals, locals_stack, "bnf2_to_bnf12" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "p" |), "y" |)
+                M.get_field (| M.get_name (| globals, locals_stack, "p" |), "y" |)
               ],
               make_dict []
             |),
             BinOp.pow (|
-              M.get_field (| M.get_name (| globals, "BNF12" |), "w" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "BNF12" |), "w" |),
               Constant.int 3
             |)
           |)
@@ -387,8 +393,9 @@ Definition twist : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition linefunc : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "p1"; "p2"; "t" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "p1"; "p2"; "t" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Evaluate the function defining the line between points `p1` and `p2` at the
     point `t`. The mathematical significance of this function is that is has
@@ -402,8 +409,8 @@ Definition linefunc : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.not_eq (|
-          M.get_field (| M.get_name (| globals, "p1" |), "x" |),
-          M.get_field (| M.get_name (| globals, "p2" |), "x" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "p1" |), "x" |),
+          M.get_field (| M.get_name (| globals, locals_stack, "p2" |), "x" |)
         |),
       (* then *)
       ltac:(M.monadic (
@@ -411,27 +418,27 @@ Definition linefunc : Value.t -> Value.t -> M :=
           "lam" ,
           BinOp.div (|
             BinOp.sub (|
-              M.get_field (| M.get_name (| globals, "p2" |), "y" |),
-              M.get_field (| M.get_name (| globals, "p1" |), "y" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "p2" |), "y" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "p1" |), "y" |)
             |),
             BinOp.sub (|
-              M.get_field (| M.get_name (| globals, "p2" |), "x" |),
-              M.get_field (| M.get_name (| globals, "p1" |), "x" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "p2" |), "x" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "p1" |), "x" |)
             |)
           |)
         |) in
         let _ := M.return_ (|
           BinOp.sub (|
             BinOp.mult (|
-              M.get_name (| globals, "lam" |),
+              M.get_name (| globals, locals_stack, "lam" |),
               BinOp.sub (|
-                M.get_field (| M.get_name (| globals, "t" |), "x" |),
-                M.get_field (| M.get_name (| globals, "p1" |), "x" |)
+                M.get_field (| M.get_name (| globals, locals_stack, "t" |), "x" |),
+                M.get_field (| M.get_name (| globals, locals_stack, "p1" |), "x" |)
               |)
             |),
             BinOp.sub (|
-              M.get_field (| M.get_name (| globals, "t" |), "y" |),
-              M.get_field (| M.get_name (| globals, "p1" |), "y" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "t" |), "y" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "p1" |), "y" |)
             |)
           |)
         |) in
@@ -442,8 +449,8 @@ Definition linefunc : Value.t -> Value.t -> M :=
           (* if *)
           M.if_then_else (|
             Compare.eq (|
-              M.get_field (| M.get_name (| globals, "p1" |), "y" |),
-              M.get_field (| M.get_name (| globals, "p2" |), "y" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "p1" |), "y" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "p2" |), "y" |)
             |),
           (* then *)
           ltac:(M.monadic (
@@ -452,41 +459,41 @@ Definition linefunc : Value.t -> Value.t -> M :=
               BinOp.div (|
                 BinOp.mult (|
                   M.call (|
-                    M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "BNF12" |), "from_int" |),
                     make_list [
                       Constant.int 3
                     ],
                     make_dict []
                   |),
                   BinOp.pow (|
-                    M.get_field (| M.get_name (| globals, "p1" |), "x" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "p1" |), "x" |),
                     Constant.int 2
                   |)
                 |),
                 BinOp.mult (|
                   M.call (|
-                    M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "BNF12" |), "from_int" |),
                     make_list [
                       Constant.int 2
                     ],
                     make_dict []
                   |),
-                  M.get_field (| M.get_name (| globals, "p1" |), "y" |)
+                  M.get_field (| M.get_name (| globals, locals_stack, "p1" |), "y" |)
                 |)
               |)
             |) in
             let _ := M.return_ (|
               BinOp.sub (|
                 BinOp.mult (|
-                  M.get_name (| globals, "lam" |),
+                  M.get_name (| globals, locals_stack, "lam" |),
                   BinOp.sub (|
-                    M.get_field (| M.get_name (| globals, "t" |), "x" |),
-                    M.get_field (| M.get_name (| globals, "p1" |), "x" |)
+                    M.get_field (| M.get_name (| globals, locals_stack, "t" |), "x" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "p1" |), "x" |)
                   |)
                 |),
                 BinOp.sub (|
-                  M.get_field (| M.get_name (| globals, "t" |), "y" |),
-                  M.get_field (| M.get_name (| globals, "p1" |), "y" |)
+                  M.get_field (| M.get_name (| globals, locals_stack, "t" |), "y" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "p1" |), "y" |)
                 |)
               |)
             |) in
@@ -495,8 +502,8 @@ Definition linefunc : Value.t -> Value.t -> M :=
           )), ltac:(M.monadic (
             let _ := M.return_ (|
               BinOp.sub (|
-                M.get_field (| M.get_name (| globals, "t" |), "x" |),
-                M.get_field (| M.get_name (| globals, "p1" |), "x" |)
+                M.get_field (| M.get_name (| globals, locals_stack, "t" |), "x" |),
+                M.get_field (| M.get_name (| globals, locals_stack, "p1" |), "x" |)
               |)
             |) in
             M.pure Constant.None_
@@ -506,8 +513,9 @@ Definition linefunc : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition miller_loop : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "q"; "p" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "q"; "p" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     The core of the pairing algorithm.
     " in
@@ -516,18 +524,18 @@ Definition miller_loop : Value.t -> Value.t -> M :=
       M.if_then_else (|
         BoolOp.or (|
           Compare.eq (|
-            M.get_name (| globals, "p" |),
+            M.get_name (| globals, locals_stack, "p" |),
             M.call (|
-              M.get_field (| M.get_name (| globals, "BNP12" |), "point_at_infinity" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "BNP12" |), "point_at_infinity" |),
               make_list [],
               make_dict []
             |)
           |),
           ltac:(M.monadic (
             Compare.eq (|
-              M.get_name (| globals, "q" |),
+              M.get_name (| globals, locals_stack, "q" |),
               M.call (|
-                M.get_field (| M.get_name (| globals, "BNP12" |), "point_at_infinity" |),
+                M.get_field (| M.get_name (| globals, locals_stack, "BNP12" |), "point_at_infinity" |),
                 make_list [],
                 make_dict []
               |)
@@ -538,7 +546,7 @@ Definition miller_loop : Value.t -> Value.t -> M :=
       ltac:(M.monadic (
         let _ := M.return_ (|
           M.call (|
-            M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
+            M.get_field (| M.get_name (| globals, locals_stack, "BNF12" |), "from_int" |),
             make_list [
               Constant.int 1
             ],
@@ -552,12 +560,12 @@ Definition miller_loop : Value.t -> Value.t -> M :=
       )) |) in
     let _ := M.assign_local (|
       "r" ,
-      M.get_name (| globals, "q" |)
+      M.get_name (| globals, locals_stack, "q" |)
     |) in
     let _ := M.assign_local (|
       "f" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "BNF12" |), "from_int" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "BNF12" |), "from_int" |),
         make_list [
           Constant.int 1
         ],
@@ -566,11 +574,11 @@ Definition miller_loop : Value.t -> Value.t -> M :=
     |) in
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "i" |),
+        M.get_name (| globals, locals_stack, "i" |),
         M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
-        M.get_name (| globals, "ATE_PAIRING_COUNT_BITS" |);
+        M.get_name (| globals, locals_stack, "ATE_PAIRING_COUNT_BITS" |);
         UnOp.sub (| Constant.int 1 |);
         UnOp.sub (| Constant.int 1 |)
       ],
@@ -581,15 +589,15 @@ Definition miller_loop : Value.t -> Value.t -> M :=
             "f" ,
             BinOp.mult (|
               BinOp.mult (|
-                M.get_name (| globals, "f" |),
-                M.get_name (| globals, "f" |)
+                M.get_name (| globals, locals_stack, "f" |),
+                M.get_name (| globals, locals_stack, "f" |)
               |),
               M.call (|
-                M.get_name (| globals, "linefunc" |),
+                M.get_name (| globals, locals_stack, "linefunc" |),
                 make_list [
-                  M.get_name (| globals, "r" |);
-                  M.get_name (| globals, "r" |);
-                  M.get_name (| globals, "p" |)
+                  M.get_name (| globals, locals_stack, "r" |);
+                  M.get_name (| globals, locals_stack, "r" |);
+                  M.get_name (| globals, locals_stack, "p" |)
                 ],
                 make_dict []
               |)
@@ -598,7 +606,7 @@ Definition miller_loop : Value.t -> Value.t -> M :=
           let _ := M.assign_local (|
             "r" ,
             M.call (|
-              M.get_field (| M.get_name (| globals, "r" |), "double" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "r" |), "double" |),
               make_list [],
               make_dict []
             |)
@@ -608,12 +616,12 @@ Definition miller_loop : Value.t -> Value.t -> M :=
             M.if_then_else (|
               BinOp.bit_and (|
                 BinOp.sub (|
-                  M.get_name (| globals, "ATE_PAIRING_COUNT" |),
+                  M.get_name (| globals, locals_stack, "ATE_PAIRING_COUNT" |),
                   Constant.int 1
                 |),
                 BinOp.pow (|
                   Constant.int 2,
-                  M.get_name (| globals, "i" |)
+                  M.get_name (| globals, locals_stack, "i" |)
                 |)
               |),
             (* then *)
@@ -621,13 +629,13 @@ Definition miller_loop : Value.t -> Value.t -> M :=
               let _ := M.assign_local (|
                 "f" ,
                 BinOp.mult (|
-                  M.get_name (| globals, "f" |),
+                  M.get_name (| globals, locals_stack, "f" |),
                   M.call (|
-                    M.get_name (| globals, "linefunc" |),
+                    M.get_name (| globals, locals_stack, "linefunc" |),
                     make_list [
-                      M.get_name (| globals, "r" |);
-                      M.get_name (| globals, "q" |);
-                      M.get_name (| globals, "p" |)
+                      M.get_name (| globals, locals_stack, "r" |);
+                      M.get_name (| globals, locals_stack, "q" |);
+                      M.get_name (| globals, locals_stack, "p" |)
                     ],
                     make_dict []
                   |)
@@ -636,8 +644,8 @@ Definition miller_loop : Value.t -> Value.t -> M :=
               let _ := M.assign_local (|
                 "r" ,
                 BinOp.add (|
-                  M.get_name (| globals, "r" |),
-                  M.get_name (| globals, "q" |)
+                  M.get_name (| globals, locals_stack, "r" |),
+                  M.get_name (| globals, locals_stack, "q" |)
                 |)
               |) in
               M.pure Constant.None_
@@ -652,12 +660,12 @@ Definition miller_loop : Value.t -> Value.t -> M :=
         ))
     |) in
     let _ := M.assert (| Compare.eq (|
-    M.get_name (| globals, "r" |),
+    M.get_name (| globals, locals_stack, "r" |),
     M.call (|
-      M.get_field (| M.get_name (| globals, "q" |), "mul_by" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "q" |), "mul_by" |),
       make_list [
         BinOp.sub (|
-          M.get_name (| globals, "ATE_PAIRING_COUNT" |),
+          M.get_name (| globals, locals_stack, "ATE_PAIRING_COUNT" |),
           Constant.int 1
         |)
       ],
@@ -667,15 +675,15 @@ Definition miller_loop : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "q1" ,
       M.call (|
-        M.get_name (| globals, "BNP12" |),
+        M.get_name (| globals, locals_stack, "BNP12" |),
         make_list [
           M.call (|
-            M.get_field (| M.get_field (| M.get_name (| globals, "q" |), "x" |), "frobenius" |),
+            M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "q" |), "x" |), "frobenius" |),
             make_list [],
             make_dict []
           |);
           M.call (|
-            M.get_field (| M.get_field (| M.get_name (| globals, "q" |), "y" |), "frobenius" |),
+            M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "q" |), "y" |), "frobenius" |),
             make_list [],
             make_dict []
           |)
@@ -686,15 +694,15 @@ Definition miller_loop : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "nq2" ,
       M.call (|
-        M.get_name (| globals, "BNP12" |),
+        M.get_name (| globals, locals_stack, "BNP12" |),
         make_list [
           M.call (|
-            M.get_field (| M.get_field (| M.get_name (| globals, "q1" |), "x" |), "frobenius" |),
+            M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "q1" |), "x" |), "frobenius" |),
             make_list [],
             make_dict []
           |);
           UnOp.sub (| M.call (|
-            M.get_field (| M.get_field (| M.get_name (| globals, "q1" |), "y" |), "frobenius" |),
+            M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "q1" |), "y" |), "frobenius" |),
             make_list [],
             make_dict []
           |) |)
@@ -705,13 +713,13 @@ Definition miller_loop : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "f" ,
       BinOp.mult (|
-        M.get_name (| globals, "f" |),
+        M.get_name (| globals, locals_stack, "f" |),
         M.call (|
-          M.get_name (| globals, "linefunc" |),
+          M.get_name (| globals, locals_stack, "linefunc" |),
           make_list [
-            M.get_name (| globals, "r" |);
-            M.get_name (| globals, "q1" |);
-            M.get_name (| globals, "p" |)
+            M.get_name (| globals, locals_stack, "r" |);
+            M.get_name (| globals, locals_stack, "q1" |);
+            M.get_name (| globals, locals_stack, "p" |)
           ],
           make_dict []
         |)
@@ -720,20 +728,20 @@ Definition miller_loop : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "r" ,
       BinOp.add (|
-        M.get_name (| globals, "r" |),
-        M.get_name (| globals, "q1" |)
+        M.get_name (| globals, locals_stack, "r" |),
+        M.get_name (| globals, locals_stack, "q1" |)
       |)
     |) in
     let _ := M.assign_local (|
       "f" ,
       BinOp.mult (|
-        M.get_name (| globals, "f" |),
+        M.get_name (| globals, locals_stack, "f" |),
         M.call (|
-          M.get_name (| globals, "linefunc" |),
+          M.get_name (| globals, locals_stack, "linefunc" |),
           make_list [
-            M.get_name (| globals, "r" |);
-            M.get_name (| globals, "nq2" |);
-            M.get_name (| globals, "p" |)
+            M.get_name (| globals, locals_stack, "r" |);
+            M.get_name (| globals, locals_stack, "nq2" |);
+            M.get_name (| globals, locals_stack, "p" |)
           ],
           make_dict []
         |)
@@ -741,42 +749,43 @@ Definition miller_loop : Value.t -> Value.t -> M :=
     |) in
     let _ := M.return_ (|
       BinOp.pow (|
-        M.get_name (| globals, "f" |),
+        M.get_name (| globals, locals_stack, "f" |),
         BinOp.floor_div (|
           BinOp.sub (|
             BinOp.pow (|
-              M.get_name (| globals, "ALT_BN128_PRIME" |),
+              M.get_name (| globals, locals_stack, "ALT_BN128_PRIME" |),
               Constant.int 12
             |),
             Constant.int 1
           |),
-          M.get_name (| globals, "ALT_BN128_CURVE_ORDER" |)
+          M.get_name (| globals, locals_stack, "ALT_BN128_CURVE_ORDER" |)
         |)
       |)
     |) in
     M.pure Constant.None_)).
 
 Definition pairing : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "q"; "p" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "q"; "p" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Compute the pairing of `q` and `p`.
     " in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "miller_loop" |),
+        M.get_name (| globals, locals_stack, "miller_loop" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "twist" |),
+            M.get_name (| globals, locals_stack, "twist" |),
             make_list [
-              M.get_name (| globals, "q" |)
+              M.get_name (| globals, locals_stack, "q" |)
             ],
             make_dict []
           |);
           M.call (|
-            M.get_name (| globals, "bnp_to_bnp12" |),
+            M.get_name (| globals, locals_stack, "bnp_to_bnp12" |),
             make_list [
-              M.get_name (| globals, "p" |)
+              M.get_name (| globals, locals_stack, "p" |)
             ],
             make_dict []
           |)

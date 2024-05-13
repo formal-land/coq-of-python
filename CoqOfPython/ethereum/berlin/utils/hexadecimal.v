@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.berlin.utils.hexadecimal".
+Definition globals : Globals.t := "ethereum.berlin.utils.hexadecimal".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -29,8 +31,9 @@ Axiom ethereum_berlin_fork_types_imports_Root :
   IsImported globals "ethereum.berlin.fork_types" "Root".
 
 Definition hex_to_root : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "hex_string" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "hex_string" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Convert hex string to trie root.
 
@@ -46,15 +49,15 @@ Definition hex_to_root : Value.t -> Value.t -> M :=
     " in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "Root" |),
+        M.get_name (| globals, locals_stack, "Root" |),
         make_list [
           M.call (|
-            M.get_field (| M.get_name (| globals, "bytes" |), "fromhex" |),
+            M.get_field (| M.get_name (| globals, locals_stack, "bytes" |), "fromhex" |),
             make_list [
               M.call (|
-                M.get_name (| globals, "remove_hex_prefix" |),
+                M.get_name (| globals, locals_stack, "remove_hex_prefix" |),
                 make_list [
-                  M.get_name (| globals, "hex_string" |)
+                  M.get_name (| globals, locals_stack, "hex_string" |)
                 ],
                 make_dict []
               |)
@@ -68,8 +71,9 @@ Definition hex_to_root : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition hex_to_bloom : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "hex_string" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "hex_string" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Convert hex string to bloom.
 
@@ -85,15 +89,15 @@ Definition hex_to_bloom : Value.t -> Value.t -> M :=
     " in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "Bloom" |),
+        M.get_name (| globals, locals_stack, "Bloom" |),
         make_list [
           M.call (|
-            M.get_field (| M.get_name (| globals, "bytes" |), "fromhex" |),
+            M.get_field (| M.get_name (| globals, locals_stack, "bytes" |), "fromhex" |),
             make_list [
               M.call (|
-                M.get_name (| globals, "remove_hex_prefix" |),
+                M.get_name (| globals, locals_stack, "remove_hex_prefix" |),
                 make_list [
-                  M.get_name (| globals, "hex_string" |)
+                  M.get_name (| globals, locals_stack, "hex_string" |)
                 ],
                 make_dict []
               |)
@@ -107,8 +111,9 @@ Definition hex_to_bloom : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition hex_to_address : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "hex_string" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "hex_string" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Convert hex string to Address (20 bytes).
 
@@ -124,16 +129,16 @@ Definition hex_to_address : Value.t -> Value.t -> M :=
     " in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "Address" |),
+        M.get_name (| globals, locals_stack, "Address" |),
         make_list [
           M.call (|
-            M.get_field (| M.get_name (| globals, "bytes" |), "fromhex" |),
+            M.get_field (| M.get_name (| globals, locals_stack, "bytes" |), "fromhex" |),
             make_list [
               M.call (|
                 M.get_field (| M.call (|
-                  M.get_name (| globals, "remove_hex_prefix" |),
+                  M.get_name (| globals, locals_stack, "remove_hex_prefix" |),
                   make_list [
-                    M.get_name (| globals, "hex_string" |)
+                    M.get_name (| globals, locals_stack, "hex_string" |)
                   ],
                   make_dict []
                 |), "rjust" |),

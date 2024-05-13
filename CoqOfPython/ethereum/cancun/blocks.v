@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.cancun.blocks".
+Definition globals : Globals.t := "ethereum.cancun.blocks".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "

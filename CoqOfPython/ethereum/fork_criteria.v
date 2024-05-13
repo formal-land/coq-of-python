@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.fork_criteria".
+Definition globals : Globals.t := "ethereum.fork_criteria".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -38,8 +40,9 @@ Definition ForkCriteria : Value.t :=
     [
       (
         "__eq__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "other" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "other" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Equality for fork criteria.
         " in
@@ -47,10 +50,10 @@ Definition ForkCriteria : Value.t :=
             (* if *)
             M.if_then_else (|
               M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "other" |);
-                  M.get_name (| globals, "ForkCriteria" |)
+                  M.get_name (| globals, locals_stack, "other" |);
+                  M.get_name (| globals, locals_stack, "ForkCriteria" |)
                 ],
                 make_dict []
               |),
@@ -58,8 +61,8 @@ Definition ForkCriteria : Value.t :=
             ltac:(M.monadic (
               let _ := M.return_ (|
                 Compare.eq (|
-                  M.get_field (| M.get_name (| globals, "self" |), "_internal" |),
-                  M.get_field (| M.get_name (| globals, "other" |), "_internal" |)
+                  M.get_field (| M.get_name (| globals, locals_stack, "self" |), "_internal" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "other" |), "_internal" |)
                 |)
               |) in
               M.pure Constant.None_
@@ -68,14 +71,15 @@ Definition ForkCriteria : Value.t :=
               M.pure Constant.None_
             )) |) in
           let _ := M.return_ (|
-            M.get_name (| globals, "NotImplemented" |)
+            M.get_name (| globals, locals_stack, "NotImplemented" |)
           |) in
           M.pure Constant.None_))
       );
       (
         "__lt__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "other" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "other" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Ordering for fork criteria. Block number forks are before timestamp
         forks and scheduled forks are before unscheduled forks.
@@ -84,10 +88,10 @@ Definition ForkCriteria : Value.t :=
             (* if *)
             M.if_then_else (|
               M.call (|
-                M.get_name (| globals, "isinstance" |),
+                M.get_name (| globals, locals_stack, "isinstance" |),
                 make_list [
-                  M.get_name (| globals, "other" |);
-                  M.get_name (| globals, "ForkCriteria" |)
+                  M.get_name (| globals, locals_stack, "other" |);
+                  M.get_name (| globals, locals_stack, "ForkCriteria" |)
                 ],
                 make_dict []
               |),
@@ -95,8 +99,8 @@ Definition ForkCriteria : Value.t :=
             ltac:(M.monadic (
               let _ := M.return_ (|
                 Compare.lt (|
-                  M.get_field (| M.get_name (| globals, "self" |), "_internal" |),
-                  M.get_field (| M.get_name (| globals, "other" |), "_internal" |)
+                  M.get_field (| M.get_name (| globals, locals_stack, "self" |), "_internal" |),
+                  M.get_field (| M.get_name (| globals, locals_stack, "other" |), "_internal" |)
                 |)
               |) in
               M.pure Constant.None_
@@ -105,22 +109,23 @@ Definition ForkCriteria : Value.t :=
               M.pure Constant.None_
             )) |) in
           let _ := M.return_ (|
-            M.get_name (| globals, "NotImplemented" |)
+            M.get_name (| globals, locals_stack, "NotImplemented" |)
           |) in
           M.pure Constant.None_))
       );
       (
         "__hash__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         `ForkCriteria` is hashable, so it can be stored in dictionaries.
         " in
           let _ := M.return_ (|
             M.call (|
-              M.get_name (| globals, "hash" |),
+              M.get_name (| globals, locals_stack, "hash" |),
               make_list [
-                M.get_field (| M.get_name (| globals, "self" |), "_internal" |)
+                M.get_field (| M.get_name (| globals, locals_stack, "self" |), "_internal" |)
               ],
               make_dict []
             |)
@@ -138,37 +143,40 @@ Definition ByBlockNumber : Value.t :=
     [
       (
         "__init__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "block_number" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "block_number" ] in
+          ltac:(M.monadic (
           let _ := M.assign (|
-            M.get_field (| M.get_name (| globals, "self" |), "_internal" |),
-            make_tuple [ M.get_field (| M.get_name (| globals, "ForkCriteria" |), "BLOCK_NUMBER" |); M.get_name (| globals, "block_number" |) ]
+            M.get_field (| M.get_name (| globals, locals_stack, "self" |), "_internal" |),
+            make_tuple [ M.get_field (| M.get_name (| globals, locals_stack, "ForkCriteria" |), "BLOCK_NUMBER" |); M.get_name (| globals, locals_stack, "block_number" |) ]
           |) in
           let _ := M.assign (|
-            M.get_field (| M.get_name (| globals, "self" |), "block_number" |),
-            M.get_name (| globals, "block_number" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "self" |), "block_number" |),
+            M.get_name (| globals, locals_stack, "block_number" |)
           |) in
           M.pure Constant.None_))
       );
       (
         "check",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "block_number"; "timestamp" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "block_number"; "timestamp" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Check whether the block number has been reached.
         " in
           let _ := M.return_ (|
             Compare.gt_e (|
-              M.get_name (| globals, "block_number" |),
-              M.get_field (| M.get_name (| globals, "self" |), "block_number" |)
+              M.get_name (| globals, locals_stack, "block_number" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "block_number" |)
             |)
           |) in
           M.pure Constant.None_))
       );
       (
         "__repr__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         String representation of this object.
         " in
@@ -188,37 +196,40 @@ Definition ByTimestamp : Value.t :=
     [
       (
         "__init__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "timestamp" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "timestamp" ] in
+          ltac:(M.monadic (
           let _ := M.assign (|
-            M.get_field (| M.get_name (| globals, "self" |), "_internal" |),
-            make_tuple [ M.get_field (| M.get_name (| globals, "ForkCriteria" |), "TIMESTAMP" |); M.get_name (| globals, "timestamp" |) ]
+            M.get_field (| M.get_name (| globals, locals_stack, "self" |), "_internal" |),
+            make_tuple [ M.get_field (| M.get_name (| globals, locals_stack, "ForkCriteria" |), "TIMESTAMP" |); M.get_name (| globals, locals_stack, "timestamp" |) ]
           |) in
           let _ := M.assign (|
-            M.get_field (| M.get_name (| globals, "self" |), "timestamp" |),
-            M.get_name (| globals, "timestamp" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "self" |), "timestamp" |),
+            M.get_name (| globals, locals_stack, "timestamp" |)
           |) in
           M.pure Constant.None_))
       );
       (
         "check",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "block_number"; "timestamp" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "block_number"; "timestamp" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Check whether the timestamp has been reached.
         " in
           let _ := M.return_ (|
             Compare.gt_e (|
-              M.get_name (| globals, "timestamp" |),
-              M.get_field (| M.get_name (| globals, "self" |), "timestamp" |)
+              M.get_name (| globals, locals_stack, "timestamp" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "self" |), "timestamp" |)
             |)
           |) in
           M.pure Constant.None_))
       );
       (
         "__repr__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         String representation of this object.
         " in
@@ -238,18 +249,20 @@ Definition Unscheduled : Value.t :=
     [
       (
         "__init__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := M.assign (|
-            M.get_field (| M.get_name (| globals, "self" |), "_internal" |),
-            make_tuple [ M.get_field (| M.get_name (| globals, "ForkCriteria" |), "UNSCHEDULED" |); Constant.int 0 ]
+            M.get_field (| M.get_name (| globals, locals_stack, "self" |), "_internal" |),
+            make_tuple [ M.get_field (| M.get_name (| globals, locals_stack, "ForkCriteria" |), "UNSCHEDULED" |); Constant.int 0 ]
           |) in
           M.pure Constant.None_))
       );
       (
         "check",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self"; "block_number"; "timestamp" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "block_number"; "timestamp" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         Unscheduled forks never occur.
         " in
@@ -260,8 +273,9 @@ Definition Unscheduled : Value.t :=
       );
       (
         "__repr__",
-        fun (args kwargs : Value.t) => ltac:(M.monadic (
-          let _ := M.set_locals (| args, kwargs, [ "self" ] |) in
+        fun (args kwargs : Value.t) =>
+          let- locals_stack := M.create_locals locals_stack args kwargs [ "self" ] in
+          ltac:(M.monadic (
           let _ := Constant.str "
         String representation of this object.
         " in

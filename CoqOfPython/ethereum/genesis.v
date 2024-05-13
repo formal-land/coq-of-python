@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.genesis".
+Definition globals : Globals.t := "ethereum.genesis".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -62,7 +64,7 @@ Axiom ethereum_utils_hexadecimal_imports_hex_to_uint :
   IsImported globals "ethereum.utils.hexadecimal" "hex_to_uint".
 
 Definition Address : Value.t := M.run ltac:(M.monadic (
-  M.get_name (| globals, "Bytes20" |)
+  M.get_name (| globals, locals_stack, "Bytes20" |)
 )).
 
 Definition GenesisConfiguration : Value.t :=
@@ -76,8 +78,9 @@ Definition GenesisConfiguration : Value.t :=
     ].
 
 Definition get_genesis_configuration : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "genesis_file" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "genesis_file" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Obtain the genesis configuration from the given genesis json file.
 
@@ -98,11 +101,11 @@ Definition get_genesis_configuration : Value.t -> Value.t -> M :=
       "genesis_str_data" ,
       M.call (|
         M.get_field (| M.call (|
-          M.get_name (| globals, "cast" |),
+          M.get_name (| globals, locals_stack, "cast" |),
           make_list [
-            M.get_name (| globals, "bytes" |);
+            M.get_name (| globals, locals_stack, "bytes" |);
             M.call (|
-              M.get_field (| M.get_name (| globals, "pkgutil" |), "get_data" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "pkgutil" |), "get_data" |),
               make_list [
                 Constant.str "ethereum";
                 Constant.str "(* At expr: unsupported node type: JoinedStr *)"
@@ -119,16 +122,16 @@ Definition get_genesis_configuration : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "genesis_data" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "json" |), "loads" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "json" |), "loads" |),
         make_list [
-          M.get_name (| globals, "genesis_str_data" |)
+          M.get_name (| globals, locals_stack, "genesis_str_data" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "GenesisConfiguration" |),
+        M.get_name (| globals, locals_stack, "GenesisConfiguration" |),
         make_list [],
         make_dict []
       |)
@@ -136,8 +139,9 @@ Definition get_genesis_configuration : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition hex_or_base_10_str_to_u256 : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "balance" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "balance" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     The genesis format can have balances and timestamps as either base 10
     numbers or 0x prefixed hex. This function supports both.
@@ -146,7 +150,7 @@ Definition hex_or_base_10_str_to_u256 : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         M.call (|
-          M.get_field (| M.get_name (| globals, "balance" |), "startswith" |),
+          M.get_field (| M.get_name (| globals, locals_stack, "balance" |), "startswith" |),
           make_list [
             Constant.str "0x"
           ],
@@ -156,9 +160,9 @@ Definition hex_or_base_10_str_to_u256 : Value.t -> Value.t -> M :=
       ltac:(M.monadic (
         let _ := M.return_ (|
           M.call (|
-            M.get_name (| globals, "hex_to_u256" |),
+            M.get_name (| globals, locals_stack, "hex_to_u256" |),
             make_list [
-              M.get_name (| globals, "balance" |)
+              M.get_name (| globals, locals_stack, "balance" |)
             ],
             make_dict []
           |)
@@ -168,12 +172,12 @@ Definition hex_or_base_10_str_to_u256 : Value.t -> Value.t -> M :=
       )), ltac:(M.monadic (
         let _ := M.return_ (|
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               M.call (|
-                M.get_name (| globals, "int" |),
+                M.get_name (| globals, locals_stack, "int" |),
                 make_list [
-                  M.get_name (| globals, "balance" |)
+                  M.get_name (| globals, locals_stack, "balance" |)
                 ],
                 make_dict []
               |)
@@ -186,8 +190,9 @@ Definition hex_or_base_10_str_to_u256 : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition add_genesis_block : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "hardfork"; "chain"; "genesis" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "hardfork"; "chain"; "genesis" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Adds the genesis block to an empty blockchain.
 
@@ -234,9 +239,9 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
     " in
     let _ :=
       M.for_ (|
-        make_tuple [ M.get_name (| globals, "address" |); M.get_name (| globals, "account" |) ],
+        make_tuple [ M.get_name (| globals, locals_stack, "address" |); M.get_name (| globals, locals_stack, "account" |) ],
         M.call (|
-      M.get_field (| M.get_field (| M.get_name (| globals, "genesis" |), "initial_accounts" |), "items" |),
+      M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "genesis" |), "initial_accounts" |), "items" |),
       make_list [],
       make_dict []
     |),
@@ -244,29 +249,29 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
           let _ := M.assign_local (|
             "address" ,
             M.call (|
-              M.get_field (| M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "utils" |), "hexadecimal" |), "hex_to_address" |),
+              M.get_field (| M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "hardfork" |), "utils" |), "hexadecimal" |), "hex_to_address" |),
               make_list [
-                M.get_name (| globals, "address" |)
+                M.get_name (| globals, locals_stack, "address" |)
               ],
               make_dict []
             |)
           |) in
           let _ := M.call (|
-    M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "state" |), "set_account" |),
+    M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "hardfork" |), "state" |), "set_account" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "chain" |), "state" |);
-      M.get_name (| globals, "address" |);
+      M.get_field (| M.get_name (| globals, locals_stack, "chain" |), "state" |);
+      M.get_name (| globals, locals_stack, "address" |);
       M.call (|
-        M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "fork_types" |), "Account" |),
+        M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "hardfork" |), "fork_types" |), "Account" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "Uint" |),
+            M.get_name (| globals, locals_stack, "Uint" |),
             make_list [
               M.call (|
-                M.get_name (| globals, "int" |),
+                M.get_name (| globals, locals_stack, "int" |),
                 make_list [
                   M.call (|
-                    M.get_field (| M.get_name (| globals, "account" |), "get" |),
+                    M.get_field (| M.get_name (| globals, locals_stack, "account" |), "get" |),
                     make_list [
                       Constant.str "nonce";
                       Constant.str "0"
@@ -280,10 +285,10 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
             make_dict []
           |);
           M.call (|
-            M.get_name (| globals, "hex_or_base_10_str_to_u256" |),
+            M.get_name (| globals, locals_stack, "hex_or_base_10_str_to_u256" |),
             make_list [
               M.call (|
-                M.get_field (| M.get_name (| globals, "account" |), "get" |),
+                M.get_field (| M.get_name (| globals, locals_stack, "account" |), "get" |),
                 make_list [
                   Constant.str "balance";
                   Constant.int 0
@@ -294,10 +299,10 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
             make_dict []
           |);
           M.call (|
-            M.get_name (| globals, "hex_to_bytes" |),
+            M.get_name (| globals, locals_stack, "hex_to_bytes" |),
             make_list [
               M.call (|
-                M.get_field (| M.get_name (| globals, "account" |), "get" |),
+                M.get_field (| M.get_name (| globals, locals_stack, "account" |), "get" |),
                 make_list [
                   Constant.str "code";
                   Constant.str "0x"
@@ -315,10 +320,10 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
   |) in
           let _ :=
             M.for_ (|
-              make_tuple [ M.get_name (| globals, "key" |); M.get_name (| globals, "value" |) ],
+              make_tuple [ M.get_name (| globals, locals_stack, "key" |); M.get_name (| globals, locals_stack, "value" |) ],
               M.call (|
       M.get_field (| M.call (|
-        M.get_field (| M.get_name (| globals, "account" |), "get" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "account" |), "get" |),
         make_list [
           Constant.str "storage";
           Constant.str "(* At expr: unsupported node type: Dict *)"
@@ -330,21 +335,21 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
     |),
               ltac:(M.monadic (
                 let _ := M.call (|
-    M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "state" |), "set_storage" |),
+    M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "hardfork" |), "state" |), "set_storage" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "chain" |), "state" |);
-      M.get_name (| globals, "address" |);
+      M.get_field (| M.get_name (| globals, locals_stack, "chain" |), "state" |);
+      M.get_name (| globals, locals_stack, "address" |);
       M.call (|
-        M.get_name (| globals, "hex_to_bytes32" |),
+        M.get_name (| globals, locals_stack, "hex_to_bytes32" |),
         make_list [
-          M.get_name (| globals, "key" |)
+          M.get_name (| globals, locals_stack, "key" |)
         ],
         make_dict []
       |);
       M.call (|
-        M.get_name (| globals, "hex_to_uint" |),
+        M.get_name (| globals, locals_stack, "hex_to_uint" |),
         make_list [
-          M.get_name (| globals, "value" |)
+          M.get_name (| globals, locals_stack, "value" |)
         ],
         make_dict []
       |)
@@ -371,9 +376,9 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         M.call (|
-          M.get_name (| globals, "hasattr" |),
+          M.get_name (| globals, locals_stack, "hasattr" |),
           make_list [
-            M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "blocks" |), "Header" |);
+            M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "hardfork" |), "blocks" |), "Header" |);
             Constant.str "mix_digest"
           ],
           make_dict []
@@ -382,11 +387,11 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
       ltac:(M.monadic (
         let _ := M.assign (|
           M.get_subscript (|
-            M.get_name (| globals, "fields" |),
+            M.get_name (| globals, locals_stack, "fields" |),
             Constant.str "mix_digest"
           |),
           M.call (|
-            M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "fork_types" |), "Hash32" |),
+            M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "hardfork" |), "fork_types" |), "Hash32" |),
             make_list [
               BinOp.mult (|
                 Constant.bytes "00",
@@ -401,11 +406,11 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
       )), ltac:(M.monadic (
         let _ := M.assign (|
           M.get_subscript (|
-            M.get_name (| globals, "fields" |),
+            M.get_name (| globals, locals_stack, "fields" |),
             Constant.str "prev_randao"
           |),
           M.call (|
-            M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "fork_types" |), "Hash32" |),
+            M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "hardfork" |), "fork_types" |), "Hash32" |),
             make_list [
               BinOp.mult (|
                 Constant.bytes "00",
@@ -421,9 +426,9 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         M.call (|
-          M.get_name (| globals, "hasattr" |),
+          M.get_name (| globals, locals_stack, "hasattr" |),
           make_list [
-            M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "blocks" |), "Header" |);
+            M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "hardfork" |), "blocks" |), "Header" |);
             Constant.str "base_fee_per_gas"
           ],
           make_dict []
@@ -432,11 +437,11 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
       ltac:(M.monadic (
         let _ := M.assign (|
           M.get_subscript (|
-            M.get_name (| globals, "fields" |),
+            M.get_name (| globals, locals_stack, "fields" |),
             Constant.str "base_fee_per_gas"
           |),
           M.call (|
-            M.get_name (| globals, "Uint" |),
+            M.get_name (| globals, locals_stack, "Uint" |),
             make_list [
               BinOp.pow (|
                 Constant.int 10,
@@ -454,7 +459,7 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "genesis_header" ,
       M.call (|
-        M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "blocks" |), "Header" |),
+        M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "hardfork" |), "blocks" |), "Header" |),
         make_list [],
         make_dict []
       |)
@@ -462,20 +467,20 @@ Definition add_genesis_block : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "genesis_block" ,
       M.call (|
-        M.get_field (| M.get_field (| M.get_name (| globals, "hardfork" |), "blocks" |), "Block" |),
+        M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "hardfork" |), "blocks" |), "Block" |),
         make_list [],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_field (| M.get_field (| M.get_name (| globals, "chain" |), "blocks" |), "append" |),
+    M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "chain" |), "blocks" |), "append" |),
     make_list [
-      M.get_name (| globals, "genesis_block" |)
+      M.get_name (| globals, locals_stack, "genesis_block" |)
     ],
     make_dict []
   |) in
     let _ := M.assign (|
-      M.get_field (| M.get_name (| globals, "chain" |), "chain_id" |),
-      M.get_field (| M.get_name (| globals, "genesis" |), "chain_id" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "chain" |), "chain_id" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "genesis" |), "chain_id" |)
     |) in
     M.pure Constant.None_)).

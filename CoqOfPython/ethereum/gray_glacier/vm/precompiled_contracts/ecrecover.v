@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.gray_glacier.vm.precompiled_contracts.ecrecover".
+Definition globals : Globals.t := "ethereum.gray_glacier.vm.precompiled_contracts.ecrecover".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -45,8 +47,9 @@ Axiom ethereum_gray_glacier_vm_memory_imports_buffer_read :
   IsImported globals "ethereum.gray_glacier.vm.memory" "buffer_read".
 
 Definition ecrecover : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Decrypts the address using elliptic curve DSA recovery mechanism and writes
     the address to output.
@@ -58,31 +61,31 @@ Definition ecrecover : Value.t -> Value.t -> M :=
     " in
     let _ := M.assign_local (|
       "data" ,
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |)
+      M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "data" |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_ECRECOVER" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_ECRECOVER" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_local (|
       "message_hash_bytes" ,
       M.call (|
-        M.get_name (| globals, "buffer_read" |),
+        M.get_name (| globals, locals_stack, "buffer_read" |),
         make_list [
-          M.get_name (| globals, "data" |);
+          M.get_name (| globals, locals_stack, "data" |);
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               Constant.int 0
             ],
             make_dict []
           |);
           M.call (|
-            M.get_name (| globals, "U256" |),
+            M.get_name (| globals, locals_stack, "U256" |),
             make_list [
               Constant.int 32
             ],
@@ -95,9 +98,9 @@ Definition ecrecover : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "message_hash" ,
       M.call (|
-        M.get_name (| globals, "Hash32" |),
+        M.get_name (| globals, locals_stack, "Hash32" |),
         make_list [
-          M.get_name (| globals, "message_hash_bytes" |)
+          M.get_name (| globals, locals_stack, "message_hash_bytes" |)
         ],
         make_dict []
       |)
@@ -105,21 +108,21 @@ Definition ecrecover : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "v" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "U256" |), "from_be_bytes" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "buffer_read" |),
+            M.get_name (| globals, locals_stack, "buffer_read" |),
             make_list [
-              M.get_name (| globals, "data" |);
+              M.get_name (| globals, locals_stack, "data" |);
               M.call (|
-                M.get_name (| globals, "U256" |),
+                M.get_name (| globals, locals_stack, "U256" |),
                 make_list [
                   Constant.int 32
                 ],
                 make_dict []
               |);
               M.call (|
-                M.get_name (| globals, "U256" |),
+                M.get_name (| globals, locals_stack, "U256" |),
                 make_list [
                   Constant.int 32
                 ],
@@ -135,21 +138,21 @@ Definition ecrecover : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "r" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "U256" |), "from_be_bytes" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "buffer_read" |),
+            M.get_name (| globals, locals_stack, "buffer_read" |),
             make_list [
-              M.get_name (| globals, "data" |);
+              M.get_name (| globals, locals_stack, "data" |);
               M.call (|
-                M.get_name (| globals, "U256" |),
+                M.get_name (| globals, locals_stack, "U256" |),
                 make_list [
                   Constant.int 64
                 ],
                 make_dict []
               |);
               M.call (|
-                M.get_name (| globals, "U256" |),
+                M.get_name (| globals, locals_stack, "U256" |),
                 make_list [
                   Constant.int 32
                 ],
@@ -165,21 +168,21 @@ Definition ecrecover : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "s" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "U256" |), "from_be_bytes" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "buffer_read" |),
+            M.get_name (| globals, locals_stack, "buffer_read" |),
             make_list [
-              M.get_name (| globals, "data" |);
+              M.get_name (| globals, locals_stack, "data" |);
               M.call (|
-                M.get_name (| globals, "U256" |),
+                M.get_name (| globals, locals_stack, "U256" |),
                 make_list [
                   Constant.int 96
                 ],
                 make_dict []
               |);
               M.call (|
-                M.get_name (| globals, "U256" |),
+                M.get_name (| globals, locals_stack, "U256" |),
                 make_list [
                   Constant.int 32
                 ],
@@ -197,12 +200,12 @@ Definition ecrecover : Value.t -> Value.t -> M :=
       M.if_then_else (|
         BoolOp.and (|
           Compare.not_eq (|
-            M.get_name (| globals, "v" |),
+            M.get_name (| globals, locals_stack, "v" |),
             Constant.int 27
           |),
           ltac:(M.monadic (
             Compare.not_eq (|
-              M.get_name (| globals, "v" |),
+              M.get_name (| globals, locals_stack, "v" |),
               Constant.int 28
             |)
           ))
@@ -223,12 +226,12 @@ Definition ecrecover : Value.t -> Value.t -> M :=
         BoolOp.or (|
           Compare.gt_e (|
             Constant.int 0,
-            M.get_name (| globals, "r" |)
+            M.get_name (| globals, locals_stack, "r" |)
           |),
           ltac:(M.monadic (
             Compare.gt_e (|
-              M.get_name (| globals, "r" |),
-              M.get_name (| globals, "SECP256K1N" |)
+              M.get_name (| globals, locals_stack, "r" |),
+              M.get_name (| globals, locals_stack, "SECP256K1N" |)
             |)
           ))
         |),
@@ -248,12 +251,12 @@ Definition ecrecover : Value.t -> Value.t -> M :=
         BoolOp.or (|
           Compare.gt_e (|
             Constant.int 0,
-            M.get_name (| globals, "s" |)
+            M.get_name (| globals, locals_stack, "s" |)
           |),
           ltac:(M.monadic (
             Compare.gt_e (|
-              M.get_name (| globals, "s" |),
-              M.get_name (| globals, "SECP256K1N" |)
+              M.get_name (| globals, locals_stack, "s" |),
+              M.get_name (| globals, locals_stack, "SECP256K1N" |)
             |)
           ))
         |),
@@ -272,9 +275,9 @@ Definition ecrecover : Value.t -> Value.t -> M :=
       "address" ,
       M.slice (|
         M.call (|
-          M.get_name (| globals, "keccak256" |),
+          M.get_name (| globals, locals_stack, "keccak256" |),
           make_list [
-            M.get_name (| globals, "public_key" |)
+            M.get_name (| globals, locals_stack, "public_key" |)
           ],
           make_dict []
         |),
@@ -286,16 +289,16 @@ Definition ecrecover : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "padded_address" ,
       M.call (|
-        M.get_name (| globals, "left_pad_zero_bytes" |),
+        M.get_name (| globals, locals_stack, "left_pad_zero_bytes" |),
         make_list [
-          M.get_name (| globals, "address" |);
+          M.get_name (| globals, locals_stack, "address" |);
           Constant.int 32
         ],
         make_dict []
       |)
     |) in
     let _ := M.assign (|
-      M.get_field (| M.get_name (| globals, "evm" |), "output" |),
-      M.get_name (| globals, "padded_address" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "output" |),
+      M.get_name (| globals, locals_stack, "padded_address" |)
     |) in
     M.pure Constant.None_)).

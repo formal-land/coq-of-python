@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.trace".
+Definition globals : Globals.t := "ethereum.trace".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -121,14 +123,15 @@ Definition GasAndRefund : Value.t :=
 
 Definition TraceEvent : Value.t := M.run ltac:(M.monadic (
   M.get_subscript (|
-    M.get_name (| globals, "Union" |),
-    make_tuple [ M.get_name (| globals, "TransactionStart" |); M.get_name (| globals, "TransactionEnd" |); M.get_name (| globals, "PrecompileStart" |); M.get_name (| globals, "PrecompileEnd" |); M.get_name (| globals, "OpStart" |); M.get_name (| globals, "OpEnd" |); M.get_name (| globals, "OpException" |); M.get_name (| globals, "EvmStop" |); M.get_name (| globals, "GasAndRefund" |) ]
+    M.get_name (| globals, locals_stack, "Union" |),
+    make_tuple [ M.get_name (| globals, locals_stack, "TransactionStart" |); M.get_name (| globals, locals_stack, "TransactionEnd" |); M.get_name (| globals, locals_stack, "PrecompileStart" |); M.get_name (| globals, locals_stack, "PrecompileEnd" |); M.get_name (| globals, locals_stack, "OpStart" |); M.get_name (| globals, locals_stack, "OpEnd" |); M.get_name (| globals, locals_stack, "OpException" |); M.get_name (| globals, locals_stack, "EvmStop" |); M.get_name (| globals, locals_stack, "GasAndRefund" |) ]
   |)
 )).
 
 Definition evm_trace : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm"; "event"; "trace_memory"; "trace_stack"; "trace_return_data" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm"; "event"; "trace_memory"; "trace_stack"; "trace_return_data" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Create a trace of the event.
     " in

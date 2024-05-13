@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.spurious_dragon.vm.instructions.memory".
+Definition globals : Globals.t := "ethereum.spurious_dragon.vm.instructions.memory".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -45,8 +47,9 @@ Axiom ethereum_spurious_dragon_vm_stack_imports_push :
   IsImported globals "ethereum.spurious_dragon.vm.stack" "push".
 
 Definition mstore : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Stores a word to memory.
     This also expands the memory, if the memory is
@@ -61,9 +64,9 @@ Definition mstore : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "start_position" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
@@ -72,9 +75,9 @@ Definition mstore : Value.t -> Value.t -> M :=
       "value" ,
       M.call (|
         M.get_field (| M.call (|
-          M.get_name (| globals, "pop" |),
+          M.get_name (| globals, locals_stack, "pop" |),
           make_list [
-            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
           ],
           make_dict []
         |), "to_be_bytes32" |),
@@ -85,17 +88,17 @@ Definition mstore : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "extend_memory" ,
       M.call (|
-        M.get_name (| globals, "calculate_gas_extend_memory" |),
+        M.get_name (| globals, locals_stack, "calculate_gas_extend_memory" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "memory" |);
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "memory" |);
           make_list [
-            make_tuple [ M.get_name (| globals, "start_position" |); M.call (|
-              M.get_name (| globals, "U256" |),
+            make_tuple [ M.get_name (| globals, locals_stack, "start_position" |); M.call (|
+              M.get_name (| globals, locals_stack, "U256" |),
               make_list [
                 M.call (|
-                  M.get_name (| globals, "len" |),
+                  M.get_name (| globals, locals_stack, "len" |),
                   make_list [
-                    M.get_name (| globals, "value" |)
+                    M.get_name (| globals, locals_stack, "value" |)
                   ],
                   make_dict []
                 |)
@@ -108,43 +111,44 @@ Definition mstore : Value.t -> Value.t -> M :=
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, locals_stack, "evm" |);
       BinOp.add (|
-        M.get_name (| globals, "GAS_VERY_LOW" |),
-        M.get_field (| M.get_name (| globals, "extend_memory" |), "cost" |)
+        M.get_name (| globals, locals_stack, "GAS_VERY_LOW" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "extend_memory" |), "cost" |)
       |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "memory" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "memory" |),
       BinOp.mult (|
     Constant.bytes "00",
-    M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
+    M.get_field (| M.get_name (| globals, locals_stack, "extend_memory" |), "expand_by" |)
   |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "memory_write" |),
+    M.get_name (| globals, locals_stack, "memory_write" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "memory" |);
-      M.get_name (| globals, "start_position" |);
-      M.get_name (| globals, "value" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "memory" |);
+      M.get_name (| globals, locals_stack, "start_position" |);
+      M.get_name (| globals, locals_stack, "value" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition mstore8 : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Stores a byte to memory.
     This also expands the memory, if the memory is
@@ -159,9 +163,9 @@ Definition mstore8 : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "start_position" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
@@ -169,9 +173,9 @@ Definition mstore8 : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "value" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
@@ -179,12 +183,12 @@ Definition mstore8 : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "extend_memory" ,
       M.call (|
-        M.get_name (| globals, "calculate_gas_extend_memory" |),
+        M.get_name (| globals, locals_stack, "calculate_gas_extend_memory" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "memory" |);
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "memory" |);
           make_list [
-            make_tuple [ M.get_name (| globals, "start_position" |); M.call (|
-              M.get_name (| globals, "U256" |),
+            make_tuple [ M.get_name (| globals, locals_stack, "start_position" |); M.call (|
+              M.get_name (| globals, locals_stack, "U256" |),
               make_list [
                 Constant.int 1
               ],
@@ -196,32 +200,32 @@ Definition mstore8 : Value.t -> Value.t -> M :=
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, locals_stack, "evm" |);
       BinOp.add (|
-        M.get_name (| globals, "GAS_VERY_LOW" |),
-        M.get_field (| M.get_name (| globals, "extend_memory" |), "cost" |)
+        M.get_name (| globals, locals_stack, "GAS_VERY_LOW" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "extend_memory" |), "cost" |)
       |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "memory" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "memory" |),
       BinOp.mult (|
     Constant.bytes "00",
-    M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
+    M.get_field (| M.get_name (| globals, locals_stack, "extend_memory" |), "expand_by" |)
   |)
     |) in
     let _ := M.assign_local (|
       "normalized_bytes_value" ,
       M.call (|
-        M.get_name (| globals, "Bytes" |),
+        M.get_name (| globals, locals_stack, "Bytes" |),
         make_list [
           make_list [
             BinOp.bit_and (|
-              M.get_name (| globals, "value" |),
+              M.get_name (| globals, locals_stack, "value" |),
               Constant.int 255
             |)
           ]
@@ -230,24 +234,25 @@ Definition mstore8 : Value.t -> Value.t -> M :=
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "memory_write" |),
+    M.get_name (| globals, locals_stack, "memory_write" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "memory" |);
-      M.get_name (| globals, "start_position" |);
-      M.get_name (| globals, "normalized_bytes_value" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "memory" |);
+      M.get_name (| globals, locals_stack, "start_position" |);
+      M.get_name (| globals, locals_stack, "normalized_bytes_value" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition mload : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Load word from memory.
 
@@ -260,9 +265,9 @@ Definition mload : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "start_position" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
@@ -270,12 +275,12 @@ Definition mload : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "extend_memory" ,
       M.call (|
-        M.get_name (| globals, "calculate_gas_extend_memory" |),
+        M.get_name (| globals, locals_stack, "calculate_gas_extend_memory" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "memory" |);
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "memory" |);
           make_list [
-            make_tuple [ M.get_name (| globals, "start_position" |); M.call (|
-              M.get_name (| globals, "U256" |),
+            make_tuple [ M.get_name (| globals, locals_stack, "start_position" |); M.call (|
+              M.get_name (| globals, locals_stack, "U256" |),
               make_list [
                 Constant.int 32
               ],
@@ -287,36 +292,36 @@ Definition mload : Value.t -> Value.t -> M :=
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, locals_stack, "evm" |);
       BinOp.add (|
-        M.get_name (| globals, "GAS_VERY_LOW" |),
-        M.get_field (| M.get_name (| globals, "extend_memory" |), "cost" |)
+        M.get_name (| globals, locals_stack, "GAS_VERY_LOW" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "extend_memory" |), "cost" |)
       |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "memory" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "memory" |),
       BinOp.mult (|
     Constant.bytes "00",
-    M.get_field (| M.get_name (| globals, "extend_memory" |), "expand_by" |)
+    M.get_field (| M.get_name (| globals, locals_stack, "extend_memory" |), "expand_by" |)
   |)
     |) in
     let _ := M.assign_local (|
       "value" ,
       M.call (|
-        M.get_field (| M.get_name (| globals, "U256" |), "from_be_bytes" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "U256" |), "from_be_bytes" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "memory_read_bytes" |),
+            M.get_name (| globals, locals_stack, "memory_read_bytes" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "evm" |), "memory" |);
-              M.get_name (| globals, "start_position" |);
+              M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "memory" |);
+              M.get_name (| globals, locals_stack, "start_position" |);
               M.call (|
-                M.get_name (| globals, "U256" |),
+                M.get_name (| globals, locals_stack, "U256" |),
                 make_list [
                   Constant.int 32
                 ],
@@ -330,23 +335,24 @@ Definition mload : Value.t -> Value.t -> M :=
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.get_name (| globals, "value" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
+      M.get_name (| globals, locals_stack, "value" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition msize : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Push the size of active memory in bytes onto the stack.
 
@@ -358,24 +364,24 @@ Definition msize : Value.t -> Value.t -> M :=
     " in
     let _ := M.pass (| |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_BASE" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_BASE" |)
     ],
     make_dict []
   |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
       M.call (|
-        M.get_name (| globals, "U256" |),
+        M.get_name (| globals, locals_stack, "U256" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "len" |),
+            M.get_name (| globals, locals_stack, "len" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "evm" |), "memory" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "memory" |)
             ],
             make_dict []
           |)
@@ -387,7 +393,7 @@ Definition msize : Value.t -> Value.t -> M :=
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).

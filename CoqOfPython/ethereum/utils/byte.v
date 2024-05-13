@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.utils.byte".
+Definition globals : Globals.t := "ethereum.utils.byte".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -21,8 +23,9 @@ Axiom ethereum_base_types_imports_Bytes :
   IsImported globals "ethereum.base_types" "Bytes".
 
 Definition left_pad_zero_bytes : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "value"; "size" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "value"; "size" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Left pad zeroes to `value` if it's length is less than the given `size`.
 
@@ -40,9 +43,9 @@ Definition left_pad_zero_bytes : Value.t -> Value.t -> M :=
     " in
     let _ := M.return_ (|
       M.call (|
-        M.get_field (| M.get_name (| globals, "value" |), "rjust" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "value" |), "rjust" |),
         make_list [
-          M.get_name (| globals, "size" |);
+          M.get_name (| globals, locals_stack, "size" |);
           Constant.bytes "00"
         ],
         make_dict []
@@ -51,8 +54,9 @@ Definition left_pad_zero_bytes : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition right_pad_zero_bytes : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "value"; "size" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "value"; "size" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Right pad zeroes to `value` if it's length is less than the given `size`.
 
@@ -70,9 +74,9 @@ Definition right_pad_zero_bytes : Value.t -> Value.t -> M :=
     " in
     let _ := M.return_ (|
       M.call (|
-        M.get_field (| M.get_name (| globals, "value" |), "ljust" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "value" |), "ljust" |),
         make_list [
-          M.get_name (| globals, "size" |);
+          M.get_name (| globals, locals_stack, "size" |);
           Constant.bytes "00"
         ],
         make_dict []

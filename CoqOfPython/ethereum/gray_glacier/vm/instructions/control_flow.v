@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.gray_glacier.vm.instructions.control_flow".
+Definition globals : Globals.t := "ethereum.gray_glacier.vm.instructions.control_flow".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -45,8 +47,9 @@ Axiom ethereum_gray_glacier_vm_stack_imports_push :
   IsImported globals "ethereum.gray_glacier.vm.stack" "push".
 
 Definition stop : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Stop further execution of EVM code.
 
@@ -58,19 +61,20 @@ Definition stop : Value.t -> Value.t -> M :=
     let _ := M.pass (| |) in
     let _ := M.pass (| |) in
     let _ := M.assign (|
-      M.get_field (| M.get_name (| globals, "evm" |), "running" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "running" |),
       Constant.bool false
     |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition jump : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Alter the program counter to the location specified by the top of the
     stack.
@@ -84,12 +88,12 @@ Definition jump : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "jump_dest" ,
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "pop" |),
+            M.get_name (| globals, locals_stack, "pop" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
             ],
             make_dict []
           |)
@@ -98,10 +102,10 @@ Definition jump : Value.t -> Value.t -> M :=
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_MID" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_MID" |)
     ],
     make_dict []
   |) in
@@ -109,23 +113,23 @@ Definition jump : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.not_in (|
-          M.get_name (| globals, "jump_dest" |),
-          M.get_field (| M.get_name (| globals, "evm" |), "valid_jump_destinations" |)
+          M.get_name (| globals, locals_stack, "jump_dest" |),
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "valid_jump_destinations" |)
         |),
       (* then *)
       ltac:(M.monadic (
-        let _ := M.raise (| Some (M.get_name (| globals, "InvalidJumpDestError" |)) |) in
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "InvalidJumpDestError" |)) |) in
         M.pure Constant.None_
       (* else *)
       )), ltac:(M.monadic (
         M.pure Constant.None_
       )) |) in
     let _ := M.assign (|
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
-          M.get_name (| globals, "jump_dest" |)
+          M.get_name (| globals, locals_stack, "jump_dest" |)
         ],
         make_dict []
       |)
@@ -133,8 +137,9 @@ Definition jump : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition jumpi : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Alter the program counter to the specified location if and only if a
     condition is true. If the condition is not true, then the program counter
@@ -149,12 +154,12 @@ Definition jumpi : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "jump_dest" ,
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
           M.call (|
-            M.get_name (| globals, "pop" |),
+            M.get_name (| globals, locals_stack, "pop" |),
             make_list [
-              M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
             ],
             make_dict []
           |)
@@ -165,18 +170,18 @@ Definition jumpi : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "conditional_value" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_HIGH" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_HIGH" |)
     ],
     make_dict []
   |) in
@@ -184,7 +189,7 @@ Definition jumpi : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.eq (|
-          M.get_name (| globals, "conditional_value" |),
+          M.get_name (| globals, locals_stack, "conditional_value" |),
           Constant.int 0
         |),
       (* then *)
@@ -192,7 +197,7 @@ Definition jumpi : Value.t -> Value.t -> M :=
         let _ := M.assign_local (|
           "destination" ,
           BinOp.add (|
-            M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+            M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
             Constant.int 1
           |)
         |) in
@@ -203,29 +208,29 @@ Definition jumpi : Value.t -> Value.t -> M :=
           (* if *)
           M.if_then_else (|
             Compare.not_in (|
-              M.get_name (| globals, "jump_dest" |),
-              M.get_field (| M.get_name (| globals, "evm" |), "valid_jump_destinations" |)
+              M.get_name (| globals, locals_stack, "jump_dest" |),
+              M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "valid_jump_destinations" |)
             |),
           (* then *)
           ltac:(M.monadic (
-            let _ := M.raise (| Some (M.get_name (| globals, "InvalidJumpDestError" |)) |) in
+            let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "InvalidJumpDestError" |)) |) in
             M.pure Constant.None_
           (* else *)
           )), ltac:(M.monadic (
             let _ := M.assign_local (|
               "destination" ,
-              M.get_name (| globals, "jump_dest" |)
+              M.get_name (| globals, locals_stack, "jump_dest" |)
             |) in
             M.pure Constant.None_
           )) |) in
         M.pure Constant.None_
       )) |) in
     let _ := M.assign (|
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
-          M.get_name (| globals, "destination" |)
+          M.get_name (| globals, locals_stack, "destination" |)
         ],
         make_dict []
       |)
@@ -233,8 +238,9 @@ Definition jumpi : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition pc : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Push onto the stack the value of the program counter after reaching the
     current instruction and without increasing it for the next instruction.
@@ -247,21 +253,21 @@ Definition pc : Value.t -> Value.t -> M :=
     " in
     let _ := M.pass (| |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_BASE" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_BASE" |)
     ],
     make_dict []
   |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
       M.call (|
-        M.get_name (| globals, "U256" |),
+        M.get_name (| globals, locals_stack, "U256" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "pc" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |)
         ],
         make_dict []
       |)
@@ -270,14 +276,15 @@ Definition pc : Value.t -> Value.t -> M :=
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition gas_left : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Push the amount of available gas (including the corresponding reduction
     for the cost of this instruction) onto the stack.
@@ -290,21 +297,21 @@ Definition gas_left : Value.t -> Value.t -> M :=
     " in
     let _ := M.pass (| |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_BASE" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_BASE" |)
     ],
     make_dict []
   |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
       M.call (|
-        M.get_name (| globals, "U256" |),
+        M.get_name (| globals, locals_stack, "U256" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "gas_left" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "gas_left" |)
         ],
         make_dict []
       |)
@@ -313,14 +320,15 @@ Definition gas_left : Value.t -> Value.t -> M :=
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition jumpdest : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Mark a valid destination for jumps. This is a noop, present only
     to be used by `JUMP` and `JUMPI` opcodes to verify that their jump is
@@ -334,17 +342,17 @@ Definition jumpdest : Value.t -> Value.t -> M :=
     " in
     let _ := M.pass (| |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_JUMPDEST" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_JUMPDEST" |)
     ],
     make_dict []
   |) in
     let _ := M.pass (| |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).

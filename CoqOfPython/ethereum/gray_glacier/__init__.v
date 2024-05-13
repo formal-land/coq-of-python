@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.gray_glacier.__init__".
+Definition globals : Globals.t := "ethereum.gray_glacier.__init__".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -13,7 +15,7 @@ Axiom ethereum_fork_criteria_imports_ByBlockNumber :
 
 Definition FORK_CRITERIA : Value.t := M.run ltac:(M.monadic (
   M.call (|
-    M.get_name (| globals, "ByBlockNumber" |),
+    M.get_name (| globals, locals_stack, "ByBlockNumber" |),
     make_list [
       Constant.int 15050000
     ],

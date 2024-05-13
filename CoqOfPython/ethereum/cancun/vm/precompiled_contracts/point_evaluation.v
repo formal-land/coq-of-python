@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.cancun.vm.precompiled_contracts.point_evaluation".
+Definition globals : Globals.t := "ethereum.cancun.vm.precompiled_contracts.point_evaluation".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -56,8 +58,9 @@ Definition VERSIONED_HASH_VERSION_KZG : Value.t := M.run ltac:(M.monadic (
 )).
 
 Definition point_evaluation : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     A pre-compile that verifies a KZG proof which claims that a blob
     (represented by a commitment) evaluates to a given value at a given point.
@@ -70,29 +73,29 @@ Definition point_evaluation : Value.t -> Value.t -> M :=
     " in
     let _ := M.assign_local (|
       "data" ,
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |)
+      M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "data" |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "ensure" |),
+    M.get_name (| globals, locals_stack, "ensure" |),
     make_list [
       Compare.eq (|
         M.call (|
-          M.get_name (| globals, "len" |),
+          M.get_name (| globals, locals_stack, "len" |),
           make_list [
-            M.get_name (| globals, "data" |)
+            M.get_name (| globals, locals_stack, "data" |)
           ],
           make_dict []
         |),
         Constant.int 192
       |);
-      M.get_name (| globals, "KZGProofError" |)
+      M.get_name (| globals, locals_stack, "KZGProofError" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_local (|
       "versioned_hash" ,
       M.slice (|
-        M.get_name (| globals, "data" |),
+        M.get_name (| globals, locals_stack, "data" |),
         Constant.None_,
         Constant.int 32,
         Constant.None_
@@ -101,7 +104,7 @@ Definition point_evaluation : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "z" ,
       M.slice (|
-        M.get_name (| globals, "data" |),
+        M.get_name (| globals, locals_stack, "data" |),
         Constant.int 32,
         Constant.int 64,
         Constant.None_
@@ -110,7 +113,7 @@ Definition point_evaluation : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "y" ,
       M.slice (|
-        M.get_name (| globals, "data" |),
+        M.get_name (| globals, locals_stack, "data" |),
         Constant.int 64,
         Constant.int 96,
         Constant.None_
@@ -119,10 +122,10 @@ Definition point_evaluation : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "commitment" ,
       M.call (|
-        M.get_name (| globals, "KZGCommitment" |),
+        M.get_name (| globals, locals_stack, "KZGCommitment" |),
         make_list [
           M.slice (|
-            M.get_name (| globals, "data" |),
+            M.get_name (| globals, locals_stack, "data" |),
             Constant.int 96,
             Constant.int 144,
             Constant.None_
@@ -134,57 +137,57 @@ Definition point_evaluation : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "proof" ,
       M.slice (|
-        M.get_name (| globals, "data" |),
+        M.get_name (| globals, locals_stack, "data" |),
         Constant.int 144,
         Constant.int 192,
         Constant.None_
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_POINT_EVALUATION" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_POINT_EVALUATION" |)
     ],
     make_dict []
   |) in
     let _ := M.call (|
-    M.get_name (| globals, "ensure" |),
+    M.get_name (| globals, locals_stack, "ensure" |),
     make_list [
       Compare.eq (|
         M.call (|
-          M.get_name (| globals, "kzg_commitment_to_versioned_hash" |),
+          M.get_name (| globals, locals_stack, "kzg_commitment_to_versioned_hash" |),
           make_list [
-            M.get_name (| globals, "commitment" |)
+            M.get_name (| globals, locals_stack, "commitment" |)
           ],
           make_dict []
         |),
-        M.get_name (| globals, "versioned_hash" |)
+        M.get_name (| globals, locals_stack, "versioned_hash" |)
       |);
-      M.get_name (| globals, "KZGProofError" |)
+      M.get_name (| globals, locals_stack, "KZGProofError" |)
     ],
     make_dict []
   |) in
 (* At stmt: unsupported node type: Try *)
     let _ := M.call (|
-    M.get_name (| globals, "ensure" |),
+    M.get_name (| globals, locals_stack, "ensure" |),
     make_list [
-      M.get_name (| globals, "kzg_proof_verification" |);
-      M.get_name (| globals, "KZGProofError" |)
+      M.get_name (| globals, locals_stack, "kzg_proof_verification" |);
+      M.get_name (| globals, locals_stack, "KZGProofError" |)
     ],
     make_dict []
   |) in
     let _ := M.assign (|
-      M.get_field (| M.get_name (| globals, "evm" |), "output" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "output" |),
       M.call (|
-        M.get_name (| globals, "Bytes" |),
+        M.get_name (| globals, locals_stack, "Bytes" |),
         make_list [
           BinOp.add (|
             M.call (|
               M.get_field (| M.call (|
-                M.get_name (| globals, "U256" |),
+                M.get_name (| globals, locals_stack, "U256" |),
                 make_list [
-                  M.get_name (| globals, "FIELD_ELEMENTS_PER_BLOB" |)
+                  M.get_name (| globals, locals_stack, "FIELD_ELEMENTS_PER_BLOB" |)
                 ],
                 make_dict []
               |), "to_be_bytes32" |),
@@ -193,9 +196,9 @@ Definition point_evaluation : Value.t -> Value.t -> M :=
             |),
             M.call (|
               M.get_field (| M.call (|
-                M.get_name (| globals, "U256" |),
+                M.get_name (| globals, locals_stack, "U256" |),
                 make_list [
-                  M.get_name (| globals, "BLS_MODULUS" |)
+                  M.get_name (| globals, locals_stack, "BLS_MODULUS" |)
                 ],
                 make_dict []
               |), "to_be_bytes32" |),

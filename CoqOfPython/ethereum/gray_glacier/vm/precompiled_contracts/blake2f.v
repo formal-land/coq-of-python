@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.gray_glacier.vm.precompiled_contracts.blake2f".
+Definition globals : Globals.t := "ethereum.gray_glacier.vm.precompiled_contracts.blake2f".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -35,8 +37,9 @@ Axiom ethereum_gray_glacier_vm_exceptions_imports_InvalidParameter :
   IsImported globals "ethereum.gray_glacier.vm.exceptions" "InvalidParameter".
 
 Definition blake2f : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Writes the Blake2 hash to output.
 
@@ -47,79 +50,79 @@ Definition blake2f : Value.t -> Value.t -> M :=
     " in
     let _ := M.assign_local (|
       "data" ,
-      M.get_field (| M.get_field (| M.get_name (| globals, "evm" |), "message" |), "data" |)
+      M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "data" |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "ensure" |),
+    M.get_name (| globals, locals_stack, "ensure" |),
     make_list [
       Compare.eq (|
         M.call (|
-          M.get_name (| globals, "len" |),
+          M.get_name (| globals, locals_stack, "len" |),
           make_list [
-            M.get_name (| globals, "data" |)
+            M.get_name (| globals, locals_stack, "data" |)
           ],
           make_dict []
         |),
         Constant.int 213
       |);
-      M.get_name (| globals, "InvalidParameter" |)
+      M.get_name (| globals, locals_stack, "InvalidParameter" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_local (|
       "blake2b" ,
       M.call (|
-        M.get_name (| globals, "Blake2b" |),
+        M.get_name (| globals, locals_stack, "Blake2b" |),
         make_list [],
         make_dict []
       |)
     |) in
     let _ := M.assign (|
-      make_tuple [ M.get_name (| globals, "rounds" |); M.get_name (| globals, "h" |); M.get_name (| globals, "m" |); M.get_name (| globals, "t_0" |); M.get_name (| globals, "t_1" |); M.get_name (| globals, "f" |) ],
+      make_tuple [ M.get_name (| globals, locals_stack, "rounds" |); M.get_name (| globals, locals_stack, "h" |); M.get_name (| globals, locals_stack, "m" |); M.get_name (| globals, locals_stack, "t_0" |); M.get_name (| globals, locals_stack, "t_1" |); M.get_name (| globals, locals_stack, "f" |) ],
       M.call (|
-        M.get_field (| M.get_name (| globals, "blake2b" |), "get_blake2_parameters" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "blake2b" |), "get_blake2_parameters" |),
         make_list [
-          M.get_name (| globals, "data" |)
+          M.get_name (| globals, locals_stack, "data" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
+      M.get_name (| globals, locals_stack, "evm" |);
       BinOp.mult (|
-        M.get_name (| globals, "GAS_BLAKE2_PER_ROUND" |),
-        M.get_name (| globals, "rounds" |)
+        M.get_name (| globals, locals_stack, "GAS_BLAKE2_PER_ROUND" |),
+        M.get_name (| globals, locals_stack, "rounds" |)
       |)
     ],
     make_dict []
   |) in
     let _ := M.call (|
-    M.get_name (| globals, "ensure" |),
+    M.get_name (| globals, locals_stack, "ensure" |),
     make_list [
       Compare.in_ (|
-        M.get_name (| globals, "f" |),
+        M.get_name (| globals, locals_stack, "f" |),
         make_list [
           Constant.int 0;
           Constant.int 1
         ]
       |);
-      M.get_name (| globals, "InvalidParameter" |)
+      M.get_name (| globals, locals_stack, "InvalidParameter" |)
     ],
     make_dict []
   |) in
     let _ := M.assign (|
-      M.get_field (| M.get_name (| globals, "evm" |), "output" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "output" |),
       M.call (|
-        M.get_field (| M.get_name (| globals, "blake2b" |), "compress" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "blake2b" |), "compress" |),
         make_list [
-          M.get_name (| globals, "rounds" |);
-          M.get_name (| globals, "h" |);
-          M.get_name (| globals, "m" |);
-          M.get_name (| globals, "t_0" |);
-          M.get_name (| globals, "t_1" |);
-          M.get_name (| globals, "f" |)
+          M.get_name (| globals, locals_stack, "rounds" |);
+          M.get_name (| globals, locals_stack, "h" |);
+          M.get_name (| globals, locals_stack, "m" |);
+          M.get_name (| globals, locals_stack, "t_0" |);
+          M.get_name (| globals, locals_stack, "t_1" |);
+          M.get_name (| globals, locals_stack, "f" |)
         ],
         make_dict []
       |)

@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.cancun.vm.instructions.comparison".
+Definition globals : Globals.t := "ethereum.cancun.vm.instructions.comparison".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -34,8 +36,9 @@ Axiom ethereum_cancun_vm_stack_imports_push :
   IsImported globals "ethereum.cancun.vm.stack" "push".
 
 Definition less_than : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Checks if the top element is less than the next top element. Pushes the
     result back on the stack.
@@ -49,9 +52,9 @@ Definition less_than : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "left" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
@@ -59,52 +62,53 @@ Definition less_than : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "right" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_VERY_LOW" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_VERY_LOW" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_local (|
       "result" ,
       M.call (|
-        M.get_name (| globals, "U256" |),
+        M.get_name (| globals, locals_stack, "U256" |),
         make_list [
           Compare.lt (|
-            M.get_name (| globals, "left" |),
-            M.get_name (| globals, "right" |)
+            M.get_name (| globals, locals_stack, "left" |),
+            M.get_name (| globals, locals_stack, "right" |)
           |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.get_name (| globals, "result" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
+      M.get_name (| globals, locals_stack, "result" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition signed_less_than : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Signed less-than comparison.
 
@@ -118,9 +122,9 @@ Definition signed_less_than : Value.t -> Value.t -> M :=
       "left" ,
       M.call (|
         M.get_field (| M.call (|
-          M.get_name (| globals, "pop" |),
+          M.get_name (| globals, locals_stack, "pop" |),
           make_list [
-            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
           ],
           make_dict []
         |), "to_signed" |),
@@ -132,9 +136,9 @@ Definition signed_less_than : Value.t -> Value.t -> M :=
       "right" ,
       M.call (|
         M.get_field (| M.call (|
-          M.get_name (| globals, "pop" |),
+          M.get_name (| globals, locals_stack, "pop" |),
           make_list [
-            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
           ],
           make_dict []
         |), "to_signed" |),
@@ -143,44 +147,45 @@ Definition signed_less_than : Value.t -> Value.t -> M :=
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_VERY_LOW" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_VERY_LOW" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_local (|
       "result" ,
       M.call (|
-        M.get_name (| globals, "U256" |),
+        M.get_name (| globals, locals_stack, "U256" |),
         make_list [
           Compare.lt (|
-            M.get_name (| globals, "left" |),
-            M.get_name (| globals, "right" |)
+            M.get_name (| globals, locals_stack, "left" |),
+            M.get_name (| globals, locals_stack, "right" |)
           |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.get_name (| globals, "result" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
+      M.get_name (| globals, locals_stack, "result" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition greater_than : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Checks if the top element is greater than the next top element. Pushes
     the result back on the stack.
@@ -194,9 +199,9 @@ Definition greater_than : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "left" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
@@ -204,52 +209,53 @@ Definition greater_than : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "right" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_VERY_LOW" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_VERY_LOW" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_local (|
       "result" ,
       M.call (|
-        M.get_name (| globals, "U256" |),
+        M.get_name (| globals, locals_stack, "U256" |),
         make_list [
           Compare.gt (|
-            M.get_name (| globals, "left" |),
-            M.get_name (| globals, "right" |)
+            M.get_name (| globals, locals_stack, "left" |),
+            M.get_name (| globals, locals_stack, "right" |)
           |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.get_name (| globals, "result" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
+      M.get_name (| globals, locals_stack, "result" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition signed_greater_than : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Signed greater-than comparison.
 
@@ -263,9 +269,9 @@ Definition signed_greater_than : Value.t -> Value.t -> M :=
       "left" ,
       M.call (|
         M.get_field (| M.call (|
-          M.get_name (| globals, "pop" |),
+          M.get_name (| globals, locals_stack, "pop" |),
           make_list [
-            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
           ],
           make_dict []
         |), "to_signed" |),
@@ -277,9 +283,9 @@ Definition signed_greater_than : Value.t -> Value.t -> M :=
       "right" ,
       M.call (|
         M.get_field (| M.call (|
-          M.get_name (| globals, "pop" |),
+          M.get_name (| globals, locals_stack, "pop" |),
           make_list [
-            M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+            M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
           ],
           make_dict []
         |), "to_signed" |),
@@ -288,44 +294,45 @@ Definition signed_greater_than : Value.t -> Value.t -> M :=
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_VERY_LOW" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_VERY_LOW" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_local (|
       "result" ,
       M.call (|
-        M.get_name (| globals, "U256" |),
+        M.get_name (| globals, locals_stack, "U256" |),
         make_list [
           Compare.gt (|
-            M.get_name (| globals, "left" |),
-            M.get_name (| globals, "right" |)
+            M.get_name (| globals, locals_stack, "left" |),
+            M.get_name (| globals, locals_stack, "right" |)
           |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.get_name (| globals, "result" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
+      M.get_name (| globals, locals_stack, "result" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition equal : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Checks if the top element is equal to the next top element. Pushes
     the result back on the stack.
@@ -339,9 +346,9 @@ Definition equal : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "left" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
@@ -349,52 +356,53 @@ Definition equal : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "right" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_VERY_LOW" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_VERY_LOW" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_local (|
       "result" ,
       M.call (|
-        M.get_name (| globals, "U256" |),
+        M.get_name (| globals, locals_stack, "U256" |),
         make_list [
           Compare.eq (|
-            M.get_name (| globals, "left" |),
-            M.get_name (| globals, "right" |)
+            M.get_name (| globals, locals_stack, "left" |),
+            M.get_name (| globals, locals_stack, "right" |)
           |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.get_name (| globals, "result" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
+      M.get_name (| globals, locals_stack, "result" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).
 
 Definition is_zero : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "evm" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Checks if the top element is equal to 0. Pushes the result back on the
     stack.
@@ -408,28 +416,28 @@ Definition is_zero : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "x" ,
       M.call (|
-        M.get_name (| globals, "pop" |),
+        M.get_name (| globals, locals_stack, "pop" |),
         make_list [
-          M.get_field (| M.get_name (| globals, "evm" |), "stack" |)
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "charge_gas" |),
+    M.get_name (| globals, locals_stack, "charge_gas" |),
     make_list [
-      M.get_name (| globals, "evm" |);
-      M.get_name (| globals, "GAS_VERY_LOW" |)
+      M.get_name (| globals, locals_stack, "evm" |);
+      M.get_name (| globals, locals_stack, "GAS_VERY_LOW" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_local (|
       "result" ,
       M.call (|
-        M.get_name (| globals, "U256" |),
+        M.get_name (| globals, locals_stack, "U256" |),
         make_list [
           Compare.eq (|
-            M.get_name (| globals, "x" |),
+            M.get_name (| globals, locals_stack, "x" |),
             Constant.int 0
           |)
         ],
@@ -437,16 +445,16 @@ Definition is_zero : Value.t -> Value.t -> M :=
       |)
     |) in
     let _ := M.call (|
-    M.get_name (| globals, "push" |),
+    M.get_name (| globals, locals_stack, "push" |),
     make_list [
-      M.get_field (| M.get_name (| globals, "evm" |), "stack" |);
-      M.get_name (| globals, "result" |)
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |);
+      M.get_name (| globals, locals_stack, "result" |)
     ],
     make_dict []
   |) in
     let _ := M.assign_op (|
       BinOp.add,
-      M.get_field (| M.get_name (| globals, "evm" |), "pc" |),
+      M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "pc" |),
       Constant.int 1
     |) in
     M.pure Constant.None_)).

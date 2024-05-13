@@ -1,6 +1,8 @@
 Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "ethereum.utils.numeric".
+Definition globals : Globals.t := "ethereum.utils.numeric".
+
+Definition locals_stack : list Locals.t := [].
 
 Definition expr_1 : Value.t :=
   Constant.str "
@@ -28,8 +30,9 @@ Axiom ethereum_base_types_imports_Uint :
   IsImported globals "ethereum.base_types" "Uint".
 
 Definition get_sign : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "value" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "value" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Determines the sign of a number.
 
@@ -48,7 +51,7 @@ Definition get_sign : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.lt (|
-          M.get_name (| globals, "value" |),
+          M.get_name (| globals, locals_stack, "value" |),
           Constant.int 0
         |),
       (* then *)
@@ -63,7 +66,7 @@ Definition get_sign : Value.t -> Value.t -> M :=
           (* if *)
           M.if_then_else (|
             Compare.eq (|
-              M.get_name (| globals, "value" |),
+              M.get_name (| globals, locals_stack, "value" |),
               Constant.int 0
             |),
           (* then *)
@@ -84,8 +87,9 @@ Definition get_sign : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition ceil32 : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "value" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "value" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Converts a unsigned integer to the next closest multiple of 32.
 
@@ -104,7 +108,7 @@ Definition ceil32 : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "ceiling" ,
       M.call (|
-        M.get_name (| globals, "Uint" |),
+        M.get_name (| globals, locals_stack, "Uint" |),
         make_list [
           Constant.int 32
         ],
@@ -114,17 +118,17 @@ Definition ceil32 : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "remainder" ,
       BinOp.mod_ (|
-        M.get_name (| globals, "value" |),
-        M.get_name (| globals, "ceiling" |)
+        M.get_name (| globals, locals_stack, "value" |),
+        M.get_name (| globals, locals_stack, "ceiling" |)
       |)
     |) in
     let _ :=
       (* if *)
       M.if_then_else (|
         Compare.eq (|
-          M.get_name (| globals, "remainder" |),
+          M.get_name (| globals, locals_stack, "remainder" |),
           M.call (|
-            M.get_name (| globals, "Uint" |),
+            M.get_name (| globals, locals_stack, "Uint" |),
             make_list [
               Constant.int 0
             ],
@@ -134,7 +138,7 @@ Definition ceil32 : Value.t -> Value.t -> M :=
       (* then *)
       ltac:(M.monadic (
         let _ := M.return_ (|
-          M.get_name (| globals, "value" |)
+          M.get_name (| globals, locals_stack, "value" |)
         |) in
         M.pure Constant.None_
       (* else *)
@@ -142,10 +146,10 @@ Definition ceil32 : Value.t -> Value.t -> M :=
         let _ := M.return_ (|
           BinOp.sub (|
             BinOp.add (|
-              M.get_name (| globals, "value" |),
-              M.get_name (| globals, "ceiling" |)
+              M.get_name (| globals, locals_stack, "value" |),
+              M.get_name (| globals, locals_stack, "ceiling" |)
             |),
-            M.get_name (| globals, "remainder" |)
+            M.get_name (| globals, locals_stack, "remainder" |)
           |)
         |) in
         M.pure Constant.None_
@@ -153,8 +157,9 @@ Definition ceil32 : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition is_prime : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "number" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "number" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Checks if `number` is a prime number.
 
@@ -172,7 +177,7 @@ Definition is_prime : Value.t -> Value.t -> M :=
       (* if *)
       M.if_then_else (|
         Compare.lt_e (|
-          M.get_name (| globals, "number" |),
+          M.get_name (| globals, locals_stack, "number" |),
           Constant.int 1
         |),
       (* then *)
@@ -187,17 +192,17 @@ Definition is_prime : Value.t -> Value.t -> M :=
       )) |) in
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "x" |),
+        M.get_name (| globals, locals_stack, "x" |),
         M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         Constant.int 2;
         BinOp.add (|
           M.call (|
-            M.get_name (| globals, "int" |),
+            M.get_name (| globals, locals_stack, "int" |),
             make_list [
               BinOp.pow (|
-                M.get_name (| globals, "number" |),
+                M.get_name (| globals, locals_stack, "number" |),
                 Constant.float "0.5"
               |)
             ],
@@ -214,8 +219,8 @@ Definition is_prime : Value.t -> Value.t -> M :=
             M.if_then_else (|
               Compare.eq (|
                 BinOp.mod_ (|
-                  M.get_name (| globals, "number" |),
-                  M.get_name (| globals, "x" |)
+                  M.get_name (| globals, locals_stack, "number" |),
+                  M.get_name (| globals, locals_stack, "x" |)
                 |),
                 Constant.int 0
               |),
@@ -241,8 +246,9 @@ Definition is_prime : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition le_bytes_to_uint32_sequence : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "data" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "data" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Convert little endian byte stream `data` to a little endian U32
     sequence i.e., the first U32 number of the sequence is the least
@@ -266,15 +272,15 @@ Definition le_bytes_to_uint32_sequence : Value.t -> Value.t -> M :=
     |) in
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "i" |),
+        M.get_name (| globals, locals_stack, "i" |),
         M.call (|
-      M.get_name (| globals, "range" |),
+      M.get_name (| globals, locals_stack, "range" |),
       make_list [
         Constant.int 0;
         M.call (|
-          M.get_name (| globals, "len" |),
+          M.get_name (| globals, locals_stack, "len" |),
           make_list [
-            M.get_name (| globals, "data" |)
+            M.get_name (| globals, locals_stack, "data" |)
           ],
           make_dict []
         |);
@@ -284,16 +290,16 @@ Definition le_bytes_to_uint32_sequence : Value.t -> Value.t -> M :=
     |),
         ltac:(M.monadic (
           let _ := M.call (|
-    M.get_field (| M.get_name (| globals, "sequence" |), "append" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "sequence" |), "append" |),
     make_list [
       M.call (|
-        M.get_field (| M.get_name (| globals, "U32" |), "from_le_bytes" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "U32" |), "from_le_bytes" |),
         make_list [
           M.slice (|
-            M.get_name (| globals, "data" |),
-            M.get_name (| globals, "i" |),
+            M.get_name (| globals, locals_stack, "data" |),
+            M.get_name (| globals, locals_stack, "i" |),
             BinOp.add (|
-              M.get_name (| globals, "i" |),
+              M.get_name (| globals, locals_stack, "i" |),
               Constant.int 4
             |),
             Constant.None_
@@ -312,9 +318,9 @@ Definition le_bytes_to_uint32_sequence : Value.t -> Value.t -> M :=
     |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_name (| globals, "tuple" |),
+        M.get_name (| globals, locals_stack, "tuple" |),
         make_list [
-          M.get_name (| globals, "sequence" |)
+          M.get_name (| globals, locals_stack, "sequence" |)
         ],
         make_dict []
       |)
@@ -322,8 +328,9 @@ Definition le_bytes_to_uint32_sequence : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition le_uint32_sequence_to_bytes : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "sequence" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "sequence" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Obtain little endian byte stream from a little endian U32 sequence
     i.e., the first U32 number of the sequence is the least significant
@@ -354,14 +361,14 @@ Definition le_uint32_sequence_to_bytes : Value.t -> Value.t -> M :=
     |) in
     let _ :=
       M.for_ (|
-        M.get_name (| globals, "item" |),
-        M.get_name (| globals, "sequence" |),
+        M.get_name (| globals, locals_stack, "item" |),
+        M.get_name (| globals, locals_stack, "sequence" |),
         ltac:(M.monadic (
           let _ := M.assign_op_local (|
             BinOp.add,
             "result_bytes",
             M.call (|
-    M.get_field (| M.get_name (| globals, "item" |), "to_le_bytes4" |),
+    M.get_field (| M.get_name (| globals, locals_stack, "item" |), "to_le_bytes4" |),
     make_list [],
     make_dict []
   |)
@@ -373,13 +380,14 @@ Definition le_uint32_sequence_to_bytes : Value.t -> Value.t -> M :=
         ))
     |) in
     let _ := M.return_ (|
-      M.get_name (| globals, "result_bytes" |)
+      M.get_name (| globals, locals_stack, "result_bytes" |)
     |) in
     M.pure Constant.None_)).
 
 Definition le_uint32_sequence_to_uint : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "sequence" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "sequence" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Obtain Uint from a U32 sequence assuming that this sequence is little
     endian i.e., the first U32 number of the sequence is the least
@@ -399,18 +407,18 @@ Definition le_uint32_sequence_to_uint : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "sequence_as_bytes" ,
       M.call (|
-        M.get_name (| globals, "le_uint32_sequence_to_bytes" |),
+        M.get_name (| globals, locals_stack, "le_uint32_sequence_to_bytes" |),
         make_list [
-          M.get_name (| globals, "sequence" |)
+          M.get_name (| globals, locals_stack, "sequence" |)
         ],
         make_dict []
       |)
     |) in
     let _ := M.return_ (|
       M.call (|
-        M.get_field (| M.get_name (| globals, "Uint" |), "from_le_bytes" |),
+        M.get_field (| M.get_name (| globals, locals_stack, "Uint" |), "from_le_bytes" |),
         make_list [
-          M.get_name (| globals, "sequence_as_bytes" |)
+          M.get_name (| globals, locals_stack, "sequence_as_bytes" |)
         ],
         make_dict []
       |)
@@ -418,8 +426,9 @@ Definition le_uint32_sequence_to_uint : Value.t -> Value.t -> M :=
     M.pure Constant.None_)).
 
 Definition taylor_exponential : Value.t -> Value.t -> M :=
-  fun (args kwargs : Value.t) => ltac:(M.monadic (
-    let _ := M.set_locals (| args, kwargs, [ "factor"; "numerator"; "denominator" ] |) in
+  fun (args kwargs : Value.t) =>
+    let- locals_stack := M.create_locals locals_stack args kwargs [ "factor"; "numerator"; "denominator" ] in
+    ltac:(M.monadic (
     let _ := Constant.str "
     Approximates factor * e ** (numerator / denominator) using
     Taylor expansion.
@@ -450,32 +459,32 @@ Definition taylor_exponential : Value.t -> Value.t -> M :=
     let _ := M.assign_local (|
       "numerator_accumulated" ,
       BinOp.mult (|
-        M.get_name (| globals, "factor" |),
-        M.get_name (| globals, "denominator" |)
+        M.get_name (| globals, locals_stack, "factor" |),
+        M.get_name (| globals, locals_stack, "denominator" |)
       |)
     |) in
     let _ :=
       M.while (|
         Compare.gt (|
-      M.get_name (| globals, "numerator_accumulated" |),
+      M.get_name (| globals, locals_stack, "numerator_accumulated" |),
       Constant.int 0
     |),
         ltac:(M.monadic (
           let _ := M.assign_op_local (|
             BinOp.add,
             "output",
-            M.get_name (| globals, "numerator_accumulated" |)
+            M.get_name (| globals, locals_stack, "numerator_accumulated" |)
           |) in
           let _ := M.assign_local (|
             "numerator_accumulated" ,
             BinOp.floor_div (|
               BinOp.mult (|
-                M.get_name (| globals, "numerator_accumulated" |),
-                M.get_name (| globals, "numerator" |)
+                M.get_name (| globals, locals_stack, "numerator_accumulated" |),
+                M.get_name (| globals, locals_stack, "numerator" |)
               |),
               BinOp.mult (|
-                M.get_name (| globals, "denominator" |),
-                M.get_name (| globals, "i" |)
+                M.get_name (| globals, locals_stack, "denominator" |),
+                M.get_name (| globals, locals_stack, "i" |)
               |)
             |)
           |) in
@@ -492,8 +501,8 @@ Definition taylor_exponential : Value.t -> Value.t -> M :=
     |) in
     let _ := M.return_ (|
       BinOp.floor_div (|
-        M.get_name (| globals, "output" |),
-        M.get_name (| globals, "denominator" |)
+        M.get_name (| globals, locals_stack, "output" |),
+        M.get_name (| globals, locals_stack, "denominator" |)
       |)
     |) in
     M.pure Constant.None_)).

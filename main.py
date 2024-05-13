@@ -197,9 +197,10 @@ def generate_function_def_body(indent, node):
     params = "; ".join(f"\"{arg.arg}\"" for arg in node.args.args)
     body = generate_stmts(indent + 1, node.body)
 
-    return "fun (args kwargs : Value.t) => ltac:(M.monadic (\n" + \
+    return "fun (args kwargs : Value.t) =>\n" + \
         generate_indent(indent + 1) + \
-        f"let _ := M.set_locals (| args, kwargs, [ {params} ] |) in\n" + \
+        f"let- locals_stack := M.create_locals locals_stack args kwargs [ {params} ] in\n" + \
+        generate_indent(indent + 1) + "ltac:(M.monadic (\n" + \
         body + "))"
 
 
@@ -602,7 +603,7 @@ def generate_expr(indent, is_with_paren, node: ast.expr):
     elif isinstance(node, ast.Name):
         return paren(
             is_with_paren,
-            f"M.get_name (| globals, \"{node.id}\" |)"
+            f"M.get_name (| globals, locals_stack, \"{node.id}\" |)"
         )
     elif isinstance(node, ast.List):
         return generate_list(indent, is_with_paren, node.elts)
@@ -715,7 +716,7 @@ def generate_arg(node):
 
 
 input_file_name = sys.argv[1]
-output_file_name = "../../translate-ethereum-specs/CoqOfPython/" + \
+output_file_name = "../../coq-of-python/CoqOfPython/" + \
     input_file_name.replace(".py", ".v")
 
 file_content = open(input_file_name).read()
@@ -726,7 +727,9 @@ globals = input_file_name.replace("/", ".").replace(".py", "")
 # Generate Coq code from the AST
 coq_code = f"""Require Import CoqOfPython.CoqOfPython.
 
-Definition globals : string := "{globals}".
+Definition globals : Globals.t := "{globals}".
+
+Definition locals_stack : list Locals.t := [].
 
 {generate_mod(parsed_tree)}
 """
