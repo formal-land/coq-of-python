@@ -95,3 +95,6 @@ Definition identity : Value.t -> Value.t -> M :=
       M.get_name (| globals, locals_stack, "data" |)
     |) in
     M.pure Constant.None_)).
+
+Axiom identity_in_globals :
+  IsInGlobals globals "identity" (make_function identity).

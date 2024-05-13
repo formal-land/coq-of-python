@@ -306,6 +306,9 @@ Definition bnf2_to_bnf12 : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom bnf2_to_bnf12_in_globals :
+  IsInGlobals globals "bnf2_to_bnf12" (make_function bnf2_to_bnf12).
+
 Definition bnp_to_bnp12 : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "p" ] in
@@ -349,6 +352,9 @@ Definition bnp_to_bnp12 : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom bnp_to_bnp12_in_globals :
+  IsInGlobals globals "bnp_to_bnp12" (make_function bnp_to_bnp12).
+
 Definition twist : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "p" ] in
@@ -391,6 +397,9 @@ Definition twist : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom twist_in_globals :
+  IsInGlobals globals "twist" (make_function twist).
 
 Definition linefunc : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -511,6 +520,9 @@ Definition linefunc : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
+
+Axiom linefunc_in_globals :
+  IsInGlobals globals "linefunc" (make_function linefunc).
 
 Definition miller_loop : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -764,6 +776,9 @@ Definition miller_loop : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom miller_loop_in_globals :
+  IsInGlobals globals "miller_loop" (make_function miller_loop).
+
 Definition pairing : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "q"; "p" ] in
@@ -794,3 +809,6 @@ Definition pairing : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom pairing_in_globals :
+  IsInGlobals globals "pairing" (make_function pairing).

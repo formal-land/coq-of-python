@@ -468,6 +468,9 @@ Definition modexp : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom modexp_in_globals :
+  IsInGlobals globals "modexp" (make_function modexp).
+
 Definition get_mult_complexity : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "x" ] in
@@ -546,3 +549,6 @@ Definition get_mult_complexity : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
+
+Axiom get_mult_complexity_in_globals :
+  IsInGlobals globals "get_mult_complexity" (make_function get_mult_complexity).

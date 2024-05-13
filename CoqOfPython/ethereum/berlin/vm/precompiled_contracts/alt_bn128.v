@@ -273,6 +273,9 @@ Definition alt_bn128_add : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom alt_bn128_add_in_globals :
+  IsInGlobals globals "alt_bn128_add" (make_function alt_bn128_add).
+
 Definition alt_bn128_mul : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -454,6 +457,9 @@ Definition alt_bn128_mul : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom alt_bn128_mul_in_globals :
+  IsInGlobals globals "alt_bn128_mul" (make_function alt_bn128_mul).
 
 Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -781,3 +787,6 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
+
+Axiom alt_bn128_pairing_check_in_globals :
+  IsInGlobals globals "alt_bn128_pairing_check" (make_function alt_bn128_pairing_check).

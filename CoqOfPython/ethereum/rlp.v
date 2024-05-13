@@ -309,6 +309,9 @@ Definition encode : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom encode_in_globals :
+  IsInGlobals globals "encode" (make_function encode).
+
 Definition encode_bytes : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "raw_bytes" ] in
@@ -437,6 +440,9 @@ Definition encode_bytes : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom encode_bytes_in_globals :
+  IsInGlobals globals "encode_bytes" (make_function encode_bytes).
+
 Definition encode_sequence : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "raw_sequence" ] in
@@ -547,6 +553,9 @@ Definition encode_sequence : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom encode_sequence_in_globals :
+  IsInGlobals globals "encode_sequence" (make_function encode_sequence).
+
 Definition get_joined_encodings : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "raw_sequence" ] in
@@ -576,6 +585,9 @@ Definition get_joined_encodings : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom get_joined_encodings_in_globals :
+  IsInGlobals globals "get_joined_encodings" (make_function get_joined_encodings).
 
 Definition decode : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -655,6 +667,9 @@ Definition decode : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom decode_in_globals :
+  IsInGlobals globals "decode" (make_function decode).
+
 Definition T : Value.t := M.run ltac:(M.monadic (
   M.call (|
     M.get_name (| globals, locals_stack, "TypeVar" |),
@@ -702,6 +717,9 @@ Definition decode_to : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom decode_to_in_globals :
+  IsInGlobals globals "decode_to" (make_function decode_to).
 
 Definition _decode_to : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1582,6 +1600,9 @@ Definition _decode_to : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom _decode_to_in_globals :
+  IsInGlobals globals "_decode_to" (make_function _decode_to).
+
 Definition decode_to_bytes : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "encoded_bytes" ] in
@@ -1825,6 +1846,9 @@ Definition decode_to_bytes : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom decode_to_bytes_in_globals :
+  IsInGlobals globals "decode_to_bytes" (make_function decode_to_bytes).
+
 Definition decode_to_sequence : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "encoded_sequence" ] in
@@ -2019,6 +2043,9 @@ Definition decode_to_sequence : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom decode_to_sequence_in_globals :
+  IsInGlobals globals "decode_to_sequence" (make_function decode_to_sequence).
+
 Definition decode_joined_encodings : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "joined_encodings" ] in
@@ -2136,6 +2163,9 @@ Definition decode_joined_encodings : Value.t -> Value.t -> M :=
       M.get_name (| globals, locals_stack, "decoded_sequence" |)
     |) in
     M.pure Constant.None_)).
+
+Axiom decode_joined_encodings_in_globals :
+  IsInGlobals globals "decode_joined_encodings" (make_function decode_joined_encodings).
 
 Definition decode_item_length : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -2414,6 +2444,9 @@ Definition decode_item_length : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom decode_item_length_in_globals :
+  IsInGlobals globals "decode_item_length" (make_function decode_item_length).
+
 Definition rlp_hash : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "data" ] in
@@ -2447,3 +2480,6 @@ Definition rlp_hash : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom rlp_hash_in_globals :
+  IsInGlobals globals "rlp_hash" (make_function rlp_hash).

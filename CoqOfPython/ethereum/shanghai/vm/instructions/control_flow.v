@@ -71,6 +71,9 @@ Definition stop : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom stop_in_globals :
+  IsInGlobals globals "stop" (make_function stop).
+
 Definition jump : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -135,6 +138,9 @@ Definition jump : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom jump_in_globals :
+  IsInGlobals globals "jump" (make_function jump).
 
 Definition jumpi : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -237,6 +243,9 @@ Definition jumpi : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom jumpi_in_globals :
+  IsInGlobals globals "jumpi" (make_function jumpi).
+
 Definition pc : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -280,6 +289,9 @@ Definition pc : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom pc_in_globals :
+  IsInGlobals globals "pc" (make_function pc).
 
 Definition gas_left : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -325,6 +337,9 @@ Definition gas_left : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom gas_left_in_globals :
+  IsInGlobals globals "gas_left" (make_function gas_left).
+
 Definition jumpdest : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -356,3 +371,6 @@ Definition jumpdest : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom jumpdest_in_globals :
+  IsInGlobals globals "jumpdest" (make_function jumpdest).

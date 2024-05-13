@@ -210,3 +210,6 @@ Definition prepare_message : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom prepare_message_in_globals :
+  IsInGlobals globals "prepare_message" (make_function prepare_message).

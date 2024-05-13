@@ -63,6 +63,9 @@ Definition u256_safe_add : Value.t -> Value.t -> M :=
 (* At stmt: unsupported node type: Try *)
     M.pure Constant.None_)).
 
+Axiom u256_safe_add_in_globals :
+  IsInGlobals globals "u256_safe_add" (make_function u256_safe_add).
+
 Definition u256_safe_multiply : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [  ] in
@@ -101,3 +104,6 @@ Definition u256_safe_multiply : Value.t -> Value.t -> M :=
     |) in
 (* At stmt: unsupported node type: Try *)
     M.pure Constant.None_)).
+
+Axiom u256_safe_multiply_in_globals :
+  IsInGlobals globals "u256_safe_multiply" (make_function u256_safe_multiply).

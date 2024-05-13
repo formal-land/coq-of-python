@@ -404,6 +404,9 @@ Definition create : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom create_in_globals :
+  IsInGlobals globals "create" (make_function create).
+
 Definition return_ : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -486,6 +489,9 @@ Definition return_ : Value.t -> Value.t -> M :=
     |) in
     let _ := M.pass (| |) in
     M.pure Constant.None_)).
+
+Axiom return__in_globals :
+  IsInGlobals globals "return_" (make_function return_).
 
 Definition generic_call : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -669,6 +675,9 @@ Definition generic_call : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     M.pure Constant.None_)).
+
+Axiom generic_call_in_globals :
+  IsInGlobals globals "generic_call" (make_function generic_call).
 
 Definition call : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -877,6 +886,9 @@ Definition call : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom call_in_globals :
+  IsInGlobals globals "call" (make_function call).
 
 Definition callcode : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1090,6 +1102,9 @@ Definition callcode : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom callcode_in_globals :
+  IsInGlobals globals "callcode" (make_function callcode).
+
 Definition selfdestruct : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -1248,6 +1263,9 @@ Definition selfdestruct : Value.t -> Value.t -> M :=
     let _ := M.pass (| |) in
     M.pure Constant.None_)).
 
+Axiom selfdestruct_in_globals :
+  IsInGlobals globals "selfdestruct" (make_function selfdestruct).
+
 Definition delegatecall : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -1391,3 +1409,6 @@ Definition delegatecall : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom delegatecall_in_globals :
+  IsInGlobals globals "delegatecall" (make_function delegatecall).

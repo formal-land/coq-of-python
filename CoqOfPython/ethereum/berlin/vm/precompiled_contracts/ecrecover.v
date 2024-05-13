@@ -302,3 +302,6 @@ Definition ecrecover : Value.t -> Value.t -> M :=
       M.get_name (| globals, locals_stack, "padded_address" |)
     |) in
     M.pure Constant.None_)).
+
+Axiom ecrecover_in_globals :
+  IsInGlobals globals "ecrecover" (make_function ecrecover).

@@ -186,6 +186,9 @@ Definition secp256k1_recover : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom secp256k1_recover_in_globals :
+  IsInGlobals globals "secp256k1_recover" (make_function secp256k1_recover).
+
 Definition EllipticCurve : Value.t :=
   builtins.make_klass
     [(* At base: unsupported node type: Subscript *)]

@@ -356,6 +356,9 @@ Definition modexp : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom modexp_in_globals :
+  IsInGlobals globals "modexp" (make_function modexp).
+
 Definition complexity : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "base_length"; "modulus_length" ] in
@@ -418,6 +421,9 @@ Definition complexity : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom complexity_in_globals :
+  IsInGlobals globals "complexity" (make_function complexity).
 
 Definition iterations : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -600,6 +606,9 @@ Definition iterations : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom iterations_in_globals :
+  IsInGlobals globals "iterations" (make_function iterations).
+
 Definition gas_cost : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "base_length"; "modulus_length"; "exponent_length"; "exponent_head" ] in
@@ -680,3 +689,6 @@ Definition gas_cost : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom gas_cost_in_globals :
+  IsInGlobals globals "gas_cost" (make_function gas_cost).

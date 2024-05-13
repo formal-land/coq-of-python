@@ -189,6 +189,21 @@ Module Run.
       LowM.CallPrimitive (Primitive.StateWrite mutable update') k ⇓
       result
     | stack', heap' }}
+  | CallPrimitiveGetInGlobals
+      (globals : Globals.t)
+      (name : string)
+      (value : Value.t)
+      (stack : Stack.t) (heap : Heap)
+      (k : Value.t -> LowM.t A) :
+    IsInGlobals globals name value ->
+    {{ stack, heap |
+      k value ⇓
+      result
+    | stack', heap' }} ->
+    {{ stack, heap |
+      LowM.CallPrimitive (Primitive.GetInGlobals globals name) k ⇓
+      result
+    | stack', heap' }}
   | CallClosure
       (stack stack_inter : Stack.t) (heap heap_inter : Heap)
       (f : Value.t -> Value.t -> M)

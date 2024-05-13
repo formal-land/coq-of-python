@@ -102,7 +102,10 @@ def get_globals_of_import(node: ast.ImportFrom) -> str:
 def generate_top_level_stmt(node: ast.stmt):
     if isinstance(node, ast.FunctionDef):
         return f"Definition {generate_name(node.name)} : Value.t -> Value.t -> M :=\n" + \
-            generate_indent(1) + generate_function_def_body(1, node) + "."
+            generate_indent(1) + generate_function_def_body(1, node) + ".\n\n" + \
+            f"Axiom {generate_name(node.name)}_in_globals :\n" +\
+            generate_indent(1) + \
+            f"IsInGlobals globals \"{node.name}\" (make_function {generate_name(node.name)})."
     elif isinstance(node, ast.AsyncFunctionDef):
         return generate_error("top_level_stmt", node)
     elif isinstance(node, ast.ClassDef):

@@ -100,6 +100,9 @@ Definition close_state : Value.t -> Value.t -> M :=
     let _ := M.delete (| M.get_field (| M.get_name (| globals, locals_stack, "state" |), "_created_accounts" |) |) in
     M.pure Constant.None_)).
 
+Axiom close_state_in_globals :
+  IsInGlobals globals "close_state" (make_function close_state).
+
 Definition begin_transaction : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "state" ] in
@@ -129,6 +132,9 @@ Definition begin_transaction : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     M.pure Constant.None_)).
+
+Axiom begin_transaction_in_globals :
+  IsInGlobals globals "begin_transaction" (make_function begin_transaction).
 
 Definition commit_transaction : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -164,6 +170,9 @@ Definition commit_transaction : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
+
+Axiom commit_transaction_in_globals :
+  IsInGlobals globals "commit_transaction" (make_function commit_transaction).
 
 Definition rollback_transaction : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -203,6 +212,9 @@ Definition rollback_transaction : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
+
+Axiom rollback_transaction_in_globals :
+  IsInGlobals globals "rollback_transaction" (make_function rollback_transaction).
 
 Definition get_account : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -264,6 +276,9 @@ Definition get_account : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom get_account_in_globals :
+  IsInGlobals globals "get_account" (make_function get_account).
+
 Definition get_account_optional : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "state"; "address" ] in
@@ -300,6 +315,9 @@ Definition get_account_optional : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom get_account_optional_in_globals :
+  IsInGlobals globals "get_account_optional" (make_function get_account_optional).
+
 Definition set_account : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "state"; "address"; "account" ] in
@@ -327,6 +345,9 @@ Definition set_account : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     M.pure Constant.None_)).
+
+Axiom set_account_in_globals :
+  IsInGlobals globals "set_account" (make_function set_account).
 
 Definition destroy_account : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -365,6 +386,9 @@ Definition destroy_account : Value.t -> Value.t -> M :=
   |) in
     M.pure Constant.None_)).
 
+Axiom destroy_account_in_globals :
+  IsInGlobals globals "destroy_account" (make_function destroy_account).
+
 Definition destroy_storage : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "state"; "address" ] in
@@ -399,6 +423,9 @@ Definition destroy_storage : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom destroy_storage_in_globals :
+  IsInGlobals globals "destroy_storage" (make_function destroy_storage).
+
 Definition mark_account_created : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "state"; "address" ] in
@@ -427,6 +454,9 @@ Definition mark_account_created : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     M.pure Constant.None_)).
+
+Axiom mark_account_created_in_globals :
+  IsInGlobals globals "mark_account_created" (make_function mark_account_created).
 
 Definition get_storage : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -506,6 +536,9 @@ Definition get_storage : Value.t -> Value.t -> M :=
       M.get_name (| globals, locals_stack, "value" |)
     |) in
     M.pure Constant.None_)).
+
+Axiom get_storage_in_globals :
+  IsInGlobals globals "get_storage" (make_function get_storage).
 
 Definition set_storage : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -605,6 +638,9 @@ Definition set_storage : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom set_storage_in_globals :
+  IsInGlobals globals "set_storage" (make_function set_storage).
+
 Definition storage_root : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "state"; "address" ] in
@@ -656,6 +692,9 @@ Definition storage_root : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom storage_root_in_globals :
+  IsInGlobals globals "storage_root" (make_function storage_root).
+
 Definition state_root : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "state" ] in
@@ -685,6 +724,9 @@ Definition state_root : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom state_root_in_globals :
+  IsInGlobals globals "state_root" (make_function state_root).
 
 Definition account_exists : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -719,6 +761,9 @@ Definition account_exists : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom account_exists_in_globals :
+  IsInGlobals globals "account_exists" (make_function account_exists).
 
 Definition account_has_code_or_nonce : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -772,6 +817,9 @@ Definition account_has_code_or_nonce : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom account_has_code_or_nonce_in_globals :
+  IsInGlobals globals "account_has_code_or_nonce" (make_function account_has_code_or_nonce).
 
 Definition is_account_empty : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -833,6 +881,9 @@ Definition is_account_empty : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom is_account_empty_in_globals :
+  IsInGlobals globals "is_account_empty" (make_function is_account_empty).
 
 Definition account_exists_and_is_empty : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -903,6 +954,9 @@ Definition account_exists_and_is_empty : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom account_exists_and_is_empty_in_globals :
+  IsInGlobals globals "account_exists_and_is_empty" (make_function account_exists_and_is_empty).
 
 Definition is_account_alive : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -981,6 +1035,9 @@ Definition is_account_alive : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom is_account_alive_in_globals :
+  IsInGlobals globals "is_account_alive" (make_function is_account_alive).
+
 Definition modify_state : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "state"; "address"; "f" ] in
@@ -1013,6 +1070,9 @@ Definition modify_state : Value.t -> Value.t -> M :=
   |) in
     M.pure Constant.None_)).
 
+Axiom modify_state_in_globals :
+  IsInGlobals globals "modify_state" (make_function modify_state).
+
 Definition move_ether : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "state"; "sender_address"; "recipient_address"; "amount" ] in
@@ -1041,6 +1101,9 @@ Definition move_ether : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     M.pure Constant.None_)).
+
+Axiom move_ether_in_globals :
+  IsInGlobals globals "move_ether" (make_function move_ether).
 
 Definition set_account_balance : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1071,6 +1134,9 @@ Definition set_account_balance : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     M.pure Constant.None_)).
+
+Axiom set_account_balance_in_globals :
+  IsInGlobals globals "set_account_balance" (make_function set_account_balance).
 
 Definition touch_account : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1116,6 +1182,9 @@ Definition touch_account : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom touch_account_in_globals :
+  IsInGlobals globals "touch_account" (make_function touch_account).
+
 Definition increment_nonce : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "state"; "address" ] in
@@ -1142,6 +1211,9 @@ Definition increment_nonce : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     M.pure Constant.None_)).
+
+Axiom increment_nonce_in_globals :
+  IsInGlobals globals "increment_nonce" (make_function increment_nonce).
 
 Definition set_code : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1172,6 +1244,9 @@ Definition set_code : Value.t -> Value.t -> M :=
     make_dict []
   |) in
     M.pure Constant.None_)).
+
+Axiom set_code_in_globals :
+  IsInGlobals globals "set_code" (make_function set_code).
 
 Definition get_storage_original : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1278,3 +1353,6 @@ Definition get_storage_original : Value.t -> Value.t -> M :=
       M.get_name (| globals, locals_stack, "original_value" |)
     |) in
     M.pure Constant.None_)).
+
+Axiom get_storage_original_in_globals :
+  IsInGlobals globals "get_storage_original" (make_function get_storage_original).

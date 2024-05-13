@@ -129,6 +129,9 @@ Definition block_hash : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom block_hash_in_globals :
+  IsInGlobals globals "block_hash" (make_function block_hash).
+
 Definition coinbase : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -176,6 +179,9 @@ Definition coinbase : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom coinbase_in_globals :
+  IsInGlobals globals "coinbase" (make_function coinbase).
+
 Definition timestamp : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -216,6 +222,9 @@ Definition timestamp : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom timestamp_in_globals :
+  IsInGlobals globals "timestamp" (make_function timestamp).
 
 Definition number : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -263,6 +272,9 @@ Definition number : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom number_in_globals :
+  IsInGlobals globals "number" (make_function number).
+
 Definition difficulty : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -309,6 +321,9 @@ Definition difficulty : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom difficulty_in_globals :
+  IsInGlobals globals "difficulty" (make_function difficulty).
+
 Definition gas_limit : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -354,3 +369,6 @@ Definition gas_limit : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom gas_limit_in_globals :
+  IsInGlobals globals "gas_limit" (make_function gas_limit).

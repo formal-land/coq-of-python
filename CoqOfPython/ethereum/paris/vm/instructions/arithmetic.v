@@ -119,6 +119,9 @@ Definition add : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom add_in_globals :
+  IsInGlobals globals "add" (make_function add).
+
 Definition sub : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -186,6 +189,9 @@ Definition sub : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom sub_in_globals :
+  IsInGlobals globals "sub" (make_function sub).
+
 Definition mul : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -252,6 +258,9 @@ Definition mul : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom mul_in_globals :
+  IsInGlobals globals "mul" (make_function mul).
 
 Definition div : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -340,6 +349,9 @@ Definition div : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom div_in_globals :
+  IsInGlobals globals "div" (make_function div).
 
 Definition sdiv : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -491,6 +503,9 @@ Definition sdiv : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom sdiv_in_globals :
+  IsInGlobals globals "sdiv" (make_function sdiv).
+
 Definition mod_ : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -578,6 +593,9 @@ Definition mod_ : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom mod__in_globals :
+  IsInGlobals globals "mod" (make_function mod_).
 
 Definition smod : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -695,6 +713,9 @@ Definition smod : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom smod_in_globals :
+  IsInGlobals globals "smod" (make_function smod).
 
 Definition addmod : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -821,6 +842,9 @@ Definition addmod : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom addmod_in_globals :
+  IsInGlobals globals "addmod" (make_function addmod).
+
 Definition mulmod : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -946,6 +970,9 @@ Definition mulmod : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom mulmod_in_globals :
+  IsInGlobals globals "mulmod" (make_function mulmod).
+
 Definition exp : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "evm" ] in
@@ -1056,6 +1083,9 @@ Definition exp : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom exp_in_globals :
+  IsInGlobals globals "exp" (make_function exp).
 
 Definition signextend : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -1231,3 +1261,6 @@ Definition signextend : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom signextend_in_globals :
+  IsInGlobals globals "signextend" (make_function signextend).

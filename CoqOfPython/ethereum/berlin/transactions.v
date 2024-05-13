@@ -164,6 +164,9 @@ Definition encode_transaction : Value.t -> Value.t -> M :=
       )) |) in
     M.pure Constant.None_)).
 
+Axiom encode_transaction_in_globals :
+  IsInGlobals globals "encode_transaction" (make_function encode_transaction).
+
 Definition decode_transaction : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "tx" ] in
@@ -222,3 +225,6 @@ Definition decode_transaction : Value.t -> Value.t -> M :=
         M.pure Constant.None_
       )) |) in
     M.pure Constant.None_)).
+
+Axiom decode_transaction_in_globals :
+  IsInGlobals globals "decode_transaction" (make_function decode_transaction).

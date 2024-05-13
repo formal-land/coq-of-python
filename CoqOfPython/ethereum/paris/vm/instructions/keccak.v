@@ -189,3 +189,6 @@ Definition keccak : Value.t -> Value.t -> M :=
       Constant.int 1
     |) in
     M.pure Constant.None_)).
+
+Axiom keccak_in_globals :
+  IsInGlobals globals "keccak" (make_function keccak).

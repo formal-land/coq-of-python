@@ -158,3 +158,6 @@ Definition get_valid_jump_destinations : Value.t -> Value.t -> M :=
       M.get_name (| globals, locals_stack, "valid_jump_destinations" |)
     |) in
     M.pure Constant.None_)).
+
+Axiom get_valid_jump_destinations_in_globals :
+  IsInGlobals globals "get_valid_jump_destinations" (make_function get_valid_jump_destinations).

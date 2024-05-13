@@ -79,6 +79,9 @@ Definition to_address : Value.t -> Value.t -> M :=
     |) in
     M.pure Constant.None_)).
 
+Axiom to_address_in_globals :
+  IsInGlobals globals "to_address" (make_function to_address).
+
 Definition compute_contract_address : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
     let- locals_stack := M.create_locals locals_stack args kwargs [ "address"; "nonce" ] in
@@ -148,6 +151,9 @@ Definition compute_contract_address : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom compute_contract_address_in_globals :
+  IsInGlobals globals "compute_contract_address" (make_function compute_contract_address).
 
 Definition compute_create2_contract_address : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -230,3 +236,6 @@ Definition compute_create2_contract_address : Value.t -> Value.t -> M :=
       |)
     |) in
     M.pure Constant.None_)).
+
+Axiom compute_create2_contract_address_in_globals :
+  IsInGlobals globals "compute_create2_contract_address" (make_function compute_create2_contract_address).
