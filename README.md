@@ -61,3 +61,9 @@ make -j4
 ```
 
 It will compile all the Coq files, including the ones generated from the Ethereum specification and the proofs.
+
+## Documentation
+
+For now the documentation is the code (everything is open-source), this README, and the following blog post:
+
+- [Translation of Python code to Coq](https://formal.land/blog/2024/05/10/translation-of-python-code) 2024-05-10
