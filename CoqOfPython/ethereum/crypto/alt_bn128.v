@@ -31,35 +31,35 @@ Definition ATE_PAIRING_COUNT_BITS : Value.t := M.run ltac:(M.monadic (
   Constant.int 63
 )).
 
-Definition BNF : Value.t :=
-  builtins.make_klass
-    [(* At base: unsupported node type: Attribute *)]
-    [
+Definition BNF : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (* At base: unsupported node type: Attribute *)
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ]
-    [
+Definition BNP : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (* At base: unsupported node type: Attribute *)
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ].
-
-Definition BNP : Value.t :=
-  builtins.make_klass
-    [(* At base: unsupported node type: Attribute *)]
-    [
-
-    ]
-    [
-
-    ].
-
-Definition BNF2 : Value.t :=
-  builtins.make_klass
-    [(* At base: unsupported node type: Attribute *)]
-    [
-
-    ]
-    [
-
-    ].
+Definition BNF2 : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (* At base: unsupported node type: Attribute *)
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
 (* At top_level_stmt: unsupported node type: Assign *)
 
@@ -76,72 +76,72 @@ Definition expr_48 : Value.t :=
 Definition expr_51 : Value.t :=
   Constant.str "autoapi_noindex".
 
-Definition BNP2 : Value.t :=
-  builtins.make_klass
-    [(* At base: unsupported node type: Attribute *)]
-    [
+Definition BNP2 : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (* At base: unsupported node type: Attribute *)
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ]
-    [
-
-    ].
-
-Definition BNF12 : Value.t :=
-  builtins.make_klass
-    [(* At base: unsupported node type: Attribute *)]
-    [
-
-    ]
-    [
-      (
-        "__mul__",
-        fun (args kwargs : Value.t) =>
-          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
-          ltac:(M.monadic (
-          let _ := Constant.str "
+Definition BNF12 : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (* At base: unsupported node type: Attribute *)
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+    (
+      "__mul__",
+      fun (args kwargs : Value.t) =>
+        let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "right" ] in
+        ltac:(M.monadic (
+        let _ := Constant.str "
         Multiplication special cased for BNF12.
         " in
-          let _ := M.assign_local (|
-            "mul" ,
-            BinOp.mult (|
-              make_list [
-                Constant.int 0
-              ],
-              Constant.int 23
-            |)
-          |) in
-          let _ :=
-            M.for_ (|
-              M.get_name (| globals, locals_stack, "i" |),
-              M.call (|
+        let _ := M.assign_local (|
+          "mul" ,
+          BinOp.mult (|
+            make_list [
+              Constant.int 0
+            ],
+            Constant.int 23
+          |)
+        |) in
+        let _ :=
+          M.for_ (|
+            M.get_name (| globals, locals_stack, "i" |),
+            M.call (|
       M.get_name (| globals, locals_stack, "range" |),
       make_list [
         Constant.int 12
       ],
       make_dict []
     |),
-              ltac:(M.monadic (
-                let _ :=
-                  M.for_ (|
-                    M.get_name (| globals, locals_stack, "j" |),
-                    M.call (|
+            ltac:(M.monadic (
+              let _ :=
+                M.for_ (|
+                  M.get_name (| globals, locals_stack, "j" |),
+                  M.call (|
       M.get_name (| globals, locals_stack, "range" |),
       make_list [
         Constant.int 12
       ],
       make_dict []
     |),
-                    ltac:(M.monadic (
-                      let _ := M.assign_op (|
-                        BinOp.add,
-                        M.get_subscript (|
+                  ltac:(M.monadic (
+                    let _ := M.assign_op (|
+                      BinOp.add,
+                      M.get_subscript (|
     M.get_name (| globals, locals_stack, "mul" |),
     BinOp.add (|
       M.get_name (| globals, locals_stack, "i" |),
       M.get_name (| globals, locals_stack, "j" |)
     |)
   |),
-                        BinOp.mult (|
+                      BinOp.mult (|
     M.get_subscript (|
       M.get_name (| globals, locals_stack, "self" |),
       M.get_name (| globals, locals_stack, "i" |)
@@ -151,23 +151,23 @@ Definition BNF12 : Value.t :=
       M.get_name (| globals, locals_stack, "j" |)
     |)
   |)
-                      |) in
-                      M.pure Constant.None_
-                    )),
-                    ltac:(M.monadic (
-                      M.pure Constant.None_
-                    ))
-                |) in
-                M.pure Constant.None_
-              )),
-              ltac:(M.monadic (
-                M.pure Constant.None_
-              ))
-          |) in
-          let _ :=
-            M.for_ (|
-              M.get_name (| globals, locals_stack, "i" |),
-              M.call (|
+                    |) in
+                    M.pure Constant.None_
+                  )),
+                  ltac:(M.monadic (
+                    M.pure Constant.None_
+                  ))
+              |) in
+              M.pure Constant.None_
+            )),
+            ltac:(M.monadic (
+              M.pure Constant.None_
+            ))
+        |) in
+        let _ :=
+          M.for_ (|
+            M.get_name (| globals, locals_stack, "i" |),
+            M.call (|
       M.get_name (| globals, locals_stack, "range" |),
       make_list [
         Constant.int 22;
@@ -176,65 +176,66 @@ Definition BNF12 : Value.t :=
       ],
       make_dict []
     |),
-              ltac:(M.monadic (
-                let _ := M.assign_op (|
-                  BinOp.sub,
-                  M.get_subscript (|
+            ltac:(M.monadic (
+              let _ := M.assign_op (|
+                BinOp.sub,
+                M.get_subscript (|
     M.get_name (| globals, locals_stack, "mul" |),
     BinOp.sub (|
       M.get_name (| globals, locals_stack, "i" |),
       Constant.int 6
     |)
   |),
-                  BinOp.mult (|
+                BinOp.mult (|
     M.get_subscript (|
       M.get_name (| globals, locals_stack, "mul" |),
       M.get_name (| globals, locals_stack, "i" |)
     |),
     UnOp.sub (| Constant.int 18 |)
   |)
-                |) in
-                let _ := M.assign_op (|
-                  BinOp.sub,
-                  M.get_subscript (|
+              |) in
+              let _ := M.assign_op (|
+                BinOp.sub,
+                M.get_subscript (|
     M.get_name (| globals, locals_stack, "mul" |),
     BinOp.sub (|
       M.get_name (| globals, locals_stack, "i" |),
       Constant.int 12
     |)
   |),
-                  BinOp.mult (|
+                BinOp.mult (|
     M.get_subscript (|
       M.get_name (| globals, locals_stack, "mul" |),
       M.get_name (| globals, locals_stack, "i" |)
     |),
     Constant.int 82
   |)
-                |) in
-                M.pure Constant.None_
-              )),
-              ltac:(M.monadic (
-                M.pure Constant.None_
-              ))
-          |) in
-          let _ := M.return_ (|
-            M.call (|
-              M.get_field (| M.get_name (| globals, locals_stack, "BNF12" |), "__new__" |),
-              make_list [
-                M.get_name (| globals, locals_stack, "BNF12" |);
-                M.slice (|
-                  M.get_name (| globals, locals_stack, "mul" |),
-                  Constant.None_,
-                  Constant.int 12,
-                  Constant.None_
-                |)
-              ],
-              make_dict []
-            |)
-          |) in
-          M.pure Constant.None_))
-      )
-    ].
+              |) in
+              M.pure Constant.None_
+            )),
+            ltac:(M.monadic (
+              M.pure Constant.None_
+            ))
+        |) in
+        let _ := M.return_ (|
+          M.call (|
+            M.get_field (| M.get_name (| globals, locals_stack, "BNF12" |), "__new__" |),
+            make_list [
+              M.get_name (| globals, locals_stack, "BNF12" |);
+              M.slice (|
+                M.get_name (| globals, locals_stack, "mul" |),
+                Constant.None_,
+                Constant.int 12,
+                Constant.None_
+              |)
+            ],
+            make_dict []
+          |)
+        |) in
+        M.pure Constant.None_))
+    )
+  ]
+|}.
 
 (* At top_level_stmt: unsupported node type: Assign *)
 
@@ -251,15 +252,15 @@ Definition expr_101 : Value.t :=
 Definition expr_104 : Value.t :=
   Constant.str "autoapi_noindex".
 
-Definition BNP12 : Value.t :=
-  builtins.make_klass
-    [(* At base: unsupported node type: Attribute *)]
-    [
-
-    ]
-    [
-
-    ].
+Definition BNP12 : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (* At base: unsupported node type: Attribute *)
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
 Definition bnf2_to_bnf12 : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>

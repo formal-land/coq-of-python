@@ -48,42 +48,38 @@ Axiom ethereum_dao_fork_fork_types_imports_Root :
 Axiom ethereum_dao_fork_transactions_imports_Transaction :
   IsImported globals "ethereum.dao_fork.transactions" "Transaction".
 
-Definition Header : Value.t :=
-  builtins.make_klass
-    []
-    [
+Definition Header : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ]
-    [
+Definition Block : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ].
+Definition Log : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-Definition Block : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
-
-Definition Log : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
-
-Definition Receipt : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
+Definition Receipt : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.

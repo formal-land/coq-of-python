@@ -63,14 +63,14 @@ Axiom ethereum_berlin_vm_instructions_imports_storage :
 Axiom ethereum_berlin_vm_instructions_imports_system :
   IsImported globals "ethereum.berlin.vm.instructions" "system".
 
-Definition Ops : Value.t :=
-  builtins.make_klass
-    [(* At base: unsupported node type: Attribute *)]
-    [
-
-    ]
-    [
-
-    ].
+Definition Ops : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (* At base: unsupported node type: Attribute *)
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
 (* At top_level_stmt: unsupported node type: AnnAssign *)

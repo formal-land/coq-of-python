@@ -67,15 +67,14 @@ Definition Address : Value.t := M.run ltac:(M.monadic (
   M.get_name (| globals, locals_stack, "Bytes20" |)
 )).
 
-Definition GenesisConfiguration : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
+Definition GenesisConfiguration : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
 Definition get_genesis_configuration : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>

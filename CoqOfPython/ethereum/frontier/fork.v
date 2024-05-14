@@ -167,15 +167,14 @@ Definition MAX_OMMER_DEPTH : Value.t := M.run ltac:(M.monadic (
   Constant.int 6
 )).
 
-Definition BlockChain : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
+Definition BlockChain : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
 Definition apply_fork : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>
@@ -876,15 +875,14 @@ Definition make_receipt : Value.t -> Value.t -> M :=
 Axiom make_receipt_in_globals :
   IsInGlobals globals "make_receipt" (make_function make_receipt).
 
-Definition ApplyBodyOutput : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
+Definition ApplyBodyOutput : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
 Definition apply_body : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>

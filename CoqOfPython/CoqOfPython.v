@@ -64,6 +64,15 @@ Module Globals.
   Definition t : Set := string.
 End Globals.
 
+Module Klass.
+  Record t {Value M : Set} : Set := {
+    bases : list (Globals.t * string);
+    class_methods : list (string * (Value -> Value -> M));
+    methods : list (string * (Value -> Value -> M));
+  }.
+  Arguments t : clear implicits.
+End Klass.
+
 Module Data.
   (** This type is not accessible directly in Python, as only object are. We use this type
       internally to represent integers, closures, ... that can be made accessible in a special
@@ -81,10 +90,7 @@ Module Data.
   | Set_ (items : list Value)
   | Dict (dict : Dict.t Value)
   | Closure {Value M : Set} (f : Value -> Value -> M)
-  | Klass {Value M : Set}
-    (bases : list (Globals.t * string))
-    (class_methods : list (string * (Value -> Value -> M)))
-    (methods : list (string * (Value -> Value -> M))).
+  | Klass {Value M : Set} (klass : Klass.t Value M).
   Arguments Ellipsis {_}.
   Arguments Bool {_}.
   Arguments Integer {_}.
@@ -509,25 +515,31 @@ End Compare.
 
 (** ** Builtins *)
 Module builtins.
-  Definition make_klass
-    (bases : list (string * string))
-    (class_methods : list (string * (Value.t -> Value.t -> M)))
-    (methods : list (string * (Value.t -> Value.t -> M))) :
-    Value.t :=
-  Value.Make "builtins" "type" (Pointer.Imm (Object.wrapper (
-    Data.Klass bases class_methods methods
-  ))).
+  Definition make_klass (klass : Klass.t Value.t M) : Value.t :=
+  Value.Make "builtins" "type" (Pointer.Imm (Object.wrapper (Data.Klass klass))).
 
   Definition type : Value.t :=
-    make_klass [] [] [].
+    make_klass {|
+      Klass.bases := [];
+      Klass.class_methods := [];
+      Klass.methods := [];
+    |}.
   Axiom type_in_globals : IsInGlobals "builtins" "type" type.
 
   Definition int : Value.t :=
-    make_klass [] [] [].
+    make_klass {|
+      Klass.bases := [];
+      Klass.class_methods := [];
+      Klass.methods := [];
+    |}.
   Axiom int_in_globals : IsInGlobals "builtins" "int" int.
 
   Definition str : Value.t :=
-    make_klass [] [] [].
+    make_klass {|
+      Klass.bases := [];
+      Klass.class_methods := [];
+      Klass.methods := [];
+    |}.
   Axiom str_in_globals : IsInGlobals "builtins" "str" str.
 End builtins.
 

@@ -109,55 +109,61 @@ def generate_top_level_stmt(node: ast.stmt):
     elif isinstance(node, ast.AsyncFunctionDef):
         return generate_error("top_level_stmt", node)
     elif isinstance(node, ast.ClassDef):
-        text = f"Definition {generate_name(node.name)} : Value.t :=\n"
-        text += generate_indent(1) + "builtins.make_klass\n"
+        text = f"Definition {generate_name(node.name)} : Value.t := "
+        text += "builtins.make_klass {|\n"
 
         # Bases
-        text += generate_indent(2) + "["
+        text += generate_indent(1) + "Klass.bases := ["
         not_first = False
         for base in node.bases:
             if not_first:
-                text += "; "
+                text += ";"
+            text += "\n"
+            text += generate_indent(2)
             if isinstance(base, ast.Name):
                 text += f"(globals, \"{generate_name(base.id)}\")"
             else:
                 text += generate_error("base", base)
             not_first = True
-        text += "]\n"
+        text += "\n"
+        text += generate_indent(1) + "];\n"
 
         # Class methods
-        text += generate_indent(2) + "[\n"
+        text += generate_indent(1) + "Klass.class_methods := ["
         not_first = False
         for stmt in node.body:
             if isinstance(stmt, ast.FunctionDef) and len(stmt.decorator_list) == 1:
                 decorator = stmt.decorator_list[0]
                 if isinstance(decorator, ast.Name) and decorator.id == "classmethod":
                     if not_first:
-                        text += ";\n"
-                    text += generate_indent(3) + "(\n"
-                    text += generate_indent(4) + f"\"{stmt.name}\"," + "\n"
-                    text += generate_indent(4)
-                    text += generate_function_def_body(4, stmt) + "\n"
-                    text += generate_indent(3) + ")"
+                        text += ";"
+                    text += "\n"
+                    text += generate_indent(2) + "(\n"
+                    text += generate_indent(3) + f"\"{stmt.name}\"," + "\n"
+                    text += generate_indent(3)
+                    text += generate_function_def_body(3, stmt) + "\n"
+                    text += generate_indent(2) + ")"
                     not_first = True
         text += "\n"
-        text += generate_indent(2) + "]\n"
+        text += generate_indent(1) + "];\n"
 
         # Methods
-        text += generate_indent(2) + "[\n"
+        text += generate_indent(1) + "Klass.methods := ["
         not_first = False
         for stmt in node.body:
             if isinstance(stmt, ast.FunctionDef) and len(stmt.decorator_list) == 0:
                 if not_first:
-                    text += ";\n"
-                text += generate_indent(3) + "(\n"
-                text += generate_indent(4) + f"\"{stmt.name}\"," + "\n"
-                text += generate_indent(4)
-                text += generate_function_def_body(4, stmt) + "\n"
-                text += generate_indent(3) + ")"
+                    text += ";"
+                text += "\n"
+                text += generate_indent(2) + "(\n"
+                text += generate_indent(3) + f"\"{stmt.name}\"," + "\n"
+                text += generate_indent(3)
+                text += generate_function_def_body(3, stmt) + "\n"
+                text += generate_indent(2) + ")"
                 not_first = True
         text += "\n"
-        text += generate_indent(2) + "]."
+        text += generate_indent(1) + "]\n"
+        text += "|}."
 
         return text
     elif isinstance(node, ast.Assign):

@@ -31,95 +31,86 @@ Axiom typing_imports_Optional :
 Axiom typing_imports_Union :
   IsImported globals "typing" "Union".
 
-Definition TransactionStart : Value.t :=
-  builtins.make_klass
-    []
-    [
+Definition TransactionStart : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ]
-    [
+Definition TransactionEnd : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ].
+Definition PrecompileStart : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-Definition TransactionEnd : Value.t :=
-  builtins.make_klass
-    []
-    [
+Definition PrecompileEnd : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ]
-    [
+Definition OpStart : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ].
+Definition OpEnd : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-Definition PrecompileStart : Value.t :=
-  builtins.make_klass
-    []
-    [
+Definition OpException : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ]
-    [
+Definition EvmStop : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ].
-
-Definition PrecompileEnd : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
-
-Definition OpStart : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
-
-Definition OpEnd : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
-
-Definition OpException : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
-
-Definition EvmStop : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
-
-Definition GasAndRefund : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
+Definition GasAndRefund : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
 Definition TraceEvent : Value.t := M.run ltac:(M.monadic (
   M.get_subscript (|

@@ -22,69 +22,69 @@ Exceptions which cause the EVM to halt exceptionally.
 Axiom ethereum_exceptions_imports_EthereumException :
   IsImported globals "ethereum.exceptions" "EthereumException".
 
-Definition ExceptionalHalt : Value.t :=
-  builtins.make_klass
-    [(globals, "EthereumException")]
-    [
+Definition ExceptionalHalt : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (globals, "EthereumException")
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ]
-    [
+Definition Revert : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (globals, "EthereumException")
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ].
+Definition StackUnderflowError : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (globals, "ExceptionalHalt")
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-Definition Revert : Value.t :=
-  builtins.make_klass
-    [(globals, "EthereumException")]
-    [
+Definition StackOverflowError : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (globals, "ExceptionalHalt")
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ]
-    [
+Definition OutOfGasError : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (globals, "ExceptionalHalt")
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ].
-
-Definition StackUnderflowError : Value.t :=
-  builtins.make_klass
-    [(globals, "ExceptionalHalt")]
-    [
-
-    ]
-    [
-
-    ].
-
-Definition StackOverflowError : Value.t :=
-  builtins.make_klass
-    [(globals, "ExceptionalHalt")]
-    [
-
-    ]
-    [
-
-    ].
-
-Definition OutOfGasError : Value.t :=
-  builtins.make_klass
-    [(globals, "ExceptionalHalt")]
-    [
-
-    ]
-    [
-
-    ].
-
-Definition InvalidOpcode : Value.t :=
-  builtins.make_klass
-    [(globals, "ExceptionalHalt")]
-    [
-
-    ]
-    [
-      (
-        "__init__",
-        fun (args kwargs : Value.t) =>
-          let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "code" ] in
-          ltac:(M.monadic (
-          let _ := M.call (|
+Definition InvalidOpcode : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (globals, "ExceptionalHalt")
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+    (
+      "__init__",
+      fun (args kwargs : Value.t) =>
+        let- locals_stack := M.create_locals locals_stack args kwargs [ "self"; "code" ] in
+        ltac:(M.monadic (
+        let _ := M.call (|
     M.get_field (| M.call (|
       M.get_name (| globals, locals_stack, "super" |),
       make_list [],
@@ -95,80 +95,81 @@ Definition InvalidOpcode : Value.t :=
     ],
     make_dict []
   |) in
-          let _ := M.assign (|
-            M.get_field (| M.get_name (| globals, locals_stack, "self" |), "code" |),
-            M.get_name (| globals, locals_stack, "code" |)
-          |) in
-          M.pure Constant.None_))
-      )
-    ].
+        let _ := M.assign (|
+          M.get_field (| M.get_name (| globals, locals_stack, "self" |), "code" |),
+          M.get_name (| globals, locals_stack, "code" |)
+        |) in
+        M.pure Constant.None_))
+    )
+  ]
+|}.
 
-Definition InvalidJumpDestError : Value.t :=
-  builtins.make_klass
-    [(globals, "ExceptionalHalt")]
-    [
+Definition InvalidJumpDestError : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (globals, "ExceptionalHalt")
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ]
-    [
+Definition StackDepthLimitError : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (globals, "ExceptionalHalt")
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ].
+Definition WriteInStaticContext : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (globals, "ExceptionalHalt")
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-Definition StackDepthLimitError : Value.t :=
-  builtins.make_klass
-    [(globals, "ExceptionalHalt")]
-    [
+Definition OutOfBoundsRead : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (globals, "ExceptionalHalt")
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ]
-    [
+Definition InvalidParameter : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (globals, "ExceptionalHalt")
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ].
+Definition InvalidContractPrefix : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (globals, "ExceptionalHalt")
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-Definition WriteInStaticContext : Value.t :=
-  builtins.make_klass
-    [(globals, "ExceptionalHalt")]
-    [
-
-    ]
-    [
-
-    ].
-
-Definition OutOfBoundsRead : Value.t :=
-  builtins.make_klass
-    [(globals, "ExceptionalHalt")]
-    [
-
-    ]
-    [
-
-    ].
-
-Definition InvalidParameter : Value.t :=
-  builtins.make_klass
-    [(globals, "ExceptionalHalt")]
-    [
-
-    ]
-    [
-
-    ].
-
-Definition InvalidContractPrefix : Value.t :=
-  builtins.make_klass
-    [(globals, "ExceptionalHalt")]
-    [
-
-    ]
-    [
-
-    ].
-
-Definition AddressCollision : Value.t :=
-  builtins.make_klass
-    [(globals, "ExceptionalHalt")]
-    [
-
-    ]
-    [
-
-    ].
+Definition AddressCollision : Value.t := builtins.make_klass {|
+  Klass.bases := [
+    (globals, "ExceptionalHalt")
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.

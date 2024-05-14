@@ -525,25 +525,23 @@ Definition BLOB_GASPRICE_UPDATE_FRACTION : Value.t := M.run ltac:(M.monadic (
   |)
 )).
 
-Definition ExtendMemory : Value.t :=
-  builtins.make_klass
-    []
-    [
+Definition ExtendMemory : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
-    ]
-    [
-
-    ].
-
-Definition MessageCallGas : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
+Definition MessageCallGas : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
 
 Definition charge_gas : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>

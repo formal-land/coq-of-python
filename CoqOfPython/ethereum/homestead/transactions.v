@@ -47,12 +47,11 @@ Definition TX_CREATE_COST : Value.t := M.run ltac:(M.monadic (
   Constant.int 32000
 )).
 
-Definition Transaction : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
+Definition Transaction : Value.t := builtins.make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ]
+|}.
