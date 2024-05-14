@@ -64,6 +64,7 @@ It will compile all the Coq files, including the ones generated from the Ethereu
 
 ## Documentation
 
-For now the documentation is the code (everything is open-source), this README, and the following blog post:
+For now, the documentation is the code (everything is open-source), this README, and the following blog posts:
 
+- [Simulation of Python code in Coq](https://formal.land/blog/2024/05/14/translation-of-python-code-simulations) 2024-05-14
 - [Translation of Python code to Coq](https://formal.land/blog/2024/05/10/translation-of-python-code) 2024-05-10
