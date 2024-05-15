@@ -163,7 +163,7 @@ Definition LeafNode : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition ExtensionNode : Value.t := builtins.make_klass {|
@@ -172,7 +172,7 @@ Definition ExtensionNode : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition BranchNode : Value.t := builtins.make_klass {|
@@ -181,7 +181,7 @@ Definition BranchNode : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition InternalNode : Value.t := M.run ltac:(M.monadic (
@@ -484,12 +484,12 @@ Axiom encode_node_in_globals :
 
 Definition Trie : Value.t := builtins.make_klass {|
   Klass.bases := [
-    (* At base: unsupported node type: Subscript *)
+    (globals, "(* At base: unsupported node type: Subscript *)")
   ];
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition copy_trie : Value.t -> Value.t -> M :=

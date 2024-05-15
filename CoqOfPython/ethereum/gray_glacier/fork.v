@@ -222,7 +222,7 @@ Definition BlockChain : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition apply_fork : Value.t -> Value.t -> M :=
@@ -1272,7 +1272,7 @@ Definition ApplyBodyOutput : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition apply_body : Value.t -> Value.t -> M :=

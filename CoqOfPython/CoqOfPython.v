@@ -112,19 +112,32 @@ Module Object.
   Arguments t : clear implicits.
   Arguments Build_t {_}.
 
-  Fixpoint fields_of_optional_dict {Value : Set} (optional_dict : list (string * option Value)) :
+  Fixpoint fields_of_dict_option {Value : Set} (optional_dict : list (string * option Value)) :
       Dict.t Value :=
     match optional_dict with
     | [] => []
     | (name, Some value) :: optional_dict =>
-      Dict.write (fields_of_optional_dict optional_dict) name value
-    | (_, None) :: optional_dict => fields_of_optional_dict optional_dict
+      Dict.write (fields_of_dict_option optional_dict) name value
+    | (_, None) :: optional_dict => fields_of_dict_option optional_dict
     end.
 
-  Definition make {Value : Set} (optional_dict : list (string * option Value)) : t Value :=
+  Definition make_option {Value : Set} (optional_dict : list (string * option Value)) : t Value :=
     {|
       internal := None;
-      fields := fields_of_optional_dict optional_dict;
+      fields := fields_of_dict_option optional_dict;
+    |}.
+
+  Fixpoint fields_of_dict {Value : Set} (dict : list (string * Value)) : Dict.t Value :=
+    match dict with
+    | [] => []
+    | (name, value) :: dict =>
+      Dict.write (fields_of_dict dict) name value
+    end.
+
+  Definition make {Value : Set} (dict : list (string * Value)) : t Value :=
+    {|
+      internal := None;
+      fields := fields_of_dict dict;
     |}.
 
   (** When an object is just a wrapper around the [Data.t] type. *)
@@ -246,6 +259,11 @@ Definition IsImported (globals : Globals.t) (import : Globals.t) (name : string)
   forall (value : Value.t),
     IsInGlobals import name value ->
     IsInGlobals globals name value.
+
+(** The `builtins` module is accessible from anywhere. *)
+Axiom builtins_is_imported :
+  forall (globals : Globals.t) (name : string),
+  IsImported globals "builtins" name.
 
 Module M.
   Definition pure (v : Value.t) : M :=
@@ -513,10 +531,17 @@ Module Compare.
   Parameter not_in : Value.t -> Value.t -> M.
 End Compare.
 
+Parameter make_list_concat : list Value.t -> M.
+
+Definition make_function (f : Value.t -> Value.t -> M) : Value.t :=
+  Value.Make "builtins" "function" (Pointer.Imm (Object.wrapper (Data.Closure f))).
+
 (** ** Builtins *)
 Module builtins.
+  Definition globals : Globals.t := "builtins".
+
   Definition make_klass (klass : Klass.t Value.t M) : Value.t :=
-  Value.Make "builtins" "type" (Pointer.Imm (Object.wrapper (Data.Klass klass))).
+    Value.Make "builtins" "type" (Pointer.Imm (Object.wrapper (Data.Klass klass))).
 
   Definition type : Value.t :=
     make_klass {|
@@ -541,9 +566,7 @@ Module builtins.
       Klass.methods := [];
     |}.
   Axiom str_in_globals : IsInGlobals "builtins" "str" str.
+
+  Parameter len : Value.t -> Value.t -> M.
+  Axiom len_in_globals : IsInGlobals globals "len" (make_function len).
 End builtins.
-
-Parameter make_list_concat : list Value.t -> M.
-
-Definition make_function (f : Value.t -> Value.t -> M) : Value.t :=
-  Value.Make "builtins" "function" (Pointer.Imm (Object.wrapper (Data.Closure f))).

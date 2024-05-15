@@ -87,7 +87,7 @@ Definition State : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition TransientStorage : Value.t := builtins.make_klass {|
@@ -96,7 +96,7 @@ Definition TransientStorage : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition close_state : Value.t -> Value.t -> M :=

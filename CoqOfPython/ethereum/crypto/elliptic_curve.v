@@ -191,7 +191,7 @@ Axiom secp256k1_recover_in_globals :
 
 Definition EllipticCurve : Value.t := builtins.make_klass {|
   Klass.bases := [
-    (* At base: unsupported node type: Subscript *)
+    (globals, "(* At base: unsupported node type: Subscript *)")
   ];
   Klass.class_methods := [
     (
@@ -784,5 +784,5 @@ Definition EllipticCurve : Value.t := builtins.make_klass {|
         |) in
         M.pure Constant.None_))
     )
-  ]
+  ];
 |}.

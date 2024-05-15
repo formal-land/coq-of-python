@@ -65,12 +65,12 @@ Axiom ethereum_frontier_vm_instructions_imports_system :
 
 Definition Ops : Value.t := builtins.make_klass {|
   Klass.bases := [
-    (* At base: unsupported node type: Attribute *)
+    (globals, "(* At base: unsupported node type: Attribute *)")
   ];
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 (* At top_level_stmt: unsupported node type: AnnAssign *)

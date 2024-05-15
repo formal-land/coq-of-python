@@ -73,7 +73,7 @@ Definition GenesisConfiguration : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition get_genesis_configuration : Value.t -> Value.t -> M :=

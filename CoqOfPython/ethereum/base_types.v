@@ -57,7 +57,7 @@ Definition SlottedFreezable : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition U255_CEIL_VALUE : Value.t := M.run ltac:(M.monadic (
@@ -1521,7 +1521,7 @@ Definition Uint : Value.t := builtins.make_klass {|
         |) in
         M.pure Constant.None_))
     )
-  ]
+  ];
 |}.
 
 Definition T : Value.t := M.run ltac:(M.monadic (
@@ -3614,7 +3614,7 @@ Definition FixedUint : Value.t := builtins.make_klass {|
         |) in
         M.pure Constant.None_))
     )
-  ]
+  ];
 |}.
 
 Definition U256 : Value.t := builtins.make_klass {|
@@ -3798,7 +3798,7 @@ Definition U256 : Value.t := builtins.make_klass {|
         |) in
         M.pure Constant.None_))
     )
-  ]
+  ];
 |}.
 
 (* At top_level_stmt: unsupported node type: Assign *)
@@ -3928,7 +3928,7 @@ Definition U32 : Value.t := builtins.make_klass {|
         |) in
         M.pure Constant.None_))
     )
-  ]
+  ];
 |}.
 
 (* At top_level_stmt: unsupported node type: Assign *)
@@ -4110,7 +4110,7 @@ Definition U64 : Value.t := builtins.make_klass {|
         |) in
         M.pure Constant.None_))
     )
-  ]
+  ];
 |}.
 
 (* At top_level_stmt: unsupported node type: Assign *)
@@ -4192,7 +4192,7 @@ Definition FixedBytes : Value.t := builtins.make_klass {|
         |) in
         M.pure Constant.None_))
     )
-  ]
+  ];
 |}.
 
 Definition Bytes0 : Value.t := builtins.make_klass {|
@@ -4202,7 +4202,7 @@ Definition Bytes0 : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition Bytes4 : Value.t := builtins.make_klass {|
@@ -4212,7 +4212,7 @@ Definition Bytes4 : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition Bytes8 : Value.t := builtins.make_klass {|
@@ -4222,7 +4222,7 @@ Definition Bytes8 : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition Bytes20 : Value.t := builtins.make_klass {|
@@ -4232,7 +4232,7 @@ Definition Bytes20 : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition Bytes32 : Value.t := builtins.make_klass {|
@@ -4242,7 +4242,7 @@ Definition Bytes32 : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition Bytes48 : Value.t := builtins.make_klass {|
@@ -4252,7 +4252,7 @@ Definition Bytes48 : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition Bytes64 : Value.t := builtins.make_klass {|
@@ -4262,7 +4262,7 @@ Definition Bytes64 : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition Bytes256 : Value.t := builtins.make_klass {|
@@ -4272,7 +4272,7 @@ Definition Bytes256 : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition Bytes : Value.t := M.run ltac:(M.monadic (

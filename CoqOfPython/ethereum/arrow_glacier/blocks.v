@@ -56,7 +56,7 @@ Definition Header : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition Block : Value.t := builtins.make_klass {|
@@ -65,7 +65,7 @@ Definition Block : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition Log : Value.t := builtins.make_klass {|
@@ -74,7 +74,7 @@ Definition Log : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition Receipt : Value.t := builtins.make_klass {|
@@ -83,5 +83,5 @@ Definition Receipt : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.

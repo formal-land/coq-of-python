@@ -76,7 +76,7 @@ Definition LegacyTransaction : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition AccessListTransaction : Value.t := builtins.make_klass {|
@@ -85,7 +85,7 @@ Definition AccessListTransaction : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition Transaction : Value.t := M.run ltac:(M.monadic (

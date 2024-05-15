@@ -72,7 +72,7 @@ Definition Environment : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition Message : Value.t := builtins.make_klass {|
@@ -81,7 +81,7 @@ Definition Message : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition Evm : Value.t := builtins.make_klass {|
@@ -90,7 +90,7 @@ Definition Evm : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition incorporate_child_on_success : Value.t -> Value.t -> M :=

@@ -29,7 +29,7 @@ Definition ExceptionalHalt : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition StackUnderflowError : Value.t := builtins.make_klass {|
@@ -39,7 +39,7 @@ Definition StackUnderflowError : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition StackOverflowError : Value.t := builtins.make_klass {|
@@ -49,7 +49,7 @@ Definition StackOverflowError : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition OutOfGasError : Value.t := builtins.make_klass {|
@@ -59,7 +59,7 @@ Definition OutOfGasError : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition InvalidOpcode : Value.t := builtins.make_klass {|
@@ -91,7 +91,7 @@ Definition InvalidOpcode : Value.t := builtins.make_klass {|
         |) in
         M.pure Constant.None_))
     )
-  ]
+  ];
 |}.
 
 Definition InvalidJumpDestError : Value.t := builtins.make_klass {|
@@ -101,7 +101,7 @@ Definition InvalidJumpDestError : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition StackDepthLimitError : Value.t := builtins.make_klass {|
@@ -111,7 +111,7 @@ Definition StackDepthLimitError : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition AddressCollision : Value.t := builtins.make_klass {|
@@ -121,5 +121,5 @@ Definition AddressCollision : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.

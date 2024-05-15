@@ -64,9 +64,6 @@ Module U256.
   Definition to_Z (value : t) : Z :=
     FixedUint.value (get value).
 
-  Definition to_value (value : t) : Value.t :=
-    Value.Make globals "U256" (Pointer.Imm (Object.wrapper (Data.Integer (to_Z value)))).
-
   Definition __add__ (self right_ : t) : M? Exception.t t :=
     let? result := FixedUint.__add__ (get self) (get right_) in
     return? (Make result).

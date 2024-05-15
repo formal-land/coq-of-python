@@ -814,7 +814,7 @@ Definition Blake2 : Value.t := builtins.make_klass {|
         |) in
         M.pure Constant.None_))
     )
-  ]
+  ];
 |}.
 
 Definition Blake2b : Value.t := builtins.make_klass {|
@@ -824,5 +824,5 @@ Definition Blake2b : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.

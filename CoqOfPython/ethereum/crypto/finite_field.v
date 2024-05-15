@@ -160,7 +160,7 @@ Definition Field : Value.t := builtins.make_klass {|
         let _ := Constant.ellipsis in
         M.pure Constant.None_))
     )
-  ]
+  ];
 |}.
 
 Definition T : Value.t := M.run ltac:(M.monadic (
@@ -679,7 +679,7 @@ Definition PrimeField : Value.t := builtins.make_klass {|
         |) in
         M.pure Constant.None_))
     )
-  ]
+  ];
 |}.
 
 Definition U : Value.t := M.run ltac:(M.monadic (
@@ -2315,5 +2315,5 @@ Definition GaloisField : Value.t := builtins.make_klass {|
         |) in
         M.pure Constant.None_))
     )
-  ]
+  ];
 |}.

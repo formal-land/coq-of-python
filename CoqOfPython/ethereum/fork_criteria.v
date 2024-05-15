@@ -132,7 +132,7 @@ Definition ForkCriteria : Value.t := builtins.make_klass {|
         |) in
         M.pure Constant.None_))
     )
-  ]
+  ];
 |}.
 
 Definition ByBlockNumber : Value.t := builtins.make_klass {|
@@ -186,7 +186,7 @@ Definition ByBlockNumber : Value.t := builtins.make_klass {|
         |) in
         M.pure Constant.None_))
     )
-  ]
+  ];
 |}.
 
 Definition ByTimestamp : Value.t := builtins.make_klass {|
@@ -240,7 +240,7 @@ Definition ByTimestamp : Value.t := builtins.make_klass {|
         |) in
         M.pure Constant.None_))
     )
-  ]
+  ];
 |}.
 
 Definition Unscheduled : Value.t := builtins.make_klass {|
@@ -287,5 +287,5 @@ Definition Unscheduled : Value.t := builtins.make_klass {|
         |) in
         M.pure Constant.None_))
     )
-  ]
+  ];
 |}.

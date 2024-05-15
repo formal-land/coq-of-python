@@ -452,7 +452,7 @@ Definition ExtendMemory : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition MessageCallGas : Value.t := builtins.make_klass {|
@@ -461,7 +461,7 @@ Definition MessageCallGas : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition charge_gas : Value.t -> Value.t -> M :=

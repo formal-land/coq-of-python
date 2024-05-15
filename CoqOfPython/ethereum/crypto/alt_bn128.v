@@ -33,32 +33,32 @@ Definition ATE_PAIRING_COUNT_BITS : Value.t := M.run ltac:(M.monadic (
 
 Definition BNF : Value.t := builtins.make_klass {|
   Klass.bases := [
-    (* At base: unsupported node type: Attribute *)
+    (globals, "(* At base: unsupported node type: Attribute *)")
   ];
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition BNP : Value.t := builtins.make_klass {|
   Klass.bases := [
-    (* At base: unsupported node type: Attribute *)
+    (globals, "(* At base: unsupported node type: Attribute *)")
   ];
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition BNF2 : Value.t := builtins.make_klass {|
   Klass.bases := [
-    (* At base: unsupported node type: Attribute *)
+    (globals, "(* At base: unsupported node type: Attribute *)")
   ];
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 (* At top_level_stmt: unsupported node type: Assign *)
@@ -78,17 +78,17 @@ Definition expr_51 : Value.t :=
 
 Definition BNP2 : Value.t := builtins.make_klass {|
   Klass.bases := [
-    (* At base: unsupported node type: Attribute *)
+    (globals, "(* At base: unsupported node type: Attribute *)")
   ];
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition BNF12 : Value.t := builtins.make_klass {|
   Klass.bases := [
-    (* At base: unsupported node type: Attribute *)
+    (globals, "(* At base: unsupported node type: Attribute *)")
   ];
   Klass.class_methods := [
   ];
@@ -234,7 +234,7 @@ Definition BNF12 : Value.t := builtins.make_klass {|
         |) in
         M.pure Constant.None_))
     )
-  ]
+  ];
 |}.
 
 (* At top_level_stmt: unsupported node type: Assign *)
@@ -254,12 +254,12 @@ Definition expr_104 : Value.t :=
 
 Definition BNP12 : Value.t := builtins.make_klass {|
   Klass.bases := [
-    (* At base: unsupported node type: Attribute *)
+    (globals, "(* At base: unsupported node type: Attribute *)")
   ];
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition bnf2_to_bnf12 : Value.t -> Value.t -> M :=

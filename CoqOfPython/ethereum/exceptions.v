@@ -26,7 +26,7 @@ Definition EthereumException : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition InvalidBlock : Value.t := builtins.make_klass {|
@@ -36,7 +36,7 @@ Definition InvalidBlock : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition RLPDecodingError : Value.t := builtins.make_klass {|
@@ -46,7 +46,7 @@ Definition RLPDecodingError : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition RLPEncodingError : Value.t := builtins.make_klass {|
@@ -56,5 +56,5 @@ Definition RLPEncodingError : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.

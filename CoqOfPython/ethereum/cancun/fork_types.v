@@ -65,7 +65,7 @@ Definition Account : Value.t := builtins.make_klass {|
   Klass.class_methods := [
   ];
   Klass.methods := [
-  ]
+  ];
 |}.
 
 Definition EMPTY_ACCOUNT : Value.t := M.run ltac:(M.monadic (
