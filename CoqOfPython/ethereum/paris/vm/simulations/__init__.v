@@ -105,5 +105,15 @@ Module Evm.
       Lens.read '(Make _ rest) := rest.(Rest.memory);
       Lens.write '(Make message rest) memory := Make message rest<|Rest.memory := memory|>;
     |}.
+
+    Definition code : Lens.t t Bytes.t := {|
+      Lens.read '(Make _ rest) := rest.(Rest.code);
+      Lens.write '(Make message rest) code := Make message rest<|Rest.code := code|>;
+    |}.
+
+    Definition gas_left : Lens.t t Uint.t := {|
+      Lens.read '(Make _ rest) := rest.(Rest.gas_left);
+      Lens.write '(Make message rest) gas_left := Make message rest<|Rest.gas_left := gas_left|>;
+    |}.
   End Lens.
 End Evm.

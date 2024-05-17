@@ -25,7 +25,47 @@ Definition push := stack.push.
 
 Import simulations.CoqOfPython.Notations.
 
-Definition add : MS? Evm.t Exception.t unit :=
+(* For sanity checks *)
+Axiom environment : __init__.Environment.t.
+Axiom message : __init__.Message.t Evm.t.
+
+Definition empty_evm : Evm.t :=
+  Evm.Make message {|
+    Evm.Rest.pc := Uint.Make 0;
+    Evm.Rest.stack := [];
+    Evm.Rest.memory := [];
+    Evm.Rest.code := __init__.Bytes.Make [];
+    Evm.Rest.gas_left := Uint.Make 0;
+    Evm.Rest.env := environment;
+    Evm.Rest.valid_jump_destinations := [];
+    Evm.Rest.logs := [];
+    Evm.Rest.refund_counter := 0;
+    Evm.Rest.running := true;
+    Evm.Rest.output := __init__.Bytes.Make [];
+    Evm.Rest.accounts_to_delete := [];
+    Evm.Rest.touched_accounts := [];
+    Evm.Rest.return_data := __init__.Bytes.Make [];
+    Evm.Rest.error := None;
+    Evm.Rest.accessed_addresses := [];
+    Evm.Rest.accessed_storage_keys := [];
+  |}.
+
+Definition evm_with_gas : Evm.t :=
+  Evm.Lens.gas_left.(Lens.write) empty_evm GAS_VERY_LOW.
+
+Definition evm_with_stack : Evm.t :=
+  Evm.Lens.stack.(Lens.write) evm_with_gas [
+    U256.of_Z 23;
+    U256.of_Z 23
+  ].
+
+
+Check U256.__add__.
+Check U256.to_Z.
+Check U256.to_value.
+Check U256.__add__.
+
+Definition arithmetic_operation wrapped_operation : MS? Evm.t Exception.t unit :=
   (* STACK *)
   letS? x := StateError.lift_lens Evm.Lens.stack pop in
   letS? y := StateError.lift_lens Evm.Lens.stack pop in
@@ -34,7 +74,7 @@ Definition add : MS? Evm.t Exception.t unit :=
   letS? _ := charge_gas GAS_VERY_LOW in
 
   (* OPERATION *)
-  let result := U256.wrapping_add x y in
+  let result := wrapped_operation x y in
 
   letS? _ := StateError.lift_lens Evm.Lens.stack (push result) in
 
@@ -43,3 +83,35 @@ Definition add : MS? Evm.t Exception.t unit :=
     (inl tt, Uint.__add__ pc (Uint.Make 1))) in
 
   returnS? tt.
+
+Definition add : MS? Evm.t Exception.t unit :=
+  arithmetic_operation U256.wrapping_add.
+
+(* Compute add evm_with_stack. *)
+
+Definition sub : MS? Evm.t Exception.t unit :=
+  arithmetic_operation U256.wrapping_sub.
+  
+(* Compute sub evm_with_stack. *)
+
+Definition mul : MS? Evm.t Exception.t unit :=
+  arithmetic_operation U256.wrapping_mul.
+
+(* Compute mul evm_with_stack. *)
+
+Definition div : MS? Evm.t Exception.t unit :=
+  arithmetic_operation U256.wrapping_div.
+
+  
+ 
+
+
+
+    
+
+
+
+
+
+
+

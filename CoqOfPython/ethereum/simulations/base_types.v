@@ -45,6 +45,42 @@ Module FixedUint.
       MAX_VALUE := self.(MAX_VALUE);
       value := Z.modulo sum self.(MAX_VALUE);
     |}.
+
+   Definition __sub__ (self right_ : t) : M? Exception.t t :=
+    let result := (self.(value) - right_.(value))%Z in
+    if result >? self.(MAX_VALUE) then
+      Error.raise (Exception.ArithmeticError ArithmeticError.OverflowError)
+    else
+      return? {|
+        MAX_VALUE := self.(MAX_VALUE);
+        value := result;
+      |}.
+
+  Definition wrapping_sub (self right_ : t) : t :=
+    let sub := (self.(value) - right_.(value))%Z in
+    {|
+      MAX_VALUE := self.(MAX_VALUE);
+      value := Z.modulo sub self.(MAX_VALUE);
+    |}.
+
+  Definition __mul__ (self right_ : t) : M? Exception.t t :=
+    let result := (self.(value) * right_.(value))%Z in
+    if result >? self.(MAX_VALUE) then
+      Error.raise (Exception.ArithmeticError ArithmeticError.OverflowError)
+    else
+      return? {|
+        MAX_VALUE := self.(MAX_VALUE);
+        value := result;
+      |}.
+
+  Definition wrapping_mul (self right_ : t) : t :=
+    let mul := (self.(value) * right_.(value))%Z in
+    {|
+      MAX_VALUE := self.(MAX_VALUE);
+      value := Z.modulo mul self.(MAX_VALUE);
+    |}.
+  
+
 End FixedUint.
 
 Module U256.
@@ -73,6 +109,21 @@ Module U256.
 
   Definition wrapping_add (self right_ : t) : t :=
     Make (FixedUint.wrapping_add (get self) (get right_)).
+
+  Definition __sub__ (self right_ : t) : M? Exception.t t :=
+    let? result := FixedUint.__sub__ (get self) (get right_) in
+    return? (Make result).
+
+  Definition wrapping_sub (self right_ : t) : t :=
+    Make (FixedUint.wrapping_sub (get self) (get right_)).
+
+  Definition __mul__ (self right_ : t) : M? Exception.t t :=
+    let? result := FixedUint.__mul__ (get self) (get right_) in
+    return? (Make result).
+
+  Definition wrapping_mul (self right_ : t) : t :=
+    Make (FixedUint.wrapping_mul (get self) (get right_)).
+
 End U256.
 
 Module U32.
