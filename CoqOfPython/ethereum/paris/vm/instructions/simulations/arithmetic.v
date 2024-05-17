@@ -56,22 +56,16 @@ Definition evm_with_gas : Evm.t :=
 Definition evm_with_stack : Evm.t :=
   Evm.Lens.stack.(Lens.write) evm_with_gas [
     U256.of_Z 23;
-    U256.of_Z 23
+    U256.of_Z 3
   ].
 
-
-Check U256.__add__.
-Check U256.to_Z.
-Check U256.to_value.
-Check U256.__add__.
-
-Definition arithmetic_operation wrapped_operation : MS? Evm.t Exception.t unit :=
+Definition binary_operation wrapped_operation gas_charge : MS? Evm.t Exception.t unit :=
   (* STACK *)
   letS? x := StateError.lift_lens Evm.Lens.stack pop in
   letS? y := StateError.lift_lens Evm.Lens.stack pop in
 
   (* GAS *)
-  letS? _ := charge_gas GAS_VERY_LOW in
+  letS? _ := charge_gas gas_charge in
 
   (* OPERATION *)
   let result := wrapped_operation x y in
@@ -85,29 +79,75 @@ Definition arithmetic_operation wrapped_operation : MS? Evm.t Exception.t unit :
   returnS? tt.
 
 Definition add : MS? Evm.t Exception.t unit :=
-  arithmetic_operation U256.wrapping_add.
+  binary_operation U256.wrapping_add GAS_VERY_LOW.
 
 (* Compute add evm_with_stack. *)
 
 Definition sub : MS? Evm.t Exception.t unit :=
-  arithmetic_operation U256.wrapping_sub.
+  binary_operation U256.wrapping_sub GAS_VERY_LOW.
   
 (* Compute sub evm_with_stack. *)
 
 Definition mul : MS? Evm.t Exception.t unit :=
-  arithmetic_operation U256.wrapping_mul.
+  binary_operation U256.wrapping_mul GAS_VERY_LOW.
 
 (* Compute mul evm_with_stack. *)
 
 Definition div : MS? Evm.t Exception.t unit :=
-  arithmetic_operation U256.wrapping_div.
+  binary_operation U256.wrapping_div GAS_VERY_LOW.
+
+(* Compute div evm_with_stack. *)
+
+(* Gallina has a built in 'mod' which causes the
+   names to collide *)
+
+Definition sim_mod : MS? Evm.t Exception.t unit :=
+  binary_operation U256.wrapping_mod GAS_VERY_LOW.
+
+Require Import NZAxioms NZMulOrder NZPow.
+
+
+Search "_" inside Z.
+
+Check log2.
+
+
+Definition exp : MS? Evm.t Exception.t unit :=
+  (* STACK *)
+  letS? base := StateError.lift_lens Evm.Lens.stack pop in
+  letS? exponent := StateError.lift_lens Evm.Lens.stack pop in
+
+        
+  (* GAS *)
+  letS? _ := charge_gas GAS_EXPONENTIATION + GAS_EXPONENTIATION_PER_BYTE * exponent_bytes in
+
+  (* OPERATION *)
+  let result := U256.wrapping_div base exponent in
+
+  letS? _ := StateError.lift_lens Evm.Lens.stack (push result) in
+
+  (* PROGRAM COUNTER *)
+  letS? _ := StateError.lift_lens Evm.Lens.pc (fun pc =>
+    (inl tt, Uint.__add__ pc (Uint.Make 1))) in
+
+  returnS? tt.
+
+
+
+
 
   
- 
+(* Compute sim_mod evm_with_stack. *)
+
+
+
+
 
 
 
     
+
+
 
 
 

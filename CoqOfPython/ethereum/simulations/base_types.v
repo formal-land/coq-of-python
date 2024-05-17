@@ -79,8 +79,64 @@ Module FixedUint.
       MAX_VALUE := self.(MAX_VALUE);
       value := Z.modulo mul self.(MAX_VALUE);
     |}.
-  
 
+  Definition __div__ (self right_ : t) : M? Exception.t t :=
+    let result := (self.(value) / right_.(value))%Z in
+    if result >? self.(MAX_VALUE) then
+      Error.raise (Exception.ArithmeticError ArithmeticError.OverflowError)
+    else
+      return? {|
+        MAX_VALUE := self.(MAX_VALUE);
+        value := result;
+      |}.
+
+  (* Coq's built it in division operator will take
+     care of the division by zero case *)
+  
+  Definition wrapping_div (self right_ : t) : t :=
+    let div := (self.(value) / right_.(value))%Z in
+    {|
+      MAX_VALUE := self.(MAX_VALUE);
+      value := Z.modulo div self.(MAX_VALUE);
+    |}.
+
+  Check Z.modulo.
+  
+  Definition __mod__ (self right_ : t) : M? Exception.t t :=
+    let result := (Z.modulo self.(value) right_.(value))%Z in
+    if result >? self.(MAX_VALUE) then
+      Error.raise (Exception.ArithmeticError ArithmeticError.OverflowError)
+    else
+      return? {|
+        MAX_VALUE := self.(MAX_VALUE);
+        value := result;
+      |}.
+  
+  Definition wrapping_mod (self right_ : t) : t :=
+    let mul := (Z.modulo self.(value) right_.(value))%Z in
+    {|
+      MAX_VALUE := self.(MAX_VALUE);
+      value := Z.modulo mul self.(MAX_VALUE);
+    |}.
+
+  Definition __exp__ (self right_ : t) : M? Exception.t t :=
+    let result := (Z.pow self.(value) right_.(value))%Z in
+    if result >? self.(MAX_VALUE) then
+      Error.raise (Exception.ArithmeticError ArithmeticError.OverflowError)
+    else
+      return? {|
+        MAX_VALUE := self.(MAX_VALUE);
+        value := result;
+      |}.
+  
+  Definition wrapping_exp (self right_ : t) : t :=
+    let mul := (Z.pow self.(value) right_.(value))%Z in
+    {|
+      MAX_VALUE := self.(MAX_VALUE);
+      value := Z.modulo mul self.(MAX_VALUE);
+    |}.
+
+  
 End FixedUint.
 
 Module U256.
@@ -124,6 +180,27 @@ Module U256.
   Definition wrapping_mul (self right_ : t) : t :=
     Make (FixedUint.wrapping_mul (get self) (get right_)).
 
+  Definition __div__ (self right_ : t) : M? Exception.t t :=
+    let? result := FixedUint.__div__ (get self) (get right_) in
+    return? (Make result).
+
+  Definition wrapping_div (self right_ : t) : t :=
+    Make (FixedUint.wrapping_div (get self) (get right_)).
+
+  Definition __mod__ (self right_ : t) : M? Exception.t t :=
+    let? result := FixedUint.__div__ (get self) (get right_) in
+    return? (Make result).
+
+  Definition wrapping_mod (self right_ : t) : t :=
+    Make (FixedUint.wrapping_mod (get self) (get right_)).
+
+  Definition __exp__ (self right_ : t) : M? Exception.t t :=
+    let? result := FixedUint.__div__ (get self) (get right_) in
+    return? (Make result).
+
+  Definition wrapping_exp (self right_ : t) : t :=
+    Make (FixedUint.wrapping_mod (get self) (get right_)).
+  
 End U256.
 
 Module U32.
