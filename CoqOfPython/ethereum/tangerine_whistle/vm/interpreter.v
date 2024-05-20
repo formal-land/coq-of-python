@@ -119,7 +119,7 @@ Definition STACK_DEPTH_LIMIT : Value.t := M.run ltac:(M.monadic (
   |)
 )).
 
-Definition MessageCallOutput : Value.t := builtins.make_klass {|
+Definition MessageCallOutput : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [

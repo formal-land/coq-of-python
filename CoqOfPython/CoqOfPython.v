@@ -150,11 +150,15 @@ End Object.
 
 Module Pointer.
   Module Mutable.
+    Module Kind.
+      Inductive t : Set :=
+      | Stack (index : nat)
+      | Heap {Address : Set} (address : Address).
+    End Kind.
+
     Inductive t (Value : Set) : Set :=
-    | Stack {A : Set} (index : nat) (to_object : A -> Object.t Value)
-    | Heap {Address A : Set} (address : Address) (to_object : A -> Object.t Value).
-    Arguments Stack {_ _}.
-    Arguments Heap {_ _ _}.
+    | Make {A : Set} (kind : Kind.t) (to_object : A -> Object.t Value).
+    Arguments Make {_ _}.
   End Mutable.
 
   Inductive t (Value : Set) : Set :=
@@ -162,6 +166,13 @@ Module Pointer.
   | Mutable (mutable : Mutable.t Value).
   Arguments Imm {_}.
   Arguments Mutable {_}.
+
+  Definition stack {Value A : Set} (index : nat) (to_object : A -> Object.t Value) : t Value :=
+    Mutable (Mutable.Make (Mutable.Kind.Stack index) to_object).
+
+  Definition heap {Value A Address : Set} (address : Address) (to_object : A -> Object.t Value) :
+      t Value :=
+    Mutable (Mutable.Make (Mutable.Kind.Heap address) to_object).
 End Pointer.
 
 Module Value.
@@ -536,37 +547,5 @@ Parameter make_list_concat : list Value.t -> M.
 Definition make_function (f : Value.t -> Value.t -> M) : Value.t :=
   Value.Make "builtins" "function" (Pointer.Imm (Object.wrapper (Data.Closure f))).
 
-(** ** Builtins *)
-Module builtins.
-  Definition globals : Globals.t := "builtins".
-
-  Definition make_klass (klass : Klass.t Value.t M) : Value.t :=
-    Value.Make "builtins" "type" (Pointer.Imm (Object.wrapper (Data.Klass klass))).
-
-  Definition type : Value.t :=
-    make_klass {|
-      Klass.bases := [];
-      Klass.class_methods := [];
-      Klass.methods := [];
-    |}.
-  Axiom type_in_globals : IsInGlobals "builtins" "type" type.
-
-  Definition int : Value.t :=
-    make_klass {|
-      Klass.bases := [];
-      Klass.class_methods := [];
-      Klass.methods := [];
-    |}.
-  Axiom int_in_globals : IsInGlobals "builtins" "int" int.
-
-  Definition str : Value.t :=
-    make_klass {|
-      Klass.bases := [];
-      Klass.class_methods := [];
-      Klass.methods := [];
-    |}.
-  Axiom str_in_globals : IsInGlobals "builtins" "str" str.
-
-  Parameter len : Value.t -> Value.t -> M.
-  Axiom len_in_globals : IsInGlobals globals "len" (make_function len).
-End builtins.
+Definition make_klass (klass : Klass.t Value.t M) : Value.t :=
+  Value.Make "builtins" "type" (Pointer.Imm (Object.wrapper (Data.Klass klass))).

@@ -55,7 +55,7 @@ Definition Bloom : Value.t := M.run ltac:(M.monadic (
   M.get_name (| globals, locals_stack, "Bytes256" |)
 )).
 
-Definition Account : Value.t := builtins.make_klass {|
+Definition Account : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [

@@ -41,7 +41,7 @@ Definition F : Value.t := M.run ltac:(M.monadic (
   |)
 )).
 
-Definition Field : Value.t := builtins.make_klass {|
+Definition Field : Value.t := make_klass {|
   Klass.bases := [
     (globals, "Protocol")
   ];
@@ -173,7 +173,7 @@ Definition T : Value.t := M.run ltac:(M.monadic (
   |)
 )).
 
-Definition PrimeField : Value.t := builtins.make_klass {|
+Definition PrimeField : Value.t := make_klass {|
   Klass.bases := [
     (globals, "int");
     (globals, "Field")
@@ -692,7 +692,7 @@ Definition U : Value.t := M.run ltac:(M.monadic (
   |)
 )).
 
-Definition GaloisField : Value.t := builtins.make_klass {|
+Definition GaloisField : Value.t := make_klass {|
   Klass.bases := [
     (globals, "tuple");
     (globals, "Field")

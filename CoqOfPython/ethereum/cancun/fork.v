@@ -240,7 +240,7 @@ Definition VERSIONED_HASH_VERSION_KZG : Value.t := M.run ltac:(M.monadic (
   Constant.bytes "01"
 )).
 
-Definition BlockChain : Value.t := builtins.make_klass {|
+Definition BlockChain : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [
@@ -1508,7 +1508,7 @@ Definition make_receipt : Value.t -> Value.t -> M :=
 Axiom make_receipt_in_globals :
   IsInGlobals globals "make_receipt" (make_function make_receipt).
 
-Definition ApplyBodyOutput : Value.t := builtins.make_klass {|
+Definition ApplyBodyOutput : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [

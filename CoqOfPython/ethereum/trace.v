@@ -31,7 +31,7 @@ Axiom typing_imports_Optional :
 Axiom typing_imports_Union :
   IsImported globals "typing" "Union".
 
-Definition TransactionStart : Value.t := builtins.make_klass {|
+Definition TransactionStart : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [
@@ -40,7 +40,7 @@ Definition TransactionStart : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition TransactionEnd : Value.t := builtins.make_klass {|
+Definition TransactionEnd : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [
@@ -49,7 +49,7 @@ Definition TransactionEnd : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition PrecompileStart : Value.t := builtins.make_klass {|
+Definition PrecompileStart : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [
@@ -58,7 +58,7 @@ Definition PrecompileStart : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition PrecompileEnd : Value.t := builtins.make_klass {|
+Definition PrecompileEnd : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [
@@ -67,7 +67,7 @@ Definition PrecompileEnd : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition OpStart : Value.t := builtins.make_klass {|
+Definition OpStart : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [
@@ -76,7 +76,7 @@ Definition OpStart : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition OpEnd : Value.t := builtins.make_klass {|
+Definition OpEnd : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [
@@ -85,7 +85,7 @@ Definition OpEnd : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition OpException : Value.t := builtins.make_klass {|
+Definition OpException : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [
@@ -94,7 +94,7 @@ Definition OpException : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition EvmStop : Value.t := builtins.make_klass {|
+Definition EvmStop : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [
@@ -103,7 +103,7 @@ Definition EvmStop : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition GasAndRefund : Value.t := builtins.make_klass {|
+Definition GasAndRefund : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [

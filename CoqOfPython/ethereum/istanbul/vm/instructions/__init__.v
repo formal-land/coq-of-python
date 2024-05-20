@@ -63,7 +63,7 @@ Axiom ethereum_istanbul_vm_instructions_imports_storage :
 Axiom ethereum_istanbul_vm_instructions_imports_system :
   IsImported globals "ethereum.istanbul.vm.instructions" "system".
 
-Definition Ops : Value.t := builtins.make_klass {|
+Definition Ops : Value.t := make_klass {|
   Klass.bases := [
     (globals, "(* At base: unsupported node type: Attribute *)")
   ];

@@ -68,7 +68,7 @@ Definition __all__ : Value.t := M.run ltac:(M.monadic (
   make_tuple [ Constant.str "Environment"; Constant.str "Evm"; Constant.str "Message" ]
 )).
 
-Definition Environment : Value.t := builtins.make_klass {|
+Definition Environment : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [
@@ -77,7 +77,7 @@ Definition Environment : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition Message : Value.t := builtins.make_klass {|
+Definition Message : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [
@@ -86,7 +86,7 @@ Definition Message : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition Evm : Value.t := builtins.make_klass {|
+Definition Evm : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [

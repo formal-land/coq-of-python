@@ -22,7 +22,7 @@ Exceptions which cause the EVM to halt exceptionally.
 Axiom ethereum_exceptions_imports_EthereumException :
   IsImported globals "ethereum.exceptions" "EthereumException".
 
-Definition ExceptionalHalt : Value.t := builtins.make_klass {|
+Definition ExceptionalHalt : Value.t := make_klass {|
   Klass.bases := [
     (globals, "EthereumException")
   ];
@@ -32,7 +32,7 @@ Definition ExceptionalHalt : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition StackUnderflowError : Value.t := builtins.make_klass {|
+Definition StackUnderflowError : Value.t := make_klass {|
   Klass.bases := [
     (globals, "ExceptionalHalt")
   ];
@@ -42,7 +42,7 @@ Definition StackUnderflowError : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition StackOverflowError : Value.t := builtins.make_klass {|
+Definition StackOverflowError : Value.t := make_klass {|
   Klass.bases := [
     (globals, "ExceptionalHalt")
   ];
@@ -52,7 +52,7 @@ Definition StackOverflowError : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition OutOfGasError : Value.t := builtins.make_klass {|
+Definition OutOfGasError : Value.t := make_klass {|
   Klass.bases := [
     (globals, "ExceptionalHalt")
   ];
@@ -62,7 +62,7 @@ Definition OutOfGasError : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition InvalidOpcode : Value.t := builtins.make_klass {|
+Definition InvalidOpcode : Value.t := make_klass {|
   Klass.bases := [
     (globals, "ExceptionalHalt")
   ];
@@ -94,7 +94,7 @@ Definition InvalidOpcode : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition InvalidJumpDestError : Value.t := builtins.make_klass {|
+Definition InvalidJumpDestError : Value.t := make_klass {|
   Klass.bases := [
     (globals, "ExceptionalHalt")
   ];
@@ -104,7 +104,7 @@ Definition InvalidJumpDestError : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition StackDepthLimitError : Value.t := builtins.make_klass {|
+Definition StackDepthLimitError : Value.t := make_klass {|
   Klass.bases := [
     (globals, "ExceptionalHalt")
   ];
@@ -114,7 +114,7 @@ Definition StackDepthLimitError : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition AddressCollision : Value.t := builtins.make_klass {|
+Definition AddressCollision : Value.t := make_klass {|
   Klass.bases := [
     (globals, "ExceptionalHalt")
   ];

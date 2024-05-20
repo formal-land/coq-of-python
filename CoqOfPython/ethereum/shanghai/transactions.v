@@ -67,7 +67,7 @@ Definition TX_ACCESS_LIST_STORAGE_KEY_COST : Value.t := M.run ltac:(M.monadic (
   Constant.int 1900
 )).
 
-Definition LegacyTransaction : Value.t := builtins.make_klass {|
+Definition LegacyTransaction : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [
@@ -76,7 +76,7 @@ Definition LegacyTransaction : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition AccessListTransaction : Value.t := builtins.make_klass {|
+Definition AccessListTransaction : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [
@@ -85,7 +85,7 @@ Definition AccessListTransaction : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition FeeMarketTransaction : Value.t := builtins.make_klass {|
+Definition FeeMarketTransaction : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [

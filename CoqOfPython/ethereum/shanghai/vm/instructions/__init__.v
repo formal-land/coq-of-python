@@ -63,7 +63,7 @@ Axiom ethereum_shanghai_vm_instructions_imports_storage :
 Axiom ethereum_shanghai_vm_instructions_imports_system :
   IsImported globals "ethereum.shanghai.vm.instructions" "system".
 
-Definition Ops : Value.t := builtins.make_klass {|
+Definition Ops : Value.t := make_klass {|
   Klass.bases := [
     (globals, "(* At base: unsupported node type: Attribute *)")
   ];

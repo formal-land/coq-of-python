@@ -50,7 +50,7 @@ Axiom typing_imports_TypeVar :
 Axiom typing_imports_runtime_checkable :
   IsImported globals "typing" "runtime_checkable".
 
-Definition SlottedFreezable : Value.t := builtins.make_klass {|
+Definition SlottedFreezable : Value.t := make_klass {|
   Klass.bases := [
     (globals, "Protocol")
   ];
@@ -91,7 +91,7 @@ Smallest value that requires 257 bits to represent. Used when converting a
 [`U256.to_signed`]: ref:ethereum.base_types.U256.to_signed
 ".
 
-Definition Uint : Value.t := builtins.make_klass {|
+Definition Uint : Value.t := make_klass {|
   Klass.bases := [
     (globals, "int")
   ];
@@ -1534,7 +1534,7 @@ Definition T : Value.t := M.run ltac:(M.monadic (
   |)
 )).
 
-Definition FixedUint : Value.t := builtins.make_klass {|
+Definition FixedUint : Value.t := make_klass {|
   Klass.bases := [
     (globals, "int")
   ];
@@ -3617,7 +3617,7 @@ Definition FixedUint : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition U256 : Value.t := builtins.make_klass {|
+Definition U256 : Value.t := make_klass {|
   Klass.bases := [
     (globals, "FixedUint")
   ];
@@ -3803,7 +3803,7 @@ Definition U256 : Value.t := builtins.make_klass {|
 
 (* At top_level_stmt: unsupported node type: Assign *)
 
-Definition U32 : Value.t := builtins.make_klass {|
+Definition U32 : Value.t := make_klass {|
   Klass.bases := [
     (globals, "FixedUint")
   ];
@@ -3933,7 +3933,7 @@ Definition U32 : Value.t := builtins.make_klass {|
 
 (* At top_level_stmt: unsupported node type: Assign *)
 
-Definition U64 : Value.t := builtins.make_klass {|
+Definition U64 : Value.t := make_klass {|
   Klass.bases := [
     (globals, "FixedUint")
   ];
@@ -4125,7 +4125,7 @@ Definition B : Value.t := M.run ltac:(M.monadic (
   |)
 )).
 
-Definition FixedBytes : Value.t := builtins.make_klass {|
+Definition FixedBytes : Value.t := make_klass {|
   Klass.bases := [
     (globals, "bytes")
   ];
@@ -4195,7 +4195,7 @@ Definition FixedBytes : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition Bytes0 : Value.t := builtins.make_klass {|
+Definition Bytes0 : Value.t := make_klass {|
   Klass.bases := [
     (globals, "FixedBytes")
   ];
@@ -4205,7 +4205,7 @@ Definition Bytes0 : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition Bytes4 : Value.t := builtins.make_klass {|
+Definition Bytes4 : Value.t := make_klass {|
   Klass.bases := [
     (globals, "FixedBytes")
   ];
@@ -4215,7 +4215,7 @@ Definition Bytes4 : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition Bytes8 : Value.t := builtins.make_klass {|
+Definition Bytes8 : Value.t := make_klass {|
   Klass.bases := [
     (globals, "FixedBytes")
   ];
@@ -4225,7 +4225,7 @@ Definition Bytes8 : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition Bytes20 : Value.t := builtins.make_klass {|
+Definition Bytes20 : Value.t := make_klass {|
   Klass.bases := [
     (globals, "FixedBytes")
   ];
@@ -4235,7 +4235,7 @@ Definition Bytes20 : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition Bytes32 : Value.t := builtins.make_klass {|
+Definition Bytes32 : Value.t := make_klass {|
   Klass.bases := [
     (globals, "FixedBytes")
   ];
@@ -4245,7 +4245,7 @@ Definition Bytes32 : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition Bytes48 : Value.t := builtins.make_klass {|
+Definition Bytes48 : Value.t := make_klass {|
   Klass.bases := [
     (globals, "FixedBytes")
   ];
@@ -4255,7 +4255,7 @@ Definition Bytes48 : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition Bytes64 : Value.t := builtins.make_klass {|
+Definition Bytes64 : Value.t := make_klass {|
   Klass.bases := [
     (globals, "FixedBytes")
   ];
@@ -4265,7 +4265,7 @@ Definition Bytes64 : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition Bytes256 : Value.t := builtins.make_klass {|
+Definition Bytes256 : Value.t := make_klass {|
   Klass.bases := [
     (globals, "FixedBytes")
   ];

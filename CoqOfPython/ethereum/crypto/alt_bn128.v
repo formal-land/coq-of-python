@@ -31,7 +31,7 @@ Definition ATE_PAIRING_COUNT_BITS : Value.t := M.run ltac:(M.monadic (
   Constant.int 63
 )).
 
-Definition BNF : Value.t := builtins.make_klass {|
+Definition BNF : Value.t := make_klass {|
   Klass.bases := [
     (globals, "(* At base: unsupported node type: Attribute *)")
   ];
@@ -41,7 +41,7 @@ Definition BNF : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition BNP : Value.t := builtins.make_klass {|
+Definition BNP : Value.t := make_klass {|
   Klass.bases := [
     (globals, "(* At base: unsupported node type: Attribute *)")
   ];
@@ -51,7 +51,7 @@ Definition BNP : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition BNF2 : Value.t := builtins.make_klass {|
+Definition BNF2 : Value.t := make_klass {|
   Klass.bases := [
     (globals, "(* At base: unsupported node type: Attribute *)")
   ];
@@ -76,7 +76,7 @@ Definition expr_48 : Value.t :=
 Definition expr_51 : Value.t :=
   Constant.str "autoapi_noindex".
 
-Definition BNP2 : Value.t := builtins.make_klass {|
+Definition BNP2 : Value.t := make_klass {|
   Klass.bases := [
     (globals, "(* At base: unsupported node type: Attribute *)")
   ];
@@ -86,7 +86,7 @@ Definition BNP2 : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition BNF12 : Value.t := builtins.make_klass {|
+Definition BNF12 : Value.t := make_klass {|
   Klass.bases := [
     (globals, "(* At base: unsupported node type: Attribute *)")
   ];
@@ -252,7 +252,7 @@ Definition expr_101 : Value.t :=
 Definition expr_104 : Value.t :=
   Constant.str "autoapi_noindex".
 
-Definition BNP12 : Value.t := builtins.make_klass {|
+Definition BNP12 : Value.t := make_klass {|
   Klass.bases := [
     (globals, "(* At base: unsupported node type: Attribute *)")
   ];

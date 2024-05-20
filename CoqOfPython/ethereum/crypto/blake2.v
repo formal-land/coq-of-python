@@ -99,7 +99,7 @@ Definition spit_le_to_uint : Value.t -> Value.t -> M :=
 Axiom spit_le_to_uint_in_globals :
   IsInGlobals globals "spit_le_to_uint" (make_function spit_le_to_uint).
 
-Definition Blake2 : Value.t := builtins.make_klass {|
+Definition Blake2 : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [
@@ -817,7 +817,7 @@ Definition Blake2 : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition Blake2b : Value.t := builtins.make_klass {|
+Definition Blake2b : Value.t := make_klass {|
   Klass.bases := [
     (globals, "Blake2")
   ];

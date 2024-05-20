@@ -31,7 +31,7 @@ Axiom typing_imports_Final :
 Axiom typing_imports_Tuple :
   IsImported globals "typing" "Tuple".
 
-Definition ForkCriteria : Value.t := builtins.make_klass {|
+Definition ForkCriteria : Value.t := make_klass {|
   Klass.bases := [
     (globals, "ABC")
   ];
@@ -135,7 +135,7 @@ Definition ForkCriteria : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition ByBlockNumber : Value.t := builtins.make_klass {|
+Definition ByBlockNumber : Value.t := make_klass {|
   Klass.bases := [
     (globals, "ForkCriteria")
   ];
@@ -189,7 +189,7 @@ Definition ByBlockNumber : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition ByTimestamp : Value.t := builtins.make_klass {|
+Definition ByTimestamp : Value.t := make_klass {|
   Klass.bases := [
     (globals, "ForkCriteria")
   ];
@@ -243,7 +243,7 @@ Definition ByTimestamp : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition Unscheduled : Value.t := builtins.make_klass {|
+Definition Unscheduled : Value.t := make_klass {|
   Klass.bases := [
     (globals, "ForkCriteria")
   ];

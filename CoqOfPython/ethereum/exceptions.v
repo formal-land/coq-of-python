@@ -19,7 +19,7 @@ Introduction
 The Ethereum specification exception classes.
 ".
 
-Definition EthereumException : Value.t := builtins.make_klass {|
+Definition EthereumException : Value.t := make_klass {|
   Klass.bases := [
     (globals, "Exception")
   ];
@@ -29,7 +29,7 @@ Definition EthereumException : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition InvalidBlock : Value.t := builtins.make_klass {|
+Definition InvalidBlock : Value.t := make_klass {|
   Klass.bases := [
     (globals, "EthereumException")
   ];
@@ -39,7 +39,7 @@ Definition InvalidBlock : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition RLPDecodingError : Value.t := builtins.make_klass {|
+Definition RLPDecodingError : Value.t := make_klass {|
   Klass.bases := [
     (globals, "InvalidBlock")
   ];
@@ -49,7 +49,7 @@ Definition RLPDecodingError : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition RLPEncodingError : Value.t := builtins.make_klass {|
+Definition RLPEncodingError : Value.t := make_klass {|
   Klass.bases := [
     (globals, "EthereumException")
   ];

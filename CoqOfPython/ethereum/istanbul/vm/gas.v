@@ -476,7 +476,7 @@ Definition GAS_BLAKE2_PER_ROUND : Value.t := M.run ltac:(M.monadic (
   |)
 )).
 
-Definition ExtendMemory : Value.t := builtins.make_klass {|
+Definition ExtendMemory : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [
@@ -485,7 +485,7 @@ Definition ExtendMemory : Value.t := builtins.make_klass {|
   ];
 |}.
 
-Definition MessageCallGas : Value.t := builtins.make_klass {|
+Definition MessageCallGas : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [

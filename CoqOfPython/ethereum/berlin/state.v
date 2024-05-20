@@ -76,7 +76,7 @@ Axiom ethereum_berlin_trie_imports_trie_get :
 Axiom ethereum_berlin_trie_imports_trie_set :
   IsImported globals "ethereum.berlin.trie" "trie_set".
 
-Definition State : Value.t := builtins.make_klass {|
+Definition State : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [

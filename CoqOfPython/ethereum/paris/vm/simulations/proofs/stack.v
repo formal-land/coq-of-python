@@ -48,13 +48,13 @@ Proof.
   unfold stack.pop, simulations.stack.pop in *.
   cbn in *.
   repeat eexists.
-  { apply (Run.CallPrimitiveStateAllocStack (PopLocals.init evm) PopLocals.to_object). {
-      reflexivity.
+  { eapply Run.CallPrimitiveStateAllocMutable. {
+      now apply (IsAlloc.Stack PopLocals.to_object (PopLocals.init evm)).
     }
     cbn.
-    eapply Run.CallPrimitiveStateReadStack. {
-      erewrite Stack.read_length_eq.
-      reflexivity.
+    eapply Run.CallPrimitiveStateRead. {
+      apply IsRead.Stack.
+      now erewrite Stack.read_length_eq.
     }
     cbn.
     eapply Run.CallPrimitiveGetInGlobals. {

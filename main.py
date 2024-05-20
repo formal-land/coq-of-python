@@ -106,7 +106,7 @@ def generate_klass(
     methods: list[tuple[str, str]],
 ) -> str:
     text = f"Definition {klass_name} : Value.t := "
-    text += "builtins.make_klass {|\n"
+    text += "make_klass {|\n"
 
     # Bases
     text += generate_indent(1) + "Klass.bases := ["

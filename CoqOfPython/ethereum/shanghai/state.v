@@ -79,7 +79,7 @@ Axiom ethereum_shanghai_trie_imports_trie_get :
 Axiom ethereum_shanghai_trie_imports_trie_set :
   IsImported globals "ethereum.shanghai.trie" "trie_set".
 
-Definition State : Value.t := builtins.make_klass {|
+Definition State : Value.t := make_klass {|
   Klass.bases := [
   ];
   Klass.class_methods := [
