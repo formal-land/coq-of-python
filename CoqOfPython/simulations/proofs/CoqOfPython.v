@@ -64,7 +64,7 @@ Module IsAlloc.
     Pointer.Mutable.t Value.t ->
     Object.t Value.t ->
     Stack.t -> Heap ->
-    Prop :=
+    Set :=
   | Stack {A : Set} to_object (value : A) object :
     let index := List.length stack in
     object = to_object value ->
@@ -92,7 +92,7 @@ Module IsRead.
     (stack : Stack.t) (heap : Heap) :
     Pointer.Mutable.t Value.t ->
     Object.t Value.t ->
-    Prop :=
+    Set :=
   | Stack {A : Set} index to_object (value : A) :
     Stack.read stack index = Some (existS A value) ->
     t
@@ -113,7 +113,7 @@ Module IsWrite.
     Pointer.Mutable.t Value.t ->
     Object.t Value.t ->
     Stack.t -> Heap ->
-    Prop :=
+    Set :=
   | Stack {A : Set} index to_object (update : A) update_object :
     let stack' := Stack.write stack index update in
     update_object = to_object update ->
@@ -135,34 +135,36 @@ End IsWrite.
 Module Run.
   Reserved Notation "{{ stack , heap | e ⇓ result | stack' , heap' }}".
 
-  Inductive t `{Heap.Trait} {A : Set}
-      (* Be aware of the order of parameters: the result and final heap are at
-         the beginning. This is due to the way polymorphic types for inductive
-         work in Coq, and the fact that the result is always the same as we are
-         in continuation passing style. *)
-      {result : A} {stack' : Stack.t} {heap' : Heap} :
-      LowM.t A -> Stack.t -> Heap -> Prop :=
-  | Pure :
-    {{ stack', heap' |
-      LowM.Pure result ⇓
-      result
-    | stack', heap' }}
+  Inductive t `{Heap.Trait} {A B : Set}
+      (stack : Stack.t) (heap : Heap)
+      (to_value : A -> B) (P_stack : Stack.t -> Prop) (P_heap : Heap -> Prop) :
+      LowM.t B -> Set :=
+  | Pure
+    (result : A)
+    (result' : B) :
+    result' = to_value result ->
+    P_stack stack ->
+    P_heap heap ->
+    {{ stack, heap |
+      LowM.Pure result' ⇓
+      to_value
+    | P_stack, P_heap }}
   | CallPrimitiveStateAllocImmediate
-      (stack : Stack.t) (heap : Heap) (object : Object.t Value.t)
-      (k : Pointer.t Value.t -> LowM.t A) :
+      (object : Object.t Value.t)
+      (k : Pointer.t Value.t -> LowM.t B) :
     {{ stack, heap |
       k (Pointer.Imm object) ⇓
-      result
-    | stack', heap' }} ->
+      to_value
+    | P_stack, P_heap }} ->
     {{ stack, heap |
       LowM.CallPrimitive (Primitive.StateAlloc object) k ⇓
-      result
-    | stack', heap' }}
+      to_value
+    | P_stack, P_heap }}
   | CallPrimitiveStateAllocMutable
       (mutable : Pointer.Mutable.t Value.t)
       (object : Object.t Value.t)
-      (stack stack_inter : Stack.t) (heap heap_inter : Heap)
-      (k : Pointer.t Value.t -> LowM.t A) :
+      (stack_inter : Stack.t) (heap_inter : Heap)
+      (k : Pointer.t Value.t -> LowM.t B) :
     IsAlloc.t
       stack heap
       mutable
@@ -170,75 +172,129 @@ Module Run.
       stack_inter heap_inter ->
     {{ stack_inter, heap_inter |
       k (Pointer.Mutable mutable) ⇓
-      result
-    | stack', heap' }} ->
+      to_value
+    | P_stack, P_heap }} ->
     {{ stack, heap |
       LowM.CallPrimitive (Primitive.StateAlloc object) k ⇓
-      result
-    | stack', heap' }}
+      to_value
+    | P_stack, P_heap }}
   | CallPrimitiveStateRead
       (mutable : Pointer.Mutable.t Value.t)
       (object : Object.t Value.t)
-      (stack : Stack.t) (heap : Heap)
-      (k : Object.t Value.t -> LowM.t A) :
+      (k : Object.t Value.t -> LowM.t B) :
     IsRead.t stack heap mutable object ->
     {{ stack, heap |
       k object ⇓
-      result
-    | stack', heap' }} ->
+      to_value
+    | P_stack, P_heap }} ->
     {{ stack, heap |
       LowM.CallPrimitive (Primitive.StateRead mutable) k ⇓
-      result
-    | stack', heap' }}
+      to_value
+    | P_stack, P_heap }}
   | CallPrimitiveStateWrite
       (mutable : Pointer.Mutable.t Value.t)
       (update : Object.t Value.t)
-      (stack stack_inter : Stack.t) (heap heap_inter : Heap)
-      (k : unit -> LowM.t A) :
-    IsWrite.t stack heap mutable update stack' heap' ->
+      (stack_inter : Stack.t) (heap_inter : Heap)
+      (k : unit -> LowM.t B) :
+    IsWrite.t stack heap mutable update stack_inter heap_inter ->
     {{ stack_inter, heap_inter |
       k tt ⇓
-      result
-    | stack', heap' }} ->
+      to_value
+    | P_stack, P_heap }} ->
     {{ stack, heap |
       LowM.CallPrimitive (Primitive.StateWrite mutable update) k ⇓
-      result
-    | stack', heap' }}
+      to_value
+    | P_stack, P_heap }}
   | CallPrimitiveGetInGlobals
       (globals : Globals.t)
       (name : string)
       (value : Value.t)
-      (stack : Stack.t) (heap : Heap)
-      (k : Value.t -> LowM.t A) :
+      (k : Value.t -> LowM.t B) :
     IsInGlobals globals name value ->
     {{ stack, heap |
       k value ⇓
-      result
-    | stack', heap' }} ->
+      to_value
+    | P_stack, P_heap }} ->
     {{ stack, heap |
       LowM.CallPrimitive (Primitive.GetInGlobals globals name) k ⇓
-      result
-    | stack', heap' }}
-  | CallClosure
-      (stack stack_inter : Stack.t) (heap heap_inter : Heap)
+      to_value
+    | P_stack, P_heap }}
+  | CallClosure {C : Set}
       (f : Value.t -> Value.t -> M)
       (args kwargs : Value.t)
-      (value : Value.t + Exception.t)
-      (k : Value.t + Exception.t -> LowM.t A) :
+      (to_value_inter : C -> Value.t + Exception.t)
+      (P_stack_inter : Stack.t -> Prop) (P_heap_inter : Heap -> Prop)
+      (k : Value.t + Exception.t -> LowM.t B) :
     let closure := Data.Closure f in
     {{ stack, heap |
       f args kwargs ⇓
-      value
-    | stack_inter, heap_inter }} ->
-    {{ stack_inter, heap_inter |
-      k value ⇓
-      result
-    | stack', heap' }} ->
+      to_value_inter
+    | P_stack_inter, P_heap_inter }} ->
+    (* We quantify over every possible values as we cannot compute the result of the closure here.
+       We only know that it exists and respect some constraints in this inductive definition. *)
+    (forall value_inter stack_inter heap_inter,
+      P_stack_inter stack_inter ->
+      P_heap_inter heap_inter ->
+      {{ stack_inter, heap_inter |
+        k (to_value_inter value_inter) ⇓
+        to_value
+      | P_stack, P_heap }}
+    ) ->
     {{ stack, heap |
       LowM.CallClosure closure args kwargs k ⇓
-      result
-    | stack', heap' }}
+      to_value
+    | P_stack, P_heap }}
 
-  where "{{ stack , heap | e ⇓ result | stack' , heap' }}" :=
-    (t (result := result) (stack' := stack') (heap' := heap') e stack heap).
+  where "{{ stack , heap | e ⇓ to_value | P_stack , P_heap }}" :=
+    (t stack heap to_value P_stack P_heap e).
 End Run.
+
+Import Run.
+
+Fixpoint evaluate `{Heap.Trait} {A B : Set}
+    {stack : Stack.t} {heap : Heap} {e : LowM.t B}
+    {to_value : A -> B} {P_stack : Stack.t -> Prop} {P_heap : Heap -> Prop}
+    (run : {{ stack, heap | e ⇓ to_value | P_stack, P_heap }}) :
+  A *
+    { stack : Stack.t | P_stack stack } *
+    { heap : Heap | P_heap heap }.
+Proof.
+  destruct run.
+  { repeat split.
+    { exact result. }
+    { try eexists.
+      match goal with
+      | H : P_stack _ |- _ => exact H
+      end.
+    }
+    { try eexists.
+      match goal with
+      | H : P_heap _ |- _ => exact H
+      end.
+    }
+  }
+  { eapply evaluate.
+    exact run.
+  }
+  { eapply evaluate.
+    exact run.
+  }
+  { eapply evaluate.
+    exact run.
+  }
+  { eapply evaluate.
+    exact run.
+  }
+  { eapply evaluate.
+    exact run.
+  }
+  { destruct (evaluate _ _ _ _ _ _ _ _ _ _ _ run) as
+      [[value_inter [stack_inter H_stack_inter]] [heap_inter H_heap_inter]].
+    eapply evaluate.
+    match goal with
+    | H : forall _ _ _, _ |- _ => apply (H value_inter)
+    end.
+    { exact H_stack_inter. }
+    { exact H_heap_inter. }
+  }
+Defined.
