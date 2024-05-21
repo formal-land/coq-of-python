@@ -107,6 +107,20 @@ Module IsRead.
       (to_object value).
 End IsRead.
 
+Module PointerRead.
+  (** A generalization of [IsRead.t] to take into account immediate values. Useful for some
+      lemma. *)
+  Definition t `{Heap.Trait}
+      (stack : Stack.t) (heap : Heap)
+      (pointer : Pointer.t Value.t)
+      (object : Object.t Value.t) :
+      Set :=
+    match pointer with
+    | Pointer.Imm object' => object' = object
+    | Pointer.Mutable mutable => IsRead.t stack heap mutable object
+    end.
+End PointerRead.
+
 Module IsWrite.
   Inductive t `{Heap.Trait}
     (stack : Stack.t) (heap : Heap) :
@@ -133,13 +147,34 @@ Module IsWrite.
 End IsWrite.
 
 Module Run.
-  Reserved Notation "{{ stack , heap | e ⇓ result | stack' , heap' }}".
+  Reserved Notation "{{ stack , heap | e ⇓ to_value | P_stack , P_heap }}".
 
+  (** A execution trace of a monadic expression, where we do name resolution and explicit an
+      allocation strategy. We do not talk about the result, we only say that it exists. Thus we can
+      infer the result when building the trace rather than stating it beforehand. The [evaluate]
+      function defined after can compute this result from a trace. We will make our specifications
+      and proofs about the output of the [evaluate] function.
+
+      Even if we do not compute the result, we still constraint it with the [to_value] function,
+      saying that it should be in the image of this function, and with the [P_stack] and [P_heap]
+      predicates, saying that the stack and heap should respect some properties. This is mainly
+      useful for the [CallClosure] case, in order to avoid exploring impossible branches or
+      branches corresponding to ill-typed Python expressions at the return of a function call.
+
+      The [P_stack] and [P_heap] predicates should be very simple. The attempt here is not to
+      verify the code, only to build an execution trace. It should mainly contain information about
+      the size of the stack and the presence of some values in the heap, just enough to be able to
+      build the trace.
+  *)
   Inductive t `{Heap.Trait} {A B : Set}
       (stack : Stack.t) (heap : Heap)
       (to_value : A -> B) (P_stack : Stack.t -> Prop) (P_heap : Heap -> Prop) :
       LowM.t B -> Set :=
+  (** Final case of an execution. We check that [to_value], [P_stack], and [P_heap] are true. *)
   | Pure
+    (* We can have some choices for the expression of [result]. One can use [rewrite] in order to
+       simplify the [result] expression and provide something that will simplify the proofs later.
+    *)
     (result : A)
     (result' : B) :
     result' = to_value result ->
@@ -149,7 +184,10 @@ Module Run.
       LowM.Pure result' ⇓
       to_value
     | P_stack, P_heap }}
-  | CallPrimitiveStateAllocImmediate
+  (** Allocation as an immediate value for that values that will not be modified. If the code is
+      written in a purely functional way, we should only do immediate allocations. This removes the
+      need to manipulate pointers in the proofs later. *)
+  | CallPrimitiveStateAllocImm
       (object : Object.t Value.t)
       (k : Pointer.t Value.t -> LowM.t B) :
     {{ stack, heap |
@@ -160,6 +198,7 @@ Module Run.
       LowM.CallPrimitive (Primitive.StateAlloc object) k ⇓
       to_value
     | P_stack, P_heap }}
+  (** Allocation either on the stack or the heap. *)
   | CallPrimitiveStateAllocMutable
       (mutable : Pointer.Mutable.t Value.t)
       (object : Object.t Value.t)
@@ -178,6 +217,7 @@ Module Run.
       LowM.CallPrimitive (Primitive.StateAlloc object) k ⇓
       to_value
     | P_stack, P_heap }}
+  (** Read of a pointer in the stack or the heap. *)
   | CallPrimitiveStateRead
       (mutable : Pointer.Mutable.t Value.t)
       (object : Object.t Value.t)
@@ -191,6 +231,7 @@ Module Run.
       LowM.CallPrimitive (Primitive.StateRead mutable) k ⇓
       to_value
     | P_stack, P_heap }}
+  (** Read to a pointer in the stack or the heap. *)
   | CallPrimitiveStateWrite
       (mutable : Pointer.Mutable.t Value.t)
       (update : Object.t Value.t)
@@ -205,6 +246,7 @@ Module Run.
       LowM.CallPrimitive (Primitive.StateWrite mutable update) k ⇓
       to_value
     | P_stack, P_heap }}
+  (** Name resolution for top-level names. *)
   | CallPrimitiveGetInGlobals
       (globals : Globals.t)
       (name : string)
@@ -219,6 +261,8 @@ Module Run.
       LowM.CallPrimitive (Primitive.GetInGlobals globals name) k ⇓
       to_value
     | P_stack, P_heap }}
+  (** Call of a closure. We abstract away the detail of the call. We use closures as an explicit
+      abstraction barrier to split our traces. *)
   | CallClosure {C : Set}
       (f : Value.t -> Value.t -> M)
       (args kwargs : Value.t)
@@ -251,14 +295,22 @@ End Run.
 
 Import Run.
 
+(** Get the value computed from the trace of a monadic expression. We will do our proofs on the
+    output of this function, as it gives a purely functional interpretation of the translated
+    monadic expressions.
+
+    Do be able to do the induction in this definition, we also return a proof for [P_stack]
+    and [P_heap].
+*)
 Fixpoint evaluate `{Heap.Trait} {A B : Set}
     {stack : Stack.t} {heap : Heap} {e : LowM.t B}
     {to_value : A -> B} {P_stack : Stack.t -> Prop} {P_heap : Heap -> Prop}
     (run : {{ stack, heap | e ⇓ to_value | P_stack, P_heap }}) :
   A *
-    { stack : Stack.t | P_stack stack } *
-    { heap : Heap | P_heap heap }.
+  { stack : Stack.t | P_stack stack } *
+  { heap : Heap | P_heap heap }.
 Proof.
+  (* We use very explicit tactics in order to make sure that we build the definition we want. *)
   destruct run.
   { repeat split.
     { exact result. }
@@ -296,5 +348,33 @@ Proof.
     end.
     { exact H_stack_inter. }
     { exact H_heap_inter. }
+  }
+Defined.
+
+(** Trace of the read at a memory location, wether it is an immediate or allocated value. *)
+Definition run_read `{Heap.Trait} {A : Set}
+    (stack : Stack.t) (heap : Heap)
+    (pointer : Pointer.t Value.t)
+    (object : Object.t Value.t)
+    (to_value : A -> Value.t + Exception.t)
+    (k : Object.t Value.t -> M)
+    (P_stack : Stack.t -> Prop) (P_heap : Heap -> Prop)
+    (H_pointer : PointerRead.t stack heap pointer object) :
+  {{ stack, heap |
+    k object ⇓
+    to_value
+  | P_stack, P_heap }} ->
+  {{ stack, heap |
+    LowM.bind (M.read pointer) k ⇓
+    to_value
+  | P_stack, P_heap }}.
+Proof.
+  intros.
+  destruct pointer; cbn in *.
+  { congruence. }
+  { eapply Run.CallPrimitiveStateRead. {
+      apply H_pointer.
+    }
+    trivial.
   }
 Defined.
