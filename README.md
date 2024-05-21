@@ -34,13 +34,20 @@ This will translate each file of the Ethereum specification to Coq and put the r
 
 ### Compile the Coq
 
-Go into the `CoqOfPython` folder and run the following command:
+Go into the `CoqOfPython` folder and install the dependencies with [opam](https://opam.ocaml.org/):
+
+```sh
+opam repo add coq-released https://coq.inria.fr/opam/released
+opam install --deps-only coq-of-python.opam
+```
+
+Then, build the project (still in the `CoqOfPython` folder):
 
 ```sh
 make -j4
 ```
 
-It will compile all the Coq files, including the ones generated from the Ethereum specification and the proofs.
+It will compile all the Coq files, including the ones generated from the Ethereum specification and the proofs, so it might take some time.
 
 ## Documentation
 
