@@ -22,9 +22,6 @@ Implementations of the EVM storage related instructions.
 Axiom ethereum_base_types_imports_Uint :
   IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_utils_ensure_imports_ensure :
-  IsImported globals "ethereum.utils.ensure" "ensure".
-
 Axiom ethereum_arrow_glacier_state_imports_get_storage :
   IsImported globals "ethereum.arrow_glacier.state" "get_storage".
 Axiom ethereum_arrow_glacier_state_imports_get_storage_original :
@@ -192,17 +189,21 @@ Definition sstore : Value.t -> Value.t -> M :=
         make_dict []
       |)
     |) in
-    let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.gt (|
-        M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "gas_left" |),
-        M.get_name (| globals, locals_stack, "GAS_CALL_STIPEND" |)
-      |);
-      M.get_name (| globals, locals_stack, "OutOfGasError" |)
-    ],
-    make_dict []
-  |) in
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.lt_e (|
+          M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "gas_left" |),
+          M.get_name (| globals, locals_stack, "GAS_CALL_STIPEND" |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "OutOfGasError" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        M.pure Constant.None_
+      )) |) in
     let _ := M.assign_local (|
       "original_value" ,
       M.call (|
@@ -472,14 +473,18 @@ Definition sstore : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      UnOp.not (| M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "is_static" |) |);
-      M.get_name (| globals, locals_stack, "WriteInStaticContext" |)
-    ],
-    make_dict []
-  |) in
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "is_static" |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "WriteInStaticContext" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        M.pure Constant.None_
+      )) |) in
     let _ := M.call (|
     M.get_name (| globals, locals_stack, "set_storage" |),
     make_list [

@@ -19,9 +19,6 @@ Introduction
 Implementations of the EVM storage related instructions.
 ".
 
-Axiom ethereum_utils_ensure_imports_ensure :
-  IsImported globals "ethereum.utils.ensure" "ensure".
-
 Axiom ethereum_byzantium_state_imports_get_storage :
   IsImported globals "ethereum.byzantium.state" "get_storage".
 Axiom ethereum_byzantium_state_imports_set_storage :
@@ -229,14 +226,18 @@ Definition sstore : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      UnOp.not (| M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "is_static" |) |);
-      M.get_name (| globals, locals_stack, "WriteInStaticContext" |)
-    ],
-    make_dict []
-  |) in
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "is_static" |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "WriteInStaticContext" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        M.pure Constant.None_
+      )) |) in
     let _ := M.call (|
     M.get_name (| globals, locals_stack, "set_storage" |),
     make_list [

@@ -56,9 +56,6 @@ Axiom ethereum_crypto_hash_imports_keccak256 :
 Axiom ethereum_tangerine_whistle_imports_trie :
   IsImported globals "ethereum.tangerine_whistle" "trie".
 
-Axiom ethereum_utils_ensure_imports_ensure :
-  IsImported globals "ethereum.utils.ensure" "ensure".
-
 Axiom ethereum_utils_hexadecimal_imports_hex_to_bytes :
   IsImported globals "ethereum.utils.hexadecimal" "hex_to_bytes".
 
@@ -1106,17 +1103,21 @@ Definition _prepare_trie : Value.t -> Value.t -> M :=
               |) in
               M.pure Constant.None_
             )) |) in
-          let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.not_eq (|
-        M.get_name (| globals, locals_stack, "encoded_value" |),
-        Constant.bytes ""
-      |);
-      M.get_name (| globals, locals_stack, "AssertionError" |)
-    ],
-    make_dict []
-  |) in
+          let _ :=
+            (* if *)
+            M.if_then_else (|
+              Compare.eq (|
+                M.get_name (| globals, locals_stack, "encoded_value" |),
+                Constant.bytes ""
+              |),
+            (* then *)
+            ltac:(M.monadic (
+              let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "AssertionError" |)) |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
+              M.pure Constant.None_
+            )) |) in
 (* At stmt: unsupported node type: AnnAssign *)
           let _ :=
             (* if *)

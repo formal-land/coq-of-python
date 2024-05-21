@@ -40,9 +40,6 @@ Axiom ethereum_base_types_imports_slotted_freezable :
 Axiom ethereum_exceptions_imports_InvalidBlock :
   IsImported globals "ethereum.exceptions" "InvalidBlock".
 
-Axiom ethereum_utils_ensure_imports_ensure :
-  IsImported globals "ethereum.utils.ensure" "ensure".
-
 Axiom ethereum_berlin_fork_types_imports_Address :
   IsImported globals "ethereum.berlin.fork_types" "Address".
 
@@ -185,20 +182,24 @@ Definition decode_transaction : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.eq (|
-        M.get_subscript (|
-          M.get_name (| globals, locals_stack, "tx" |),
-          Constant.int 0
-        |),
-        Constant.int 1
-      |);
-      M.get_name (| globals, locals_stack, "InvalidBlock" |)
-    ],
-    make_dict []
-  |) in
+        let _ :=
+          (* if *)
+          M.if_then_else (|
+            Compare.not_eq (|
+              M.get_subscript (|
+                M.get_name (| globals, locals_stack, "tx" |),
+                Constant.int 0
+              |),
+              Constant.int 1
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "InvalidBlock" |)) |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
+            M.pure Constant.None_
+          )) |) in
         let _ := M.return_ (|
           M.call (|
             M.get_field (| M.get_name (| globals, locals_stack, "rlp" |), "decode_to" |),

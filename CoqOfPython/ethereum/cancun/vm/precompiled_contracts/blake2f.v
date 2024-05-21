@@ -22,9 +22,6 @@ Implementation of the `Blake2` precompiled contract.
 Axiom ethereum_crypto_blake2_imports_Blake2b :
   IsImported globals "ethereum.crypto.blake2" "Blake2b".
 
-Axiom ethereum_utils_ensure_imports_ensure :
-  IsImported globals "ethereum.utils.ensure" "ensure".
-
 Axiom ethereum_cancun_vm_imports_Evm :
   IsImported globals "ethereum.cancun.vm" "Evm".
 
@@ -52,23 +49,27 @@ Definition blake2f : Value.t -> Value.t -> M :=
       "data" ,
       M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "data" |)
     |) in
-    let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.eq (|
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_name (| globals, locals_stack, "data" |)
-          ],
-          make_dict []
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.not_eq (|
+          M.call (|
+            M.get_name (| globals, locals_stack, "len" |),
+            make_list [
+              M.get_name (| globals, locals_stack, "data" |)
+            ],
+            make_dict []
+          |),
+          Constant.int 213
         |),
-        Constant.int 213
-      |);
-      M.get_name (| globals, locals_stack, "InvalidParameter" |)
-    ],
-    make_dict []
-  |) in
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "InvalidParameter" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        M.pure Constant.None_
+      )) |) in
     let _ := M.assign_local (|
       "blake2b" ,
       M.call (|
@@ -98,20 +99,24 @@ Definition blake2f : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.in_ (|
-        M.get_name (| globals, locals_stack, "f" |),
-        make_list [
-          Constant.int 0;
-          Constant.int 1
-        ]
-      |);
-      M.get_name (| globals, locals_stack, "InvalidParameter" |)
-    ],
-    make_dict []
-  |) in
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.not_in (|
+          M.get_name (| globals, locals_stack, "f" |),
+          make_list [
+            Constant.int 0;
+            Constant.int 1
+          ]
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "InvalidParameter" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        M.pure Constant.None_
+      )) |) in
     let _ := M.assign (|
       M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "output" |),
       M.call (|

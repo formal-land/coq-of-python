@@ -29,9 +29,6 @@ Axiom ethereum_base_types_imports_Uint :
 Axiom ethereum_crypto_hash_imports_keccak256 :
   IsImported globals "ethereum.crypto.hash" "keccak256".
 
-Axiom ethereum_utils_ensure_imports_ensure :
-  IsImported globals "ethereum.utils.ensure" "ensure".
-
 Axiom ethereum_utils_numeric_imports_ceil32 :
   IsImported globals "ethereum.utils.numeric" "ceil32".
 
@@ -1307,38 +1304,42 @@ Definition returndatacopy : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.lt_e (|
-        BinOp.add (|
-          M.call (|
-            M.get_name (| globals, locals_stack, "Uint" |),
-            make_list [
-              M.get_name (| globals, locals_stack, "return_data_start_position" |)
-            ],
-            make_dict []
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.gt (|
+          BinOp.add (|
+            M.call (|
+              M.get_name (| globals, locals_stack, "Uint" |),
+              make_list [
+                M.get_name (| globals, locals_stack, "return_data_start_position" |)
+              ],
+              make_dict []
+            |),
+            M.call (|
+              M.get_name (| globals, locals_stack, "Uint" |),
+              make_list [
+                M.get_name (| globals, locals_stack, "size" |)
+              ],
+              make_dict []
+            |)
           |),
           M.call (|
-            M.get_name (| globals, locals_stack, "Uint" |),
+            M.get_name (| globals, locals_stack, "len" |),
             make_list [
-              M.get_name (| globals, locals_stack, "size" |)
+              M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "return_data" |)
             ],
             make_dict []
           |)
         |),
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "return_data" |)
-          ],
-          make_dict []
-        |)
-      |);
-      M.get_name (| globals, locals_stack, "OutOfBoundsRead" |)
-    ],
-    make_dict []
-  |) in
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "OutOfBoundsRead" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        M.pure Constant.None_
+      )) |) in
     let _ := M.assign_op (|
       BinOp.add,
       M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "memory" |),

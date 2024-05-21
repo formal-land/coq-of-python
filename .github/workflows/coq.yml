@@ -23,9 +23,19 @@ jobs:
           custom_script: |
             startGroup "Install dependencies"
               opam install -y --deps-only CoqOfPython/coq-of-python.opam
+              sudo ln -s `which python3` /usr/bin/python
+              python --version
             endGroup
             startGroup "Set the rights"
               sudo chown -R $(whoami) .
+            endGroup
+            startGroup "Translate the Python code to Coq"
+              cd ethereum-execution-specs/src
+              find ethereum -name "*.py" -print0 | xargs -0 -n 1 python ../../main.py
+              cd ../..
+            endGroup
+            startGroup "Make sure there no differences"
+              git diff --exit-code
             endGroup
             startGroup "Compile Coq translations"
               cd CoqOfPython

@@ -25,9 +25,6 @@ Axiom functools_imports_partial :
 Axiom ethereum_base_types_imports_U256 :
   IsImported globals "ethereum.base_types" "U256".
 
-Axiom ethereum_utils_ensure_imports_ensure :
-  IsImported globals "ethereum.utils.ensure" "ensure".
-
 Axiom ethereum_byzantium_vm_imports_Evm :
   IsImported globals "ethereum.byzantium.vm" "Evm".
 Axiom ethereum_byzantium_vm_imports_stack :
@@ -191,23 +188,27 @@ Definition dup_n : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.lt (|
-        M.get_name (| globals, locals_stack, "item_number" |),
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
-          ],
-          make_dict []
-        |)
-      |);
-      M.get_name (| globals, locals_stack, "StackUnderflowError" |)
-    ],
-    make_dict []
-  |) in
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.gt_e (|
+          M.get_name (| globals, locals_stack, "item_number" |),
+          M.call (|
+            M.get_name (| globals, locals_stack, "len" |),
+            make_list [
+              M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
+            ],
+            make_dict []
+          |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "StackUnderflowError" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        M.pure Constant.None_
+      )) |) in
     let _ := M.assign_local (|
       "data_to_duplicate" ,
       M.get_subscript (|
@@ -275,23 +276,27 @@ Definition swap_n : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.lt (|
-        M.get_name (| globals, locals_stack, "item_number" |),
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
-          ],
-          make_dict []
-        |)
-      |);
-      M.get_name (| globals, locals_stack, "StackUnderflowError" |)
-    ],
-    make_dict []
-  |) in
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.gt_e (|
+          M.get_name (| globals, locals_stack, "item_number" |),
+          M.call (|
+            M.get_name (| globals, locals_stack, "len" |),
+            make_list [
+              M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |)
+            ],
+            make_dict []
+          |)
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "StackUnderflowError" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        M.pure Constant.None_
+      )) |) in
     let _ := M.assign (|
       make_tuple [ M.get_subscript (|
         M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "stack" |),

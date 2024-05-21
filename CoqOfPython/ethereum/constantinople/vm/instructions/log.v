@@ -25,9 +25,6 @@ Axiom functools_imports_partial :
 Axiom ethereum_base_types_imports_U256 :
   IsImported globals "ethereum.base_types" "U256".
 
-Axiom ethereum_utils_ensure_imports_ensure :
-  IsImported globals "ethereum.utils.ensure" "ensure".
-
 Axiom ethereum_constantinople_blocks_imports_Log :
   IsImported globals "ethereum.constantinople.blocks" "Log".
 
@@ -178,14 +175,18 @@ Definition log_n : Value.t -> Value.t -> M :=
     M.get_field (| M.get_name (| globals, locals_stack, "extend_memory" |), "expand_by" |)
   |)
     |) in
-    let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      UnOp.not (| M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "is_static" |) |);
-      M.get_name (| globals, locals_stack, "WriteInStaticContext" |)
-    ],
-    make_dict []
-  |) in
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "is_static" |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "WriteInStaticContext" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        M.pure Constant.None_
+      )) |) in
     let _ := M.assign_local (|
       "log_entry" ,
       M.call (|

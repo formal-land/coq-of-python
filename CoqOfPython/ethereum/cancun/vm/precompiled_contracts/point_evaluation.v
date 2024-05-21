@@ -31,9 +31,6 @@ Axiom ethereum_base_types_imports_U256 :
 Axiom ethereum_base_types_imports_Bytes :
   IsImported globals "ethereum.base_types" "Bytes".
 
-Axiom ethereum_utils_ensure_imports_ensure :
-  IsImported globals "ethereum.utils.ensure" "ensure".
-
 Axiom ethereum_cancun_vm_imports_Evm :
   IsImported globals "ethereum.cancun.vm" "Evm".
 
@@ -75,23 +72,27 @@ Definition point_evaluation : Value.t -> Value.t -> M :=
       "data" ,
       M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "data" |)
     |) in
-    let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.eq (|
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_name (| globals, locals_stack, "data" |)
-          ],
-          make_dict []
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.not_eq (|
+          M.call (|
+            M.get_name (| globals, locals_stack, "len" |),
+            make_list [
+              M.get_name (| globals, locals_stack, "data" |)
+            ],
+            make_dict []
+          |),
+          Constant.int 192
         |),
-        Constant.int 192
-      |);
-      M.get_name (| globals, locals_stack, "KZGProofError" |)
-    ],
-    make_dict []
-  |) in
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "KZGProofError" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        M.pure Constant.None_
+      )) |) in
     let _ := M.assign_local (|
       "versioned_hash" ,
       M.slice (|
@@ -151,32 +152,40 @@ Definition point_evaluation : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.eq (|
-        M.call (|
-          M.get_name (| globals, locals_stack, "kzg_commitment_to_versioned_hash" |),
-          make_list [
-            M.get_name (| globals, locals_stack, "commitment" |)
-          ],
-          make_dict []
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.not_eq (|
+          M.call (|
+            M.get_name (| globals, locals_stack, "kzg_commitment_to_versioned_hash" |),
+            make_list [
+              M.get_name (| globals, locals_stack, "commitment" |)
+            ],
+            make_dict []
+          |),
+          M.get_name (| globals, locals_stack, "versioned_hash" |)
         |),
-        M.get_name (| globals, locals_stack, "versioned_hash" |)
-      |);
-      M.get_name (| globals, locals_stack, "KZGProofError" |)
-    ],
-    make_dict []
-  |) in
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "KZGProofError" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        M.pure Constant.None_
+      )) |) in
 (* At stmt: unsupported node type: Try *)
-    let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      M.get_name (| globals, locals_stack, "kzg_proof_verification" |);
-      M.get_name (| globals, locals_stack, "KZGProofError" |)
-    ],
-    make_dict []
-  |) in
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        UnOp.not (| M.get_name (| globals, locals_stack, "kzg_proof_verification" |) |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "KZGProofError" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        M.pure Constant.None_
+      )) |) in
     let _ := M.assign (|
       M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "output" |),
       M.call (|
