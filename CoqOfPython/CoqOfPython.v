@@ -146,6 +146,12 @@ Module Object.
       internal := Some data;
       fields := [];
     |}.
+
+  Definition empty {Value : Set} : t Value :=
+    {|
+      internal := None;
+      fields := [];
+    |}.
 End Object.
 
 Module Pointer.
@@ -187,10 +193,7 @@ End Locals.
 (** ** Constants *)
 Module Constant.
   Definition None_ : Value.t :=
-    Value.Make "builtins" "NoneType" (Pointer.Imm {|
-      Object.internal := None;
-      Object.fields := [];
-    |}).
+    Value.Make "builtins" "NoneType" (Pointer.Imm Object.empty).
 
   Definition ellipsis : Value.t :=
     Value.Make "builtins" "ellipsis" (Pointer.Imm (Object.wrapper Data.Ellipsis)).
@@ -411,7 +414,8 @@ Module M.
 
   Parameter delete : Value.t -> M.
 
-  Parameter return_ : Value.t -> M.
+  Definition return_ (value : Value.t) : M :=
+    LowM.Pure (inr (Exception.Return value)).
 
   Parameter pass : M.
 
@@ -422,6 +426,14 @@ Module M.
   Parameter raise : option Value.t -> M.
 
   Parameter assert : Value.t -> M.
+
+  Definition catch_return (m : M) : M :=
+    let- v := m in
+    match v with
+    | inl v => pure v
+    | inr (Exception.Return v) => pure v
+    | inr e => LowM.Pure (inr e)
+    end.
 
   Parameter if_then_else : Value.t -> M -> M -> M.
 
