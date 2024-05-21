@@ -1,6 +1,7 @@
 import ast
 import os
 import sys
+from typing import Union
 
 
 def generate_error(kind, node):
@@ -245,8 +246,8 @@ def generate_function_def_body(indent, node):
 def generate_if_then_else(
     indent,
     condition: ast.expr,
-    success: ast.expr | list[ast.stmt],
-    error: ast.expr | list[ast.stmt],
+    success: Union[ast.expr, list[ast.stmt]],
+    error: Union[ast.expr, list[ast.stmt]],
 ):
     return generate_indent(indent) + "(* if *)\n" + \
         generate_indent(indent) + "M.if_then_else (|\n" + \
@@ -364,7 +365,7 @@ def generate_stmt(indent, node: ast.stmt):
         return generate_error("stmt", node)
     elif isinstance(node, ast.AsyncWith):
         return generate_error("stmt", node)
-    elif isinstance(node, ast.Match):
+    elif sys.version_info >= (3, 10) and isinstance(node, ast.Match):
         return generate_error("stmt", node)
     elif isinstance(node, ast.Raise):
         return generate_indent(indent) + "let _ := M.raise (| " + \
@@ -754,8 +755,9 @@ def generate_arg(node):
 
 
 input_file_name = sys.argv[1]
-output_file_name = "../../coq-of-python/CoqOfPython/" + \
-    input_file_name.replace(".py", ".v")
+output_file_name = "../../CoqOfPython/" + input_file_name.replace(".py", ".v")
+
+print(f"Processing {input_file_name} -> {output_file_name}")
 
 file_content = open(input_file_name).read()
 parsed_tree = ast.parse(file_content)

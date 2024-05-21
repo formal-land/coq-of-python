@@ -41,9 +41,6 @@ Axiom ethereum_crypto_alt_bn128_imports_BNP2 :
 Axiom ethereum_crypto_alt_bn128_imports_pairing :
   IsImported globals "ethereum.crypto.alt_bn128" "pairing".
 
-Axiom ethereum_utils_ensure_imports_ensure :
-  IsImported globals "ethereum.utils.ensure" "ensure".
-
 Axiom ethereum_cancun_vm_imports_Evm :
   IsImported globals "ethereum.cancun.vm" "Evm".
 
@@ -646,48 +643,56 @@ Definition alt_bn128_pairing_check : Value.t -> Value.t -> M :=
               ))
           |) in
 (* At stmt: unsupported node type: Try *)
-          let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.eq (|
-        M.call (|
-          M.get_field (| M.get_name (| globals, locals_stack, "p" |), "mul_by" |),
-          make_list [
-            M.get_name (| globals, locals_stack, "ALT_BN128_CURVE_ORDER" |)
-          ],
-          make_dict []
-        |),
-        M.call (|
-          M.get_field (| M.get_name (| globals, locals_stack, "BNP" |), "point_at_infinity" |),
-          make_list [],
-          make_dict []
-        |)
-      |);
-      M.get_name (| globals, locals_stack, "OutOfGasError" |)
-    ],
-    make_dict []
-  |) in
-          let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.eq (|
-        M.call (|
-          M.get_field (| M.get_name (| globals, locals_stack, "q" |), "mul_by" |),
-          make_list [
-            M.get_name (| globals, locals_stack, "ALT_BN128_CURVE_ORDER" |)
-          ],
-          make_dict []
-        |),
-        M.call (|
-          M.get_field (| M.get_name (| globals, locals_stack, "BNP2" |), "point_at_infinity" |),
-          make_list [],
-          make_dict []
-        |)
-      |);
-      M.get_name (| globals, locals_stack, "OutOfGasError" |)
-    ],
-    make_dict []
-  |) in
+          let _ :=
+            (* if *)
+            M.if_then_else (|
+              Compare.not_eq (|
+                M.call (|
+                  M.get_field (| M.get_name (| globals, locals_stack, "p" |), "mul_by" |),
+                  make_list [
+                    M.get_name (| globals, locals_stack, "ALT_BN128_CURVE_ORDER" |)
+                  ],
+                  make_dict []
+                |),
+                M.call (|
+                  M.get_field (| M.get_name (| globals, locals_stack, "BNP" |), "point_at_infinity" |),
+                  make_list [],
+                  make_dict []
+                |)
+              |),
+            (* then *)
+            ltac:(M.monadic (
+              let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "OutOfGasError" |)) |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
+              M.pure Constant.None_
+            )) |) in
+          let _ :=
+            (* if *)
+            M.if_then_else (|
+              Compare.not_eq (|
+                M.call (|
+                  M.get_field (| M.get_name (| globals, locals_stack, "q" |), "mul_by" |),
+                  make_list [
+                    M.get_name (| globals, locals_stack, "ALT_BN128_CURVE_ORDER" |)
+                  ],
+                  make_dict []
+                |),
+                M.call (|
+                  M.get_field (| M.get_name (| globals, locals_stack, "BNP2" |), "point_at_infinity" |),
+                  make_list [],
+                  make_dict []
+                |)
+              |),
+            (* then *)
+            ltac:(M.monadic (
+              let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "OutOfGasError" |)) |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
+              M.pure Constant.None_
+            )) |) in
           let _ :=
             (* if *)
             M.if_then_else (|

@@ -55,9 +55,6 @@ Axiom ethereum_trace_imports_TransactionEnd :
 Axiom ethereum_trace_imports_evm_trace :
   IsImported globals "ethereum.trace" "evm_trace".
 
-Axiom ethereum_utils_ensure_imports_ensure :
-  IsImported globals "ethereum.utils.ensure" "ensure".
-
 Axiom ethereum_muir_glacier_blocks_imports_Log :
   IsImported globals "ethereum.muir_glacier.blocks" "Log".
 

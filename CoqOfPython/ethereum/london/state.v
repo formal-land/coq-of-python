@@ -51,9 +51,6 @@ Axiom ethereum_base_types_imports_Uint :
 Axiom ethereum_base_types_imports_modify :
   IsImported globals "ethereum.base_types" "modify".
 
-Axiom ethereum_utils_ensure_imports_ensure :
-  IsImported globals "ethereum.utils.ensure" "ensure".
-
 Axiom ethereum_london_fork_types_imports_EMPTY_ACCOUNT :
   IsImported globals "ethereum.london.fork_types" "EMPTY_ACCOUNT".
 Axiom ethereum_london_fork_types_imports_Account :

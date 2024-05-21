@@ -55,9 +55,6 @@ Axiom ethereum_exceptions_imports_RLPDecodingError :
 Axiom ethereum_exceptions_imports_RLPEncodingError :
   IsImported globals "ethereum.exceptions" "RLPEncodingError".
 
-Axiom ethereum_utils_ensure_imports_ensure :
-  IsImported globals "ethereum.utils.ensure" "ensure".
-
 Axiom ethereum_base_types_imports_Bytes :
   IsImported globals "ethereum.base_types" "Bytes".
 Axiom ethereum_base_types_imports_Bytes0 :
@@ -607,29 +604,33 @@ Definition decode : Value.t -> Value.t -> M :=
     decoded_data : `RLP`
         Object decoded from `encoded_data`.
     " in
-    let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.gt (|
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.lt_e (|
+          M.call (|
+            M.get_name (| globals, locals_stack, "len" |),
+            make_list [
+              M.get_name (| globals, locals_stack, "encoded_data" |)
+            ],
+            make_dict []
+          |),
+          Constant.int 0
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some (M.call (|
+          M.get_name (| globals, locals_stack, "RLPDecodingError" |),
           make_list [
-            M.get_name (| globals, locals_stack, "encoded_data" |)
+            Constant.str "Cannot decode empty bytestring"
           ],
           make_dict []
-        |),
-        Constant.int 0
-      |);
-      M.call (|
-        M.get_name (| globals, locals_stack, "RLPDecodingError" |),
-        make_list [
-          Constant.str "Cannot decode empty bytestring"
-        ],
-        make_dict []
-      |)
-    ],
-    make_dict []
-  |) in
+        |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        M.pure Constant.None_
+      )) |) in
     let _ :=
       (* if *)
       M.if_then_else (|
@@ -772,21 +773,25 @@ Definition _decode_to : Value.t -> Value.t -> M :=
         |),
       (* then *)
       ltac:(M.monadic (
-        let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      M.call (|
-        M.get_name (| globals, locals_stack, "isinstance" |),
-        make_list [
-          M.get_name (| globals, locals_stack, "raw_rlp" |);
-          M.get_name (| globals, locals_stack, "list" |)
-        ],
-        make_dict []
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+        let _ :=
+          (* if *)
+          M.if_then_else (|
+            UnOp.not (| M.call (|
+              M.get_name (| globals, locals_stack, "isinstance" |),
+              make_list [
+                M.get_name (| globals, locals_stack, "raw_rlp" |);
+                M.get_name (| globals, locals_stack, "list" |)
+              ],
+              make_dict []
+            |) |),
+          (* then *)
+          ltac:(M.monadic (
+            let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
+            M.pure Constant.None_
+          )) |) in
         let _ :=
           (* if *)
           M.if_then_else (|
@@ -847,29 +852,33 @@ Definition _decode_to : Value.t -> Value.t -> M :=
               "args" ,
               make_list []
             |) in
-            let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.eq (|
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_name (| globals, locals_stack, "raw_rlp" |)
-          ],
-          make_dict []
-        |),
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "__args__" |)
-          ],
-          make_dict []
-        |)
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+            let _ :=
+              (* if *)
+              M.if_then_else (|
+                Compare.not_eq (|
+                  M.call (|
+                    M.get_name (| globals, locals_stack, "len" |),
+                    make_list [
+                      M.get_name (| globals, locals_stack, "raw_rlp" |)
+                    ],
+                    make_dict []
+                  |),
+                  M.call (|
+                    M.get_name (| globals, locals_stack, "len" |),
+                    make_list [
+                      M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "__args__" |)
+                    ],
+                    make_dict []
+                  |)
+                |),
+              (* then *)
+              ltac:(M.monadic (
+                let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                M.pure Constant.None_
+              (* else *)
+              )), ltac:(M.monadic (
+                M.pure Constant.None_
+              )) |) in
             let _ :=
               M.for_ (|
                 make_tuple [ M.get_name (| globals, locals_stack, "t" |); M.get_name (| globals, locals_stack, "raw_item" |) ],
@@ -928,21 +937,25 @@ Definition _decode_to : Value.t -> Value.t -> M :=
             |),
           (* then *)
           ltac:(M.monadic (
-            let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      M.call (|
-        M.get_name (| globals, locals_stack, "isinstance" |),
-        make_list [
-          M.get_name (| globals, locals_stack, "raw_rlp" |);
-          M.get_name (| globals, locals_stack, "Bytes" |)
-        ],
-        make_dict []
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+            let _ :=
+              (* if *)
+              M.if_then_else (|
+                UnOp.not (| M.call (|
+                  M.get_name (| globals, locals_stack, "isinstance" |),
+                  make_list [
+                    M.get_name (| globals, locals_stack, "raw_rlp" |);
+                    M.get_name (| globals, locals_stack, "Bytes" |)
+                  ],
+                  make_dict []
+                |) |),
+              (* then *)
+              ltac:(M.monadic (
+                let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                M.pure Constant.None_
+              (* else *)
+              )), ltac:(M.monadic (
+                M.pure Constant.None_
+              )) |) in
             let _ :=
               (* if *)
               M.if_then_else (|
@@ -1051,21 +1064,25 @@ Definition _decode_to : Value.t -> Value.t -> M :=
                 |),
               (* then *)
               ltac:(M.monadic (
-                let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      M.call (|
-        M.get_name (| globals, locals_stack, "isinstance" |),
-        make_list [
-          M.get_name (| globals, locals_stack, "raw_rlp" |);
-          M.get_name (| globals, locals_stack, "list" |)
-        ],
-        make_dict []
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+                let _ :=
+                  (* if *)
+                  M.if_then_else (|
+                    UnOp.not (| M.call (|
+                      M.get_name (| globals, locals_stack, "isinstance" |),
+                      make_list [
+                        M.get_name (| globals, locals_stack, "raw_rlp" |);
+                        M.get_name (| globals, locals_stack, "list" |)
+                      ],
+                      make_dict []
+                    |) |),
+                  (* then *)
+                  ltac:(M.monadic (
+                    let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                    M.pure Constant.None_
+                  (* else *)
+                  )), ltac:(M.monadic (
+                    M.pure Constant.None_
+                  )) |) in
                 let _ := M.assign_local (|
                   "items" ,
                   make_list []
@@ -1334,38 +1351,46 @@ Definition _decode_to : Value.t -> Value.t -> M :=
                             |),
                           (* then *)
                           ltac:(M.monadic (
-                            let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      M.call (|
-        M.get_name (| globals, locals_stack, "isinstance" |),
-        make_list [
-          M.get_name (| globals, locals_stack, "raw_rlp" |);
-          M.get_name (| globals, locals_stack, "Bytes" |)
-        ],
-        make_dict []
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
-                            let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.eq (|
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_name (| globals, locals_stack, "raw_rlp" |)
-          ],
-          make_dict []
-        |),
-        M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "LENGTH" |)
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+                            let _ :=
+                              (* if *)
+                              M.if_then_else (|
+                                UnOp.not (| M.call (|
+                                  M.get_name (| globals, locals_stack, "isinstance" |),
+                                  make_list [
+                                    M.get_name (| globals, locals_stack, "raw_rlp" |);
+                                    M.get_name (| globals, locals_stack, "Bytes" |)
+                                  ],
+                                  make_dict []
+                                |) |),
+                              (* then *)
+                              ltac:(M.monadic (
+                                let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                                M.pure Constant.None_
+                              (* else *)
+                              )), ltac:(M.monadic (
+                                M.pure Constant.None_
+                              )) |) in
+                            let _ :=
+                              (* if *)
+                              M.if_then_else (|
+                                Compare.not_eq (|
+                                  M.call (|
+                                    M.get_name (| globals, locals_stack, "len" |),
+                                    make_list [
+                                      M.get_name (| globals, locals_stack, "raw_rlp" |)
+                                    ],
+                                    make_dict []
+                                  |),
+                                  M.get_field (| M.get_name (| globals, locals_stack, "cls" |), "LENGTH" |)
+                                |),
+                              (* then *)
+                              ltac:(M.monadic (
+                                let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                                M.pure Constant.None_
+                              (* else *)
+                              )), ltac:(M.monadic (
+                                M.pure Constant.None_
+                              )) |) in
                             let _ := M.return_ (|
                               M.call (|
                                 M.get_name (| globals, locals_stack, "cls" |),
@@ -1391,21 +1416,25 @@ Definition _decode_to : Value.t -> Value.t -> M :=
                                 |),
                               (* then *)
                               ltac:(M.monadic (
-                                let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      M.call (|
-        M.get_name (| globals, locals_stack, "isinstance" |),
-        make_list [
-          M.get_name (| globals, locals_stack, "raw_rlp" |);
-          M.get_name (| globals, locals_stack, "Bytes" |)
-        ],
-        make_dict []
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+                                let _ :=
+                                  (* if *)
+                                  M.if_then_else (|
+                                    UnOp.not (| M.call (|
+                                      M.get_name (| globals, locals_stack, "isinstance" |),
+                                      make_list [
+                                        M.get_name (| globals, locals_stack, "raw_rlp" |);
+                                        M.get_name (| globals, locals_stack, "Bytes" |)
+                                      ],
+                                      make_dict []
+                                    |) |),
+                                  (* then *)
+                                  ltac:(M.monadic (
+                                    let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                                    M.pure Constant.None_
+                                  (* else *)
+                                  )), ltac:(M.monadic (
+                                    M.pure Constant.None_
+                                  )) |) in
                                 let _ := M.return_ (|
                                   M.get_name (| globals, locals_stack, "raw_rlp" |)
                                 |) in
@@ -1425,21 +1454,25 @@ Definition _decode_to : Value.t -> Value.t -> M :=
                                     |),
                                   (* then *)
                                   ltac:(M.monadic (
-                                    let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      M.call (|
-        M.get_name (| globals, locals_stack, "isinstance" |),
-        make_list [
-          M.get_name (| globals, locals_stack, "raw_rlp" |);
-          M.get_name (| globals, locals_stack, "Bytes" |)
-        ],
-        make_dict []
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+                                    let _ :=
+                                      (* if *)
+                                      M.if_then_else (|
+                                        UnOp.not (| M.call (|
+                                          M.get_name (| globals, locals_stack, "isinstance" |),
+                                          make_list [
+                                            M.get_name (| globals, locals_stack, "raw_rlp" |);
+                                            M.get_name (| globals, locals_stack, "Bytes" |)
+                                          ],
+                                          make_dict []
+                                        |) |),
+                                      (* then *)
+                                      ltac:(M.monadic (
+                                        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                                        M.pure Constant.None_
+                                      (* else *)
+                                      )), ltac:(M.monadic (
+                                        M.pure Constant.None_
+                                      )) |) in
 (* At stmt: unsupported node type: Try *)
                                     M.pure Constant.None_
                                   (* else *)
@@ -1456,21 +1489,25 @@ Definition _decode_to : Value.t -> Value.t -> M :=
                                         |),
                                       (* then *)
                                       ltac:(M.monadic (
-                                        let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      M.call (|
-        M.get_name (| globals, locals_stack, "isinstance" |),
-        make_list [
-          M.get_name (| globals, locals_stack, "raw_rlp" |);
-          M.get_name (| globals, locals_stack, "list" |)
-        ],
-        make_dict []
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+                                        let _ :=
+                                          (* if *)
+                                          M.if_then_else (|
+                                            UnOp.not (| M.call (|
+                                              M.get_name (| globals, locals_stack, "isinstance" |),
+                                              make_list [
+                                                M.get_name (| globals, locals_stack, "raw_rlp" |);
+                                                M.get_name (| globals, locals_stack, "list" |)
+                                              ],
+                                              make_dict []
+                                            |) |),
+                                          (* then *)
+                                          ltac:(M.monadic (
+                                            let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                                            M.pure Constant.None_
+                                          (* else *)
+                                          )), ltac:(M.monadic (
+                                            M.pure Constant.None_
+                                          )) |) in
                                         let _ := M.assert (| M.call (|
     M.get_name (| globals, locals_stack, "isinstance" |),
     make_list [
@@ -1483,35 +1520,39 @@ Definition _decode_to : Value.t -> Value.t -> M :=
                                           "args" ,
                                           make_list []
                                         |) in
-                                        let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.eq (|
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.call (|
-              M.get_name (| globals, locals_stack, "fields" |),
-              make_list [
-                M.get_name (| globals, locals_stack, "cls" |)
-              ],
-              make_dict []
-            |)
-          ],
-          make_dict []
-        |),
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_name (| globals, locals_stack, "raw_rlp" |)
-          ],
-          make_dict []
-        |)
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+                                        let _ :=
+                                          (* if *)
+                                          M.if_then_else (|
+                                            Compare.not_eq (|
+                                              M.call (|
+                                                M.get_name (| globals, locals_stack, "len" |),
+                                                make_list [
+                                                  M.call (|
+                                                    M.get_name (| globals, locals_stack, "fields" |),
+                                                    make_list [
+                                                      M.get_name (| globals, locals_stack, "cls" |)
+                                                    ],
+                                                    make_dict []
+                                                  |)
+                                                ],
+                                                make_dict []
+                                              |),
+                                              M.call (|
+                                                M.get_name (| globals, locals_stack, "len" |),
+                                                make_list [
+                                                  M.get_name (| globals, locals_stack, "raw_rlp" |)
+                                                ],
+                                                make_dict []
+                                              |)
+                                            |),
+                                          (* then *)
+                                          ltac:(M.monadic (
+                                            let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                                            M.pure Constant.None_
+                                          (* else *)
+                                          )), ltac:(M.monadic (
+                                            M.pure Constant.None_
+                                          )) |) in
                                         let _ :=
                                           M.for_ (|
                                             make_tuple [ M.get_name (| globals, locals_stack, "field" |); M.get_name (| globals, locals_stack, "rlp_item" |) ],
@@ -1675,23 +1716,27 @@ Definition decode_to_bytes : Value.t -> Value.t -> M :=
                 Constant.int 128
               |)
             |) in
-            let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.lt (|
-        M.get_name (| globals, locals_stack, "len_raw_data" |),
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_name (| globals, locals_stack, "encoded_bytes" |)
-          ],
-          make_dict []
-        |)
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+            let _ :=
+              (* if *)
+              M.if_then_else (|
+                Compare.gt_e (|
+                  M.get_name (| globals, locals_stack, "len_raw_data" |),
+                  M.call (|
+                    M.get_name (| globals, locals_stack, "len" |),
+                    make_list [
+                      M.get_name (| globals, locals_stack, "encoded_bytes" |)
+                    ],
+                    make_dict []
+                  |)
+                |),
+              (* then *)
+              ltac:(M.monadic (
+                let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                M.pure Constant.None_
+              (* else *)
+              )), ltac:(M.monadic (
+                M.pure Constant.None_
+              )) |) in
             let _ := M.assign_local (|
               "raw_data" ,
               M.slice (|
@@ -1704,28 +1749,32 @@ Definition decode_to_bytes : Value.t -> Value.t -> M :=
                 Constant.None_
               |)
             |) in
-            let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      UnOp.not (| BoolOp.and (|
-        Compare.eq (|
-          M.get_name (| globals, locals_stack, "len_raw_data" |),
-          Constant.int 1
-        |),
-        ltac:(M.monadic (
-          Compare.lt (|
-            M.get_subscript (|
-              M.get_name (| globals, locals_stack, "raw_data" |),
-              Constant.int 0
-            |),
-            Constant.int 128
-          |)
-        ))
-      |) |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+            let _ :=
+              (* if *)
+              M.if_then_else (|
+                BoolOp.and (|
+                  Compare.eq (|
+                    M.get_name (| globals, locals_stack, "len_raw_data" |),
+                    Constant.int 1
+                  |),
+                  ltac:(M.monadic (
+                    Compare.lt (|
+                      M.get_subscript (|
+                        M.get_name (| globals, locals_stack, "raw_data" |),
+                        Constant.int 0
+                      |),
+                      Constant.int 128
+                    |)
+                  ))
+                |),
+              (* then *)
+              ltac:(M.monadic (
+                let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                M.pure Constant.None_
+              (* else *)
+              )), ltac:(M.monadic (
+                M.pure Constant.None_
+              )) |) in
             let _ := M.return_ (|
               M.get_name (| globals, locals_stack, "raw_data" |)
             |) in
@@ -1745,40 +1794,48 @@ Definition decode_to_bytes : Value.t -> Value.t -> M :=
                 Constant.int 183
               |)
             |) in
-            let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.lt (|
-        BinOp.sub (|
-          M.get_name (| globals, locals_stack, "decoded_data_start_idx" |),
-          Constant.int 1
-        |),
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_name (| globals, locals_stack, "encoded_bytes" |)
-          ],
-          make_dict []
-        |)
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
-            let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.not_eq (|
-        M.get_subscript (|
-          M.get_name (| globals, locals_stack, "encoded_bytes" |),
-          Constant.int 1
-        |),
-        Constant.int 0
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+            let _ :=
+              (* if *)
+              M.if_then_else (|
+                Compare.gt_e (|
+                  BinOp.sub (|
+                    M.get_name (| globals, locals_stack, "decoded_data_start_idx" |),
+                    Constant.int 1
+                  |),
+                  M.call (|
+                    M.get_name (| globals, locals_stack, "len" |),
+                    make_list [
+                      M.get_name (| globals, locals_stack, "encoded_bytes" |)
+                    ],
+                    make_dict []
+                  |)
+                |),
+              (* then *)
+              ltac:(M.monadic (
+                let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                M.pure Constant.None_
+              (* else *)
+              )), ltac:(M.monadic (
+                M.pure Constant.None_
+              )) |) in
+            let _ :=
+              (* if *)
+              M.if_then_else (|
+                Compare.eq (|
+                  M.get_subscript (|
+                    M.get_name (| globals, locals_stack, "encoded_bytes" |),
+                    Constant.int 1
+                  |),
+                  Constant.int 0
+                |),
+              (* then *)
+              ltac:(M.monadic (
+                let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                M.pure Constant.None_
+              (* else *)
+              )), ltac:(M.monadic (
+                M.pure Constant.None_
+              )) |) in
             let _ := M.assign_local (|
               "len_decoded_data" ,
               M.call (|
@@ -1794,17 +1851,21 @@ Definition decode_to_bytes : Value.t -> Value.t -> M :=
                 make_dict []
               |)
             |) in
-            let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.gt_e (|
-        M.get_name (| globals, locals_stack, "len_decoded_data" |),
-        Constant.int 56
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+            let _ :=
+              (* if *)
+              M.if_then_else (|
+                Compare.lt (|
+                  M.get_name (| globals, locals_stack, "len_decoded_data" |),
+                  Constant.int 56
+                |),
+              (* then *)
+              ltac:(M.monadic (
+                let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                M.pure Constant.None_
+              (* else *)
+              )), ltac:(M.monadic (
+                M.pure Constant.None_
+              )) |) in
             let _ := M.assign_local (|
               "decoded_data_end_idx" ,
               BinOp.add (|
@@ -1812,26 +1873,30 @@ Definition decode_to_bytes : Value.t -> Value.t -> M :=
                 M.get_name (| globals, locals_stack, "len_decoded_data" |)
               |)
             |) in
-            let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.lt (|
-        BinOp.sub (|
-          M.get_name (| globals, locals_stack, "decoded_data_end_idx" |),
-          Constant.int 1
-        |),
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_name (| globals, locals_stack, "encoded_bytes" |)
-          ],
-          make_dict []
-        |)
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+            let _ :=
+              (* if *)
+              M.if_then_else (|
+                Compare.gt_e (|
+                  BinOp.sub (|
+                    M.get_name (| globals, locals_stack, "decoded_data_end_idx" |),
+                    Constant.int 1
+                  |),
+                  M.call (|
+                    M.get_name (| globals, locals_stack, "len" |),
+                    make_list [
+                      M.get_name (| globals, locals_stack, "encoded_bytes" |)
+                    ],
+                    make_dict []
+                  |)
+                |),
+              (* then *)
+              ltac:(M.monadic (
+                let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                M.pure Constant.None_
+              (* else *)
+              )), ltac:(M.monadic (
+                M.pure Constant.None_
+              )) |) in
             let _ := M.return_ (|
               M.slice (|
                 M.get_name (| globals, locals_stack, "encoded_bytes" |),
@@ -1889,23 +1954,27 @@ Definition decode_to_sequence : Value.t -> Value.t -> M :=
             Constant.int 192
           |)
         |) in
-        let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.lt (|
-        M.get_name (| globals, locals_stack, "len_joined_encodings" |),
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_name (| globals, locals_stack, "encoded_sequence" |)
-          ],
-          make_dict []
-        |)
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+        let _ :=
+          (* if *)
+          M.if_then_else (|
+            Compare.gt_e (|
+              M.get_name (| globals, locals_stack, "len_joined_encodings" |),
+              M.call (|
+                M.get_name (| globals, locals_stack, "len" |),
+                make_list [
+                  M.get_name (| globals, locals_stack, "encoded_sequence" |)
+                ],
+                make_dict []
+              |)
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
+            M.pure Constant.None_
+          )) |) in
         let _ := M.assign_local (|
           "joined_encodings" ,
           M.slice (|
@@ -1934,40 +2003,48 @@ Definition decode_to_sequence : Value.t -> Value.t -> M :=
             Constant.int 247
           |)
         |) in
-        let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.lt (|
-        BinOp.sub (|
-          M.get_name (| globals, locals_stack, "joined_encodings_start_idx" |),
-          Constant.int 1
-        |),
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_name (| globals, locals_stack, "encoded_sequence" |)
-          ],
-          make_dict []
-        |)
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
-        let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.not_eq (|
-        M.get_subscript (|
-          M.get_name (| globals, locals_stack, "encoded_sequence" |),
-          Constant.int 1
-        |),
-        Constant.int 0
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+        let _ :=
+          (* if *)
+          M.if_then_else (|
+            Compare.gt_e (|
+              BinOp.sub (|
+                M.get_name (| globals, locals_stack, "joined_encodings_start_idx" |),
+                Constant.int 1
+              |),
+              M.call (|
+                M.get_name (| globals, locals_stack, "len" |),
+                make_list [
+                  M.get_name (| globals, locals_stack, "encoded_sequence" |)
+                ],
+                make_dict []
+              |)
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
+            M.pure Constant.None_
+          )) |) in
+        let _ :=
+          (* if *)
+          M.if_then_else (|
+            Compare.eq (|
+              M.get_subscript (|
+                M.get_name (| globals, locals_stack, "encoded_sequence" |),
+                Constant.int 1
+              |),
+              Constant.int 0
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
+            M.pure Constant.None_
+          )) |) in
         let _ := M.assign_local (|
           "len_joined_encodings" ,
           M.call (|
@@ -1983,17 +2060,21 @@ Definition decode_to_sequence : Value.t -> Value.t -> M :=
             make_dict []
           |)
         |) in
-        let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.gt_e (|
-        M.get_name (| globals, locals_stack, "len_joined_encodings" |),
-        Constant.int 56
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+        let _ :=
+          (* if *)
+          M.if_then_else (|
+            Compare.lt (|
+              M.get_name (| globals, locals_stack, "len_joined_encodings" |),
+              Constant.int 56
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
+            M.pure Constant.None_
+          )) |) in
         let _ := M.assign_local (|
           "joined_encodings_end_idx" ,
           BinOp.add (|
@@ -2001,26 +2082,30 @@ Definition decode_to_sequence : Value.t -> Value.t -> M :=
             M.get_name (| globals, locals_stack, "len_joined_encodings" |)
           |)
         |) in
-        let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.lt (|
-        BinOp.sub (|
-          M.get_name (| globals, locals_stack, "joined_encodings_end_idx" |),
-          Constant.int 1
-        |),
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_name (| globals, locals_stack, "encoded_sequence" |)
-          ],
-          make_dict []
-        |)
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+        let _ :=
+          (* if *)
+          M.if_then_else (|
+            Compare.gt_e (|
+              BinOp.sub (|
+                M.get_name (| globals, locals_stack, "joined_encodings_end_idx" |),
+                Constant.int 1
+              |),
+              M.call (|
+                M.get_name (| globals, locals_stack, "len" |),
+                make_list [
+                  M.get_name (| globals, locals_stack, "encoded_sequence" |)
+                ],
+                make_dict []
+              |)
+            |),
+          (* then *)
+          ltac:(M.monadic (
+            let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+            M.pure Constant.None_
+          (* else *)
+          )), ltac:(M.monadic (
+            M.pure Constant.None_
+          )) |) in
         let _ := M.assign_local (|
           "joined_encodings" ,
           M.slice (|
@@ -2100,29 +2185,33 @@ Definition decode_joined_encodings : Value.t -> Value.t -> M :=
               make_dict []
             |)
           |) in
-          let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.lt (|
-        BinOp.sub (|
-          BinOp.add (|
-            M.get_name (| globals, locals_stack, "item_start_idx" |),
-            M.get_name (| globals, locals_stack, "encoded_item_length" |)
-          |),
-          Constant.int 1
-        |),
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_name (| globals, locals_stack, "joined_encodings" |)
-          ],
-          make_dict []
-        |)
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+          let _ :=
+            (* if *)
+            M.if_then_else (|
+              Compare.gt_e (|
+                BinOp.sub (|
+                  BinOp.add (|
+                    M.get_name (| globals, locals_stack, "item_start_idx" |),
+                    M.get_name (| globals, locals_stack, "encoded_item_length" |)
+                  |),
+                  Constant.int 1
+                |),
+                M.call (|
+                  M.get_name (| globals, locals_stack, "len" |),
+                  make_list [
+                    M.get_name (| globals, locals_stack, "joined_encodings" |)
+                  ],
+                  make_dict []
+                |)
+              |),
+            (* then *)
+            ltac:(M.monadic (
+              let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+              M.pure Constant.None_
+            (* else *)
+            )), ltac:(M.monadic (
+              M.pure Constant.None_
+            )) |) in
           let _ := M.assign_local (|
             "encoded_item" ,
             M.slice (|
@@ -2190,23 +2279,27 @@ Definition decode_item_length : Value.t -> Value.t -> M :=
     -------
     rlp_length : `int`
     " in
-    let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.gt (|
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_name (| globals, locals_stack, "encoded_data" |)
-          ],
-          make_dict []
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        Compare.lt_e (|
+          M.call (|
+            M.get_name (| globals, locals_stack, "len" |),
+            make_list [
+              M.get_name (| globals, locals_stack, "encoded_data" |)
+            ],
+            make_dict []
+          |),
+          Constant.int 0
         |),
-        Constant.int 0
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        M.pure Constant.None_
+      )) |) in
     let _ := M.assign_local (|
       "first_rlp_byte" ,
       M.call (|
@@ -2284,37 +2377,45 @@ Definition decode_item_length : Value.t -> Value.t -> M :=
                     Constant.int 183
                   |)
                 |) in
-                let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.lt (|
-        M.get_name (| globals, locals_stack, "length_length" |),
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_name (| globals, locals_stack, "encoded_data" |)
-          ],
-          make_dict []
-        |)
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
-                let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.not_eq (|
-        M.get_subscript (|
-          M.get_name (| globals, locals_stack, "encoded_data" |),
-          Constant.int 1
-        |),
-        Constant.int 0
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+                let _ :=
+                  (* if *)
+                  M.if_then_else (|
+                    Compare.gt_e (|
+                      M.get_name (| globals, locals_stack, "length_length" |),
+                      M.call (|
+                        M.get_name (| globals, locals_stack, "len" |),
+                        make_list [
+                          M.get_name (| globals, locals_stack, "encoded_data" |)
+                        ],
+                        make_dict []
+                      |)
+                    |),
+                  (* then *)
+                  ltac:(M.monadic (
+                    let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                    M.pure Constant.None_
+                  (* else *)
+                  )), ltac:(M.monadic (
+                    M.pure Constant.None_
+                  )) |) in
+                let _ :=
+                  (* if *)
+                  M.if_then_else (|
+                    Compare.eq (|
+                      M.get_subscript (|
+                        M.get_name (| globals, locals_stack, "encoded_data" |),
+                        Constant.int 1
+                      |),
+                      Constant.int 0
+                    |),
+                  (* then *)
+                  ltac:(M.monadic (
+                    let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                    M.pure Constant.None_
+                  (* else *)
+                  )), ltac:(M.monadic (
+                    M.pure Constant.None_
+                  )) |) in
                 let _ := M.assign_local (|
                   "decoded_data_length" ,
                   M.call (|
@@ -2371,37 +2472,45 @@ Definition decode_item_length : Value.t -> Value.t -> M :=
                             Constant.int 247
                           |)
                         |) in
-                        let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.lt (|
-        M.get_name (| globals, locals_stack, "length_length" |),
-        M.call (|
-          M.get_name (| globals, locals_stack, "len" |),
-          make_list [
-            M.get_name (| globals, locals_stack, "encoded_data" |)
-          ],
-          make_dict []
-        |)
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
-                        let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      Compare.not_eq (|
-        M.get_subscript (|
-          M.get_name (| globals, locals_stack, "encoded_data" |),
-          Constant.int 1
-        |),
-        Constant.int 0
-      |);
-      M.get_name (| globals, locals_stack, "RLPDecodingError" |)
-    ],
-    make_dict []
-  |) in
+                        let _ :=
+                          (* if *)
+                          M.if_then_else (|
+                            Compare.gt_e (|
+                              M.get_name (| globals, locals_stack, "length_length" |),
+                              M.call (|
+                                M.get_name (| globals, locals_stack, "len" |),
+                                make_list [
+                                  M.get_name (| globals, locals_stack, "encoded_data" |)
+                                ],
+                                make_dict []
+                              |)
+                            |),
+                          (* then *)
+                          ltac:(M.monadic (
+                            let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                            M.pure Constant.None_
+                          (* else *)
+                          )), ltac:(M.monadic (
+                            M.pure Constant.None_
+                          )) |) in
+                        let _ :=
+                          (* if *)
+                          M.if_then_else (|
+                            Compare.eq (|
+                              M.get_subscript (|
+                                M.get_name (| globals, locals_stack, "encoded_data" |),
+                                Constant.int 1
+                              |),
+                              Constant.int 0
+                            |),
+                          (* then *)
+                          ltac:(M.monadic (
+                            let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "RLPDecodingError" |)) |) in
+                            M.pure Constant.None_
+                          (* else *)
+                          )), ltac:(M.monadic (
+                            M.pure Constant.None_
+                          )) |) in
                         let _ := M.assign_local (|
                           "decoded_data_length" ,
                           M.call (|

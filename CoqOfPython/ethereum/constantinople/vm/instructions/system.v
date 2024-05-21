@@ -26,9 +26,6 @@ Axiom ethereum_base_types_imports_Bytes0 :
 Axiom ethereum_base_types_imports_Uint :
   IsImported globals "ethereum.base_types" "Uint".
 
-Axiom ethereum_utils_ensure_imports_ensure :
-  IsImported globals "ethereum.utils.ensure" "ensure".
-
 Axiom ethereum_utils_numeric_imports_ceil32 :
   IsImported globals "ethereum.utils.numeric" "ceil32".
 
@@ -135,14 +132,18 @@ Definition generic_create : Value.t -> Value.t -> M :=
       M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "gas_left" |),
       M.get_name (| globals, locals_stack, "create_message_gas" |)
     |) in
-    let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      UnOp.not (| M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "is_static" |) |);
-      M.get_name (| globals, locals_stack, "WriteInStaticContext" |)
-    ],
-    make_dict []
-  |) in
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "is_static" |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "WriteInStaticContext" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        M.pure Constant.None_
+      )) |) in
     let _ := M.assign (|
       M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "return_data" |),
       Constant.bytes ""
@@ -1134,28 +1135,32 @@ M.get_name (| globals, locals_stack, "GAS_CALL_VALUE" |)
     ],
     make_dict []
   |) in
-    let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      BoolOp.or (|
-        UnOp.not (| M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "is_static" |) |),
-        ltac:(M.monadic (
-          Compare.eq (|
-            M.get_name (| globals, locals_stack, "value" |),
-            M.call (|
-              M.get_name (| globals, locals_stack, "U256" |),
-              make_list [
-                Constant.int 0
-              ],
-              make_dict []
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        BoolOp.and (|
+          M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "is_static" |),
+          ltac:(M.monadic (
+            Compare.not_eq (|
+              M.get_name (| globals, locals_stack, "value" |),
+              M.call (|
+                M.get_name (| globals, locals_stack, "U256" |),
+                make_list [
+                  Constant.int 0
+                ],
+                make_dict []
+              |)
             |)
-          |)
-        ))
-      |);
-      M.get_name (| globals, locals_stack, "WriteInStaticContext" |)
-    ],
-    make_dict []
-  |) in
+          ))
+        |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "WriteInStaticContext" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        M.pure Constant.None_
+      )) |) in
     let _ := M.assign_op (|
       BinOp.add,
       M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "memory" |),
@@ -1625,14 +1630,18 @@ Definition selfdestruct : Value.t -> Value.t -> M :=
     ],
     make_dict []
   |) in
-    let _ := M.call (|
-    M.get_name (| globals, locals_stack, "ensure" |),
-    make_list [
-      UnOp.not (| M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "is_static" |) |);
-      M.get_name (| globals, locals_stack, "WriteInStaticContext" |)
-    ],
-    make_dict []
-  |) in
+    let _ :=
+      (* if *)
+      M.if_then_else (|
+        M.get_field (| M.get_field (| M.get_name (| globals, locals_stack, "evm" |), "message" |), "is_static" |),
+      (* then *)
+      ltac:(M.monadic (
+        let _ := M.raise (| Some (M.get_name (| globals, locals_stack, "WriteInStaticContext" |)) |) in
+        M.pure Constant.None_
+      (* else *)
+      )), ltac:(M.monadic (
+        M.pure Constant.None_
+      )) |) in
     let _ := M.assign_local (|
       "beneficiary_balance" ,
       M.get_field (| M.call (|
