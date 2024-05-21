@@ -2,6 +2,7 @@ Require Import CoqOfPython.CoqOfPython.
 Require Import simulations.CoqOfPython.
 Require Import simulations.builtins.
 
+
 Require ethereum.simulations.base_types.
 Definition U255_CEIL_VALUE := base_types.U255_CEIL_VALUE.
 Module U256 := base_types.U256.
@@ -56,10 +57,11 @@ Definition evm_with_gas : Evm.t :=
 Definition evm_with_stack : Evm.t :=
   Evm.Lens.stack.(Lens.write) evm_with_gas [
     U256.of_Z 23;
-    U256.of_Z 3
+    U256.of_Z 3;
+    U256.of_Z 5
   ].
 
-Definition binary_operation wrapped_operation gas_charge : MS? Evm.t Exception.t unit :=
+Definition wrapped_binary_operation wrapped_operation gas_charge : MS? Evm.t Exception.t unit :=
   (* STACK *)
   letS? x := StateError.lift_lens Evm.Lens.stack pop in
   letS? y := StateError.lift_lens Evm.Lens.stack pop in
@@ -79,51 +81,135 @@ Definition binary_operation wrapped_operation gas_charge : MS? Evm.t Exception.t
   returnS? tt.
 
 Definition add : MS? Evm.t Exception.t unit :=
-  binary_operation U256.wrapping_add GAS_VERY_LOW.
+  wrapped_binary_operation U256.wrapping_add GAS_VERY_LOW.
 
 (* Compute add evm_with_stack. *)
 
 Definition sub : MS? Evm.t Exception.t unit :=
-  binary_operation U256.wrapping_sub GAS_VERY_LOW.
+  wrapped_binary_operation U256.wrapping_sub GAS_VERY_LOW.
   
 (* Compute sub evm_with_stack. *)
 
 Definition mul : MS? Evm.t Exception.t unit :=
-  binary_operation U256.wrapping_mul GAS_VERY_LOW.
+  wrapped_binary_operation U256.wrapping_mul GAS_VERY_LOW.
 
 (* Compute mul evm_with_stack. *)
 
 Definition div : MS? Evm.t Exception.t unit :=
-  binary_operation U256.wrapping_div GAS_VERY_LOW.
+  (* STACK *)
+  letS? divisor := StateError.lift_lens Evm.Lens.stack pop in
+  letS? divident := StateError.lift_lens Evm.Lens.stack pop in
+
+  (* GAS *)
+  letS? _ := charge_gas GAS_VERY_LOW in
+
+  (* OPERATION *)
+
+  let division := 
+  match (U256.to_Z divident) with
+  | 0 => U256.of_Z 0
+  | _ => U256.of_Z ((U256.to_Z divisor) / (U256.to_Z divident))
+  end in
+
+  let result := division in
+  
+  letS? _ := StateError.lift_lens Evm.Lens.stack (push result) in
+
+  (* PROGRAM COUNTER *)
+  letS? _ := StateError.lift_lens Evm.Lens.pc (fun pc =>
+    (inl tt, Uint.__add__ pc (Uint.Make 1))) in
+
+  returnS? tt.
 
 (* Compute div evm_with_stack. *)
 
-(* Gallina has a built in 'mod' which causes the
-   names to collide *)
+(* Name collides with Coq's mod. *)
 
-Definition sim_mod : MS? Evm.t Exception.t unit :=
-  binary_operation U256.wrapping_mod GAS_VERY_LOW.
-
-Require Import NZAxioms NZMulOrder NZPow.
-
-
-Search "_" inside Z.
-
-Check log2.
-
-
-Definition exp : MS? Evm.t Exception.t unit :=
+Definition modulo : MS? Evm.t Exception.t unit :=
   (* STACK *)
-  letS? base := StateError.lift_lens Evm.Lens.stack pop in
-  letS? exponent := StateError.lift_lens Evm.Lens.stack pop in
+  letS? x := StateError.lift_lens Evm.Lens.stack pop in
+  letS? y := StateError.lift_lens Evm.Lens.stack pop in
 
-        
   (* GAS *)
-  letS? _ := charge_gas GAS_EXPONENTIATION + GAS_EXPONENTIATION_PER_BYTE * exponent_bytes in
+  letS? _ := charge_gas GAS_VERY_LOW in
 
   (* OPERATION *)
-  let result := U256.wrapping_div base exponent in
 
+  let modular y := 
+    match (U256.to_Z y) with
+    | 0 =>
+      U256.of_Z 0
+    | _ =>
+        U256.of_Z ((U256.to_Z x) mod (U256.to_Z y))
+  end
+  in
+
+  let result := modular y in
+  
+  letS? _ := StateError.lift_lens Evm.Lens.stack (push result) in
+
+  (* PROGRAM COUNTER *)
+  letS? _ := StateError.lift_lens Evm.Lens.pc (fun pc =>
+    (inl tt, Uint.__add__ pc (Uint.Make 1))) in
+
+  returnS? tt.
+  
+(* Compute modulo evm_with_stack. *)
+
+Definition add_mod : MS? Evm.t Exception.t unit :=
+  (* STACK *)
+  letS? x := StateError.lift_lens Evm.Lens.stack pop in
+  letS? y := StateError.lift_lens Evm.Lens.stack pop in
+  letS? z := StateError.lift_lens Evm.Lens.stack pop in
+        
+  (* GAS *)
+  letS? _ := charge_gas GAS_MID in
+
+  (* OPERATION *)
+
+  let modular y := 
+  match (U256.to_Z y) with
+  | 0 =>
+    U256.of_Z 0
+  | _ =>
+      U256.of_Z (((U256.to_Z x) + (U256.to_Z y)) mod (U256.to_Z z))
+  end
+  in
+
+  let result := modular y in
+  
+  letS? _ := StateError.lift_lens Evm.Lens.stack (push result) in
+
+  (* PROGRAM COUNTER *)
+  letS? _ := StateError.lift_lens Evm.Lens.pc (fun pc =>
+    (inl tt, Uint.__add__ pc (Uint.Make 1))) in
+
+  returnS? tt.
+
+(* Compute add_mod evm_with_stack *)
+
+Definition mul_mod : MS? Evm.t Exception.t unit :=
+  (* STACK *)
+  letS? x := StateError.lift_lens Evm.Lens.stack pop in
+  letS? y := StateError.lift_lens Evm.Lens.stack pop in
+  letS? z := StateError.lift_lens Evm.Lens.stack pop in
+        
+  (* GAS *)
+  letS? _ := charge_gas GAS_MID in
+
+  (* OPERATION *)
+
+  let modular y := 
+    match (U256.to_Z y) with
+    | 0 =>
+      U256.of_Z 0
+    | _ =>
+      U256.of_Z (((U256.to_Z x) * (U256.to_Z y)) mod (U256.to_Z z))
+  end
+  in
+
+  let result := modular y in
+  
   letS? _ := StateError.lift_lens Evm.Lens.stack (push result) in
 
   (* PROGRAM COUNTER *)
@@ -133,19 +219,39 @@ Definition exp : MS? Evm.t Exception.t unit :=
   returnS? tt.
 
 
+(* Compute mul_mod evm_with_stack. *)
 
+(* "This is equivalent to 1 + floor(log(y, 256))" *)
 
+Definition byte_length n :=
+  1 + Z.log2(n) / 8.
 
+Definition exp : MS? Evm.t Exception.t unit :=
+  (* STACK *)
+  letS? base := StateError.lift_lens Evm.Lens.stack pop in
+  letS? exponent := StateError.lift_lens Evm.Lens.stack pop in
+
+  let exponent_bytes := byte_length (U256.to_Z exponent) in
+  (* GAS *)
+  letS? _ := charge_gas (gas.Uint.Make 
+                           ((gas.Uint.get GAS_EXPONENTIATION)
+                          + (gas.Uint.get GAS_EXPONENTIATION_PER_BYTE)
+                          * exponent_bytes)) in 
+
+  (* OPERATION *)
+
+  let result := U256.of_Z ((Z.pow (U256.to_Z base) (U256.to_Z exponent)) mod U256_CEIL_VALUE) in 
+          
   
-(* Compute sim_mod evm_with_stack. *)
+  letS? _ := StateError.lift_lens Evm.Lens.stack (push result) in
 
+  (* PROGRAM COUNTER *)
+  letS? _ := StateError.lift_lens Evm.Lens.pc (fun pc =>
+    (inl tt, Uint.__add__ pc (Uint.Make 1))) in
 
+  returnS? tt.
 
-
-
-
-
-    
+(* Compute exp evm_with_stack. *)
 
 
 
