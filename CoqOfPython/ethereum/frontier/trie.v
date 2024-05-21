@@ -148,35 +148,32 @@ Definition V : Value.t := M.run ltac:(M.monadic (
   |)
 )).
 
-Definition LeafNode : Value.t :=
-  builtins.make_klass
-    []
-    [
+Definition LeafNode : Value.t := make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ];
+|}.
 
-    ]
-    [
+Definition ExtensionNode : Value.t := make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ];
+|}.
 
-    ].
-
-Definition ExtensionNode : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
-
-Definition BranchNode : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
+Definition BranchNode : Value.t := make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ];
+|}.
 
 Definition InternalNode : Value.t := M.run ltac:(M.monadic (
   M.get_subscript (|
@@ -473,15 +470,15 @@ Definition encode_node : Value.t -> Value.t -> M :=
 Axiom encode_node_in_globals :
   IsInGlobals globals "encode_node" (make_function encode_node).
 
-Definition Trie : Value.t :=
-  builtins.make_klass
-    [(* At base: unsupported node type: Subscript *)]
-    [
-
-    ]
-    [
-
-    ].
+Definition Trie : Value.t := make_klass {|
+  Klass.bases := [
+    (globals, "(* At base: unsupported node type: Subscript *)")
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ];
+|}.
 
 Definition copy_trie : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>

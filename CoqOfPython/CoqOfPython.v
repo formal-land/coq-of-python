@@ -64,6 +64,15 @@ Module Globals.
   Definition t : Set := string.
 End Globals.
 
+Module Klass.
+  Record t {Value M : Set} : Set := {
+    bases : list (Globals.t * string);
+    class_methods : list (string * (Value -> Value -> M));
+    methods : list (string * (Value -> Value -> M));
+  }.
+  Arguments t : clear implicits.
+End Klass.
+
 Module Data.
   (** This type is not accessible directly in Python, as only object are. We use this type
       internally to represent integers, closures, ... that can be made accessible in a special
@@ -81,10 +90,7 @@ Module Data.
   | Set_ (items : list Value)
   | Dict (dict : Dict.t Value)
   | Closure {Value M : Set} (f : Value -> Value -> M)
-  | Klass {Value M : Set}
-    (bases : list (Globals.t * string))
-    (class_methods : list (string * (Value -> Value -> M)))
-    (methods : list (string * (Value -> Value -> M))).
+  | Klass {Value M : Set} (klass : Klass.t Value M).
   Arguments Ellipsis {_}.
   Arguments Bool {_}.
   Arguments Integer {_}.
@@ -106,19 +112,32 @@ Module Object.
   Arguments t : clear implicits.
   Arguments Build_t {_}.
 
-  Fixpoint fields_of_optional_dict {Value : Set} (optional_dict : list (string * option Value)) :
+  Fixpoint fields_of_dict_option {Value : Set} (optional_dict : list (string * option Value)) :
       Dict.t Value :=
     match optional_dict with
     | [] => []
     | (name, Some value) :: optional_dict =>
-      Dict.write (fields_of_optional_dict optional_dict) name value
-    | (_, None) :: optional_dict => fields_of_optional_dict optional_dict
+      Dict.write (fields_of_dict_option optional_dict) name value
+    | (_, None) :: optional_dict => fields_of_dict_option optional_dict
     end.
 
-  Definition make {Value : Set} (optional_dict : list (string * option Value)) : t Value :=
+  Definition make_option {Value : Set} (optional_dict : list (string * option Value)) : t Value :=
     {|
       internal := None;
-      fields := fields_of_optional_dict optional_dict;
+      fields := fields_of_dict_option optional_dict;
+    |}.
+
+  Fixpoint fields_of_dict {Value : Set} (dict : list (string * Value)) : Dict.t Value :=
+    match dict with
+    | [] => []
+    | (name, value) :: dict =>
+      Dict.write (fields_of_dict dict) name value
+    end.
+
+  Definition make {Value : Set} (dict : list (string * Value)) : t Value :=
+    {|
+      internal := None;
+      fields := fields_of_dict dict;
     |}.
 
   (** When an object is just a wrapper around the [Data.t] type. *)
@@ -131,11 +150,15 @@ End Object.
 
 Module Pointer.
   Module Mutable.
+    Module Kind.
+      Inductive t : Set :=
+      | Stack (index : nat)
+      | Heap {Address : Set} (address : Address).
+    End Kind.
+
     Inductive t (Value : Set) : Set :=
-    | Stack {A : Set} (index : nat) (to_object : A -> Object.t Value)
-    | Heap {Address A : Set} (address : Address) (to_object : A -> Object.t Value).
-    Arguments Stack {_ _}.
-    Arguments Heap {_ _ _}.
+    | Make {A : Set} (kind : Kind.t) (to_object : A -> Object.t Value).
+    Arguments Make {_ _}.
   End Mutable.
 
   Inductive t (Value : Set) : Set :=
@@ -143,6 +166,13 @@ Module Pointer.
   | Mutable (mutable : Mutable.t Value).
   Arguments Imm {_}.
   Arguments Mutable {_}.
+
+  Definition stack {Value A : Set} (index : nat) (to_object : A -> Object.t Value) : t Value :=
+    Mutable (Mutable.Make (Mutable.Kind.Stack index) to_object).
+
+  Definition heap {Value A Address : Set} (address : Address) (to_object : A -> Object.t Value) :
+      t Value :=
+    Mutable (Mutable.Make (Mutable.Kind.Heap address) to_object).
 End Pointer.
 
 Module Value.
@@ -240,6 +270,11 @@ Definition IsImported (globals : Globals.t) (import : Globals.t) (name : string)
   forall (value : Value.t),
     IsInGlobals import name value ->
     IsInGlobals globals name value.
+
+(** The `builtins` module is accessible from anywhere. *)
+Axiom builtins_is_imported :
+  forall (globals : Globals.t) (name : string),
+  IsImported globals "builtins" name.
 
 Module M.
   Definition pure (v : Value.t) : M :=
@@ -507,31 +542,10 @@ Module Compare.
   Parameter not_in : Value.t -> Value.t -> M.
 End Compare.
 
-(** ** Builtins *)
-Module builtins.
-  Definition make_klass
-    (bases : list (string * string))
-    (class_methods : list (string * (Value.t -> Value.t -> M)))
-    (methods : list (string * (Value.t -> Value.t -> M))) :
-    Value.t :=
-  Value.Make "builtins" "type" (Pointer.Imm (Object.wrapper (
-    Data.Klass bases class_methods methods
-  ))).
-
-  Definition type : Value.t :=
-    make_klass [] [] [].
-  Axiom type_in_globals : IsInGlobals "builtins" "type" type.
-
-  Definition int : Value.t :=
-    make_klass [] [] [].
-  Axiom int_in_globals : IsInGlobals "builtins" "int" int.
-
-  Definition str : Value.t :=
-    make_klass [] [] [].
-  Axiom str_in_globals : IsInGlobals "builtins" "str" str.
-End builtins.
-
 Parameter make_list_concat : list Value.t -> M.
 
 Definition make_function (f : Value.t -> Value.t -> M) : Value.t :=
   Value.Make "builtins" "function" (Pointer.Imm (Object.wrapper (Data.Closure f))).
+
+Definition make_klass (klass : Klass.t Value.t M) : Value.t :=
+  Value.Make "builtins" "type" (Pointer.Imm (Object.wrapper (Data.Klass klass))).

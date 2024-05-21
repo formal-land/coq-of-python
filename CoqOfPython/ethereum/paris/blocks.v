@@ -50,42 +50,38 @@ Axiom ethereum_paris_fork_types_imports_Root :
 Axiom ethereum_paris_transactions_imports_LegacyTransaction :
   IsImported globals "ethereum.paris.transactions" "LegacyTransaction".
 
-Definition Header : Value.t :=
-  builtins.make_klass
-    []
-    [
+Definition Header : Value.t := make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ];
+|}.
 
-    ]
-    [
+Definition Block : Value.t := make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ];
+|}.
 
-    ].
+Definition Log : Value.t := make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ];
+|}.
 
-Definition Block : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
-
-Definition Log : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
-
-Definition Receipt : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
+Definition Receipt : Value.t := make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ];
+|}.

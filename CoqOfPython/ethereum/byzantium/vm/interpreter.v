@@ -136,15 +136,14 @@ Definition MAX_CODE_SIZE : Value.t := M.run ltac:(M.monadic (
   Constant.int 24576
 )).
 
-Definition MessageCallOutput : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
+Definition MessageCallOutput : Value.t := make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ];
+|}.
 
 Definition process_message_call : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>

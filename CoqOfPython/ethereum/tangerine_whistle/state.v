@@ -74,15 +74,14 @@ Axiom ethereum_tangerine_whistle_trie_imports_trie_get :
 Axiom ethereum_tangerine_whistle_trie_imports_trie_set :
   IsImported globals "ethereum.tangerine_whistle.trie" "trie_set".
 
-Definition State : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
+Definition State : Value.t := make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ];
+|}.
 
 Definition close_state : Value.t -> Value.t -> M :=
   fun (args kwargs : Value.t) =>

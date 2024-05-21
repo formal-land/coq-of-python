@@ -58,6 +58,80 @@ Module Heap.
   End Valid.
 End Heap.
 
+Module IsAlloc.
+  Inductive t `{Heap.Trait}
+    (stack : Stack.t) (heap : Heap) :
+    Pointer.Mutable.t Value.t ->
+    Object.t Value.t ->
+    Stack.t -> Heap ->
+    Prop :=
+  | Stack {A : Set} to_object (value : A) object :
+    let index := List.length stack in
+    object = to_object value ->
+    t
+      stack heap
+      (Pointer.Mutable.Make (Pointer.Mutable.Kind.Stack index) to_object)
+      object
+      (stack ++ [existS A value]) heap
+  | Heap heap' (address : Address) to_object value object :
+    Heap.read address heap = None ->
+    Heap.alloc_write address heap value = Some heap' ->
+    object = to_object value ->
+    t
+      stack heap
+      (Pointer.Mutable.Make (Pointer.Mutable.Kind.Heap address) to_object)
+      object
+      stack heap'.
+  (* We make the first arguments implicit so that we can apply this contructor in proofs directly
+     with the parameters than cannot be found by unification, namely [to_object] and [value]. *)
+  Arguments Stack {_ _ _ _ _ _}.
+End IsAlloc.
+
+Module IsRead.
+  Inductive t `{Heap.Trait}
+    (stack : Stack.t) (heap : Heap) :
+    Pointer.Mutable.t Value.t ->
+    Object.t Value.t ->
+    Prop :=
+  | Stack {A : Set} index to_object (value : A) :
+    Stack.read stack index = Some (existS A value) ->
+    t
+      stack heap
+      (Pointer.Mutable.Make (Pointer.Mutable.Kind.Stack index) to_object)
+      (to_object value)
+  | Heap (address : Address) to_object value :
+    Heap.read address heap = Some value ->
+    t
+      stack heap
+      (Pointer.Mutable.Make (Pointer.Mutable.Kind.Heap address) to_object)
+      (to_object value).
+End IsRead.
+
+Module IsWrite.
+  Inductive t `{Heap.Trait}
+    (stack : Stack.t) (heap : Heap) :
+    Pointer.Mutable.t Value.t ->
+    Object.t Value.t ->
+    Stack.t -> Heap ->
+    Prop :=
+  | Stack {A : Set} index to_object (update : A) update_object :
+    let stack' := Stack.write stack index update in
+    update_object = to_object update ->
+    t
+      stack heap
+      (Pointer.Mutable.Make (Pointer.Mutable.Kind.Stack index) to_object)
+      update_object
+      stack' heap
+  | Heap (address : Address) to_object update update_object heap' :
+    Heap.alloc_write address heap update = Some heap' ->
+    update_object = to_object update ->
+    t
+      stack heap
+      (Pointer.Mutable.Make (Pointer.Mutable.Kind.Heap address) to_object)
+      update_object
+      stack heap'.
+End IsWrite.
+
 Module Run.
   Reserved Notation "{{ stack , heap | e ⇓ result | stack' , heap' }}".
 
@@ -84,17 +158,17 @@ Module Run.
       LowM.CallPrimitive (Primitive.StateAlloc object) k ⇓
       result
     | stack', heap' }}
-  | CallPrimitiveStateAllocStack {B : Set}
-      (value : B)
-      (to_object : B -> Object.t Value.t)
+  | CallPrimitiveStateAllocMutable
+      (mutable : Pointer.Mutable.t Value.t)
       (object : Object.t Value.t)
-      (stack : Stack.t) (heap : Heap)
+      (stack stack_inter : Stack.t) (heap heap_inter : Heap)
       (k : Pointer.t Value.t -> LowM.t A) :
-    let stack_inter := (stack ++ [existS B value])%list in
-    let index := List.length stack in
-    let mutable := Pointer.Mutable.Stack index to_object in
-    object = to_object value ->
-    {{ stack_inter, heap |
+    IsAlloc.t
+      stack heap
+      mutable
+      object
+      stack_inter heap_inter ->
+    {{ stack_inter, heap_inter |
       k (Pointer.Mutable mutable) ⇓
       result
     | stack', heap' }} ->
@@ -102,91 +176,32 @@ Module Run.
       LowM.CallPrimitive (Primitive.StateAlloc object) k ⇓
       result
     | stack', heap' }}
-  | CallPrimitiveStateAllocHeap
-      (address : Address)
-      (value : Heap.get_Set address)
+  | CallPrimitiveStateRead
+      (mutable : Pointer.Mutable.t Value.t)
       (object : Object.t Value.t)
-      (to_object : Heap.get_Set address -> Object.t Value.t)
-      (stack : Stack.t) (heap heap_inter : Heap)
-      (k : Pointer.t Value.t -> LowM.t A) :
-    let mutable := Pointer.Mutable.Heap address to_object in
-    object = to_object value ->
-    Heap.read address heap = None ->
-    Heap.alloc_write address heap value = Some heap_inter ->
-    {{ stack, heap_inter |
-      k (Pointer.Mutable mutable) ⇓
-      result
-    | stack', heap' }} ->
-    {{ stack, heap |
-      LowM.CallPrimitive (Primitive.StateAlloc object) k ⇓
-      result
-    | stack', heap' }}
-  | CallPrimitiveStateReadStack {B : Set}
-      (index : nat)
-      (to_object : B -> Object.t Value.t)
-      (value : B)
       (stack : Stack.t) (heap : Heap)
       (k : Object.t Value.t -> LowM.t A) :
-    let mutable := Pointer.Mutable.Stack index to_object in
-    Stack.read stack index = Some (existS B value) ->
+    IsRead.t stack heap mutable object ->
     {{ stack, heap |
-      k (to_object value) ⇓
+      k object ⇓
       result
     | stack', heap' }} ->
     {{ stack, heap |
       LowM.CallPrimitive (Primitive.StateRead mutable) k ⇓
       result
     | stack', heap' }}
-  | CallPrimitiveStateReadHeap
-      (address : Address)
-      (to_object : Heap.get_Set address -> Object.t Value.t)
-      (value : Heap.get_Set address)
-      (stack : Stack.t) (heap : Heap)
-      (k : Object.t Value.t -> LowM.t A) :
-    let mutable := Pointer.Mutable.Heap address to_object in
-    Heap.read address heap = Some value ->
-    {{ stack, heap |
-      k (to_object value) ⇓
-      result
-    | stack', heap' }} ->
-    {{ stack, heap |
-      LowM.CallPrimitive (Primitive.StateRead mutable) k ⇓
-      result
-    | stack', heap' }}
-  | CallPrimitiveStateWriteStack {B : Set}
-      (index : nat)
-      (to_object : B -> Object.t Value.t)
-      (update : B)
-      (update' : Object.t Value.t)
-      (stack : Stack.t) (heap : Heap)
+  | CallPrimitiveStateWrite
+      (mutable : Pointer.Mutable.t Value.t)
+      (update : Object.t Value.t)
+      (stack stack_inter : Stack.t) (heap heap_inter : Heap)
       (k : unit -> LowM.t A) :
-    let stack_inter := Stack.write stack index update in
-    let mutable := Pointer.Mutable.Stack index to_object in
-    update' = to_object update ->
-    {{ stack_inter, heap |
+    IsWrite.t stack heap mutable update stack' heap' ->
+    {{ stack_inter, heap_inter |
       k tt ⇓
       result
     | stack', heap' }} ->
     {{ stack, heap |
-      LowM.CallPrimitive (Primitive.StateWrite mutable update') k ⇓
-      result
-    | stack', heap' }}
-  | CallPrimitiveStateWriteHeap
-      (address : Address)
-      (to_object : Heap.get_Set address -> Object.t Value.t)
-      (update : Heap.get_Set address)
-      (update' : Object.t Value.t)
-      (stack : Stack.t) (heap heap_inter : Heap)
-      (k : unit -> LowM.t A) :
-    let mutable := Pointer.Mutable.Heap address to_object in
-    update' = to_object update ->
-    Heap.alloc_write address heap update = Some heap_inter ->
-    {{ stack, heap_inter |
-      k tt ⇓
-      result
-    | stack', heap' }} ->
-    {{ stack, heap |
-      LowM.CallPrimitive (Primitive.StateWrite mutable update') k ⇓
+      LowM.CallPrimitive (Primitive.StateWrite mutable update) k ⇓
       result
     | stack', heap' }}
   | CallPrimitiveGetInGlobals

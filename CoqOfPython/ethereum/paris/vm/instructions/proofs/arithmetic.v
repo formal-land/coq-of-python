@@ -34,15 +34,15 @@ Module AddLocals.
       result := None;
     |}.
 
-  Definition to_object (locals : t) : Object.t Value.t :=
+  (* Definition to_object (locals : t) : Object.t Value.t :=
     Object.make [
       ("x", Option.map U256.to_value locals.(x));
       ("y", Option.map U256.to_value locals.(y));
       ("result", Option.map U256.to_value locals.(result))
-    ].
+    ]. *)
 End AddLocals.
 
-Lemma run_add (stack : Stack.t) (heap : Heap.t) :
+(* Lemma run_add (stack : Stack.t) (heap : Heap.t) :
   let '(result, evm') := simulations.arithmetic.add heap.(Heap.evm) in
   let result :=
     match result with
@@ -71,4 +71,4 @@ Proof.
     }
     { admit. }
   }
-Admitted.
+Admitted. *)

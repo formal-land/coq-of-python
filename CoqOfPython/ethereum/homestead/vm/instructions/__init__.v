@@ -63,14 +63,14 @@ Axiom ethereum_homestead_vm_instructions_imports_storage :
 Axiom ethereum_homestead_vm_instructions_imports_system :
   IsImported globals "ethereum.homestead.vm.instructions" "system".
 
-Definition Ops : Value.t :=
-  builtins.make_klass
-    [(* At base: unsupported node type: Attribute *)]
-    [
-
-    ]
-    [
-
-    ].
+Definition Ops : Value.t := make_klass {|
+  Klass.bases := [
+    (globals, "(* At base: unsupported node type: Attribute *)")
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ];
+|}.
 
 (* At top_level_stmt: unsupported node type: AnnAssign *)

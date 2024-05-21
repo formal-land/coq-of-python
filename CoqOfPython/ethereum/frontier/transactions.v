@@ -43,12 +43,11 @@ Definition TX_DATA_COST_PER_ZERO : Value.t := M.run ltac:(M.monadic (
   Constant.int 4
 )).
 
-Definition Transaction : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
+Definition Transaction : Value.t := make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ];
+|}.

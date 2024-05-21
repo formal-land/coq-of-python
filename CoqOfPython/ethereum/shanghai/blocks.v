@@ -52,52 +52,47 @@ Axiom ethereum_shanghai_fork_types_imports_Root :
 Axiom ethereum_shanghai_transactions_imports_LegacyTransaction :
   IsImported globals "ethereum.shanghai.transactions" "LegacyTransaction".
 
-Definition Withdrawal : Value.t :=
-  builtins.make_klass
-    []
-    [
+Definition Withdrawal : Value.t := make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ];
+|}.
 
-    ]
-    [
+Definition Header : Value.t := make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ];
+|}.
 
-    ].
+Definition Block : Value.t := make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ];
+|}.
 
-Definition Header : Value.t :=
-  builtins.make_klass
-    []
-    [
+Definition Log : Value.t := make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ];
+|}.
 
-    ]
-    [
-
-    ].
-
-Definition Block : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
-
-Definition Log : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
-
-Definition Receipt : Value.t :=
-  builtins.make_klass
-    []
-    [
-
-    ]
-    [
-
-    ].
+Definition Receipt : Value.t := make_klass {|
+  Klass.bases := [
+  ];
+  Klass.class_methods := [
+  ];
+  Klass.methods := [
+  ];
+|}.

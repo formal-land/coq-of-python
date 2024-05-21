@@ -99,6 +99,62 @@ def get_globals_of_import(node: ast.ImportFrom) -> str:
     return actual_path.replace("/", ".")
 
 
+def generate_klass(
+    klass_name: str,
+    bases: list[str],
+    class_methods: list[tuple[str, str]],
+    methods: list[tuple[str, str]],
+) -> str:
+    text = f"Definition {klass_name} : Value.t := "
+    text += "make_klass {|\n"
+
+    # Bases
+    text += generate_indent(1) + "Klass.bases := ["
+    not_first = False
+    for base in bases:
+        if not_first:
+            text += ";"
+        text += "\n"
+        text += generate_indent(2) + f"(globals, \"{base}\")"
+        not_first = True
+    text += "\n"
+    text += generate_indent(1) + "];\n"
+
+    # Class methods
+    text += generate_indent(1) + "Klass.class_methods := ["
+    not_first = False
+    for (name, body) in class_methods:
+        if not_first:
+            text += ";"
+        text += "\n"
+        text += generate_indent(2) + "(\n"
+        text += generate_indent(3) + f"\"{name}\"," + "\n"
+        text += generate_indent(3) + body + "\n"
+        text += generate_indent(2) + ")"
+        not_first = True
+    text += "\n"
+    text += generate_indent(1) + "];\n"
+
+    # Methods
+    text += generate_indent(1) + "Klass.methods := ["
+    not_first = False
+    for (name, body) in methods:
+        if not_first:
+            text += ";"
+        text += "\n"
+        text += generate_indent(2) + "(\n"
+        text += generate_indent(3) + f"\"{name}\"," + "\n"
+        text += generate_indent(3) + body + "\n"
+        text += generate_indent(2) + ")"
+        not_first = True
+    text += "\n"
+    text += generate_indent(1) + "];\n"
+
+    text += "|}."
+
+    return text
+
+
 def generate_top_level_stmt(node: ast.stmt):
     if isinstance(node, ast.FunctionDef):
         return f"Definition {generate_name(node.name)} : Value.t -> Value.t -> M :=\n" + \
@@ -109,57 +165,36 @@ def generate_top_level_stmt(node: ast.stmt):
     elif isinstance(node, ast.AsyncFunctionDef):
         return generate_error("top_level_stmt", node)
     elif isinstance(node, ast.ClassDef):
-        text = f"Definition {generate_name(node.name)} : Value.t :=\n"
-        text += generate_indent(1) + "builtins.make_klass\n"
+        name = generate_name(node.name)
 
-        # Bases
-        text += generate_indent(2) + "["
-        not_first = False
-        for base in node.bases:
-            if not_first:
-                text += "; "
-            if isinstance(base, ast.Name):
-                text += f"(globals, \"{generate_name(base.id)}\")"
-            else:
-                text += generate_error("base", base)
-            not_first = True
-        text += "]\n"
+        bases = [
+            generate_name(base.id)
+            if isinstance(base, ast.Name)
+            else generate_error("base", base)
+            for base in node.bases
+        ]
+        class_methods = [
+            (stmt.name, generate_function_def_body(3, stmt))
+            for stmt in node.body
+            if isinstance(stmt, ast.FunctionDef) and len(stmt.decorator_list) == 1 and
+            isinstance(stmt.decorator_list[0], ast.Name) and
+            stmt.decorator_list[0].id == "classmethod"
 
-        # Class methods
-        text += generate_indent(2) + "[\n"
-        not_first = False
-        for stmt in node.body:
-            if isinstance(stmt, ast.FunctionDef) and len(stmt.decorator_list) == 1:
-                decorator = stmt.decorator_list[0]
-                if isinstance(decorator, ast.Name) and decorator.id == "classmethod":
-                    if not_first:
-                        text += ";\n"
-                    text += generate_indent(3) + "(\n"
-                    text += generate_indent(4) + f"\"{stmt.name}\"," + "\n"
-                    text += generate_indent(4)
-                    text += generate_function_def_body(4, stmt) + "\n"
-                    text += generate_indent(3) + ")"
-                    not_first = True
-        text += "\n"
-        text += generate_indent(2) + "]\n"
+        ]
+        methods = [
+            (stmt.name, generate_function_def_body(3, stmt))
+            for stmt in node.body
+            if isinstance(stmt, ast.FunctionDef) and len(stmt.decorator_list) == 0
+        ]
 
-        # Methods
-        text += generate_indent(2) + "[\n"
-        not_first = False
-        for stmt in node.body:
-            if isinstance(stmt, ast.FunctionDef) and len(stmt.decorator_list) == 0:
-                if not_first:
-                    text += ";\n"
-                text += generate_indent(3) + "(\n"
-                text += generate_indent(4) + f"\"{stmt.name}\"," + "\n"
-                text += generate_indent(4)
-                text += generate_function_def_body(4, stmt) + "\n"
-                text += generate_indent(3) + ")"
-                not_first = True
-        text += "\n"
-        text += generate_indent(2) + "]."
+        # If the class is a `@dataclass`
+        if len(node.decorator_list) == 1 and \
+                isinstance(node.decorator_list[0], ast.Name) and \
+                node.decorator_list[0].id == "dataclass":
+            # TODO: add an `__init__` function, ...
+            pass
 
-        return text
+        return generate_klass(name, bases, class_methods, methods)
     elif isinstance(node, ast.Assign):
         if len(node.targets) >= 2:
             return generate_error("top_level_stmt", node)
