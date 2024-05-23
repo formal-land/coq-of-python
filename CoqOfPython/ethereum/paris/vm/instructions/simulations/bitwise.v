@@ -26,55 +26,6 @@ Definition push := stack.push.
 Import simulations.CoqOfPython.Notations.
 
 (* 
-def add(evm: Evm) -> None:
-    """
-    Adds the top two elements of the stack together, and pushes the result back
-    on the stack.
-
-    Parameters
-    ----------
-    evm :
-        The current EVM frame.
-
-    """
-    # STACK
-    x = pop(evm.stack)
-    y = pop(evm.stack)
-
-    # GAS
-    charge_gas(evm, GAS_VERY_LOW)
-
-    # OPERATION
-    result = x.wrapping_add(y)
-
-    push(evm.stack, result)
-
-    # PROGRAM COUNTER
-    evm.pc += 1
-*)
-
-(* 
-Definition add : MS? Evm.t Exception.t unit :=
-  (* STACK *)
-  letS? x := StateError.lift_lens Evm.Lens.stack pop in
-  letS? y := StateError.lift_lens Evm.Lens.stack pop in
-
-  (* GAS *)
-  letS? _ := charge_gas GAS_VERY_LOW in
-
-  (* OPERATION *)
-  let result := U256.wrapping_add x y in
-
-  letS? _ := StateError.lift_lens Evm.Lens.stack (push result) in
-
-  (* PROGRAM COUNTER *)
-  letS? _ := StateError.lift_lens Evm.Lens.pc (fun pc =>
-    (inl tt, Uint.__add__ pc (Uint.Make 1))) in
-
-  returnS? tt.
-*)
-
-(* 
 def bitwise_and(evm: Evm) -> None:
     """
     Bitwise AND operation of the top 2 elements of the stack. Pushes the
@@ -99,20 +50,6 @@ def bitwise_and(evm: Evm) -> None:
     # PROGRAM COUNTER
     evm.pc += 1
 *)
-Print pop. (* MS? (list stack.U256.t) Exception.t stack.U256.t *)
-Print push. (* stack.U256.t -> MS? (list stack.U256.t) Exception.t unit *)
-Definition test1 := StateError.lift_lens Evm.Lens.stack pop.
-Print test1. (* MS? Evm.t Exception.t stack.U256.t *)
-
-Definition test2 :=
-  letS? x := StateError.lift_lens Evm.Lens.stack pop in
-  letS? y := StateError.lift_lens Evm.Lens.stack pop in
-  returnS? (U256.to_Z x).
-
-Print test2.
-  
-Definition test3 := Z.land 2 3.
-
 Definition bitwise_and : MS? Evm.t Exception.t unit := 
   (* STACK *)
   letS? x := StateError.lift_lens Evm.Lens.stack pop in
