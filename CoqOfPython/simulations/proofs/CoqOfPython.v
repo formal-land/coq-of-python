@@ -275,7 +275,7 @@ Module Run.
       to_value_inter
     | P_stack_inter, P_heap_inter }} ->
     (* We quantify over every possible values as we cannot compute the result of the closure here.
-       We only know that it exists and respect some constraints in this inductive definition. *)
+       We only know that it exists and respects some constraints in this inductive definition. *)
     (forall value_inter stack_inter heap_inter,
       P_stack_inter stack_inter ->
       P_heap_inter heap_inter ->
