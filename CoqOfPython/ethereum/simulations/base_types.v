@@ -45,6 +45,37 @@ Module FixedUint.
       MAX_VALUE := self.(MAX_VALUE);
       value := Z.modulo sum self.(MAX_VALUE);
     |}.
+
+  Definition bit_and (self right_ : t) : t :=
+    let x := self.(value)%Z in
+    let y := right_.(value)%Z in
+    {|
+      MAX_VALUE := self.(MAX_VALUE);
+      value := Z.land x y;
+    |}.
+
+  Definition bit_or (self right_ : t) : t :=
+    let x := self.(value)%Z in
+    let y := right_.(value)%Z in
+    {|
+      MAX_VALUE := self.(MAX_VALUE);
+      value := Z.lor x y;
+    |}.
+
+  Definition bit_xor (self right_ : t) : t :=
+    let x := self.(value)%Z in
+    let y := right_.(value)%Z in
+    {|
+      MAX_VALUE := self.(MAX_VALUE);
+      value := Z.lxor x y;
+    |}.
+
+  Definition bit_not (self : t) : t :=
+    let x := self.(value)%Z in
+    {|
+      MAX_VALUE := self.(MAX_VALUE);
+      value := Z.lnot x;
+    |}.
 End FixedUint.
 
 Module U256.
@@ -70,6 +101,18 @@ Module U256.
 
   Definition wrapping_add (self right_ : t) : t :=
     Make (FixedUint.wrapping_add (get self) (get right_)).
+
+  Definition bit_and (self right_ : t) : t :=
+    Make (FixedUint.bit_and (get self) (get right_)).
+
+  Definition bit_or (self right_ : t) : t :=
+    Make (FixedUint.bit_or (get self) (get right_)).
+
+  Definition bit_xor (self right_ : t) : t :=
+    Make (FixedUint.bit_xor (get self) (get right_)).
+
+  Definition bit_not (self : t) : t :=
+    Make (FixedUint.bit_not (get self)).
 End U256.
 
 Module U32.
