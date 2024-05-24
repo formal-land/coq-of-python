@@ -54,6 +54,28 @@ Module FixedUint.
       value := Z.land x y;
     |}.
 
+  Definition bit_or (self right_ : t) : t :=
+    let x := self.(value)%Z in
+    let y := right_.(value)%Z in
+    {|
+      MAX_VALUE := self.(MAX_VALUE);
+      value := Z.lor x y;
+    |}.
+
+  Definition bit_xor (self right_ : t) : t :=
+    let x := self.(value)%Z in
+    let y := right_.(value)%Z in
+    {|
+      MAX_VALUE := self.(MAX_VALUE);
+      value := Z.lxor x y;
+    |}.
+
+  Definition bit_not (self : t) : t :=
+    let x := self.(value)%Z in
+    {|
+      MAX_VALUE := self.(MAX_VALUE);
+      value := Z.lnot x;
+    |}.
 End FixedUint.
 
 Module U256.
@@ -73,6 +95,8 @@ Module U256.
   Definition to_Z (value : t) : Z :=
     FixedUint.value (get value).
 
+  Definition MAX_VALUE : t := U256.of_Z (2^256 - 1).
+
   Definition __add__ (self right_ : t) : M? Exception.t t :=
     let? result := FixedUint.__add__ (get self) (get right_) in
     return? (Make result).
@@ -82,6 +106,34 @@ Module U256.
 
   Definition bit_and (self right_ : t) : t :=
     Make (FixedUint.bit_and (get self) (get right_)).
+
+  Definition bit_or (self right_ : t) : t :=
+    Make (FixedUint.bit_or (get self) (get right_)).
+
+  Definition bit_xor (self right_ : t) : t :=
+    Make (FixedUint.bit_xor (get self) (get right_)).
+
+  Definition bit_not (self : t) : t :=
+    Make (FixedUint.bit_not (get self)).
+  (*  
+  def from_signed(cls: Type, value: int) -> "U256":
+      """
+      Creates an unsigned integer representing `value` using two's
+      complement.
+      """
+      if value >= 0:
+          return cls(value)
+
+      return cls(value & cls.MAX_VALUE)
+  *)  
+  (* NOTE: for now we ignore the cls here *)  
+  Definition from_signed (self : t) : t :=
+    let value := U256.to_Z self in
+    if value >=? 0 
+    then (U256.of_Z value)
+    (* TODO: here 2^256 - 1 should be the max value of the corresponded class.
+       To be modified in the future. *)
+    else (U256.of_Z (Z.land value (2^256 - 1))).
 End U256.
 
 Module U32.
