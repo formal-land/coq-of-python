@@ -64,10 +64,10 @@ Module Evm.
     Record t : Set := {
       pc : Uint.t;
       stack : list (U256.t);
-      (* memory : list ascii;
-      code : Bytes.t; *)
+      memory : list ascii;
+      code : Bytes.t;
       gas_left : Uint.t;
-      (* env : Environment.t;
+      env : Environment.t;
       valid_jump_destinations : list Uint.t;
       logs : list unit;
       refund_counter : Z;
@@ -78,7 +78,7 @@ Module Evm.
       return_data : Bytes.t;
       error : option Exception.t;
       accessed_addresses : list Address.t;
-      accessed_storage_keys : list (Address.t * Bytes32.t) *)
+      accessed_storage_keys : list (Address.t * Bytes32.t)
     }.
   End Rest.
 
@@ -101,7 +101,7 @@ Module Evm.
       Lens.write '(Make message rest) stack := Make message rest<|Rest.stack := stack|>;
     |}.
 
-    (* Definition memory : Lens.t t (list ascii) := {|
+    Definition memory : Lens.t t (list ascii) := {|
       Lens.read '(Make _ rest) := rest.(Rest.memory);
       Lens.write '(Make message rest) memory := Make message rest<|Rest.memory := memory|>;
     |}.
@@ -109,7 +109,7 @@ Module Evm.
     Definition code : Lens.t t Bytes.t := {|
       Lens.read '(Make _ rest) := rest.(Rest.code);
       Lens.write '(Make message rest) code := Make message rest<|Rest.code := code|>;
-    |}. *)
+    |}.
 
     Definition gas_left : Lens.t t Uint.t := {|
       Lens.read '(Make _ rest) := rest.(Rest.gas_left);

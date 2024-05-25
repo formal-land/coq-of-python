@@ -1,1 +1,8 @@
 ethereum/ethash.v
+ethereum/paris/vm/instructions/proofs/arithmetic.v
+ethereum/paris/vm/simulations/proofs/__init__.v
+ethereum/paris/vm/simulations/proofs/exceptions.v
+ethereum/paris/vm/simulations/proofs/stack.v
+ethereum/simulations/proofs/exceptions.v
+simulations/proofs/builtins.v
+simulations/proofs/heap.v
