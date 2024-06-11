@@ -10,7 +10,27 @@ Definition U255_CEIL_VALUE : Z := 2^255.
 
 Definition U256_CEIL_VALUE : Z := 2^256.
 
+(* NOTE: A byte should consist of 2 hex digits or 4 binary digits
+  https://docs.python.org/3/library/stdtypes.html#bytes *)
+Module FixedBytes.
+  Inductive t : Set :=
+  | Make (bytes : list ascii).
+  (* NOTE: some draft that might be useful for future extension
+  Inductive ByteOrder := 
+  | LittleEndian
+  | BigEndian
+  *)
+  (* Make (bytes: list ascii) (signed : bool) (byte_order : ByteOrder) *)
+
+  Definition get (bytes : t) : list ascii :=
+    match bytes with
+    | Make bytes => bytes
+    end.
+End FixedBytes.
+
 Module Uint.
+(* NOTE: to_bytes would produce a list of byte with *undetermined* length
+*)
   Inductive t : Set :=
   | Make (value : Z).
 
@@ -21,6 +41,49 @@ Module Uint.
 
   Definition __add__ (self right_ : t) : t :=
     Make (get self + get right_).
+
+  (* NOTE: Currently for convenience we only define "from fixedbytes to uint" 
+           An ideal translation should go from fixedbytes -> bytes -> uint *)
+  (* TODO: Distinguish between `from_be_bytes` and `from_le_bytes` *)
+  (* 
+    def from_bytes(bytes, byteorder='big', signed=False):
+      if byteorder == 'little':
+          little_ordered = list(bytes)
+      elif byteorder == 'big':
+          little_ordered = list(reversed(bytes))
+      else:
+          raise ValueError("byteorder must be either 'little' or 'big'")
+
+      n = sum(b << i*8 for i, b in enumerate(little_ordered))
+      if signed and little_ordered and (little_ordered[-1] & 0x80):
+          n -= 1 << 8*len(little_ordered)
+
+      return n
+  *)
+  (* 
+    NOTE:
+    - Currently we don't support between different endians
+    - From definition of related functions(?), it seems that `little_ordered` 
+      doesnt have a fixed length or even length of multiples of 2
+      (Question: Does Python check the length of byte array?)
+  *)
+  Fixpoint from_bytes_helper (bytes : list ascii) (store : Z) : Z :=
+    match bytes with
+    | [] => 0
+    | (b::bs) => from_bytes_helper bs ((Z_of_N (N_of_ascii b)) * 8 + store)
+    end.
+
+  Definition from_bytes (bytes : FixedBytes.t) : t :=
+    let '(FixedBytes.Make little_ordered) := bytes in
+    let result := from_bytes_helper little_ordered 0 in
+    (* NOTE: last_byte provides a default value 0 *)
+    let z0 := List.last little_ordered (ascii_of_N 0) in
+    let z1 := Z.of_N (N_of_ascii z0) in
+    let ascii_xor_result := Z.land z1 0x80 in
+    Make (
+      if ascii_xor_result =? 0
+      then result - Z.shiftl 1 (Z_of_nat (List.length little_ordered))
+      else result).
 End Uint.
 
 Module FixedUint.
@@ -219,16 +282,6 @@ Module U64.
     end.
 End U64.
 
-Module FixedBytes.
-  Inductive t : Set :=
-  | Make (bytes : list ascii).
-
-  Definition get (bytes : t) : list ascii :=
-    match bytes with
-    | Make bytes => bytes
-    end.
-End FixedBytes.
-
 Module Bytes0.
   Inductive t : Set :=
   | Make (bytes : FixedBytes.t).
@@ -277,6 +330,8 @@ Module Bytes32.
     match bytes with
     | Make bytes => bytes
     end.
+
+  Definition LENGTH := 32.
 End Bytes32.
 
 Module Bytes48.

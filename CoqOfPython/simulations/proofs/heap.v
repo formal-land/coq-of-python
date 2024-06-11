@@ -9,6 +9,7 @@ Module U256 := base_types.U256.
 
 Require ethereum.paris.vm.simulations.__init__.
 Module Evm := __init__.Evm.
+Module Environment := __init__.Environment.
 
 Module Address.
   Inductive t : Set :=
@@ -21,6 +22,7 @@ Module Heap.
     Record t : Set := {
       pc : Uint.t;
       gas_left : Uint.t;
+      env : Environment.t;
     }.
   End Evm.
 
@@ -69,5 +71,6 @@ Module Heap.
       __init__.Evm.Rest.pc := heap.(evm).(Evm.pc);
       __init__.Evm.Rest.stack := heap.(stack);
       __init__.Evm.Rest.gas_left := heap.(evm).(Evm.gas_left);
+      __init__.Evm.Rest.env := heap.(evm).(Evm.env);
     |}.
 End Heap.
