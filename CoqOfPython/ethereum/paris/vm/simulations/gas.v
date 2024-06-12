@@ -52,4 +52,57 @@ Definition GAS_COLD_SLOAD := Uint.Make 2100.
 Definition GAS_COLD_ACCOUNT_ACCESS := Uint.Make 2600.
 Definition GAS_WARM_ACCESS := Uint.Make 100.
 
-Parameter charge_gas : forall (amount : Uint.t), MS? Evm.t Exception.t unit.
+(* Parameter charge_gas : forall (amount : Uint.t), MS? Evm.t Exception.t unit. *)
+Parameter charge_gas : forall (amount : Uint.t), unit.
+
+(* 
+class ExtendMemory:
+    """
+    Define the parameters for memory extension in opcodes
+
+    `cost`: `ethereum.base_types.Uint`
+        The gas required to perform the extension
+    `expand_by`: `ethereum.base_types.Uint`
+        The size by which the memory will be extended
+    """
+
+    cost: Uint
+    expand_by: Uint
+*)
+Module ExtendMemory.
+  Record t : Set :={
+    cost : Uint.t;
+    expand_by : Uint.t;
+  }.
+End ExtendMemory.
+
+(* def calculate_gas_extend_memory(
+    memory: bytearray, extensions: List[Tuple[U256, U256]]
+) -> ExtendMemory: *)
+Parameter calculate_gas_extend_memory : 
+  forall (memory : list FixedBytes) (extensions : list (U256.t, U256.t)), ExtendMemory.
+
+  (* 
+  def ceil32(value: Uint) -> Uint:
+    """
+    Converts a unsigned integer to the next closest multiple of 32.
+
+    Parameters
+    ----------
+    value :
+        The value whose ceil32 is to be calculated.
+
+    Returns
+    -------
+    ceil32 : `ethereum.base_types.U256`
+        The same value if it's a perfect multiple of 32
+        else it returns the smallest multiple of 32
+        that is greater than `value`.
+    """
+    ceiling = Uint(32)
+    remainder = value % ceiling
+    if remainder == Uint(0):
+        return value
+    else:
+        return value + ceiling - remainder
+  *)
