@@ -23,10 +23,6 @@ Definition push := stack.push.
 
 Import simulations.CoqOfPython.Notations.
 
-(* TODO:
-- Address -> Byte20 -> Bytes -> U256
-*)
-
 (* def block_hash(evm: Evm) -> None:
     """
     Push the hash of one of the 256 most recent complete blocks onto the
@@ -92,11 +88,11 @@ Definition block_hash : MS? Evm.t Exception.t unit :=
       in
 
     (* Translate the type of hash from Hash32 to U256? *)
-    let h := __init__.Hash32.get hash in
-    let h1 := hash.Bytes32.get h in
-    let h2 := base_types.Uint.from_bytes h1 in
-    let h3 := base_types.Uint.get h2 in (* UInt to Z for convenience *)
-    let hash := U256.of_Z h3 in
+    let hash := __init__.Hash32.get hash in
+    let hash := hash.Bytes32.get hash in
+    let hash := base_types.Uint.from_bytes hash in
+    let hash := base_types.Uint.get hash in (* UInt to Z for convenience *)
+    let hash := U256.of_Z hash in
 
     letS? _ := StateError.lift_lens Evm.Lens.stack (push hash) in 
     (* PROGRAM COUNTER *) 
@@ -143,12 +139,12 @@ Definition coinbase : MS? Evm.t Exception.t unit :=
     letS? evm := readS? in
     let '(Evm.Make _ rest) := evm in
     (* Convert from Address to -> Byte20 -> Bytes -> U256 *)
-    let e := rest.(Evm.Rest.env).(Environment.coinbase) in
-    let e1 := fork_types.Address.get e in
-    let e2 := base_types.Bytes20.get e1 in
-    let e3 := base_types.Uint.from_bytes e2 in
-    let e4 := base_types.Uint.get e3 in
-    let evm_env_coinbase := U256.of_Z e4 in
+    let evm_env_coinbase := rest.(Evm.Rest.env).(Environment.coinbase) in
+    let evm_env_coinbase := fork_types.Address.get evm_env_coinbase in
+    let evm_env_coinbase := base_types.Bytes20.get evm_env_coinbase in
+    let evm_env_coinbase := base_types.Uint.from_bytes evm_env_coinbase in
+    let evm_env_coinbase := base_types.Uint.get evm_env_coinbase in
+    let evm_env_coinbase := U256.of_Z evm_env_coinbase in
 
     letS? _ := StateError.lift_lens Evm.Lens.stack (push evm_env_coinbase) in 
     (* PROGRAM COUNTER *) 
@@ -237,10 +233,10 @@ Definition number : MS? Evm.t Exception.t unit :=
   (* Get evm.env.time *)
   letS? evm := readS? in
   let '(Evm.Make _ rest) := evm in
-  let e := rest.(Evm.Rest.env).(Environment.number) in
+  let evm_env_number := rest.(Evm.Rest.env).(Environment.number) in
   (* Conversion from Uint to U256 *)
-  let e1 := base_types.Uint.get e in
-  let evm_env_number := U256.of_Z e1 in
+  let evm_env_number := base_types.Uint.get evm_env_number in
+  let evm_env_number := U256.of_Z evm_env_number in
 
   letS? _ := StateError.lift_lens Evm.Lens.stack (push evm_env_number) in 
   (* PROGRAM COUNTER *) 
@@ -285,12 +281,12 @@ Definition prev_randao : MS? Evm.t Exception.t unit :=
   (* Get evm.env.prev_randao *)
   letS? evm := readS? in
   let '(Evm.Make _ rest) := evm in
-  let e := rest.(Evm.Rest.env).(Environment.prev_randao) in
+  let evm_env_prev_randao := rest.(Evm.Rest.env).(Environment.prev_randao) in
   (* Convert the type from Bytes32 to U256 *)
-  let e1 := hash.Bytes32.get e in
-  let e2 := base_types.Uint.from_bytes e1 in
-  let e3 := base_types.Uint.get e2 in
-  let evm_env_prev_randao := U256.of_Z e3 in
+  let evm_env_prev_randao := hash.Bytes32.get evm_env_prev_randao in
+  let evm_env_prev_randao := base_types.Uint.from_bytes evm_env_prev_randao in
+  let evm_env_prev_randao := base_types.Uint.get evm_env_prev_randao in
+  let evm_env_prev_randao := U256.of_Z evm_env_prev_randao in
 
   letS? _ := StateError.lift_lens Evm.Lens.stack (push evm_env_prev_randao) in 
   (* PROGRAM COUNTER *) 
@@ -378,9 +374,9 @@ Definition chain_id : MS? Evm.t Exception.t unit :=
   letS? evm := readS? in
   let '(Evm.Make _ rest) := evm in
   (* Convert from U64 to U256 *)
-  let e := rest.(Evm.Rest.env).(Environment.chain_id) in
-  let '(base_types.U64.Make e1) := e in
-  let evm_env_chain_id := base_types.U256.Make e1 in
+  let evm_env_chain_id := rest.(Evm.Rest.env).(Environment.chain_id) in
+  let '(base_types.U64.Make evm_env_chain_id) := evm_env_chain_id in
+  let evm_env_chain_id := base_types.U256.Make evm_env_chain_id in
 
   letS? _ := StateError.lift_lens Evm.Lens.stack (push evm_env_chain_id) in 
   (* PROGRAM COUNTER *) 
