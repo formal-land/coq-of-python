@@ -20,3 +20,11 @@
         return value
     else:
         return value + ceiling - remainder *)
+
+(* TODO: Finish below *)
+Definition ceil32 (value : Uint) : Uint :=
+  let ceiling := Uint.Make 32 in
+  let remainder := value % ceiling in
+  if remainder =? Uint 0
+  then value
+  else value + ceiling - remainder.
