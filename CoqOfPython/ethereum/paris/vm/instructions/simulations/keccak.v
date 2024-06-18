@@ -23,7 +23,7 @@ Definition push := stack.push.
 
 Import simulations.CoqOfPython.Notations.
 
-(*  *)
+(* TODO: Check the axiomatized parts are done correctly *)
 Axiom keccak256 (bytes : FixedBytes.t) : FixBytes.t. Admitted. 
 
 (* 
