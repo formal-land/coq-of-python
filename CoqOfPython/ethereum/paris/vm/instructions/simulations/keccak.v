@@ -30,7 +30,7 @@ Definition ceil32 := numeric.ceil32.
 
 Import simulations.CoqOfPython.Notations.
 
-Definition keccak256 (bytes : FixedBytes.t) : FixedBytes.t. Admitted.
+Definition keccak256 (bytes : bytearray) : FixedBytes.t. Admitted.
 (* 
   def memory_read_bytes(
       memory: bytearray, start_position: U256, size: U256
@@ -80,14 +80,6 @@ Definition bitwise_and : MS? Evm.t Exception.t unit :=
   letS? memory_start_index := StateError.lift_lens Evm.Lens.stack pop in
   letS? size := StateError.lift_lens Evm.Lens.stack pop in
   (* GAS *)
-  (* 
-    words = ceil32(Uint(size)) // 32
-    word_gas_cost = GAS_KECCAK256_WORD * words
-    extend_memory = calculate_gas_extend_memory(
-        evm.memory, [(memory_start_index, size)]
-    )
-    charge_gas(evm, GAS_KECCAK256 + word_gas_cost + extend_memory.cost)
-  *)
   (* size : U256 -> Uint *)
   let words := ceil32(U256.to_Uint size) in
   let word_gas_cost := Uint.Make (Uint.get GAS_KECCAK256_WORD * Uint.get words) in
@@ -97,19 +89,10 @@ Definition bitwise_and : MS? Evm.t Exception.t unit :=
   let '(Evm.Make _ rest) := evm in
   let evm_memory := rest.(Evm.Rest.memory) in
 
-  let helper : list (gas.U256.t * gas.U256.t) := memory_start_index :: size :: [] in
+  let extend_memory := calculate_gas_extend_memory evm_memory ((memory_start_index, size) :: []) in
 
-  let extend_memory := calculate_gas_extend_memory evm_memory (memory_start_index :: size :: [] ) in
-
-  letS? _ := charge_gas GAS_KECCAK256 + word_gas_cost + extend_memory.(gas.ExtendMemory.cost) in
+  letS? _ := charge_gas (Uint.Make ((Uint.get GAS_KECCAK256) + (Uint.get word_gas_cost) + (Uint.get extend_memory.(gas.ExtendMemory.cost)))) in
   (* OPERATION *)
-  (* 
-    evm.memory += b"\x00" * extend_memory.expand_by
-    data = memory_read_bytes(evm.memory, memory_start_index, size)
-    hash = keccak256(data)
-
-    push(evm.stack, U256.from_be_bytes(hash))
-  *)
   (* Construct correrctly the b"\x00" *)
   let b_x00 := base_types.FixedBytes.Make [Ascii.ascii_of_N 0] in
   let b_x00 := hash.Bytes32.Make b_x00 in
@@ -119,7 +102,7 @@ Definition bitwise_and : MS? Evm.t Exception.t unit :=
   let hash := keccak256 data in
 
   letS? _ := StateError.lift_lens Evm.Lens.stack (
-    push (U256.Make (FixedBytes.get hash))) in 
+    push (U256.of_Z (Uint.get (Uint.from_bytes hash)))) in 
   (* PROGRAM COUNTER *) 
   letS? _ := StateError.lift_lens Evm.Lens.pc (fun pc =>
   (inl tt, Uint.__add__ pc (Uint.Make 1))) in
