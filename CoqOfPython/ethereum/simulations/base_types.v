@@ -28,6 +28,18 @@ Module FixedBytes.
     end.
 End FixedBytes.
 
+Module Bytes32.
+  Inductive t : Set :=
+  | Make (bytes : FixedBytes.t).
+
+  Definition get (bytes : t) : FixedBytes.t :=
+    match bytes with
+    | Make bytes => bytes
+    end.
+
+  Definition LENGTH := 32.
+End Bytes32.
+
 Module Uint.
 (* NOTE: to_bytes would produce a list of byte with *undetermined* length
 *)
@@ -84,6 +96,30 @@ Module Uint.
       if ascii_xor_result =? 0
       then result - Z.shiftl 1 (Z_of_nat (List.length little_ordered))
       else result).
+
+  (* 
+  def to_bytes(n, length=1, byteorder='big', signed=False):
+    if byteorder == 'little':
+        order = range(length)
+    elif byteorder == 'big':
+        order = reversed(range(length))
+    else:
+        raise ValueError("byteorder must be either 'little' or 'big'")
+
+    return bytes((n >> i*8) & 0xff for i in order)
+  *)
+  Fixpoint to_bytes_helper (bytes : Z) : list ascii. Admitted.
+
+  Definition to_bytes (self : t) : Bytes. 
+  (* TODO: Finish this function *)
+  Admitted.
+
+  (* def to_be_bytes32(self) -> "Bytes32" *)
+  Definition to_be_bytes32 (self : t) : Bytes32 :=
+    let bytes := to_bytes self in
+    (* NOTE: For now we only do direct conversion without truncation *)
+    let '(Make bytes) := bytes in
+    Bytes32.Make bytes.
 End Uint.
 
 Module FixedUint.
@@ -321,18 +357,6 @@ Module Bytes20.
     | Make bytes => bytes
     end.
 End Bytes20.
-
-Module Bytes32.
-  Inductive t : Set :=
-  | Make (bytes : FixedBytes.t).
-
-  Definition get (bytes : t) : FixedBytes.t :=
-    match bytes with
-    | Make bytes => bytes
-    end.
-
-  Definition LENGTH := 32.
-End Bytes32.
 
 Module Bytes48.
   Inductive t : Set :=

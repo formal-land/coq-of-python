@@ -21,6 +21,7 @@ Definition U255_CEIL_VALUE := base_types.U255_CEIL_VALUE.
 Module U256 := base_types.U256.
 Definition U256_CEIL_VALUE := base_types.U256_CEIL_VALUE.
 Module Uint := base_types.Uint.
+Definition to_be_bytes32 := base_types.Uint.to_be_bytes32.
 
 Require ethereum.paris.vm.simulations.__init__.
 Module Evm := __init__.Evm.
@@ -68,10 +69,12 @@ Import simulations.CoqOfPython.Notations.
     # PROGRAM COUNTER
     evm.pc += 1 *)
 
-Definition sload (evm : Evm) : unit :=
+Definition sload : MS? Evm.t Exception.t unit := 
     (* STACK *)
     (* key = pop(evm.stack).to_be_bytes32() *)
     letS? key := StateError.lift_lens Evm.Lens.stack pop in
+    let key := Uint.Make (U256.to_Z key) in
+    let key := to_be_bytes32 key in
     (* GAS *)
     (* 
     if (evm.message.current_target, key) in evm.accessed_storage_keys:
@@ -80,7 +83,15 @@ Definition sload (evm : Evm) : unit :=
         evm.accessed_storage_keys.add((evm.message.current_target, key))
         charge_gas(evm, GAS_COLD_SLOAD)
     *)
-    letS? _ := charge_gas GAS_VERY_LOW in
+    let evm_message_current_target := _ in
+    (* TODO: evm.accessed_storage_keys.add *)
+
+    letS? _ := 
+    if _
+    then _
+    else _
+    in
+    charge_gas GAS_VERY_LOW in
     (* OPERATION *)
     (* 
     value = get_storage(evm.env.state, evm.message.current_target, key)
