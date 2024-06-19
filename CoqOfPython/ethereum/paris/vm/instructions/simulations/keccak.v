@@ -17,9 +17,9 @@ Module Evm := __init__.Evm.
 Require ethereum.paris.vm.simulations.gas.
 Definition GAS_KECCAK256 := gas.GAS_KECCAK256.
 Definition GAS_KECCAK256_WORD := gas.GAS_KECCAK256_WORD.
+Definition ExtendMemory := gas.ExtendMemory.
 Definition calculate_gas_extend_memory := gas.calculate_gas_extend_memory.
 Definition charge_gas := gas.charge_gas.
-Definition ExtendMemory := gas.ExtendMemory.
 
 Require ethereum.paris.vm.simulations.stack.
 Definition pop := stack.pop.
