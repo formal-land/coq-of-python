@@ -25,6 +25,7 @@ Definition to_be_bytes32 := base_types.Uint.to_be_bytes32.
 
 Require ethereum.paris.vm.simulations.__init__.
 Module Evm := __init__.Evm.
+Module Message := __init__.Message.
 
 Require ethereum.paris.vm.simulations.gas.
 Definition GAS_EXPONENTIATION := gas.GAS_EXPONENTIATION.
@@ -83,13 +84,18 @@ Definition sload : MS? Evm.t Exception.t unit :=
         evm.accessed_storage_keys.add((evm.message.current_target, key))
         charge_gas(evm, GAS_COLD_SLOAD)
     *)
-    let evm_message_current_target := _ in
-    (* TODO: evm.accessed_storage_keys.add *)
+    letS? evm := readS? in
+    let '(Evm.Make message rest) := evm in
+    let evm_message_current_target := message.(Message.current_target) in
+    let evm_rest_accessed_storage_keys := rest.(Evm.Rest.accessed_storage_keys) in
+    (* NOTE: accessed_storage_keys.add is actually `pair.add` and now we just simulate directly *)
+    (* TODO: list `is_in` function *)
 
     letS? _ := 
-    if _
-    then _
-    else _
+    if List.has evm_rest_accessed_storage_keys (evm.message.current_target, key)
+    then charge_gas GAS_WARM_ACCESS
+    else (let _ := (* evm.accessed_storage_keys.add((evm.message.current_target, key)) *)
+      charge_gas GAS_COLD_SLOAD)
     in
     charge_gas GAS_VERY_LOW in
     (* OPERATION *)
