@@ -76,14 +76,14 @@ Module ExtendMemory.
     cost : Uint.t;
     expand_by : Uint.t;
   }.
-
-  Definition test_function : unit. Admitted.
 End ExtendMemory.
-
-Definition testtest : ExtendMemory.t. Admitted.
 
 (* def calculate_gas_extend_memory(
     memory: bytearray, extensions: List[Tuple[U256, U256]]
 ) -> ExtendMemory: *)
 Parameter calculate_gas_extend_memory : 
-  forall (memory : bytearray) (extensions : list (prod U256.t U256.t)), ExtendMemory.t.
+  forall (memory : bytearray) (extensions : list (U256.t * U256.t)), ExtendMemory.t.
+
+Definition t : U256.t. Admitted.
+
+Definition tt : list (U256.t * U256.t) := (t, t) :: [].

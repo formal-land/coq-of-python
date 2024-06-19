@@ -17,7 +17,7 @@ Module Evm := __init__.Evm.
 Require ethereum.paris.vm.simulations.gas.
 Definition GAS_KECCAK256 := gas.GAS_KECCAK256.
 Definition GAS_KECCAK256_WORD := gas.GAS_KECCAK256_WORD.
-Definition ExtendMemory := gas.ExtendMemory.
+Definition ExtendMemory := gas.ExtendMemory.t.
 Definition calculate_gas_extend_memory := gas.calculate_gas_extend_memory.
 Definition charge_gas := gas.charge_gas.
 
@@ -39,7 +39,6 @@ Definition keccak256 (bytes : FixedBytes.t) : FixedBytes.t. Admitted.
 (* NOTE: Upon further implementations on `memory`, we can move this axiomatized function to `memory.py`. *)
 Definition memory_read_bytes (memory : bytearray) (start_position size : U256.t) : bytearray.
 Admitted.
-
 (* 
 def keccak(evm: Evm) -> None:
     """
@@ -98,9 +97,11 @@ Definition bitwise_and : MS? Evm.t Exception.t unit :=
   let '(Evm.Make _ rest) := evm in
   let evm_memory := rest.(Evm.Rest.memory) in
 
-  let extend_memory := calculate_gas_extend_memory evm_memory (list (memory_start_index, size)) in (* TODO: Fix this *)
+  let helper : list (gas.U256.t * gas.U256.t) := memory_start_index :: size :: [] in
 
-  letS? _ := charge_gas GAS_KECCAK256 + word_gas_cost + extend_memory.cost in
+  let extend_memory := calculate_gas_extend_memory evm_memory (memory_start_index :: size :: [] ) in
+
+  letS? _ := charge_gas GAS_KECCAK256 + word_gas_cost + extend_memory.(gas.ExtendMemory.cost) in
   (* OPERATION *)
   (* 
     evm.memory += b"\x00" * extend_memory.expand_by
@@ -118,7 +119,7 @@ Definition bitwise_and : MS? Evm.t Exception.t unit :=
   let hash := keccak256 data in
 
   letS? _ := StateError.lift_lens Evm.Lens.stack (
-    push (U256.make (FixedBytes.get hash))) in 
+    push (U256.Make (FixedBytes.get hash))) in 
   (* PROGRAM COUNTER *) 
   letS? _ := StateError.lift_lens Evm.Lens.pc (fun pc =>
   (inl tt, Uint.__add__ pc (Uint.Make 1))) in
