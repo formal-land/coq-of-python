@@ -10,6 +10,9 @@ Definition U255_CEIL_VALUE : Z := 2^255.
 
 Definition U256_CEIL_VALUE : Z := 2^256.
 
+(* NOTE: Python built-in type. We put here for convenience. *)
+Definition bytearray := list ascii.
+
 Module Uint.
   Inductive t : Set :=
   | Make (value : Z).
@@ -110,6 +113,9 @@ Module FixedUint.
       MAX_VALUE := self.(MAX_VALUE);
       value := Z.lnot x;
     |}.
+
+  Definition to_Uint (self : t) : Uint.t :=
+    let x := self.(value)%Z in Uint.Make x.
 End FixedUint.
 
 Module U256.
@@ -185,6 +191,9 @@ Module U256.
     (* TODO: here 2^256 - 1 should be the max value of the corresponded class.
        To be modified in the future. *)
     else (U256.of_Z (Z.land value (2^256 - 1))).
+
+  Definition to_Uint (self : t) : Uint.t :=
+    let '(Make x) := self in FixedUint.to_Uint x.
 End U256.
 
 Module U32.
@@ -217,6 +226,10 @@ Module U64.
     match value with
     | Make value => value
     end.
+
+  Definition to_Uint (self : t) : Uint.t :=
+    let '(Make value) := self in 
+      FixedUint.to_Uint value.
 End U64.
 
 Module FixedBytes.

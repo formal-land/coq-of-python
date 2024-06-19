@@ -52,6 +52,8 @@ Definition GAS_COLD_SLOAD := Uint.Make 2100.
 Definition GAS_COLD_ACCOUNT_ACCESS := Uint.Make 2600.
 Definition GAS_WARM_ACCESS := Uint.Make 100.
 
+Definition bytearray := base_types.bytearray.
+
 (* Parameter charge_gas : forall (amount : Uint.t), MS? Evm.t Exception.t unit. *)
 Parameter charge_gas : forall (amount : Uint.t), unit.
 
@@ -80,29 +82,4 @@ End ExtendMemory.
     memory: bytearray, extensions: List[Tuple[U256, U256]]
 ) -> ExtendMemory: *)
 Parameter calculate_gas_extend_memory : 
-  forall (memory : list FixedBytes) (extensions : list (U256.t, U256.t)), ExtendMemory.
-
-  (* 
-  def ceil32(value: Uint) -> Uint:
-    """
-    Converts a unsigned integer to the next closest multiple of 32.
-
-    Parameters
-    ----------
-    value :
-        The value whose ceil32 is to be calculated.
-
-    Returns
-    -------
-    ceil32 : `ethereum.base_types.U256`
-        The same value if it's a perfect multiple of 32
-        else it returns the smallest multiple of 32
-        that is greater than `value`.
-    """
-    ceiling = Uint(32)
-    remainder = value % ceiling
-    if remainder == Uint(0):
-        return value
-    else:
-        return value + ceiling - remainder
-  *)
+  forall (memory : bytearray) (extensions : list (prod U256.t U256.t)), ExtendMemory.t.

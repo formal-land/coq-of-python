@@ -8,6 +8,8 @@ Module U256 := base_types.U256.
 Definition U256_CEIL_VALUE := base_types.U256_CEIL_VALUE.
 Module Uint := base_types.Uint.
 
+Definition bytearray := base_types.bytearray.
+
 Require ethereum.paris.vm.simulations.__init__.
 Module Evm := __init__.Evm.
 
@@ -21,10 +23,20 @@ Require ethereum.paris.vm.simulations.stack.
 Definition pop := stack.pop.
 Definition push := stack.push.
 
+Require ethereum.utils.simulations.numeric.
+Definition ceil32 := numeric.ceil32.
+
 Import simulations.CoqOfPython.Notations.
 
 (* TODO: Check the axiomatized parts are done correctly *)
-Axiom keccak256 (bytes : FixedBytes.t) : FixBytes.t. Admitted. 
+Axiom keccak256 (bytes : FixedBytes.t) : FixBytes.t.
+(* 
+  def memory_read_bytes(
+      memory: bytearray, start_position: U256, size: U256
+  ) -> bytearray:
+*)
+(* NOTE: Upon further implementations on `memory`, we can move this axiomatized function to `memory.py`. *)
+Axiom memory_read_bytes (memory : bytearray) (start_position size : U256) : bytearray.
 
 (* 
 from ethereum.utils.numeric import ceil32
@@ -88,10 +100,17 @@ Definition bitwise_and : MS? Evm.t Exception.t unit :=
     )
     charge_gas(evm, GAS_KECCAK256 + word_gas_cost + extend_memory.cost)
   *)
-  let words : Uint32 := _ in
-  let word_gas_cost := _ in
-  let evm_memory := _ in 
-  let extend_memory := calculate_gas_extend_memory _ in
+  (* size : U256 -> Uint *)
+  let words := ceil32(U256.to_Uint size) in
+  let word_gas_cost := Uint.Make (Uint.get GAS_KECCAK256_WORD * Uint.get words) in
+
+  (* Get evm.memory *)
+  letS? evm := readS? in
+  let '(Evm.Make _ rest) := evm in
+  let evm_memory := rest.(Evm.Rest.memory) in
+
+  let extend_memory := calculate_gas_extend_memory evm_memory (list (memory_start_index, size)) in (* TODO: Fix this *)
+
   letS? _ := charge_gas GAS_KECCAK256 + word_gas_cost + extend_memory.cost in
   (* OPERATION *)
   (* 
@@ -106,10 +125,11 @@ Definition bitwise_and : MS? Evm.t Exception.t unit :=
   let b_x00 := hash.Bytes32.Make b_x00 in
   let b_x00 := __init__.Hash32.Make b_x00 in
 
-
+  let data := memory_read_bytes evm_memory memory_start_index size in
+  let hash := keccak256 data in
 
   letS? _ := StateError.lift_lens Evm.Lens.stack (
-    push (U256.bit_and x y)) in 
+    push (U256.make (FixedBytes.get hash))) in 
   (* PROGRAM COUNTER *) 
   letS? _ := StateError.lift_lens Evm.Lens.pc (fun pc =>
   (inl tt, Uint.__add__ pc (Uint.Make 1))) in
