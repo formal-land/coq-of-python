@@ -31,6 +31,7 @@ Require ethereum.paris.vm.simulations.gas.
 Definition GAS_COLD_SLOAD := gas.GAS_COLD_SLOAD.
 Definition GAS_WARM_ACCESS := gas.GAS_WARM_ACCESS.
 Definition GAS_VERY_LOW := gas.GAS_VERY_LOW.
+Definition GAS_CALL_STIPEND := gas.GAS_CALL_STIPEND.
 Definition charge_gas := gas.charge_gas.
 
 Require ethereum.paris.vm.simulations.stack.
@@ -173,3 +174,91 @@ Definition sload : MS? Evm.t Exception.t unit :=
 
     # PROGRAM COUNTER
     evm.pc += 1 *)
+Definition sstore : MS? Evm.t Exception.t unit := 
+  (* STACK *)
+  (* 
+  key = pop(evm.stack).to_be_bytes32()
+  new_value = pop(evm.stack)
+  if evm.gas_left <= GAS_CALL_STIPEND:
+      raise OutOfGasError
+
+  original_value = get_storage_original(
+      evm.env.state, evm.message.current_target, key
+  )
+  current_value = get_storage(evm.env.state, evm.message.current_target, key)
+  *)
+  (* key = pop(evm.stack).to_be_bytes32() *)
+  letS? key := StateError.lift_lens Evm.Lens.stack pop in
+  let key := Uint.Make (U256.to_Z key) in
+  let key := to_be_bytes32 key in
+
+  letS? new_value := StateError.lift_lens Evm.Lens.stack pop in
+
+  (* TODO: Implement `raise OutOfGasError` *)
+
+  letS? evm := readS? in
+  let '(Evm.Make message message) := evm in
+  let evm_env_state := rest.(Evm.Rest.env).(Environment.state) in
+  let evm_message_current_target := message.(Message.current_target) in
+
+  (* TODO: Implement get_storage_original *)
+  let original_value := get_storage_original evm_env_state evm_message_current_target key in
+
+  (* TODO: Implement get_storage *)
+  let current_value := get_storage evm_env_state evm_message_current_target key in
+
+  let gas_cost := Uint.Make 0 in
+
+  (* if (evm.message.current_target, key) not in evm.accessed_storage_keys:
+    evm.accessed_storage_keys.add((evm.message.current_target, key))
+    gas_cost += GAS_COLD_SLOAD
+
+  if original_value == current_value and current_value != new_value:
+    if original_value == 0:
+        gas_cost += GAS_STORAGE_SET
+    else:
+        gas_cost += GAS_STORAGE_UPDATE - GAS_COLD_SLOAD
+  else:
+    gas_cost += GAS_WARM_ACCESS *)
+  letS? _ := 
+  if ~(List.has evm_rest_accessed_storage_keys (evm_message_current_target, key))
+  then (
+    (* evm.accessed_storage_keys.add((evm.message.current_target, key)) *)
+    letS? _ := (* gas_cost += GAS_COLD_SLOAD *)
+  )
+  else tt in
+
+  (* 
+    if original_value == current_value and current_value != new_value:
+        if original_value == 0:
+            gas_cost += GAS_STORAGE_SET
+        else:
+            gas_cost += GAS_STORAGE_UPDATE - GAS_COLD_SLOAD
+    else:
+        gas_cost += GAS_WARM_ACCESS
+  *)
+
+  (* 
+      # Refund Counter Calculation
+    if current_value != new_value:
+        if original_value != 0 and current_value != 0 and new_value == 0:
+            # Storage is cleared for the first time in the transaction
+            evm.refund_counter += int(GAS_STORAGE_CLEAR_REFUND)
+
+        if original_value != 0 and current_value == 0:
+            # Gas refund issued earlier to be reversed
+            evm.refund_counter -= int(GAS_STORAGE_CLEAR_REFUND)
+
+        if original_value == new_value:
+            # Storage slot being restored to its original value
+            if original_value == 0:
+                # Slot was originally empty and was SET earlier
+                evm.refund_counter += int(GAS_STORAGE_SET - GAS_WARM_ACCESS)
+            else:
+                # Slot was originally non-empty and was UPDATED earlier
+                evm.refund_counter += int(
+                    GAS_STORAGE_UPDATE - GAS_COLD_SLOAD - GAS_WARM_ACCESS
+                )
+  *)
+
+  returnS? tt.
