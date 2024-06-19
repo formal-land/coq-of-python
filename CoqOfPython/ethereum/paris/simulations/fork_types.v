@@ -2,7 +2,6 @@ Require Import CoqOfPython.CoqOfPython.
 Require ethereum.simulations.base_types.
 
 
-
 Module Address.
   Inductive t : Set :=
   | Make (address : base_types.Bytes20.t).
