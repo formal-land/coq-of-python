@@ -88,10 +88,9 @@ Definition sload : MS? Evm.t Exception.t unit :=
     let evm_message_current_target := message.(Message.current_target) in
     let evm_rest_accessed_storage_keys := rest.(Evm.Rest.accessed_storage_keys) in
     (* NOTE: accessed_storage_keys.add is actually `pair.add` and now we just simulate directly *)
-    (* TODO: list `is_in` function *)
 
     letS? _ := 
-    if List.has evm_rest_accessed_storage_keys (evm_message_current_target, key)
+    if List.In evm_rest_accessed_storage_keys (evm_message_current_target, key)
     then charge_gas GAS_WARM_ACCESS
     else (let _ := (* evm.accessed_storage_keys.add((evm.message.current_target, key)) *)
       charge_gas GAS_COLD_SLOAD)
@@ -221,7 +220,7 @@ Definition sstore : MS? Evm.t Exception.t unit :=
   else:
     gas_cost += GAS_WARM_ACCESS *)
   letS? _ := 
-  if ~(List.has evm_rest_accessed_storage_keys (evm_message_current_target, key))
+  if ~(List.In evm_rest_accessed_storage_keys (evm_message_current_target, key))
   then (
     (* evm.accessed_storage_keys.add((evm.message.current_target, key)) *)
     letS? _ := (* gas_cost += GAS_COLD_SLOAD *)
@@ -261,4 +260,16 @@ Definition sstore : MS? Evm.t Exception.t unit :=
                 )
   *)
 
+  (* 
+      charge_gas(evm, gas_cost)
+
+  *)
+  (* PROGRAM *)
+  (*
+    if evm.message.is_static:
+        raise WriteInStaticContext
+    set_storage(evm.env.state, evm.message.current_target, key, new_value)
+  *)
+  letS? _ := StateError.lift_lens Evm.Lens.pc (fun pc =>
+  (inl tt, Uint.__add__ pc (Uint.Make 1))) in
   returnS? tt.
