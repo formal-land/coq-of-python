@@ -84,5 +84,5 @@ End ExtendMemory.
 Parameter calculate_gas_extend_memory : 
   forall (memory : bytearray) (extensions : list (prod U256.t U256.t)), ExtendMemory.t.
 
-Definition test. 
+Module test. 
 End test.
