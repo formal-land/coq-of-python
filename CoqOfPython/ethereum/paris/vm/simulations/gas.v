@@ -54,8 +54,9 @@ Definition GAS_WARM_ACCESS := Uint.Make 100.
 
 Definition bytearray := base_types.bytearray.
 
+(* TODO: Since there might be inconsistency issue, we might
+Definition charge_gas (amount : Uint.t) : unit. *)
 Parameter charge_gas : forall (amount : Uint.t), MS? Evm.t Exception.t unit.
-(* Definition charge_gas (amount : Uint.t) : unit. *)
 
 (* 
 class ExtendMemory:
@@ -83,7 +84,3 @@ End ExtendMemory.
 ) -> ExtendMemory: *)
 Parameter calculate_gas_extend_memory : 
   forall (memory : bytearray) (extensions : list (U256.t * U256.t)), ExtendMemory.t.
-
-Definition t : U256.t. Admitted.
-
-Definition tt : list (U256.t * U256.t) := (t, t) :: [].

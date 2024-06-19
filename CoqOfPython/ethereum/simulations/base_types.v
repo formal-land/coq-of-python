@@ -31,6 +31,11 @@ Module FixedBytes.
     end.
 End FixedBytes.
 
+(* TODO: Make some consistent definitions in the following modules:
+- to_Uint: Apart from U_ series of modules, we might also need its def for FixedUint
+- bytearray, FixedBytes & Bytes: also define a consistent covert functions between them
+*)
+
 Module Uint.
 (* NOTE: to_bytes would produce a list of byte with *undetermined* length
 *)
