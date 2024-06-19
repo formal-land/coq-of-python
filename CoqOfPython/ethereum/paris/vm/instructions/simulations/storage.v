@@ -28,10 +28,8 @@ Module Evm := __init__.Evm.
 Module Message := __init__.Message.
 
 Require ethereum.paris.vm.simulations.gas.
-Definition GAS_EXPONENTIATION := gas.GAS_EXPONENTIATION.
-Definition GAS_EXPONENTIATION_PER_BYTE := gas.GAS_EXPONENTIATION_PER_BYTE.
-Definition GAS_LOW := gas.GAS_LOW.
-Definition GAS_MID := gas.GAS_MID.
+Definition GAS_COLD_SLOAD := gas.GAS_COLD_SLOAD.
+Definition GAS_WARM_ACCESS := gas.GAS_WARM_ACCESS.
 Definition GAS_VERY_LOW := gas.GAS_VERY_LOW.
 Definition charge_gas := gas.charge_gas.
 
@@ -92,20 +90,20 @@ Definition sload : MS? Evm.t Exception.t unit :=
     (* TODO: list `is_in` function *)
 
     letS? _ := 
-    if List.has evm_rest_accessed_storage_keys (evm.message.current_target, key)
+    if List.has evm_rest_accessed_storage_keys (evm_message_current_target, key)
     then charge_gas GAS_WARM_ACCESS
     else (let _ := (* evm.accessed_storage_keys.add((evm.message.current_target, key)) *)
       charge_gas GAS_COLD_SLOAD)
     in
-    charge_gas GAS_VERY_LOW in
     (* OPERATION *)
     (* 
     value = get_storage(evm.env.state, evm.message.current_target, key)
     push(evm.stack, value)
     *)
-    let value := _ in
-    letS? _ := StateError.lift_lens Evm.Lens.stack (
-      push (U256.bit_and x y)) in 
+    (* TODO: implement get_storage *)
+    let evm_env_state := rest.(Evm.Rest.env).(Environment.state) in
+    let value := get_storage evm_env_state evm_message_current_target in
+    letS? _ := StateError.lift_lens Evm.Lens.stack (push value) in 
     (* PROGRAM COUNTER *) 
     letS? _ := StateError.lift_lens Evm.Lens.pc (fun pc =>
     (inl tt, Uint.__add__ pc (Uint.Make 1))) in
