@@ -52,4 +52,35 @@ Definition GAS_COLD_SLOAD := Uint.Make 2100.
 Definition GAS_COLD_ACCOUNT_ACCESS := Uint.Make 2600.
 Definition GAS_WARM_ACCESS := Uint.Make 100.
 
+Definition bytearray := base_types.bytearray.
+
+(* TODO: Since there might be inconsistency issue, we might
+Definition charge_gas (amount : Uint.t) : unit. *)
 Parameter charge_gas : forall (amount : Uint.t), MS? Evm.t Exception.t unit.
+
+(* 
+class ExtendMemory:
+    """
+    Define the parameters for memory extension in opcodes
+
+    `cost`: `ethereum.base_types.Uint`
+        The gas required to perform the extension
+    `expand_by`: `ethereum.base_types.Uint`
+        The size by which the memory will be extended
+    """
+
+    cost: Uint
+    expand_by: Uint
+*)
+Module ExtendMemory.
+  Record t : Set :={
+    cost : Uint.t;
+    expand_by : Uint.t;
+  }.
+End ExtendMemory.
+
+(* def calculate_gas_extend_memory(
+    memory: bytearray, extensions: List[Tuple[U256, U256]]
+) -> ExtendMemory: *)
+Parameter calculate_gas_extend_memory : 
+  forall (memory : bytearray) (extensions : list (U256.t * U256.t)), ExtendMemory.t.

@@ -3,6 +3,7 @@ Require Import simulations.CoqOfPython.
 Require Import simulations.builtins.
 
 Require Import simulations.base_types.
+(* TODO: Check if this Module should be changed into Definition *)
 Module U256 := base_types.U256.
 
 Import simulations.CoqOfPython.Notations.

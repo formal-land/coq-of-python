@@ -10,6 +10,9 @@ Definition U255_CEIL_VALUE : Z := 2^255.
 
 Definition U256_CEIL_VALUE : Z := 2^256.
 
+(* NOTE: Python built-in type. We put here for convenience. *)
+Definition bytearray := list ascii.
+
 (* NOTE: A byte should consist of 2 hex digits or 4 binary digits
   https://docs.python.org/3/library/stdtypes.html#bytes *)
 Module FixedBytes.
@@ -27,6 +30,11 @@ Module FixedBytes.
     | Make bytes => bytes
     end.
 End FixedBytes.
+
+(* TODO: Make some consistent definitions in the following modules:
+- to_Uint: Apart from U_ series of modules, we might also need its def for FixedUint
+- bytearray, FixedBytes & Bytes: also define a consistent covert functions between them
+*)
 
 Module Uint.
 (* NOTE: to_bytes would produce a list of byte with *undetermined* length
@@ -173,6 +181,9 @@ Module FixedUint.
       MAX_VALUE := self.(MAX_VALUE);
       value := Z.lnot x;
     |}.
+
+  Definition to_Uint (self : t) : Uint.t :=
+    let x := self.(value)%Z in Uint.Make x.
 End FixedUint.
 
 Module U256.
@@ -248,6 +259,9 @@ Module U256.
     (* TODO: here 2^256 - 1 should be the max value of the corresponded class.
        To be modified in the future. *)
     else (U256.of_Z (Z.land value (2^256 - 1))).
+
+  Definition to_Uint (self : t) : Uint.t :=
+    let '(Make x) := self in FixedUint.to_Uint x.
 End U256.
 
 Module U32.
@@ -280,6 +294,10 @@ Module U64.
     match value with
     | Make value => value
     end.
+
+  Definition to_Uint (self : t) : Uint.t :=
+    let '(Make value) := self in 
+      FixedUint.to_Uint value.
 End U64.
 
 Module Bytes0.
