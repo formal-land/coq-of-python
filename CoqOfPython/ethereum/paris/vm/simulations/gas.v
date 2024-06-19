@@ -55,7 +55,7 @@ Definition GAS_WARM_ACCESS := Uint.Make 100.
 Definition bytearray := base_types.bytearray.
 
 Parameter charge_gas : forall (amount : Uint.t), MS? Evm.t Exception.t unit.
-(* Parameter charge_gas : forall (amount : Uint.t), unit. *)
+(* Definition charge_gas (amount : Uint.t) : unit. *)
 
 (* 
 class ExtendMemory:
@@ -76,13 +76,14 @@ Module ExtendMemory.
     cost : Uint.t;
     expand_by : Uint.t;
   }.
+
+  Definition test_function : unit. Admitted.
 End ExtendMemory.
+
+Definition testtest : ExtendMemory.t. Admitted.
 
 (* def calculate_gas_extend_memory(
     memory: bytearray, extensions: List[Tuple[U256, U256]]
 ) -> ExtendMemory: *)
 Parameter calculate_gas_extend_memory : 
   forall (memory : bytearray) (extensions : list (prod U256.t U256.t)), ExtendMemory.t.
-
-Module test. 
-End test.
