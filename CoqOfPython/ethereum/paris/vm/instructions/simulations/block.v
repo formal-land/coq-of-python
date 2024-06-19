@@ -230,7 +230,7 @@ Definition timestamp : MS? Evm.t Exception.t unit :=
 Definition number : MS? Evm.t Exception.t unit := 
   (* GAS *)
   letS? _ := charge_gas GAS_BASE in
-  (* Get evm.env.time *)
+  (* Get evm.env.number *)
   letS? evm := readS? in
   let '(Evm.Make _ rest) := evm in
   let evm_env_number := rest.(Evm.Rest.env).(Environment.number) in
@@ -370,7 +370,7 @@ def chain_id(evm: Evm) -> None:
 Definition chain_id : MS? Evm.t Exception.t unit := 
   (* GAS *)
   letS? _ := charge_gas GAS_BASE in
-  (* Get evm.env.gas_limit *)
+  (* Get evm.env.chain_id *)
   letS? evm := readS? in
   let '(Evm.Make _ rest) := evm in
   (* Convert from U64 to U256 *)
