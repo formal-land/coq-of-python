@@ -1,3 +1,13 @@
+Require Import CoqOfPython.CoqOfPython.
+Require Import simulations.CoqOfPython.
+Require Import simulations.builtins.
+
+Require ethereum.simulations.base_types.
+Module U256 := base_types.U256.
+Module Uint := base_types.Uint.
+
+Import simulations.CoqOfPython.Notations.
+
 (* def ceil32(value: Uint) -> Uint:
     """
     Converts a unsigned integer to the next closest multiple of 32.
@@ -22,7 +32,7 @@
         return value + ceiling - remainder *)
 
 (* TODO: Finish below *)
-Definition ceil32 (value : Uint) : Uint. Admitted.
+Definition ceil32 (value : Uint.t) : Uint.t. Admitted.
  (* :=
   let ceiling := Uint.Make 32 in
   let remainder := value % ceiling in

@@ -7,6 +7,7 @@ Definition U255_CEIL_VALUE := base_types.U255_CEIL_VALUE.
 Module U256 := base_types.U256.
 Definition U256_CEIL_VALUE := base_types.U256_CEIL_VALUE.
 Module Uint := base_types.Uint.
+Module FixedBytes := base_types.FixedBytes.
 
 Definition bytearray := base_types.bytearray.
 
@@ -18,6 +19,7 @@ Definition GAS_KECCAK256 := gas.GAS_KECCAK256.
 Definition GAS_KECCAK256_WORD := gas.GAS_KECCAK256_WORD.
 Definition calculate_gas_extend_memory := gas.calculate_gas_extend_memory.
 Definition charge_gas := gas.charge_gas.
+Definition ExtendMemory := gas.ExtendMemory.
 
 Require ethereum.paris.vm.simulations.stack.
 Definition pop := stack.pop.
@@ -28,30 +30,17 @@ Definition ceil32 := numeric.ceil32.
 
 Import simulations.CoqOfPython.Notations.
 
-(* TODO: Check the axiomatized parts are done correctly *)
-Axiom keccak256 (bytes : FixedBytes.t) : FixBytes.t.
+Definition keccak256 (bytes : FixedBytes.t) : FixedBytes.t. Admitted.
 (* 
   def memory_read_bytes(
       memory: bytearray, start_position: U256, size: U256
   ) -> bytearray:
 *)
 (* NOTE: Upon further implementations on `memory`, we can move this axiomatized function to `memory.py`. *)
-Axiom memory_read_bytes (memory : bytearray) (start_position size : U256) : bytearray.
+Definition memory_read_bytes (memory : bytearray) (start_position size : U256.t) : bytearray.
+Admitted.
 
 (* 
-from ethereum.utils.numeric import ceil32
-
-from .. import Evm
-from ..gas import (
-    GAS_KECCAK256,
-    GAS_KECCAK256_WORD,
-    calculate_gas_extend_memory,
-    charge_gas,
-)
-from ..memory import memory_read_bytes
-from ..stack import pop, push
-
-
 def keccak(evm: Evm) -> None:
     """
     Pushes to the stack the Keccak-256 hash of a region of memory.
