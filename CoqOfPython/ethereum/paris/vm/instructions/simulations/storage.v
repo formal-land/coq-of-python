@@ -1,17 +1,3 @@
-(* 
-from ...state import get_storage, get_storage_original, set_storage
-from .. import Evm
-from ..exceptions import OutOfGasError, WriteInStaticContext
-from ..gas import (
-    GAS_CALL_STIPEND,
-    GAS_COLD_SLOAD,
-    GAS_STORAGE_CLEAR_REFUND,
-    GAS_STORAGE_SET,
-    GAS_STORAGE_UPDATE,
-    GAS_WARM_ACCESS,
-    charge_gas,
-) *)
-
 Require Import CoqOfPython.CoqOfPython.
 Require Import simulations.CoqOfPython.
 Require Import simulations.builtins.
@@ -30,8 +16,10 @@ Module Message := __init__.Message.
 Require ethereum.paris.vm.simulations.gas.
 Definition GAS_COLD_SLOAD := gas.GAS_COLD_SLOAD.
 Definition GAS_WARM_ACCESS := gas.GAS_WARM_ACCESS.
-Definition GAS_VERY_LOW := gas.GAS_VERY_LOW.
 Definition GAS_CALL_STIPEND := gas.GAS_CALL_STIPEND.
+Definition GAS_STORAGE_UPDATE := gas.GAS_STORAGE_UPDATE.
+Definition GAS_STORAGE_SET := gas.GAS_STORAGE_SET.
+Definition GAS_STORAGE_CLEAR_REFUND := gas.GAS_STORAGE_CLEAR_REFUND.
 Definition charge_gas := gas.charge_gas.
 
 Require ethereum.paris.vm.simulations.stack.
@@ -39,6 +27,10 @@ Definition pop := stack.pop.
 Definition push := stack.push.
 
 Import simulations.CoqOfPython.Notations.
+
+(* TODO: Delete this test code *)
+Definition error_test MS? Evm.t Exception.t unit := 
+  raiseS? (Exception.t.Raise (Value.Make "exceptions" "InvalidJumpDestError" (Pointer.Imm Object.empty)))
 
 (* def sload(evm: Evm) -> None:
     """
@@ -87,12 +79,12 @@ Definition sload : MS? Evm.t Exception.t unit :=
     let '(Evm.Make message rest) := evm in
     let evm_message_current_target := message.(Message.current_target) in
     let evm_rest_accessed_storage_keys := rest.(Evm.Rest.accessed_storage_keys) in
-    (* NOTE: accessed_storage_keys.add is actually `pair.add` and now we just simulate directly *)
+    (* NOTE: accessed_storage_keys.add is actually `pair.add` and we simulate it directly *)
 
     letS? _ := 
     if List.In evm_rest_accessed_storage_keys (evm_message_current_target, key)
     then charge_gas GAS_WARM_ACCESS
-    else (let _ := (* evm.accessed_storage_keys.add((evm.message.current_target, key)) *)
+    else (let _ := (* evm.accessed_storage_keys.add((evm.message.current_target, key)) *) in
       charge_gas GAS_COLD_SLOAD)
     in
     (* OPERATION *)
@@ -108,7 +100,6 @@ Definition sload : MS? Evm.t Exception.t unit :=
     letS? _ := StateError.lift_lens Evm.Lens.pc (fun pc =>
     (inl tt, Uint.__add__ pc (Uint.Make 1))) in
     returnS? tt.
-
 
 (* def sstore(evm: Evm) -> None:
     """
@@ -193,8 +184,11 @@ Definition sstore : MS? Evm.t Exception.t unit :=
 
   letS? new_value := StateError.lift_lens Evm.Lens.stack pop in
 
-  (* TODO: Implement `raise OutOfGasError` *)
+  if _ 
+  then raiseS? OutOfGasError
+  else _ (* the full content of the rest of the code *)
 
+  (* TODO: connect with the :? above *)
   letS? evm := readS? in
   let '(Evm.Make message message) := evm in
   let evm_env_state := rest.(Evm.Rest.env).(Environment.state) in
@@ -236,6 +230,10 @@ Definition sstore : MS? Evm.t Exception.t unit :=
     else:
         gas_cost += GAS_WARM_ACCESS
   *)
+  letS? _ :=
+  if _ 
+  then _ 
+  else 
 
   (* 
       # Refund Counter Calculation

@@ -91,4 +91,6 @@ Module Notations.
   Notation "writeS?" := StateError.write.
 
   Notation "return?toS?" := StateError.lift_from_error.
+
+  Notation "raiseS?" := StateError.raise.
 End Notations.
