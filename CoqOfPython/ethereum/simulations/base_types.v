@@ -13,7 +13,12 @@ Definition U256_CEIL_VALUE : Z := 2^256.
 (* NOTE: Python built-in type. We put here for convenience. *)
 Definition bytearray := list ascii.
 
-(* TODO: Potentially, design all the conversions between the integer fully and clearly based on Z *)
+(* TODO: Implement consistent conversion functions between all the types. For example:
+- to_Uint: Apart from U_ series of modules, we might also need its def for FixedUint
+- bytearray, FixedBytes & Bytes: also define a consistent covert functions between them
+- Build all conversion functions clearly based on Z
+- Correctly truncate the values based on the max value being defined
+*)
 
 (* NOTE: A byte should consist of 2 hex digits or 4 binary digits
   https://docs.python.org/3/library/stdtypes.html#bytes *)
@@ -32,21 +37,6 @@ Module FixedBytes.
     | Make bytes => bytes
     end.
 End FixedBytes.
-
-(* TODO: Make some consistent definitions in the following modules:
-- to_Uint: Apart from U_ series of modules, we might also need its def for FixedUint
-- bytearray, FixedBytes & Bytes: also define a consistent covert functions between them
-*)
-
-Module Bytes.
-  Inductive t : Set :=
-  | Make (bytes : list ascii).
-
-  Definition get (bytes : t) : list ascii :=
-    match bytes with
-    | Make bytes => bytes
-    end.
-End Bytes.
 
 Module Bytes32.
   Inductive t : Set :=
@@ -73,8 +63,6 @@ Module Uint.
     Make (get self + get right_).
 
   (* NOTE: 
-     - For convenience we only define "from fixedbytes to uint" 
-       An ideal translation should go from fixedbytes -> bytes -> uint 
      - Currently we don't support between different endians
      - Future plan: Distinguish between `from_be_bytes` and `from_le_bytes`*)
   (* 
@@ -121,6 +109,7 @@ Module Uint.
 
     return bytes((n >> i*8) & 0xff for i in order)
   *)
+  (* NOTE: there might be order issues *)
   Fixpoint to_bytes_helper (uint : Z) (order : Z) (store : list ascii): list ascii :=
     match order with
     | 0 => store
