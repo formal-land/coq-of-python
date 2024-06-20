@@ -28,11 +28,16 @@ Definition push := stack.push.
 
 Import simulations.CoqOfPython.Notations.
 
+(* def get_storage(state: State, address: Address, key: Bytes) -> U256: *)
+Definition get_storage (state : State.t) (address : Address.t) (key : Bytes.t) : U256.t. Admitted.
+(* def get_storage_original(state: State, address: Address, key: Bytes) -> U256: *)
+Definition get_storage_original (state : State.t) (address : Address.t) (key : Bytes.t) : U256.t. Admitted.
+
 (* TODO: (progress) things to test on this draft:
 - correctly implemented `raiseS?`
 - test how to update a value for evm
-- investigate `get_storage` functions
 *)
+
 (* TODO: Delete this test code *)
 Definition error_test MS? Evm.t Exception.t unit := 
   raiseS? (Exception.t.Raise (Value.Make "exceptions" "InvalidJumpDestError" (Pointer.Imm Object.empty)))
@@ -92,7 +97,7 @@ Definition sload : MS? Evm.t Exception.t unit :=
     *)
 
     letS? _ := 
-    if List.In evm_rest_accessed_storage_keys (evm_message_current_target, key) (* TODO: Identify the order of parms for `In` *)
+    if List.In (evm_message_current_target, key) evm_rest_accessed_storage_keys
     then charge_gas GAS_WARM_ACCESS
     else (letS? _ := 
       (fun v => evm_rest_accessed_storage_keys <| (evm.message.current_target, key) |>) (* ?????? *)
@@ -104,7 +109,6 @@ Definition sload : MS? Evm.t Exception.t unit :=
     value = get_storage(evm.env.state, evm.message.current_target, key)
     push(evm.stack, value)
     *)
-    (* TODO: implement get_storage *)
     let evm_env_state := rest.(Evm.Rest.env).(Environment.state) in
     let value := get_storage evm_env_state evm_message_current_target in
     letS? _ := StateError.lift_lens Evm.Lens.stack (push value) in 
@@ -206,10 +210,7 @@ Definition sstore : MS? Evm.t Exception.t unit :=
   let evm_env_state := rest.(Evm.Rest.env).(Environment.state) in
   let evm_message_current_target := message.(Message.current_target) in
 
-  (* TODO: Implement get_storage_original *)
   let original_value := get_storage_original evm_env_state evm_message_current_target key in
-
-  (* TODO: Implement get_storage *)
   let current_value := get_storage evm_env_state evm_message_current_target key in
 
   let gas_cost := Uint.Make 0 in
@@ -226,7 +227,7 @@ Definition sstore : MS? Evm.t Exception.t unit :=
   else:
     gas_cost += GAS_WARM_ACCESS *)
   letS? _ := 
-  if ~(List.In evm_rest_accessed_storage_keys (evm_message_current_target, key))
+  if ~(List.In (evm_message_current_target, key) evm_rest_accessed_storage_keys)
   then (
     (* evm.accessed_storage_keys.add((evm.message.current_target, key)) *)
     letS? _ := (* gas_cost += GAS_COLD_SLOAD *)
