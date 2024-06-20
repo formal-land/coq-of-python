@@ -28,6 +28,11 @@ Definition push := stack.push.
 
 Import simulations.CoqOfPython.Notations.
 
+(* TODO: (progress) things to test on this draft:
+- correctly implemented `raiseS?`
+- test how to update a value for evm
+- investigate `get_storage` functions
+*)
 (* TODO: Delete this test code *)
 Definition error_test MS? Evm.t Exception.t unit := 
   raiseS? (Exception.t.Raise (Value.Make "exceptions" "InvalidJumpDestError" (Pointer.Imm Object.empty)))
@@ -81,10 +86,17 @@ Definition sload : MS? Evm.t Exception.t unit :=
     let evm_rest_accessed_storage_keys := rest.(Evm.Rest.accessed_storage_keys) in
     (* NOTE: accessed_storage_keys.add is actually `pair.add` and we simulate it directly *)
 
+    (* Example code for value update:
+      | Address.evm => fun v => Some (h <| evm := v |>)
+      | Address.stack => fun v => Some (h <| stack := v |>)
+    *)
+
     letS? _ := 
-    if List.In evm_rest_accessed_storage_keys (evm_message_current_target, key)
+    if List.In evm_rest_accessed_storage_keys (evm_message_current_target, key) (* TODO: Identify the order of parms for `In` *)
     then charge_gas GAS_WARM_ACCESS
-    else (let _ := (* evm.accessed_storage_keys.add((evm.message.current_target, key)) *) in
+    else (letS? _ := 
+      (fun v => evm_rest_accessed_storage_keys <| (evm.message.current_target, key) |>) (* ?????? *)
+    (* evm.accessed_storage_keys.add((evm.message.current_target, key)) *) in
       charge_gas GAS_COLD_SLOAD)
     in
     (* OPERATION *)

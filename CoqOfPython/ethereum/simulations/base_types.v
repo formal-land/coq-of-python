@@ -115,7 +115,7 @@ Module Uint.
     | 0 => store
     | _ => 
       let byte := Z.land (Z.shiftr uint (order * 8)) 0xff in (* TODO: test & fix this *)
-      to_bytes_helper uint (order - 1) (byte :: store)
+      to_bytes_helper uint (order - 1) (byte :: store) (* TODO: convert byte from Z to ascii *)
     end.
 
   Definition to_bytes (self : t) : Bytes.t :=
