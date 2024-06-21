@@ -8,10 +8,13 @@ Module U256 := base_types.U256.
 Definition U256_CEIL_VALUE := base_types.U256_CEIL_VALUE.
 Module Uint := base_types.Uint.
 Definition to_be_bytes32 := base_types.Uint.to_be_bytes32.
+Module Bytes := base_types.Bytes.
 
 Require ethereum.paris.vm.simulations.__init__.
 Module Evm := __init__.Evm.
 Module Message := __init__.Message.
+Module State := __init__.State.
+Module Address := __init__.Address.
 
 Require ethereum.paris.vm.simulations.gas.
 Definition GAS_COLD_SLOAD := gas.GAS_COLD_SLOAD.
@@ -34,13 +37,9 @@ Definition get_storage (state : State.t) (address : Address.t) (key : Bytes.t) :
 Definition get_storage_original (state : State.t) (address : Address.t) (key : Bytes.t) : U256.t. Admitted.
 
 (* TODO: (progress) things to test on this draft:
-- correctly implemented `raiseS?`
 - test how to update a value for evm
+- rest of the draft
 *)
-
-(* TODO: Delete this test code *)
-Definition error_test MS? Evm.t Exception.t unit := 
-  raiseS? (Exception.t.Raise (Value.Make "exceptions" "InvalidJumpDestError" (Pointer.Imm Object.empty)))
 
 (* def sload(evm: Evm) -> None:
     """
@@ -201,7 +200,9 @@ Definition sstore : MS? Evm.t Exception.t unit :=
   letS? new_value := StateError.lift_lens Evm.Lens.stack pop in
 
   if _ 
-  then raiseS? OutOfGasError
+  then 
+  (* TODO: Fill in the correct error type *)
+    StateError.lift_from_error (Error.raise (Exception.ArithmeticError ArithmeticError.OverflowError))
   else _ (* the full content of the rest of the code *)
 
   (* TODO: connect with the :? above *)

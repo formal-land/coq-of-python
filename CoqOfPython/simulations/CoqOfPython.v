@@ -66,6 +66,8 @@ Module Notations.
 
   Notation "return?" := Error.return_.
 
+  Notation "raise?" := Error.raise.
+
   Notation "'let?' x ':=' X 'in' Y" :=
     (Error.bind X (fun x => Y))
     (at level 200, x name, X at level 100, Y at level 200).
