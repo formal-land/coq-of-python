@@ -110,17 +110,16 @@ Module Uint.
     return bytes((n >> i*8) & 0xff for i in order)
   *)
   (* NOTE: there might be order issues *)
-  Fixpoint to_bytes_helper (uint : Z) (order : Z) (store : list ascii): list ascii :=
+  Fixpoint to_bytes_helper (uint : Z) (order : nat) (store : list ascii): list ascii :=
     match order with
-    | 0 => store
-    | _ => 
-      let byte := Z.land (Z.shiftr uint (order * 8)) 0xff in (* TODO: test & fix this *)
-      to_bytes_helper uint (order - 1) (byte :: store) (* TODO: convert byte from Z to ascii *)
+    | O => store
+    | S n => let byte := ascii_of_N (N_of_Z (Z.land (Z.shiftr uint ((Z.of_nat order) * 8)) 0xff)) in 
+      to_bytes_helper uint (n) (byte :: store) 
     end.
 
   Definition to_bytes (self : t) : Bytes.t :=
     let uint := get self in
-    to_bytes_helper uint uint [].
+    to_bytes_helper uint (Z.of_nat uint) [].
 
   (* def to_be_bytes32(self) -> "Bytes32" *)
   Definition to_be_bytes32 (self : t) : Bytes32.t :=
