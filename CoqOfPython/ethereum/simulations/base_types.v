@@ -20,6 +20,16 @@ Definition bytearray := list ascii.
 - Correctly truncate the values based on the max value being defined
 *)
 
+Module Bytes.
+  Inductive t : Set :=
+  | Make (bytes : list ascii).
+
+  Definition get (bytes : t) : list ascii :=
+    match bytes with
+    | Make bytes => bytes
+    end.
+End Bytes.
+
 (* NOTE: A byte should consist of 2 hex digits or 4 binary digits
   https://docs.python.org/3/library/stdtypes.html#bytes *)
 Module FixedBytes.
@@ -119,14 +129,14 @@ Module Uint.
 
   Definition to_bytes (self : t) : Bytes.t :=
     let uint := get self in
-    to_bytes_helper uint (Z.of_nat uint) [].
+    Bytes.Make (to_bytes_helper uint (Z.to_nat uint) []).
 
   (* def to_be_bytes32(self) -> "Bytes32" *)
   Definition to_be_bytes32 (self : t) : Bytes32.t :=
     let bytes := to_bytes self in
     (* NOTE: For now we only do direct conversion without truncation *)
-    let '(Make bytes) := bytes in
-    Bytes32.Make bytes.
+    let '(Bytes.Make bytes) := bytes in
+    Bytes32.Make (FixedBytes.Make bytes).
 End Uint.
 
 Module FixedUint.
