@@ -39,7 +39,7 @@ Definition get_storage_original (state : State.t) (address : Address.t) (key : B
 
 (* TODO: (progress) things to do on this draft:
 - replace `List.In` with `List.find` + `is_none`(?)
-- rest of the draft
+- finish sstore
 *)
 
 (* def sload(evm: Evm) -> None:
@@ -82,7 +82,8 @@ Definition sload : MS? Evm.t Exception.t unit :=
     let evm_message_current_target := message.(Message.current_target) in
     let evm_rest_accessed_storage_keys := rest.(Evm.Rest.accessed_storage_keys) in
     letS? _ := 
-    if List.In (evm_message_current_target, key) evm_rest_accessed_storage_keys (* TODO: Fix the List.In *)
+    (* TODO: Fix the List.In *)
+    if List.In (evm_message_current_target, key) evm_rest_accessed_storage_keys
     then charge_gas GAS_WARM_ACCESS
     else (
       (* TODO: check if the added element is added in the correct place *)
@@ -91,6 +92,8 @@ Definition sload : MS? Evm.t Exception.t unit :=
         (evm_message_current_target, key) :: evm_rest_accessed_storage_keys in
       let rest := rest <| Evm.Rest.accessed_storage_keys := evm_rest_accessed_storage_keys |> in
       let evm := Evm.Make message rest in
+      (* NOTE: After the state update, all previous variables like `evm_message_current_target`
+               should not be put into use anymore. This seems unsatisfying. *)
       letS? _ := writeS? evm in
       charge_gas GAS_COLD_SLOAD)
     in
