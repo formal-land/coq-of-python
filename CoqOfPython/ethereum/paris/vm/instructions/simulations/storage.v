@@ -38,7 +38,7 @@ Definition get_storage (state : State.t) (address : Address.t) (key : Bytes.t) :
 Definition get_storage_original (state : State.t) (address : Address.t) (key : Bytes.t) : U256.t. Admitted.
 
 (* TODO: (progress) things to do on this draft:
-- replace `List.In` with `List.find` + `is_none`(?)
+- figure out a way to implement `list.contains` in coq
 - finish sstore
 *)
 
@@ -83,7 +83,9 @@ Definition sload : MS? Evm.t Exception.t unit :=
     let evm_rest_accessed_storage_keys := rest.(Evm.Rest.accessed_storage_keys) in
     letS? _ := 
     (* TODO: Fix the List.In *)
-    if List.In (evm_message_current_target, key) evm_rest_accessed_storage_keys
+    if has_some (List.find 
+    (* (evm_message_current_target, key)  *) _
+    evm_rest_accessed_storage_keys)
     then charge_gas GAS_WARM_ACCESS
     else (
       (* TODO: check if the added element is added in the correct place *)
