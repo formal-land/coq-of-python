@@ -73,18 +73,10 @@ Definition get_storage_original (state : State.t) (address : Address.t) (key : B
 
 Definition sload : MS? Evm.t Exception.t unit := 
     (* STACK *)
-    (* key = pop(evm.stack).to_be_bytes32() *)
     letS? key := StateError.lift_lens Evm.Lens.stack pop in
     let key := Uint.Make (U256.to_Z key) in
     let key := to_be_bytes32 key in
     (* GAS *)
-    (* 
-    if (evm.message.current_target, key) in evm.accessed_storage_keys:
-        charge_gas(evm, GAS_WARM_ACCESS)
-    else:
-        evm.accessed_storage_keys.add((evm.message.current_target, key))
-        charge_gas(evm, GAS_COLD_SLOAD)
-    *)
     letS? evm := readS? in
     let '(Evm.Make message rest) := evm in
     let evm_message_current_target := message.(Message.current_target) in
