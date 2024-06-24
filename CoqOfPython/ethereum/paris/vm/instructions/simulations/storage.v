@@ -38,7 +38,6 @@ Definition get_storage (state : State.t) (address : Address.t) (key : Bytes.t) :
 Definition get_storage_original (state : State.t) (address : Address.t) (key : Bytes.t) : U256.t. Admitted.
 
 (* TODO: (progress) things to do on this draft:
-- test how to update a value for evm
 - replace `List.In` with `List.find` + `is_none`(?)
 - rest of the draft
 *)
@@ -90,40 +89,22 @@ Definition sload : MS? Evm.t Exception.t unit :=
     let '(Evm.Make message rest) := evm in
     let evm_message_current_target := message.(Message.current_target) in
     let evm_rest_accessed_storage_keys := rest.(Evm.Rest.accessed_storage_keys) in
-    (* Example code for value update:
-      | Address.evm => fun v => Some (h <| evm := v |>)
-      | Address.stack => fun v => Some (h <| stack := v |>)
-
-      
-    Definition pc : Lens.t t Uint.t := {|
-      Lens.read '(Make _ rest) := rest.(Rest.pc);
-      Lens.write '(Make message rest) pc := Make message rest<|Rest.pc := pc|>;
-    |}.
-    *)
-    (* NOTE: accessed_storage_keys.add is actually `pair.add` and we simulate it directly *)
     letS? _ := 
-    if List.In (evm_message_current_target, key) evm_rest_accessed_storage_keys
+    if List.In (evm_message_current_target, key) evm_rest_accessed_storage_keys (* TODO: Fix the List.In *)
     then charge_gas GAS_WARM_ACCESS
-    else (letS? _ := unit
-    (* TODO: Correctly write a state-update code *)
-    (* evm.accessed_storage_keys.add((evm.message.current_target, key)) *)
-    (* (fun v => evm_rest_accessed_storage_keys <| (evm.message.current_target, key) |>)  *)
-    (* 
-    TODO:
-    1. correctly construct the updated value
-    2. stuff the value into the evm correctly
-    3. update the evm using writeS?
-    *)
-    in
+    else (
+      (* TODO: check if the added element is added in the correct place *)
+      (* NOTE: accessed_storage_keys.add is actually `pair.add` and we simulate it directly *)
+      let evm_rest_accessed_storage_keys := 
+        (evm_message_current_target, key) :: evm_rest_accessed_storage_keys in
+      let rest := rest <| Evm.Rest.accessed_storage_keys := evm_rest_accessed_storage_keys |> in
+      let evm := Evm.Make message rest in
+      letS? _ := writeS? evm in
       charge_gas GAS_COLD_SLOAD)
     in
     (* OPERATION *)
-    (* 
-    value = get_storage(evm.env.state, evm.message.current_target, key)
-    push(evm.stack, value)
-    *)
     let evm_env_state := rest.(Evm.Rest.env).(Environment.state) in
-    let value := get_storage evm_env_state evm_message_current_target in
+    let value := get_storage evm_env_state evm_message_current_target key in
     letS? _ := StateError.lift_lens Evm.Lens.stack (push value) in 
     (* PROGRAM COUNTER *) 
     letS? _ := StateError.lift_lens Evm.Lens.pc (fun pc =>
