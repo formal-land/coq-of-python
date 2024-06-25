@@ -42,6 +42,27 @@ Definition get_storage_original (state : State.t) (address : Address.t) (key : B
 - finish sstore
 *)
 
+(* Scheme Boolean Equality for t. *)
+
+(* TODO: Test the following *)
+(* (* (evm_message_current_target, key)  *) _ *)
+(* TODO: generate a evm_message_current_target instance for testing *)
+Definition evm_message_current_target : Set. Admitted.
+
+(* TODO: test the following *)
+Definition test_0 : bool := Address.t_beq evm_message_current_target evm_message_current_target.
+
+Fixpoint pair_in (e : Address.t * Bytes32.t) (l : list (A * B)) : bool :=
+  let (a, k) := e in
+  match l with
+  | [] => false
+  | h :: tl => 
+    let (h1, h2) := h in
+    if (Address.t_beq a h1) && (Bytes32.t_beq k h2) 
+    then true 
+    else pair_in e tl
+  end.
+
 (* def sload(evm: Evm) -> None:
     """
     Loads to the stack, the value corresponding to a certain key from the
