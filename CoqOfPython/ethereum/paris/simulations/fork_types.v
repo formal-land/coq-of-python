@@ -10,4 +10,8 @@ Module Address.
     match address with
     | Make address => address
     end.
+
+  Scheme Boolean Equality for t.
 End Address.
+
+Definition test_0 := Address.t_beq.
