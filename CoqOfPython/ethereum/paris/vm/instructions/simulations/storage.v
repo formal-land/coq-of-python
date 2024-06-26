@@ -45,6 +45,8 @@ Definition get_storage (state : State.t) (address : Address.t) (key : Bytes.t) :
 Definition get_storage_original (state : State.t) (address : Address.t) (key : Bytes.t) : U256.t. Admitted.
 
 (* TODO: (progress) things to do on this draft:
+- Implement OutOfGasError
+- Figure out a way to simulate variable update within `if` clause
 - finish sstore
 *)
 
@@ -193,33 +195,31 @@ Definition sload : MS? Evm.t Exception.t unit :=
     evm.pc += 1 *)
 Definition sstore : MS? Evm.t Exception.t unit := 
   (* STACK *)
-  (* 
-  key = pop(evm.stack).to_be_bytes32()
-  new_value = pop(evm.stack)
-  if evm.gas_left <= GAS_CALL_STIPEND:
-      raise OutOfGasError
-
-  original_value = get_storage_original(
-      evm.env.state, evm.message.current_target, key
-  )
-  current_value = get_storage(evm.env.state, evm.message.current_target, key)
-  *)
-  (* key = pop(evm.stack).to_be_bytes32() *)
   letS? key := StateError.lift_lens Evm.Lens.stack pop in
   let key := Uint.Make (U256.to_Z key) in
   let key := to_be_bytes32 key in
 
   letS? new_value := StateError.lift_lens Evm.Lens.stack pop in
-
-  if _ 
-  then 
-  (* TODO: Fill in the correct error type *)
-    StateError.lift_from_error (Error.raise (Exception.ArithmeticError ArithmeticError.OverflowError))
-  else _ (* the full content of the rest of the code *)
-
-  (* TODO: connect with the :? above *)
+  (* 
+  if evm.gas_left <= GAS_CALL_STIPEND:
+      raise OutOfGasError
+  *)
+  (* TODO: Get the evm.gas_left correctly *)
   letS? evm := readS? in
-  let '(Evm.Make message message) := evm in
+  let '(Evm.Make message rest) := evm in
+  let evm_gas_left := rest.(Evm.Rest.gas_left) in (* Uint *)
+
+  if (Uint.get evm_gas_left) <=? (Uint.get GAS_CALL_STIPEND)
+  then 
+    (* TODO: Implement the correct error type *)
+    StateError.lift_from_error (Error.raise (Exception.ArithmeticError ArithmeticError.OverflowError))
+  else
+  (* 
+  original_value = get_storage_original(
+      evm.env.state, evm.message.current_target, key
+  )
+  current_value = get_storage(evm.env.state, evm.message.current_target, key)
+  *)
   let evm_env_state := rest.(Evm.Rest.env).(Environment.state) in
   let evm_message_current_target := message.(Message.current_target) in
 
@@ -231,30 +231,30 @@ Definition sstore : MS? Evm.t Exception.t unit :=
   (* if (evm.message.current_target, key) not in evm.accessed_storage_keys:
     evm.accessed_storage_keys.add((evm.message.current_target, key))
     gas_cost += GAS_COLD_SLOAD
-
-  if original_value == current_value and current_value != new_value:
-    if original_value == 0:
-        gas_cost += GAS_STORAGE_SET
-    else:
-        gas_cost += GAS_STORAGE_UPDATE - GAS_COLD_SLOAD
-  else:
-    gas_cost += GAS_WARM_ACCESS *)
+    *)
   letS? _ := 
-  if ~(List.In (evm_message_current_target, key) evm_rest_accessed_storage_keys)
+  if ~(pair_in (evm_message_current_target, key) evm_rest_accessed_storage_keys)
   then (
     (* evm.accessed_storage_keys.add((evm.message.current_target, key)) *)
-    letS? _ := (* gas_cost += GAS_COLD_SLOAD *)
+      (* TODO: check if the added element is added in the correct place *)
+      let evm_rest_accessed_storage_keys := 
+        (evm_message_current_target, key) :: evm_rest_accessed_storage_keys in
+      let rest := rest <| Evm.Rest.accessed_storage_keys := evm_rest_accessed_storage_keys |> in
+      let evm := Evm.Make message rest in
+      (* NOTE: After the state update, all previous variables like `evm_message_current_target`
+               should not be put into use anymore. This seems unsatisfying. *)
+      letS? _ := writeS? evm in
+      (* TODO: gas_cost += GAS_COLD_SLOAD *)
   )
-  else tt in
-
+  else
   (* 
     if original_value == current_value and current_value != new_value:
-        if original_value == 0:
-            gas_cost += GAS_STORAGE_SET
-        else:
-            gas_cost += GAS_STORAGE_UPDATE - GAS_COLD_SLOAD
+      if original_value == 0:
+          gas_cost += GAS_STORAGE_SET
+      else:
+          gas_cost += GAS_STORAGE_UPDATE - GAS_COLD_SLOAD
     else:
-        gas_cost += GAS_WARM_ACCESS
+      gas_cost += GAS_WARM_ACCESS 
   *)
   letS? _ :=
   if _ 
