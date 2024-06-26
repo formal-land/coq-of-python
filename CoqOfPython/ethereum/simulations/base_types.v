@@ -13,6 +13,23 @@ Definition U256_CEIL_VALUE : Z := 2^256.
 (* NOTE: Python built-in type. We put here for convenience. *)
 Definition bytearray := list ascii.
 
+(* TODO: Implement consistent conversion functions between all the types. For example:
+- to_Uint: Apart from U_ series of modules, we might also need its def for FixedUint
+- bytearray, FixedBytes & Bytes: also define a consistent covert functions between them
+- Build all conversion functions clearly based on Z
+- Correctly truncate the values based on the max value being defined
+*)
+
+Module Bytes.
+  Inductive t : Set :=
+  | Make (bytes : list ascii).
+
+  Definition get (bytes : t) : list ascii :=
+    match bytes with
+    | Make bytes => bytes
+    end.
+End Bytes.
+
 (* NOTE: A byte should consist of 2 hex digits or 4 binary digits
   https://docs.python.org/3/library/stdtypes.html#bytes *)
 Module FixedBytes.
@@ -31,14 +48,21 @@ Module FixedBytes.
     end.
 End FixedBytes.
 
-(* TODO: Make some consistent definitions in the following modules:
-- to_Uint: Apart from U_ series of modules, we might also need its def for FixedUint
-- bytearray, FixedBytes & Bytes: also define a consistent covert functions between them
-*)
+Module Bytes32.
+  Inductive t : Set :=
+  | Make (bytes : FixedBytes.t).
+
+  Definition get (bytes : t) : FixedBytes.t :=
+    match bytes with
+    | Make bytes => bytes
+    end.
+
+  Definition LENGTH := 32.
+
+  Scheme Boolean Equality for t. 
+End Bytes32.
 
 Module Uint.
-(* NOTE: to_bytes would produce a list of byte with *undetermined* length
-*)
   Inductive t : Set :=
   | Make (value : Z).
 
@@ -50,9 +74,9 @@ Module Uint.
   Definition __add__ (self right_ : t) : t :=
     Make (get self + get right_).
 
-  (* NOTE: Currently for convenience we only define "from fixedbytes to uint" 
-           An ideal translation should go from fixedbytes -> bytes -> uint *)
-  (* TODO: Distinguish between `from_be_bytes` and `from_le_bytes` *)
+  (* NOTE: 
+     - Currently we don't support between different endians
+     - Future plan: Distinguish between `from_be_bytes` and `from_le_bytes`*)
   (* 
     def from_bytes(bytes, byteorder='big', signed=False):
       if byteorder == 'little':
@@ -68,13 +92,6 @@ Module Uint.
 
       return n
   *)
-  (* 
-    NOTE:
-    - Currently we don't support between different endians
-    - From definition of related functions(?), it seems that `little_ordered` 
-      doesnt have a fixed length or even length of multiples of 2
-      (Question: Does Python check the length of byte array?)
-  *)
   Fixpoint from_bytes_helper (bytes : list ascii) (store : Z) : Z :=
     match bytes with
     | [] => 0
@@ -84,7 +101,7 @@ Module Uint.
   Definition from_bytes (bytes : FixedBytes.t) : t :=
     let '(FixedBytes.Make little_ordered) := bytes in
     let result := from_bytes_helper little_ordered 0 in
-    (* NOTE: last_byte provides a default value 0 *)
+    (* NOTE: Coq's last_byte provides a default value 0 *)
     let z0 := List.last little_ordered (ascii_of_N 0) in
     let z1 := Z.of_N (N_of_ascii z0) in
     let ascii_xor_result := Z.land z1 0x80 in
@@ -92,6 +109,36 @@ Module Uint.
       if ascii_xor_result =? 0
       then result - Z.shiftl 1 (Z_of_nat (List.length little_ordered))
       else result).
+
+  (* 
+  def to_bytes(n, length=1, byteorder='big', signed=False):
+    if byteorder == 'little':
+        order = range(length)
+    elif byteorder == 'big':
+        order = reversed(range(length))
+    else:
+        raise ValueError("byteorder must be either 'little' or 'big'")
+
+    return bytes((n >> i*8) & 0xff for i in order)
+  *)
+  (* NOTE: there might be order issues *)
+  Fixpoint to_bytes_helper (uint : Z) (order : nat) (store : list ascii): list ascii :=
+    match order with
+    | O => store
+    | S n => let byte := ascii_of_N (N_of_Z (Z.land (Z.shiftr uint ((Z.of_nat order) * 8)) 0xff)) in 
+      to_bytes_helper uint (n) (byte :: store) 
+    end.
+
+  Definition to_bytes (self : t) : Bytes.t :=
+    let uint := get self in
+    Bytes.Make (to_bytes_helper uint (Z.to_nat uint) []).
+
+  (* def to_be_bytes32(self) -> "Bytes32" *)
+  Definition to_be_bytes32 (self : t) : Bytes32.t :=
+    let bytes := to_bytes self in
+    (* NOTE: For now we only do direct conversion without truncation *)
+    let '(Bytes.Make bytes) := bytes in
+    Bytes32.Make (FixedBytes.Make bytes).
 End Uint.
 
 Module FixedUint.
@@ -340,18 +387,6 @@ Module Bytes20.
     end.
 End Bytes20.
 
-Module Bytes32.
-  Inductive t : Set :=
-  | Make (bytes : FixedBytes.t).
-
-  Definition get (bytes : t) : FixedBytes.t :=
-    match bytes with
-    | Make bytes => bytes
-    end.
-
-  Definition LENGTH := 32.
-End Bytes32.
-
 Module Bytes48.
   Inductive t : Set :=
   | Make (bytes : FixedBytes.t).
@@ -381,13 +416,3 @@ Module Bytes256.
     | Make bytes => bytes
     end.
 End Bytes256.
-
-Module Bytes.
-  Inductive t : Set :=
-  | Make (bytes : list ascii).
-
-  Definition get (bytes : t) : list ascii :=
-    match bytes with
-    | Make bytes => bytes
-    end.
-End Bytes.

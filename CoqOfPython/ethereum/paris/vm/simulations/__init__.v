@@ -13,7 +13,12 @@ Require ethereum.crypto.simulations.hash.
 Module Hash32 := hash.Hash32.
 
 Require ethereum.paris.simulations.fork_types.
-Module Address := fork_types.Address.
+(* Module Address := fork_types.Address. *)
+
+Module Address. 
+(* Tyring to include the `t_beq` into this module as well *)
+Include fork_types.Address.
+End Address.
 
 Require ethereum.paris.simulations.state.
 Module State := state.State.

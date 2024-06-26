@@ -54,8 +54,6 @@ Definition GAS_WARM_ACCESS := Uint.Make 100.
 
 Definition bytearray := base_types.bytearray.
 
-(* TODO: Since there might be inconsistency issue, we might
-Definition charge_gas (amount : Uint.t) : unit. *)
 Parameter charge_gas : forall (amount : Uint.t), MS? Evm.t Exception.t unit.
 
 (* 
