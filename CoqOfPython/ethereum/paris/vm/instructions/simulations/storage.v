@@ -44,13 +44,15 @@ Definition get_storage_original (state : State.t) (address : Address.t) (key : B
 
 (* Scheme Boolean Equality for t. *)
 
-(* TODO: Test the following *)
-(* (* (evm_message_current_target, key)  *) _ *)
 (* TODO: generate a evm_message_current_target instance for testing *)
-Definition evm_message_current_target : Set. Admitted.
+Definition evm_message_current_target : MS? Evm.t Exception.t Address.t :=
+  letS? evm := readS? in
+  let '(Evm.Make message rest) := evm in
+  let evm_message_current_target := message.(Message.current_target) in
+  let test := Address.t_beq evm_message_current_target evm_message_current_target in
+  returnS? evm_message_current_target.
 
-(* TODO: test the following *)
-Definition test_0 : bool := Address.t_beq evm_message_current_target evm_message_current_target.
+(* TODO: Test Bytes32.b_eq *)
 
 Fixpoint pair_in (e : Address.t * Bytes32.t) (l : list (A * B)) : bool :=
   let (a, k) := e in
