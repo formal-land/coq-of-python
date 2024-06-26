@@ -58,6 +58,8 @@ Module Bytes32.
     end.
 
   Definition LENGTH := 32.
+
+  Scheme Boolean Equality for t. 
 End Bytes32.
 
 Module Uint.

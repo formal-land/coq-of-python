@@ -8,7 +8,14 @@ Module U256 := base_types.U256.
 Definition U256_CEIL_VALUE := base_types.U256_CEIL_VALUE.
 Module Uint := base_types.Uint.
 Definition to_be_bytes32 := base_types.Uint.to_be_bytes32.
+Module FixedBytes := base_types.FixedBytes.
 Module Bytes := base_types.Bytes.
+Module Bytes32.
+(* We explicitly include the original module if we want to use its generated
+  boolean predicate. If the module is being alised through multiple files, 
+  such explicit inclusion is mandatory. *)
+Include base_types.Bytes32.
+End Bytes32.
 
 Require ethereum.paris.vm.simulations.__init__.
 Module Evm := __init__.Evm.
@@ -38,29 +45,18 @@ Definition get_storage (state : State.t) (address : Address.t) (key : Bytes.t) :
 Definition get_storage_original (state : State.t) (address : Address.t) (key : Bytes.t) : U256.t. Admitted.
 
 (* TODO: (progress) things to do on this draft:
-- figure out a way to implement `list.contains` in coq
 - finish sstore
 *)
 
-(* Scheme Boolean Equality for t. *)
-
-(* TODO: generate a evm_message_current_target instance for testing *)
-Definition evm_message_current_target : MS? Evm.t Exception.t Address.t :=
-  letS? evm := readS? in
-  let '(Evm.Make message rest) := evm in
-  let evm_message_current_target := message.(Message.current_target) in
-  let test := Address.t_beq evm_message_current_target evm_message_current_target in
-  returnS? evm_message_current_target.
-
-(* TODO: Test Bytes32.b_eq *)
-
-Fixpoint pair_in (e : Address.t * Bytes32.t) (l : list (A * B)) : bool :=
+(* Temorary `list.contains` implementation specifically for `sload`. I haven't figure out
+   a better way to generalize such function. *)
+Fixpoint pair_in (e : Address.t * Bytes32.t) (l : list (Address.t * Bytes32.t)) : bool :=
   let (a, k) := e in
   match l with
   | [] => false
   | h :: tl => 
     let (h1, h2) := h in
-    if (Address.t_beq a h1) && (Bytes32.t_beq k h2) 
+    if andb (Address.t_beq a h1) (Bytes32.t_beq k h2) 
     then true 
     else pair_in e tl
   end.
@@ -105,10 +101,7 @@ Definition sload : MS? Evm.t Exception.t unit :=
     let evm_message_current_target := message.(Message.current_target) in
     let evm_rest_accessed_storage_keys := rest.(Evm.Rest.accessed_storage_keys) in
     letS? _ := 
-    (* TODO: Fix the List.In *)
-    if has_some (List.find 
-    (* (evm_message_current_target, key)  *) _
-    evm_rest_accessed_storage_keys)
+    if pair_in (evm_message_current_target, key) evm_rest_accessed_storage_keys
     then charge_gas GAS_WARM_ACCESS
     else (
       (* TODO: check if the added element is added in the correct place *)
@@ -124,6 +117,10 @@ Definition sload : MS? Evm.t Exception.t unit :=
     in
     (* OPERATION *)
     let evm_env_state := rest.(Evm.Rest.env).(Environment.state) in
+    (* Change key type from `Bytes32` to `Bytes` *)
+    let '(Bytes32.Make key) := key in
+    let '(FixedBytes.Make key) := key in
+    let key := Bytes.Make key in
     let value := get_storage evm_env_state evm_message_current_target key in
     letS? _ := StateError.lift_lens Evm.Lens.stack (push value) in 
     (* PROGRAM COUNTER *) 
