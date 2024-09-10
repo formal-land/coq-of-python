@@ -97,8 +97,8 @@ Definition mul : MS? Evm.t Exception.t unit :=
 
 Definition div : MS? Evm.t Exception.t unit :=
   (* STACK *)
-  letS? divisor := StateError.lift_lens Evm.Lens.stack pop in
   letS? divident := StateError.lift_lens Evm.Lens.stack pop in
+  letS? divisor := StateError.lift_lens Evm.Lens.stack pop in
 
   (* GAS *)
   letS? _ := charge_gas GAS_VERY_LOW in
