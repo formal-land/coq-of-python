@@ -101,7 +101,7 @@ Definition div : MS? Evm.t Exception.t unit :=
   letS? divisor := StateError.lift_lens Evm.Lens.stack pop in
 
   (* GAS *)
-  letS? _ := charge_gas GAS_VERY_LOW in
+  letS? _ := charge_gas GAS_LOW in
 
   (* OPERATION *)
 
